@@ -304,9 +304,9 @@ namespace BSPBuilder
 				mMap	=new Map();
 				RegisterMapEvents(true);
 
-				mMap.LoadBuggeryBrushes(fileName);
+//				mMap.LoadBuggeryBrushes(fileName);
 
-//				mMap.LoadBrushFile(fileName);
+				mMap.LoadBrushFile(fileName);
 				mMainForm.SetBuildEnabled(true);
 				mMainForm.SetZoneSaveEnabled(false);
 				mMainForm.SetSaveEnabled(false);
