@@ -78,7 +78,8 @@ namespace BSPBuilder
 
 			mGameCam	=new UtilityLib.GameCamera(mGDM.GraphicsDevice.Viewport.Width,
 				mGDM.GraphicsDevice.Viewport.Height,
-				mGDM.GraphicsDevice.Viewport.AspectRatio);
+				mGDM.GraphicsDevice.Viewport.AspectRatio,
+				1.0f, 1000.0f);
 
 			base.Initialize();
 		}
