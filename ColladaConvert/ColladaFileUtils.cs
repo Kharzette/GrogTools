@@ -22,6 +22,8 @@ namespace ColladaConvert
 
 			COLLADA	ret	=xs.Deserialize(fs) as COLLADA;
 
+			fs.Close();
+
 			return	ret;
 		}
 

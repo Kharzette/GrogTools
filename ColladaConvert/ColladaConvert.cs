@@ -24,8 +24,9 @@ namespace ColladaConvert
 		AnimLib					mAnimLib;
 		Character				mCharacter;
 		StaticMeshObject		mStaticMesh;
-
-		UtilityLib.GameCamera	mGameCam;
+		
+		UtilityLib.PlayerSteering	mSteering;
+		UtilityLib.GameCamera		mGameCam;
 
 		//material gui
 		SharedForms.MaterialForm	mMF;
@@ -79,6 +80,11 @@ namespace ColladaConvert
 				mGDM.GraphicsDevice.Viewport.Height,
 				mGDM.GraphicsDevice.Viewport.AspectRatio,
 				1.0f, 1000.0f);
+
+			mSteering	=new UtilityLib.PlayerSteering(mGDM.GraphicsDevice.Viewport.Width,
+				mGDM.GraphicsDevice.Viewport.Height);
+
+			mSteering.Method	=UtilityLib.PlayerSteering.SteeringMethod.Fly;
 
 			//default cam pos off to one side
 //			Vector3	camPos	=Vector3.Zero;
@@ -543,9 +549,10 @@ namespace ColladaConvert
 
 			float	msDelta	=gameTime.ElapsedGameTime.Milliseconds;
 
-			KeyboardState	kbs	=Keyboard.GetState();
-
-			mGameCam.Update(msDelta, kbs, Mouse.GetState(), GamePad.GetState(0));
+			mSteering.Update(msDelta, mGameCam.View, Keyboard.GetState(),
+				Mouse.GetState(), GamePad.GetState(PlayerIndex.One));
+			
+			mGameCam.Update(msDelta, mSteering.Position, mSteering.Pitch, mSteering.Yaw, mSteering.Roll);
 
 			//rotate the light vector
 
@@ -568,7 +575,7 @@ namespace ColladaConvert
 			mFX.Parameters["mLightDirection"].SetValue(mLightDir);
 			mFX.Parameters["mTexture"].SetValue(mDesu);
 
-			mMatLib.UpdateWVP(mGameCam.World, mGameCam.View, mGameCam.Projection, -mGameCam.CamPos);
+			mMatLib.UpdateWVP(mGameCam.World, mGameCam.View, mGameCam.Projection, -mSteering.Position);
 
 			//put in some keys for messing with bones
 			float	time		=(float)gameTime.ElapsedGameTime.TotalMilliseconds;
