@@ -170,7 +170,8 @@ namespace BSPBuilder
 
 			KeyboardState	kbs	=Keyboard.GetState();
 
-			if(kbs.IsKeyDown(Keys.L))
+			if(mInput.Player1.mKBS.IsKeyDown(Keys.L)
+				|| mInput.Player1.mGPS.IsButtonDown(Buttons.LeftShoulder))
 			{
 				mDynamicLightPos	=-mPlayerControl.Position;
 				mMatLib.SetParameterOnAll("mLight0Position", mDynamicLightPos);
