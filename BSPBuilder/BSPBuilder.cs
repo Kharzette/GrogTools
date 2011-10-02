@@ -174,6 +174,9 @@ namespace BSPBuilder
 			{
 				mDynamicLightPos	=-mPlayerControl.Position;
 				mMatLib.SetParameterOnAll("mLight0Position", mDynamicLightPos);
+				mMatLib.SetParameterOnAll("mLight0Color", Vector3.One);
+				mMatLib.SetParameterOnAll("mLightRange", 200.0f);
+				mMatLib.SetParameterOnAll("mLightFalloffRange", 100.0f);
 			}
 
 			mIndoorMesh.Update(msDelta);
