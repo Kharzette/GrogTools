@@ -34,14 +34,18 @@ namespace BSPBuilder
 		MeshLib.IndoorMesh		mIndoorMesh;
 
 		//debug draw stuff
-		BasicEffect				mMapEffect;
-		VertexBuffer			mVB;
-		IndexBuffer				mIB;
-		UtilityLib.GameCamera	mGameCam;
-		SpriteFont				mKoot;
-		Vector2					mTextPos;
-		Random					mRnd	=new Random();
-		Vector3					mDynamicLightPos;
+		BasicEffect		mMapEffect;
+		VertexBuffer	mVB;
+		IndexBuffer		mIB;
+		SpriteFont		mKoot;
+		Vector2			mTextPos;
+		Random			mRnd	=new Random();
+		Vector3			mDynamicLightPos;
+
+		//control / view
+		UtilityLib.GameCamera		mGameCam;
+		UtilityLib.PlayerSteering	mPlayerControl;
+		UtilityLib.Input			mInput;
 
 		//working?
 		bool	mbWorking;
@@ -76,10 +80,17 @@ namespace BSPBuilder
 		{
 			mTextPos	=Vector2.One * 20.0f;
 
+			mInput	=new UtilityLib.Input();
+
 			mGameCam	=new UtilityLib.GameCamera(mGDM.GraphicsDevice.Viewport.Width,
 				mGDM.GraphicsDevice.Viewport.Height,
 				mGDM.GraphicsDevice.Viewport.AspectRatio,
 				1.0f, 1000.0f);
+
+			mPlayerControl	=new UtilityLib.PlayerSteering(mGDM.GraphicsDevice.Viewport.Width,
+				mGDM.GraphicsDevice.Viewport.Height);
+
+			mPlayerControl.Method	=UtilityLib.PlayerSteering.SteeringMethod.Fly;
 
 			base.Initialize();
 		}
@@ -155,23 +166,27 @@ namespace BSPBuilder
 
 			float	msDelta	=gameTime.ElapsedGameTime.Milliseconds;
 
+			mInput.Update(msDelta);
+
 			KeyboardState	kbs	=Keyboard.GetState();
 
 			if(kbs.IsKeyDown(Keys.L))
 			{
-				mDynamicLightPos	=-mGameCam.CamPos;
+				mDynamicLightPos	=-mGameCam.View.Translation;
 				mMatLib.SetParameterOnAll("mLight0Position", mDynamicLightPos);
 			}
 
 			mIndoorMesh.Update(msDelta);
 
-			mGameCam.Update(msDelta, kbs, Mouse.GetState(), GamePad.GetState(0));
+			mPlayerControl.Update(msDelta, mGameCam.View, mInput.Player1.mKBS, mInput.Player1.mMS, mInput.Player1.mGPS);
+
+			mGameCam.Update(msDelta, mPlayerControl.Position, mPlayerControl.Pitch, mPlayerControl.Yaw, mPlayerControl.Roll);
 
 			mMapEffect.World		=mGameCam.World;
 			mMapEffect.View			=mGameCam.View;
 			mMapEffect.Projection	=mGameCam.Projection;
 
-			mMatLib.UpdateWVP(mGameCam.World, mGameCam.View, mGameCam.Projection, -mGameCam.CamPos);
+			mMatLib.UpdateWVP(mGameCam.World, mGameCam.View, mGameCam.Projection, -mGameCam.View.Translation);
 
 			base.Update(gameTime);
 		}
@@ -232,7 +247,7 @@ namespace BSPBuilder
 
 			mSB.Begin();
 
-			mSB.DrawString(mKoot, "Coordinates: " + -mGameCam.CamPos, mTextPos, Color.Yellow);
+			mSB.DrawString(mKoot, "Coordinates: " + -mPlayerControl.Position, mTextPos, Color.Yellow);
 
 			mSB.End();
 
@@ -258,7 +273,7 @@ namespace BSPBuilder
 			List<Vector3>	verts		=new List<Vector3>();
 			List<UInt32>	indexes		=new List<UInt32>();
 
-			mMap.GetTriangles(mGameCam.CamPos, verts, indexes, drawChoice);
+			mMap.GetTriangles(mPlayerControl.Position, verts, indexes, drawChoice);
 			if(verts.Count <= 0)
 			{
 				return;
