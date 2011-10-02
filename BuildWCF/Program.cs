@@ -27,7 +27,14 @@ namespace BuildWCF
 	{
 		public byte []FloodPortalsSlow(byte []visData, int startPort, int endPort)
 		{
-			return	Map.FloodPortalsSlow(visData, startPort, endPort);
+			Console.WriteLine("Beginning Vis work unit of size " + (endPort - startPort));
+
+			byte	[]result	=Map.FloodPortalsSlow(visData, startPort, endPort);
+
+			Console.WriteLine("Finished work unit from portal " + startPort
+				+ " to portal " + endPort + " for " + result.Length + " bytes of data.");
+
+			return	result;
 		}
 
 		public BuildFarmCaps QueryCapabilities()

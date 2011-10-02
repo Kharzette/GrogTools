@@ -85,7 +85,7 @@ namespace BSPBuilder
 			mGameCam	=new UtilityLib.GameCamera(mGDM.GraphicsDevice.Viewport.Width,
 				mGDM.GraphicsDevice.Viewport.Height,
 				mGDM.GraphicsDevice.Viewport.AspectRatio,
-				1.0f, 1000.0f);
+				1.0f, 8000.0f);
 
 			mPlayerControl	=new UtilityLib.PlayerSteering(mGDM.GraphicsDevice.Viewport.Width,
 				mGDM.GraphicsDevice.Viewport.Height);
@@ -172,7 +172,7 @@ namespace BSPBuilder
 
 			if(kbs.IsKeyDown(Keys.L))
 			{
-				mDynamicLightPos	=-mGameCam.View.Translation;
+				mDynamicLightPos	=-mPlayerControl.Position;
 				mMatLib.SetParameterOnAll("mLight0Position", mDynamicLightPos);
 			}
 
@@ -186,7 +186,7 @@ namespace BSPBuilder
 			mMapEffect.View			=mGameCam.View;
 			mMapEffect.Projection	=mGameCam.Projection;
 
-			mMatLib.UpdateWVP(mGameCam.World, mGameCam.View, mGameCam.Projection, -mGameCam.View.Translation);
+			mMatLib.UpdateWVP(mGameCam.World, mGameCam.View, mGameCam.Projection, -mPlayerControl.Position);
 
 			base.Update(gameTime);
 		}
@@ -221,7 +221,7 @@ namespace BSPBuilder
 
 			if(mMap != null && mVB == null)
 			{
-				mIndoorMesh.Draw(g, mGameCam, mMap.IsMaterialVisibleFromPos);
+				mIndoorMesh.Draw(g, mGameCam, -mPlayerControl.Position, mMap.IsMaterialVisibleFromPos);
 			}
 
 			if(mVB != null)
