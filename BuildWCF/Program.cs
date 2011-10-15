@@ -7,7 +7,7 @@ using System.ServiceModel.Configuration;
 using System.ServiceModel.Description;
 using System.Configuration;
 using System.Runtime.Remoting.Messaging;
-using BSPLib;
+using BSPCore;
 
 
 namespace BuildWCF
@@ -29,7 +29,18 @@ namespace BuildWCF
 		{
 			Console.WriteLine("Beginning Vis work unit of size " + (endPort - startPort));
 
-			byte	[]result	=Map.FloodPortalsSlow(visData, startPort, endPort);
+			byte	[]result	=null;
+
+			try
+			{
+				result	=Map.FloodPortalsSlow(visData, startPort, endPort);
+			}
+			catch(Exception e)
+			{
+				Console.WriteLine(e.Message);
+
+				return	null;
+			}
 
 			Console.WriteLine("Finished work unit from portal " + startPort
 				+ " to portal " + endPort + " for " + result.Length + " bytes of data.");

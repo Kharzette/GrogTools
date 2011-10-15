@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -161,6 +162,7 @@ namespace BSPBuilder
 			if(mbWorking && !mMainForm.DrawNWork)
 			{
 				base.Update(gameTime);
+				Thread.Sleep(10);
 				return;
 			}
 
