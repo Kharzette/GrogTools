@@ -6,25 +6,23 @@ using System.ServiceModel;
 using System.ServiceModel.Configuration;
 using System.ServiceModel.Description;
 using System.Configuration;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Runtime.Remoting.Messaging;
 using BSPCore;
 
 
 namespace BuildWCF
 {
-	[ServiceContract(Namespace="http://Microsoft.ServiceModel.Samples")]
-	public interface IMapVis
-	{
-		[OperationContract]
-		byte	[]FloodPortalsSlow(byte []visData, int startPort, int endPort);
-
-		[OperationContract]
-		BuildFarmCaps	QueryCapabilities();
-	}
-
-
 	public class MapVisService : IMapVis
 	{
+		VisState	mState;
+
+		public byte []FloodPortalsSlow(object state)
+		{
+			return	FloodPortalsSlow(mState.mVisData, mState.mStartPort, mState.mEndPort);
+		}
+
 		public byte []FloodPortalsSlow(byte []visData, int startPort, int endPort)
 		{
 			Console.WriteLine("Beginning Vis work unit of size " + (endPort - startPort));
@@ -46,6 +44,23 @@ namespace BuildWCF
 				+ " to portal " + endPort + " for " + result.Length + " bytes of data.");
 
 			return	result;
+		}
+
+		public IAsyncResult BeginFloodPortalsSlow(object visState, AsyncCallback callBack, object aSyncState)
+		{
+			Console.WriteLine("Async begin started\n");
+
+			mState	=visState as VisState;
+
+			var	task	=Task<byte []>.Factory.StartNew(FloodPortalsSlow, aSyncState);
+
+			return	task.ContinueWith(res => callBack(task));
+
+		}
+
+		public byte []EndFloodPortalsSlow(IAsyncResult res)
+		{
+			return	((Task<byte []>)res).Result;
 		}
 
 		public BuildFarmCaps QueryCapabilities()

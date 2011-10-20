@@ -145,7 +145,7 @@
             0,
             0});
 			this.VisGranularity.Minimum = new decimal(new int[] {
-            50,
+            10,
             0,
             0,
             0});
