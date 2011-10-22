@@ -18,6 +18,9 @@ namespace BuildWCF
 	{
 		VisState	mState;
 
+		List<VisState>	mAbandonedData	=new List<VisState>();
+
+
 		public byte []FloodPortalsSlow(object state)
 		{
 			return	FloodPortalsSlow(mState.mVisData, mState.mStartPort, mState.mEndPort);
@@ -25,6 +28,19 @@ namespace BuildWCF
 
 		public byte []FloodPortalsSlow(byte []visData, int startPort, int endPort)
 		{
+			bool	bWorking	=false;
+			lock(mState)
+			{
+				bWorking	=mState.mbVisInProgress;
+				mState.mbVisInProgress	=true;
+			}
+
+			if(bWorking)
+			{
+				Console.WriteLine("Already working on another work unit... returning null...");
+				return	null;
+			}
+
 			Console.WriteLine("Beginning Vis work unit of size " + (endPort - startPort));
 
 			byte	[]result	=null;
@@ -42,6 +58,11 @@ namespace BuildWCF
 
 			Console.WriteLine("Finished work unit from portal " + startPort
 				+ " to portal " + endPort + " for " + result.Length + " bytes of data.");
+
+			lock(mState)
+			{
+				mState.mbVisInProgress	=false;
+			}
 
 			return	result;
 		}
@@ -77,14 +98,56 @@ namespace BuildWCF
 
 			Console.WriteLine("Received " + mState.mVisData.Length + " portals");
 
+			//in case connection is broken
+			Map.eSlowVisPieceDone	+=OnSlowVisPieceDone;
+
 			return	true;
 		}
 
 		public bool FreePortals()
 		{
 			Console.WriteLine("Freeing Portals...");
+
 			mState	=null;
+
+			Map.eSlowVisPieceDone	-=OnSlowVisPieceDone;
+
 			return	true;
+		}
+
+		public VisState GetAbandoned(int startPort, int endPort)
+		{
+			VisState	ret	=null;
+
+			lock(mAbandonedData)
+			{
+				foreach(VisState vs in mAbandonedData)
+				{
+					if(vs.mStartPort == startPort && vs.mEndPort == endPort)
+					{
+						ret	=vs;
+						break;
+					}
+				}
+			}
+
+			return	ret;
+		}
+
+		void OnSlowVisPieceDone(object sender, EventArgs ea)
+		{
+			VisState	vs	=sender as VisState;
+
+			if(vs == null)
+			{
+				Console.WriteLine("Had a slow piece arrive in a strange format: " + sender.GetType().ToString());
+				return;
+			}
+
+			lock(mAbandonedData)
+			{
+				mAbandonedData.Add(vs);
+			}
 		}
 
 		public IAsyncResult BeginFloodPortalsSlow(object visState, AsyncCallback callBack, object aSyncState)
