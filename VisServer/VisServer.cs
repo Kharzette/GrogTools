@@ -205,13 +205,11 @@ namespace VisServer
 					PrintToConsole("Build farm capabilities for " + mvc.Endpoint.Address + "\n");
 					PrintToConsole("Cpu speed in mhz:  " + bfc.mMHZ + "\n");
 					PrintToConsole("Number of cpu cores:  " + bfc.mNumCores + "\n");
-					mvc.mbActive	=true;
 					mvc.mBuildCaps	=bfc;
 				}
 				else
 				{
 					PrintToConsole("Build farm node " + mvc.Endpoint.Address + " is not responding.\n");
-					mvc.mbActive	=false;
 					mvc.mBuildCaps	=null;
 				}
 			}

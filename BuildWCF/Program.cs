@@ -46,16 +46,59 @@ namespace BuildWCF
 			return	result;
 		}
 
-		public IAsyncResult BeginFloodPortalsSlow(object visState, AsyncCallback callBack, object aSyncState)
+		public bool HasPortals(object visState)
 		{
-			Console.WriteLine("Async begin started\n");
+			if(mState == null)
+			{
+				Console.WriteLine("HasPortals: Null state");
+				return	false;
+			}
+
+			VisState	vs	=visState as VisState;
+
+			if(vs.mTotalPorts != mState.mTotalPorts)
+			{
+				Console.WriteLine("HasPortals: Server Portals is " + vs.mEndPort + " and Client Portals are " + mState.mTotalPorts);
+				return	false;
+			}
+
+			return	true;
+		}
+
+		public bool ReadPortals(object visState)
+		{
+			if(mState != null)
+			{
+				Console.WriteLine("Already a vis state in place!  ReadPortals fail");
+				return	false;
+			}
 
 			mState	=visState as VisState;
+
+			Console.WriteLine("Received " + mState.mVisData.Length + " portals");
+
+			return	true;
+		}
+
+		public bool FreePortals()
+		{
+			Console.WriteLine("Freeing Portals...");
+			mState	=null;
+			return	true;
+		}
+
+		public IAsyncResult BeginFloodPortalsSlow(object visState, AsyncCallback callBack, object aSyncState)
+		{
+			VisState	vs	=visState as VisState;
+
+			Console.WriteLine("Flood begun on portals " + vs.mStartPort + " to " + vs.mEndPort + "...");
+
+			mState.mStartPort	=vs.mStartPort;
+			mState.mEndPort		=vs.mEndPort;
 
 			var	task	=Task<byte []>.Factory.StartNew(FloodPortalsSlow, aSyncState);
 
 			return	task.ContinueWith(res => callBack(task));
-
 		}
 
 		public byte []EndFloodPortalsSlow(IAsyncResult res)
