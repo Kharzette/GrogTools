@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
@@ -24,7 +25,7 @@ namespace VisServer
 		VisParams		mVisParams		=new VisParams();
 
 		//build farm end points
-		List<string>	mBuildFarm	=new List<string>();
+		ConcurrentQueue<MapVisClient>	mBuildFarm	=new ConcurrentQueue<MapVisClient>();
 
 
 		public VisServer()
@@ -33,15 +34,7 @@ namespace VisServer
 
 			CoreEvents.ePrint					+=OnMapPrint;
 
-			//load renderfarm contacts
-			FileStream		fs	=new FileStream("BuildFarm.txt", FileMode.Open, FileAccess.Read);
-			StreamReader	sr	=new StreamReader(fs);
-
-			while(!sr.EndOfStream)
-			{
-				string	url	=sr.ReadLine();
-				mBuildFarm.Add(url);
-			}
+			LoadBuildFarm();
 		}
 
 		delegate void SetTextDel(TextBox tb, string txt);
@@ -153,10 +146,8 @@ namespace VisServer
 			}
 
 			mVisParams.mbDistribute		=true;
-			mVisParams.mbFullVis		=FullVis.Checked;
-			mVisParams.mbSortPortals	=SortPortals.Checked;
-			mVisParams.mGranularity		=(int)VisGranularity.Value;
-			mVisParams.mNumRetries		=(int)NumRetries.Value;
+			mVisParams.mbFullVis		=true;
+			mVisParams.mbSortPortals	=true;
 
 			//register for events
 			ProgressWatcher.eProgressUpdated	+=OnProgressUpdated;
@@ -166,11 +157,39 @@ namespace VisServer
 		}
 
 
+		void LoadBuildFarm()
+		{
+			//load renderfarm contacts
+			FileStream		fs	=new FileStream("BuildFarm.txt", FileMode.Open, FileAccess.Read);
+			StreamReader	sr	=new StreamReader(fs);
+
+			List<string>	endPoints	=new List<string>();
+			while(!sr.EndOfStream)
+			{
+				string	url	=sr.ReadLine();
+				endPoints.Add(url);
+			}
+
+			//clear when able
+			while(!mBuildFarm.IsEmpty)
+			{
+				MapVisClient	junx;
+				mBuildFarm.TryDequeue(out junx);
+			}
+
+			//list up the endpoints
+			foreach(string address in endPoints)
+			{
+				MapVisClient	amvc	=new MapVisClient("WSHttpBinding_IMapVis", address);
+				mBuildFarm.Enqueue(amvc);
+			}			
+		}
+
+
 		void OnQueryVisFarm(object sender, EventArgs e)
 		{
-			for(int i=0;i < mBuildFarm.Count;i++)
+			foreach(MapVisClient mvc in mBuildFarm)
 			{
-				MapVisClient	mvc	=new MapVisClient("WSHttpBinding_IMapVis", mBuildFarm[i]);
 				BuildFarmCaps	bfc	=null;
 				try
 				{
@@ -196,6 +215,12 @@ namespace VisServer
 					mvc.mBuildCaps	=null;
 				}
 			}
+		}
+
+
+		void OnReLoadBuildFarm(object sender, EventArgs e)
+		{
+			LoadBuildFarm();
 		}
 	}
 }
