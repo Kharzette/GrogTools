@@ -14,9 +14,16 @@ using BSPCore;
 
 namespace BuildWCF
 {
+	class WorkState
+	{
+		public bool	mbVisInProgress;
+	}
+
+
 	public class MapVisService : IMapVis
 	{
 		VisState	mState;
+		WorkState	mWorkState	=new WorkState();
 
 		List<VisState>	mAbandonedData	=new List<VisState>();
 
@@ -29,10 +36,10 @@ namespace BuildWCF
 		public byte []FloodPortalsSlow(byte []visData, int startPort, int endPort)
 		{
 			bool	bWorking	=false;
-			lock(mState)
+			lock(mWorkState)
 			{
-				bWorking	=mState.mbVisInProgress;
-				mState.mbVisInProgress	=true;
+				bWorking	=mWorkState.mbVisInProgress;
+				mWorkState.mbVisInProgress	=true;
 			}
 
 			if(bWorking)
@@ -59,9 +66,9 @@ namespace BuildWCF
 			Console.WriteLine("Finished work unit from portal " + startPort
 				+ " to portal " + endPort + " for " + result.Length + " bytes of data.");
 
-			lock(mState)
+			lock(mWorkState)
 			{
-				mState.mbVisInProgress	=false;
+				mWorkState.mbVisInProgress	=false;
 			}
 
 			return	result;
