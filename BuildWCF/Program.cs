@@ -25,15 +25,16 @@ namespace BuildWCF
 		VisState	mState;
 		WorkState	mWorkState	=new WorkState();
 
-		List<VisState>	mAbandonedData	=new List<VisState>();
+		//stuff completed
+		List<VisState>	mFinishedData	=new List<VisState>();
 
 
-		public byte []FloodPortalsSlow(object state)
+		public bool FloodPortalsSlow(object state)
 		{
 			return	FloodPortalsSlow(mState.mVisData, mState.mStartPort, mState.mEndPort);
 		}
 
-		public byte []FloodPortalsSlow(byte []visData, int startPort, int endPort)
+		public bool FloodPortalsSlow(byte []visData, int startPort, int endPort)
 		{
 			bool	bWorking	=false;
 			lock(mWorkState)
@@ -44,8 +45,8 @@ namespace BuildWCF
 
 			if(bWorking)
 			{
-				Console.WriteLine("Already working on another work unit... returning null...");
-				return	null;
+				Console.WriteLine("Already working on another work unit... returning false...");
+				return	false;
 			}
 
 			Console.WriteLine("Beginning Vis work unit of size " + (endPort - startPort));
@@ -60,7 +61,7 @@ namespace BuildWCF
 			{
 				Console.WriteLine(e.Message);
 
-				return	null;
+				return	false;
 			}
 
 			Console.WriteLine("Finished work unit from portal " + startPort
@@ -71,7 +72,7 @@ namespace BuildWCF
 				mWorkState.mbVisInProgress	=false;
 			}
 
-			return	result;
+			return	true;
 		}
 
 		public bool HasPortals(object visState)
@@ -122,23 +123,30 @@ namespace BuildWCF
 			return	true;
 		}
 
-		public VisState GetAbandoned(int startPort, int endPort)
+		public byte []IsFinished(object visState)
 		{
-			VisState	ret	=null;
+			VisState	inState	=visState as VisState;
 
-			lock(mAbandonedData)
+			VisState	found	=null;
+
+			lock(mFinishedData)
 			{
-				foreach(VisState vs in mAbandonedData)
+				foreach(VisState vs in mFinishedData)
 				{
-					if(vs.mStartPort == startPort && vs.mEndPort == endPort)
+					if(vs.mStartPort == inState.mStartPort
+						&& vs.mEndPort == inState.mEndPort)
 					{
-						ret	=vs;
+						found	=vs;
 						break;
 					}
 				}
 			}
 
-			return	ret;
+			if(found == null)
+			{
+				return	null;
+			}
+			return	found.mVisData;
 		}
 
 		void OnSlowVisPieceDone(object sender, EventArgs ea)
@@ -151,29 +159,30 @@ namespace BuildWCF
 				return;
 			}
 
-			lock(mAbandonedData)
+			lock(mFinishedData)
 			{
-				mAbandonedData.Add(vs);
+				mFinishedData.Add(vs);
 			}
 		}
 
-		public IAsyncResult BeginFloodPortalsSlow(object visState, AsyncCallback callBack, object aSyncState)
+		public bool BeginFloodPortalsSlow(object visState)
 		{
 			VisState	vs	=visState as VisState;
+
+			if(mState == null || mState.mVisData == null || mState.mVisData.Length == 0)
+			{
+				Console.WriteLine("No valid data to crunch!");
+				return	false;
+			}
 
 			Console.WriteLine("Flood begun on portals " + vs.mStartPort + " to " + vs.mEndPort + "...");
 
 			mState.mStartPort	=vs.mStartPort;
 			mState.mEndPort		=vs.mEndPort;
 
-			var	task	=Task<byte []>.Factory.StartNew(FloodPortalsSlow, aSyncState);
+			var	task	=Task<bool>.Factory.StartNew(FloodPortalsSlow, null);
 
-			return	task.ContinueWith(res => callBack(task));
-		}
-
-		public byte []EndFloodPortalsSlow(IAsyncResult res)
-		{
-			return	((Task<byte []>)res).Result;
+			return	true;
 		}
 
 		public BuildFarmCaps QueryCapabilities()

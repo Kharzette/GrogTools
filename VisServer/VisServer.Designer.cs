@@ -61,7 +61,7 @@
 			this.ConsoleOut.Name = "ConsoleOut";
 			this.ConsoleOut.ReadOnly = true;
 			this.ConsoleOut.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-			this.ConsoleOut.Size = new System.Drawing.Size(482, 223);
+			this.ConsoleOut.Size = new System.Drawing.Size(697, 223);
 			this.ConsoleOut.TabIndex = 17;
 			// 
 			// Progress1
@@ -70,7 +70,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.Progress1.Location = new System.Drawing.Point(12, 41);
 			this.Progress1.Name = "Progress1";
-			this.Progress1.Size = new System.Drawing.Size(482, 19);
+			this.Progress1.Size = new System.Drawing.Size(697, 19);
 			this.Progress1.TabIndex = 24;
 			// 
 			// QueryVisFarm
@@ -108,7 +108,7 @@
             this.StatusLabel});
 			this.StatusBottom.Location = new System.Drawing.Point(0, 292);
 			this.StatusBottom.Name = "StatusBottom";
-			this.StatusBottom.Size = new System.Drawing.Size(506, 22);
+			this.StatusBottom.Size = new System.Drawing.Size(721, 22);
 			this.StatusBottom.TabIndex = 33;
 			this.StatusBottom.Text = "statusStrip1";
 			// 
@@ -131,7 +131,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(506, 314);
+			this.ClientSize = new System.Drawing.Size(721, 314);
 			this.Controls.Add(this.ResumeVis);
 			this.Controls.Add(this.StatusBottom);
 			this.Controls.Add(this.Stop);
