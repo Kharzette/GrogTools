@@ -37,6 +37,7 @@
 			this.StatusBottom = new System.Windows.Forms.StatusStrip();
 			this.StatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
 			this.ResumeVis = new System.Windows.Forms.Button();
+			this.Verbose = new System.Windows.Forms.CheckBox();
 			this.StatusBottom.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -48,7 +49,7 @@
 			this.LoadGBSP.TabIndex = 0;
 			this.LoadGBSP.Text = "Vis GBSP File";
 			this.LoadGBSP.UseVisualStyleBackColor = true;
-			this.LoadGBSP.Click += new System.EventHandler(this.OnLoadGBSP);
+			this.LoadGBSP.Click += new System.EventHandler(this.OnVisGBSP);
 			// 
 			// ConsoleOut
 			// 
@@ -126,12 +127,24 @@
 			this.ResumeVis.TabIndex = 34;
 			this.ResumeVis.Text = "Resume Vis";
 			this.ResumeVis.UseVisualStyleBackColor = true;
+			this.ResumeVis.Click += new System.EventHandler(this.OnResumeVis);
+			// 
+			// Verbose
+			// 
+			this.Verbose.AutoSize = true;
+			this.Verbose.Location = new System.Drawing.Point(439, 16);
+			this.Verbose.Name = "Verbose";
+			this.Verbose.Size = new System.Drawing.Size(65, 17);
+			this.Verbose.TabIndex = 35;
+			this.Verbose.Text = "Verbose";
+			this.Verbose.UseVisualStyleBackColor = true;
 			// 
 			// VisServer
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(721, 314);
+			this.Controls.Add(this.Verbose);
 			this.Controls.Add(this.ResumeVis);
 			this.Controls.Add(this.StatusBottom);
 			this.Controls.Add(this.Stop);
@@ -160,6 +173,7 @@
 		private System.Windows.Forms.StatusStrip StatusBottom;
 		private System.Windows.Forms.ToolStripStatusLabel StatusLabel;
 		private System.Windows.Forms.Button ResumeVis;
+		private System.Windows.Forms.CheckBox Verbose;
 	}
 }
 

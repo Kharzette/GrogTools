@@ -25,6 +25,7 @@ namespace VisServer
 		VisParams		mVisParams		=new VisParams();
 
 		//build farm end points
+		List<string>					mEndPoints	=new List<string>();
 		ConcurrentQueue<MapVisClient>	mBuildFarm	=new ConcurrentQueue<MapVisClient>();
 
 
@@ -133,9 +134,13 @@ namespace VisServer
 			ProgressWatcher.eProgressUpdated	-=OnProgressUpdated;
 
 			UpdateProgressBar(Progress1, 0, 0, 0);
+
+			StatusBottom.Text	="Idle";
+
+			Enabled	=true;
 		}
 
-		void OnLoadGBSP(object sender, EventArgs e)
+		void OnResumeVis(object sender, EventArgs e)
 		{
 			mOFD.DefaultExt	="*.gbsp";
 			DialogResult	dr	=mOFD.ShowDialog();
@@ -145,9 +150,42 @@ namespace VisServer
 				return;
 			}
 
+			Enabled	=false;
+
+			StatusBottom.Text	="Resuming vis of " + mOFD.FileName;
+
 			mVisParams.mbDistribute		=true;
 			mVisParams.mbFullVis		=true;
 			mVisParams.mbSortPortals	=true;
+			mVisParams.mbResume			=true;
+			mBSPParams.mbVerbose		=Verbose.Checked;
+
+			//register for events
+			ProgressWatcher.eProgressUpdated	+=OnProgressUpdated;
+			CoreEvents.eVisDone					+=OnVisDone;
+
+			mMap.VisGBSPFile(mOFD.FileName, mVisParams, mBSPParams, mBuildFarm);
+		}
+
+		void OnVisGBSP(object sender, EventArgs e)
+		{
+			mOFD.DefaultExt	="*.gbsp";
+			DialogResult	dr	=mOFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			Enabled	=false;
+
+			StatusBottom.Text	="Firing up vis of " + mOFD.FileName;
+
+			mVisParams.mbDistribute		=true;
+			mVisParams.mbFullVis		=true;
+			mVisParams.mbSortPortals	=true;
+			mVisParams.mbResume			=false;
+			mBSPParams.mbVerbose		=Verbose.Checked;
 
 			//register for events
 			ProgressWatcher.eProgressUpdated	+=OnProgressUpdated;
@@ -163,11 +201,15 @@ namespace VisServer
 			FileStream		fs	=new FileStream("BuildFarm.txt", FileMode.Open, FileAccess.Read);
 			StreamReader	sr	=new StreamReader(fs);
 
-			List<string>	endPoints	=new List<string>();
 			while(!sr.EndOfStream)
 			{
 				string	url	=sr.ReadLine();
-				endPoints.Add(url);
+
+				//ensure unique
+				if(!mEndPoints.Contains(url))
+				{
+					mEndPoints.Add(url);
+				}
 			}
 
 			//clear when able
@@ -178,7 +220,7 @@ namespace VisServer
 			}
 
 			//list up the endpoints
-			foreach(string address in endPoints)
+			foreach(string address in mEndPoints)
 			{
 				MapVisClient	amvc	=new MapVisClient("WSHttpBinding_IMapVis", address);
 				mBuildFarm.Enqueue(amvc);

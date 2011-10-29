@@ -79,7 +79,7 @@ namespace BuildWCF
 		{
 			if(mState == null)
 			{
-				Console.WriteLine("HasPortals: Null state");
+				Console.WriteLine("HasPortals: Ready for Portals!");
 				return	false;
 			}
 
