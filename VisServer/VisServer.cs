@@ -137,7 +137,7 @@ namespace VisServer
 
 			StatusBottom.Text	="Idle";
 
-			Enabled	=true;
+//			Enabled	=true;
 		}
 
 		void OnResumeVis(object sender, EventArgs e)
@@ -150,7 +150,7 @@ namespace VisServer
 				return;
 			}
 
-			Enabled	=false;
+//			Enabled	=false;
 
 			StatusBottom.Text	="Resuming vis of " + mOFD.FileName;
 
@@ -177,7 +177,7 @@ namespace VisServer
 				return;
 			}
 
-			Enabled	=false;
+//			Enabled	=false;
 
 			StatusBottom.Text	="Firing up vis of " + mOFD.FileName;
 
