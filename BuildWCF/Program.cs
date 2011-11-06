@@ -9,7 +9,7 @@ using System.Configuration;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.Remoting.Messaging;
-using BSPCore;
+using BSPVis;
 
 
 namespace BuildWCF
@@ -55,7 +55,7 @@ namespace BuildWCF
 
 			try
 			{
-				result	=Map.FloodPortalsSlow(visData, startPort, endPort);
+				result	=VisMap.FloodPortalsSlow(visData, startPort, endPort);
 			}
 			catch(Exception e)
 			{
@@ -106,9 +106,6 @@ namespace BuildWCF
 
 			Console.WriteLine("Received " + mState.mVisData.Length + " portals");
 
-			//in case connection is broken
-			Map.eSlowVisPieceDone	+=OnSlowVisPieceDone;
-
 			return	true;
 		}
 
@@ -117,8 +114,6 @@ namespace BuildWCF
 			Console.WriteLine("Freeing Portals...");
 
 			mState	=null;
-
-			Map.eSlowVisPieceDone	-=OnSlowVisPieceDone;
 
 			return	true;
 		}
