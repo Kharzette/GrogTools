@@ -28,7 +28,8 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this.LoadGBSP = new System.Windows.Forms.Button();
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(VisServer));
+			this.FullVis = new System.Windows.Forms.Button();
 			this.ConsoleOut = new System.Windows.Forms.TextBox();
 			this.Progress1 = new System.Windows.Forms.ProgressBar();
 			this.QueryVisFarm = new System.Windows.Forms.Button();
@@ -41,15 +42,15 @@
 			this.StatusBottom.SuspendLayout();
 			this.SuspendLayout();
 			// 
-			// LoadGBSP
+			// FullVis
 			// 
-			this.LoadGBSP.Location = new System.Drawing.Point(12, 12);
-			this.LoadGBSP.Name = "LoadGBSP";
-			this.LoadGBSP.Size = new System.Drawing.Size(90, 23);
-			this.LoadGBSP.TabIndex = 0;
-			this.LoadGBSP.Text = "Vis GBSP File";
-			this.LoadGBSP.UseVisualStyleBackColor = true;
-			this.LoadGBSP.Click += new System.EventHandler(this.OnVisGBSP);
+			this.FullVis.Location = new System.Drawing.Point(12, 12);
+			this.FullVis.Name = "FullVis";
+			this.FullVis.Size = new System.Drawing.Size(90, 23);
+			this.FullVis.TabIndex = 0;
+			this.FullVis.Text = "Vis GBSP File";
+			this.FullVis.UseVisualStyleBackColor = true;
+			this.FullVis.Click += new System.EventHandler(this.OnVisGBSP);
 			// 
 			// ConsoleOut
 			// 
@@ -76,7 +77,7 @@
 			// 
 			// QueryVisFarm
 			// 
-			this.QueryVisFarm.Location = new System.Drawing.Point(195, 12);
+			this.QueryVisFarm.Location = new System.Drawing.Point(521, 12);
 			this.QueryVisFarm.Name = "QueryVisFarm";
 			this.QueryVisFarm.Size = new System.Drawing.Size(95, 23);
 			this.QueryVisFarm.TabIndex = 30;
@@ -86,7 +87,7 @@
 			// 
 			// ReloadBuildFarm
 			// 
-			this.ReloadBuildFarm.Location = new System.Drawing.Point(296, 12);
+			this.ReloadBuildFarm.Location = new System.Drawing.Point(622, 12);
 			this.ReloadBuildFarm.Name = "ReloadBuildFarm";
 			this.ReloadBuildFarm.Size = new System.Drawing.Size(87, 23);
 			this.ReloadBuildFarm.TabIndex = 31;
@@ -96,7 +97,7 @@
 			// 
 			// Stop
 			// 
-			this.Stop.Location = new System.Drawing.Point(389, 12);
+			this.Stop.Location = new System.Drawing.Point(195, 12);
 			this.Stop.Name = "Stop";
 			this.Stop.Size = new System.Drawing.Size(44, 23);
 			this.Stop.TabIndex = 32;
@@ -132,7 +133,7 @@
 			// Verbose
 			// 
 			this.Verbose.AutoSize = true;
-			this.Verbose.Location = new System.Drawing.Point(439, 16);
+			this.Verbose.Location = new System.Drawing.Point(261, 16);
 			this.Verbose.Name = "Verbose";
 			this.Verbose.Size = new System.Drawing.Size(65, 17);
 			this.Verbose.TabIndex = 35;
@@ -152,7 +153,8 @@
 			this.Controls.Add(this.QueryVisFarm);
 			this.Controls.Add(this.Progress1);
 			this.Controls.Add(this.ConsoleOut);
-			this.Controls.Add(this.LoadGBSP);
+			this.Controls.Add(this.FullVis);
+			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "VisServer";
 			this.Text = "Vis Server";
 			this.StatusBottom.ResumeLayout(false);
@@ -164,7 +166,7 @@
 
 		#endregion
 
-		private System.Windows.Forms.Button LoadGBSP;
+		private System.Windows.Forms.Button FullVis;
 		private System.Windows.Forms.TextBox ConsoleOut;
 		private System.Windows.Forms.ProgressBar Progress1;
 		private System.Windows.Forms.Button QueryVisFarm;

@@ -100,15 +100,19 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Libs\BSPCore\BSPCore.csproj">
-      <Project>{2911756D-D18A-4B8F-9EB4-0B8C619E098D}</Project>
-      <Name>BSPCore</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="BuildFarm.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Libs\BSPCore\BSPCore64.csproj">
+      <Project>{B1FB8732-424A-4598-B850-A7D650CEBF53}</Project>
+      <Name>BSPCore64</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Libs\BSPVis\BSPVis64.csproj">
+      <Project>{BC5D04C4-1AE8-490A-ADB6-44BCB80D2480}</Project>
+      <Name>BSPVis64</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Windows.Forms;
+using BSPVis;
 using BSPCore;
 
 
@@ -15,7 +16,7 @@ namespace VisServer
 {
 	public partial class VisServer : Form
 	{
-		Map	mMap	=new Map();
+		VisMap	mMap	=new VisMap();
 
 		OpenFileDialog			mOFD	=new OpenFileDialog();
 		SaveFileDialog			mSFD	=new SaveFileDialog();
@@ -135,7 +136,7 @@ namespace VisServer
 
 			UpdateProgressBar(Progress1, 0, 0, 0);
 
-			StatusBottom.Text	="Idle";
+//			SharedForms.FormExtensions.Invoke(StatusBottom, () => Text = "Idle");
 
 //			Enabled	=true;
 		}
@@ -181,7 +182,7 @@ namespace VisServer
 
 			StatusBottom.Text	="Firing up vis of " + mOFD.FileName;
 
-			mVisParams.mbDistribute		=true;
+			mVisParams.mbDistribute		=false;
 			mVisParams.mbFullVis		=true;
 			mVisParams.mbSortPortals	=true;
 			mVisParams.mbResume			=false;
