@@ -106,6 +106,8 @@ namespace BuildWCF
 
 			Console.WriteLine("Received " + mState.mVisData.Length + " portals");
 
+			VisMap.eSlowFloodPartDone	+=OnSlowVisPieceDone;
+
 			return	true;
 		}
 
@@ -114,6 +116,8 @@ namespace BuildWCF
 			Console.WriteLine("Freeing Portals...");
 
 			mState	=null;
+
+			VisMap.eSlowFloodPartDone	-=OnSlowVisPieceDone;
 
 			return	true;
 		}
