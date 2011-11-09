@@ -75,7 +75,7 @@ namespace BSPBuild
 				mLightParams.mSurfaceReflect	=(float)ReflectiveScale.Value;
 				mLightParams.mMaxIntensity		=(int)MaxIntensity.Value;
 				mLightParams.mLightGridSize		=(int)LightGridSize.Value;
-				mLightParams.mAtlasSize			=(int)AtlasSize.Value;
+				mLightParams.mAtlasSize			=(int)4;	//doesn't matter
 
 				return	mLightParams;
 			}

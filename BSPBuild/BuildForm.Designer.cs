@@ -39,8 +39,6 @@
 			this.VerboseEntity = new System.Windows.Forms.CheckBox();
 			this.VerboseBSP = new System.Windows.Forms.CheckBox();
 			this.LightSettingsGroupBox = new System.Windows.Forms.GroupBox();
-			this.label10 = new System.Windows.Forms.Label();
-			this.AtlasSize = new System.Windows.Forms.NumericUpDown();
 			this.label9 = new System.Windows.Forms.Label();
 			this.LightGridSize = new System.Windows.Forms.NumericUpDown();
 			this.label8 = new System.Windows.Forms.Label();
@@ -76,7 +74,6 @@
 			this.GroupFileIO.SuspendLayout();
 			this.GroupBuildSettings.SuspendLayout();
 			this.LightSettingsGroupBox.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.AtlasSize)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.LightGridSize)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.MaxIntensity)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.ReflectiveScale)).BeginInit();
@@ -192,8 +189,6 @@
 			// 
 			// LightSettingsGroupBox
 			// 
-			this.LightSettingsGroupBox.Controls.Add(this.label10);
-			this.LightSettingsGroupBox.Controls.Add(this.AtlasSize);
 			this.LightSettingsGroupBox.Controls.Add(this.label9);
 			this.LightSettingsGroupBox.Controls.Add(this.LightGridSize);
 			this.LightSettingsGroupBox.Controls.Add(this.label8);
@@ -221,42 +216,6 @@
 			this.LightSettingsGroupBox.TabIndex = 28;
 			this.LightSettingsGroupBox.TabStop = false;
 			this.LightSettingsGroupBox.Text = "Light Settings";
-			// 
-			// label10
-			// 
-			this.label10.AutoSize = true;
-			this.label10.Location = new System.Drawing.Point(320, 47);
-			this.label10.Name = "label10";
-			this.label10.Size = new System.Drawing.Size(53, 13);
-			this.label10.TabIndex = 39;
-			this.label10.Text = "Atlas Size";
-			// 
-			// AtlasSize
-			// 
-			this.AtlasSize.Increment = new decimal(new int[] {
-            16,
-            0,
-            0,
-            0});
-			this.AtlasSize.Location = new System.Drawing.Point(261, 45);
-			this.AtlasSize.Maximum = new decimal(new int[] {
-            4096,
-            0,
-            0,
-            0});
-			this.AtlasSize.Minimum = new decimal(new int[] {
-            256,
-            0,
-            0,
-            0});
-			this.AtlasSize.Name = "AtlasSize";
-			this.AtlasSize.Size = new System.Drawing.Size(53, 20);
-			this.AtlasSize.TabIndex = 38;
-			this.AtlasSize.Value = new decimal(new int[] {
-            1024,
-            0,
-            0,
-            0});
 			// 
 			// label9
 			// 
@@ -360,7 +319,7 @@
 			// label6
 			// 
 			this.label6.AutoSize = true;
-			this.label6.Location = new System.Drawing.Point(57, 142);
+			this.label6.Location = new System.Drawing.Point(320, 99);
 			this.label6.Name = "label6";
 			this.label6.Size = new System.Drawing.Size(60, 13);
 			this.label6.TabIndex = 33;
@@ -369,7 +328,7 @@
 			// label5
 			// 
 			this.label5.AutoSize = true;
-			this.label5.Location = new System.Drawing.Point(57, 116);
+			this.label5.Location = new System.Drawing.Point(320, 73);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(61, 13);
 			this.label5.TabIndex = 32;
@@ -378,7 +337,7 @@
 			// label4
 			// 
 			this.label4.AutoSize = true;
-			this.label4.Location = new System.Drawing.Point(57, 90);
+			this.label4.Location = new System.Drawing.Point(320, 47);
 			this.label4.Name = "label4";
 			this.label4.Size = new System.Drawing.Size(61, 13);
 			this.label4.TabIndex = 31;
@@ -386,7 +345,7 @@
 			// 
 			// MinLightZ
 			// 
-			this.MinLightZ.Location = new System.Drawing.Point(6, 140);
+			this.MinLightZ.Location = new System.Drawing.Point(269, 97);
 			this.MinLightZ.Maximum = new decimal(new int[] {
             255,
             0,
@@ -398,7 +357,7 @@
 			// 
 			// MinLightX
 			// 
-			this.MinLightX.Location = new System.Drawing.Point(6, 88);
+			this.MinLightX.Location = new System.Drawing.Point(269, 45);
 			this.MinLightX.Maximum = new decimal(new int[] {
             255,
             0,
@@ -410,7 +369,7 @@
 			// 
 			// MinLightY
 			// 
-			this.MinLightY.Location = new System.Drawing.Point(6, 114);
+			this.MinLightY.Location = new System.Drawing.Point(269, 71);
 			this.MinLightY.Maximum = new decimal(new int[] {
             255,
             0,
@@ -663,7 +622,6 @@
 			this.GroupBuildSettings.PerformLayout();
 			this.LightSettingsGroupBox.ResumeLayout(false);
 			this.LightSettingsGroupBox.PerformLayout();
-			((System.ComponentModel.ISupportInitialize)(this.AtlasSize)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.LightGridSize)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.MaxIntensity)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.ReflectiveScale)).EndInit();
@@ -692,8 +650,6 @@
 		private System.Windows.Forms.CheckBox VerboseEntity;
 		private System.Windows.Forms.CheckBox VerboseBSP;
 		private System.Windows.Forms.GroupBox LightSettingsGroupBox;
-		private System.Windows.Forms.Label label10;
-		private System.Windows.Forms.NumericUpDown AtlasSize;
 		private System.Windows.Forms.Label label9;
 		private System.Windows.Forms.NumericUpDown LightGridSize;
 		private System.Windows.Forms.Label label8;

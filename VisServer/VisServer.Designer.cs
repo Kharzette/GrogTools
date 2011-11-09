@@ -39,6 +39,7 @@
 			this.StatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
 			this.ResumeVis = new System.Windows.Forms.Button();
 			this.Verbose = new System.Windows.Forms.CheckBox();
+			this.Distributed = new System.Windows.Forms.CheckBox();
 			this.StatusBottom.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -140,11 +141,24 @@
 			this.Verbose.Text = "Verbose";
 			this.Verbose.UseVisualStyleBackColor = true;
 			// 
+			// Distributed
+			// 
+			this.Distributed.AutoSize = true;
+			this.Distributed.Checked = true;
+			this.Distributed.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.Distributed.Location = new System.Drawing.Point(332, 16);
+			this.Distributed.Name = "Distributed";
+			this.Distributed.Size = new System.Drawing.Size(76, 17);
+			this.Distributed.TabIndex = 36;
+			this.Distributed.Text = "Distributed";
+			this.Distributed.UseVisualStyleBackColor = true;
+			// 
 			// VisServer
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(721, 314);
+			this.Controls.Add(this.Distributed);
 			this.Controls.Add(this.Verbose);
 			this.Controls.Add(this.ResumeVis);
 			this.Controls.Add(this.StatusBottom);
@@ -176,6 +190,7 @@
 		private System.Windows.Forms.ToolStripStatusLabel StatusLabel;
 		private System.Windows.Forms.Button ResumeVis;
 		private System.Windows.Forms.CheckBox Verbose;
+		private System.Windows.Forms.CheckBox Distributed;
 	}
 }
 
