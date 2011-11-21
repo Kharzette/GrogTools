@@ -346,6 +346,8 @@ namespace BSPBuild
 
 			Microsoft.Xna.Framework.Color	tempColor	=new Microsoft.Xna.Framework.Color();
 
+			mEmissives.Clear();
+
 			int	count	=br.ReadInt32();
 			for(int i=0;i < count;i++)
 			{

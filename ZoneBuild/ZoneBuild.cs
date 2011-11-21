@@ -384,11 +384,11 @@ namespace ZoneBuild
 					List<MaterialLib.Material>	mats	=mMap.GetMaterials();
 
 					mIndoorMesh.BuildLM(g, mZoneForm.GetLightAtlasSize(), mMap.BuildLMRenderData, mMap.GetPlanes());
-					mIndoorMesh.BuildVLit(g, mMap.BuildVLitRenderData);
-					mIndoorMesh.BuildAlpha(g, mMap.BuildAlphaRenderData);
-					mIndoorMesh.BuildFullBright(g, mMap.BuildFullBrightRenderData);
-					mIndoorMesh.BuildMirror(g, mMap.BuildMirrorRenderData);
-					mIndoorMesh.BuildSky(g, mMap.BuildSkyRenderData);
+					mIndoorMesh.BuildVLit(g, mMap.BuildVLitRenderData, mMap.GetPlanes());
+					mIndoorMesh.BuildAlpha(g, mMap.BuildAlphaRenderData, mMap.GetPlanes());
+					mIndoorMesh.BuildFullBright(g, mMap.BuildFullBrightRenderData, mMap.GetPlanes());
+					mIndoorMesh.BuildMirror(g, mMap.BuildMirrorRenderData, mMap.GetPlanes());
+					mIndoorMesh.BuildSky(g, mMap.BuildSkyRenderData, mMap.GetPlanes());
 
 					foreach(MaterialLib.Material mat in mats)
 					{

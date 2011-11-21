@@ -40,6 +40,7 @@
 			this.ResumeVis = new System.Windows.Forms.Button();
 			this.Verbose = new System.Windows.Forms.CheckBox();
 			this.Distributed = new System.Windows.Forms.CheckBox();
+			this.RoughVis = new System.Windows.Forms.CheckBox();
 			this.StatusBottom.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -153,11 +154,22 @@
 			this.Distributed.Text = "Distributed";
 			this.Distributed.UseVisualStyleBackColor = true;
 			// 
+			// RoughVis
+			// 
+			this.RoughVis.AutoSize = true;
+			this.RoughVis.Location = new System.Drawing.Point(414, 16);
+			this.RoughVis.Name = "RoughVis";
+			this.RoughVis.Size = new System.Drawing.Size(58, 17);
+			this.RoughVis.TabIndex = 37;
+			this.RoughVis.Text = "Rough";
+			this.RoughVis.UseVisualStyleBackColor = true;
+			// 
 			// VisServer
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(721, 314);
+			this.Controls.Add(this.RoughVis);
 			this.Controls.Add(this.Distributed);
 			this.Controls.Add(this.Verbose);
 			this.Controls.Add(this.ResumeVis);
@@ -191,6 +203,7 @@
 		private System.Windows.Forms.Button ResumeVis;
 		private System.Windows.Forms.CheckBox Verbose;
 		private System.Windows.Forms.CheckBox Distributed;
+		private System.Windows.Forms.CheckBox RoughVis;
 	}
 }
 

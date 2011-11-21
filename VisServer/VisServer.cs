@@ -183,7 +183,7 @@ namespace VisServer
 			StatusBottom.Text	="Firing up vis of " + mOFD.FileName;
 
 			mVisParams.mbDistribute		=Distributed.Checked;
-			mVisParams.mbFullVis		=true;
+			mVisParams.mbFullVis		=!RoughVis.Checked;
 			mVisParams.mbSortPortals	=true;
 			mVisParams.mbResume			=false;
 			mBSPParams.mbVerbose		=Verbose.Checked;
