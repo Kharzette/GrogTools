@@ -518,12 +518,12 @@ namespace BSPBuilder
 
 					List<MaterialLib.Material>	mats	=mMap.GetMaterials();
 
-					mIndoorMesh.BuildLM(g, mMainForm.LightParameters.mAtlasSize, mMap.BuildLMRenderData);
-					mIndoorMesh.BuildVLit(g, mMap.BuildVLitRenderData);
-					mIndoorMesh.BuildAlpha(g, mMap.BuildAlphaRenderData);
-					mIndoorMesh.BuildFullBright(g, mMap.BuildFullBrightRenderData);
-					mIndoorMesh.BuildMirror(g, mMap.BuildMirrorRenderData);
-					mIndoorMesh.BuildSky(g, mMap.BuildSkyRenderData);
+//					mIndoorMesh.BuildLM(g, mMainForm.LightParameters.mAtlasSize, mMap.BuildLMRenderData);
+//					mIndoorMesh.BuildVLit(g, mMap.BuildVLitRenderData);
+//					mIndoorMesh.BuildAlpha(g, mMap.BuildAlphaRenderData);
+//					mIndoorMesh.BuildFullBright(g, mMap.BuildFullBrightRenderData);
+//					mIndoorMesh.BuildMirror(g, mMap.BuildMirrorRenderData);
+//					mIndoorMesh.BuildSky(g, mMap.BuildSkyRenderData);
 
 					foreach(MaterialLib.Material mat in mats)
 					{
