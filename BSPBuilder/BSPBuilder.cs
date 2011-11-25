@@ -278,8 +278,9 @@ namespace BSPBuilder
 
 			List<Vector3>	verts		=new List<Vector3>();
 			List<UInt32>	indexes		=new List<UInt32>();
+			List<Int32>		mergeIndex	=new List<Int32>();
 
-			mMap.GetTriangles(mPlayerControl.Position, verts, indexes, drawChoice);
+			mMap.GetTriangles(mPlayerControl.Position, verts, indexes, mergeIndex, drawChoice);
 			if(verts.Count <= 0)
 			{
 				return;
@@ -292,18 +293,27 @@ namespace BSPBuilder
 
 			VertexPositionColorTexture	[]vpnt	=new VertexPositionColorTexture[verts.Count];
 
-			int		cnt	=0;
+			int		mi	=-1;
 			Color	col	=Color.White;
-			foreach(Vector3 vert in verts)
+			for(int i=0;i < verts.Count;i++)
 			{
-				if((cnt % 6) == 0)
+				Vector3	vert	=verts[i];
+				if(mergeIndex.Count == verts.Count && mi != mergeIndex[i])
 				{
 					col	=UtilityLib.Mathery.RandomColor(mRnd);
+					mi	=mergeIndex[i];
 				}
-				vpnt[cnt].Position				=vert;
-				vpnt[cnt].Color					=col;
 
-				vpnt[cnt++].TextureCoordinate	=Vector2.Zero;
+				vpnt[i].Position			=vert;
+				vpnt[i].Color				=col;
+				vpnt[i].TextureCoordinate	=Vector2.Zero;
+			}
+
+			//slightly vary triangle colours to show tris
+			for(int i=0;i < indexes.Count;i+=3)
+			{
+				vpnt[indexes[i + 1]].Color.R	+=5;
+				vpnt[indexes[i + 2]].Color.R	+=15;
 			}
 
 			mVB.SetData<VertexPositionColorTexture>(vpnt);
@@ -311,6 +321,7 @@ namespace BSPBuilder
 		}
 
 
+		//temporary making this merge
 		void OnOpenBrushFile(object sender, EventArgs ea)
 		{
 			string	fileName	=sender as string;
@@ -318,16 +329,15 @@ namespace BSPBuilder
 			if(fileName != null)
 			{
 				mMainForm.Text	=fileName;
-				if(mMap != null)
+				if(mMap == null)
 				{
-					//unregister old events
-					RegisterMapEvents(false);
+					mMap	=new Map();
+					RegisterMapEvents(true);
 				}
-				mMap	=new Map();
-				RegisterMapEvents(true);
 
 //				mMap.LoadBuggeryBrushes(fileName);
 
+//				mMap.MergeBrushFile(fileName);
 				mMap.LoadBrushFile(fileName);
 				mMainForm.SetBuildEnabled(true);
 				mMainForm.SetZoneSaveEnabled(false);
