@@ -19,6 +19,7 @@ namespace ZoneBuild
 		public event EventHandler	eSaveZone;
 		public event EventHandler	eSaveEmissives;
 		public event EventHandler	eMaterialVis;
+		public event EventHandler	eLoadPortals;
 
 
 		public ZoneForm()
@@ -170,6 +171,20 @@ namespace ZoneBuild
 			}
 
 			UtilityLib.Misc.SafeInvoke(eSaveEmissives, mSFD.FileName);
+		}
+
+
+		void OnLoadPortals(object sender, EventArgs e)
+		{
+			mOFD.DefaultExt	="*.Portals";
+			DialogResult	dr	=mOFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			UtilityLib.Misc.SafeInvoke(eLoadPortals, mOFD.FileName);
 		}
 	}
 }

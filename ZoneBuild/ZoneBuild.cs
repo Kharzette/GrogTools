@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -36,7 +37,8 @@ namespace ZoneBuild
 		Vector2			mTextPos;
 		Random			mRnd	=new Random();
 		Vector3			mDynamicLightPos;
-		VertexBuffer	mLineVB;
+		VertexBuffer	mLineVB, mPortVB;
+		IndexBuffer		mPortIB;
 		BasicEffect		mBFX;
 
 		//control / view
@@ -131,6 +133,7 @@ namespace ZoneBuild
 			mZoneForm.eSaveZone				+=OnSaveZone;
 			mZoneForm.eZoneGBSP				+=OnZoneGBSP;
 			mZoneForm.eSaveEmissives		+=OnSaveEmissives;
+			mZoneForm.eLoadPortals			+=OnLoadPortals;
 
 			mKoot	=mSharedCM.Load<SpriteFont>("Fonts/Koot20");
 		}
@@ -200,6 +203,16 @@ namespace ZoneBuild
 				g.DrawPrimitives(PrimitiveType.LineList, 0, mLineVB.VertexCount / 2);
 			}
 
+			if(mPortVB != null)
+			{
+				g.SetVertexBuffer(mPortVB);
+				g.Indices	=mPortIB;
+
+				mBFX.CurrentTechnique.Passes[0].Apply();
+
+				g.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, mPortVB.VertexCount, 0, mPortIB.IndexCount / 3);
+			}
+
 			mSB.Begin();
 
 			mSB.DrawString(mKoot, "Coordinates: " + -mPlayerControl.Position, mTextPos, Color.Yellow);
@@ -242,6 +255,59 @@ namespace ZoneBuild
 		void OnMaterialsCleared(object sender, EventArgs ea)
 		{
 			//might need to readd lightmap tex
+		}
+
+
+		void OnLoadPortals(object sender, EventArgs ea)
+		{
+			string	fileName	=sender as string;
+
+			if(fileName == null)
+			{
+				return;
+			}
+
+			FileStream		fs	=new FileStream(fileName, FileMode.Open, FileAccess.Read);
+			BinaryReader	br	=new BinaryReader(fs);
+
+			List<GBSPPoly>	ports	=new List<GBSPPoly>();
+
+			int	numPorts	=br.ReadInt32();
+			for(int i=0;i < numPorts;i++)
+			{
+				GBSPPoly	p	=new GBSPPoly(0);
+
+				p.Read(br);
+
+				ports.Add(p);
+			}
+
+			br.Close();
+			fs.Close();
+
+			List<Vector3>	verts	=new List<Vector3>();
+			List<UInt32>	inds	=new List<UInt32>();
+
+			foreach(GBSPPoly p in ports)
+			{
+				p.GetTriangles(verts, inds, false);
+			}
+
+			mPortVB	=new VertexBuffer(mGDM.GraphicsDevice, typeof(VertexPositionColor), verts.Count, BufferUsage.WriteOnly);
+
+			VertexPositionColor	[]vpc	=new VertexPositionColor[verts.Count];
+
+			for(int i=0;i < verts.Count;i++)
+			{
+				vpc[i].Position	=verts[i];
+				vpc[i].Color	=UtilityLib.Mathery.RandomColor(mRnd);
+			}
+
+			mPortVB.SetData<VertexPositionColor>(vpc);
+
+			mPortIB	=new IndexBuffer(mGDM.GraphicsDevice, IndexElementSize.ThirtyTwoBits, inds.Count, BufferUsage.WriteOnly);
+
+			mPortIB.SetData<UInt32>(inds.ToArray());
 		}
 
 
