@@ -52,6 +52,9 @@ namespace ZoneBuild
 			mGDM	=new GraphicsDeviceManager(this);
 			Content.RootDirectory	="Content";
 
+			mGDM.PreferredBackBufferWidth	=1280;
+			mGDM.PreferredBackBufferHeight	=720;
+
 			//set window position
 			if(!mGDM.IsFullScreen)
 			{
@@ -133,7 +136,7 @@ namespace ZoneBuild
 			mZoneForm.eSaveZone				+=OnSaveZone;
 			mZoneForm.eZoneGBSP				+=OnZoneGBSP;
 			mZoneForm.eSaveEmissives		+=OnSaveEmissives;
-			mZoneForm.eLoadPortals			+=OnLoadPortals;
+			mZoneForm.eLoadDebug			+=OnLoadRays;
 
 			mKoot	=mSharedCM.Load<SpriteFont>("Fonts/Koot20");
 		}
@@ -214,9 +217,7 @@ namespace ZoneBuild
 			}
 
 			mSB.Begin();
-
 			mSB.DrawString(mKoot, "Coordinates: " + -mPlayerControl.Position, mTextPos, Color.Yellow);
-
 			mSB.End();
 
 			base.Draw(gameTime);
@@ -255,6 +256,53 @@ namespace ZoneBuild
 		void OnMaterialsCleared(object sender, EventArgs ea)
 		{
 			//might need to readd lightmap tex
+		}
+
+
+		void OnLoadRays(object sender, EventArgs ea)
+		{
+			string	fileName	=sender as string;
+
+			if(fileName == null)
+			{
+				return;
+			}
+
+			FileStream		fs	=new FileStream(fileName, FileMode.Open, FileAccess.Read);
+			BinaryReader	br	=new BinaryReader(fs);
+
+			List<Vector3>	lines	=new List<Vector3>();
+
+			int	numEndPoints	=br.ReadInt32();
+			for(int i=0;i < numEndPoints;i++)
+			{
+				Vector3	start	=Vector3.Zero;
+				Vector3	end		=Vector3.Zero;
+
+				start.X	=br.ReadSingle();
+				start.Y	=br.ReadSingle();
+				start.Z	=br.ReadSingle();
+				end.X	=br.ReadSingle();
+				end.Y	=br.ReadSingle();
+				end.Z	=br.ReadSingle();
+
+				lines.Add(start);
+				lines.Add(end);
+			}
+
+			br.Close();
+			fs.Close();
+
+			mLineVB	=new VertexBuffer(mGDM.GraphicsDevice, typeof(VertexPositionColor), lines.Count, BufferUsage.WriteOnly);
+
+			VertexPositionColor	[]normVerts	=new VertexPositionColor[lines.Count];
+			for(int i=0;i < lines.Count;i++)
+			{
+				normVerts[i].Position	=lines[i];
+				normVerts[i].Color		=Color.Green;
+			}
+
+			mLineVB.SetData<VertexPositionColor>(normVerts);
 		}
 
 
@@ -427,7 +475,7 @@ namespace ZoneBuild
 				}
 				else
 				{
-					List<Vector3>	lines	=mMap.GetFaceNormals();
+/*					List<Vector3>	lines	=mMap.GetFaceNormals();
 
 					mLineVB	=new VertexBuffer(mGDM.GraphicsDevice, typeof(VertexPositionColor), lines.Count, BufferUsage.WriteOnly);
 
@@ -439,7 +487,7 @@ namespace ZoneBuild
 					}
 
 					mLineVB.SetData<VertexPositionColor>(normVerts);
-
+*/
 					mVisMap	=new VisMap();
 					mVisMap.SetMap(mMap);
 					mVisMap.LoadVisData(fileName);

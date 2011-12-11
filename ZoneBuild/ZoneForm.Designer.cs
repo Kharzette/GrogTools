@@ -31,6 +31,7 @@
 			this.ConsoleOut = new System.Windows.Forms.TextBox();
 			this.GenerateMaterials = new System.Windows.Forms.Button();
 			this.GroupFileIO = new System.Windows.Forms.GroupBox();
+			this.LoadDebug = new System.Windows.Forms.Button();
 			this.SaveEmissives = new System.Windows.Forms.Button();
 			this.VisGBSP = new System.Windows.Forms.Button();
 			this.SaveZone = new System.Windows.Forms.Button();
@@ -46,7 +47,6 @@
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.AtlasSize = new System.Windows.Forms.NumericUpDown();
 			this.label10 = new System.Windows.Forms.Label();
-			this.LoadPortals = new System.Windows.Forms.Button();
 			this.GroupFileIO.SuspendLayout();
 			this.groupBox1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.AtlasSize)).BeginInit();
@@ -78,7 +78,7 @@
 			// 
 			// GroupFileIO
 			// 
-			this.GroupFileIO.Controls.Add(this.LoadPortals);
+			this.GroupFileIO.Controls.Add(this.LoadDebug);
 			this.GroupFileIO.Controls.Add(this.SaveEmissives);
 			this.GroupFileIO.Controls.Add(this.VisGBSP);
 			this.GroupFileIO.Controls.Add(this.SaveZone);
@@ -90,6 +90,16 @@
 			this.GroupFileIO.TabIndex = 25;
 			this.GroupFileIO.TabStop = false;
 			this.GroupFileIO.Text = "File IO";
+			// 
+			// LoadDebug
+			// 
+			this.LoadDebug.Location = new System.Drawing.Point(87, 77);
+			this.LoadDebug.Name = "LoadDebug";
+			this.LoadDebug.Size = new System.Drawing.Size(75, 23);
+			this.LoadDebug.TabIndex = 27;
+			this.LoadDebug.Text = "Load Debug";
+			this.LoadDebug.UseVisualStyleBackColor = true;
+			this.LoadDebug.Click += new System.EventHandler(this.OnLoadPortals);
 			// 
 			// SaveEmissives
 			// 
@@ -253,16 +263,6 @@
 			this.label10.TabIndex = 40;
 			this.label10.Text = "Lightmap Atlas Size";
 			// 
-			// LoadPortals
-			// 
-			this.LoadPortals.Location = new System.Drawing.Point(87, 77);
-			this.LoadPortals.Name = "LoadPortals";
-			this.LoadPortals.Size = new System.Drawing.Size(75, 23);
-			this.LoadPortals.TabIndex = 27;
-			this.LoadPortals.Text = "Load Portals";
-			this.LoadPortals.UseVisualStyleBackColor = true;
-			this.LoadPortals.Click += new System.EventHandler(this.OnLoadPortals);
-			// 
 			// ZoneForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -305,6 +305,6 @@
 		private System.Windows.Forms.NumericUpDown AtlasSize;
 		private System.Windows.Forms.Label label10;
 		private System.Windows.Forms.Button SaveEmissives;
-		private System.Windows.Forms.Button LoadPortals;
+		private System.Windows.Forms.Button LoadDebug;
 	}
 }
