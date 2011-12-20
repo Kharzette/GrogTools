@@ -70,6 +70,11 @@ namespace ZoneBuild
 			}
 		}
 
+		internal bool SaveDebugInfo
+		{
+			get { return SaveDebug.Checked; }
+		}
+
 
 
 		internal void EnableFileIO(bool bOn)

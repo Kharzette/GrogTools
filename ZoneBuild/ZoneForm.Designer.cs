@@ -47,6 +47,7 @@
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.AtlasSize = new System.Windows.Forms.NumericUpDown();
 			this.label10 = new System.Windows.Forms.Label();
+			this.SaveDebug = new System.Windows.Forms.CheckBox();
 			this.GroupFileIO.SuspendLayout();
 			this.groupBox1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.AtlasSize)).BeginInit();
@@ -263,12 +264,23 @@
 			this.label10.TabIndex = 40;
 			this.label10.Text = "Lightmap Atlas Size";
 			// 
+			// SaveDebug
+			// 
+			this.SaveDebug.AutoSize = true;
+			this.SaveDebug.Location = new System.Drawing.Point(18, 127);
+			this.SaveDebug.Name = "SaveDebug";
+			this.SaveDebug.Size = new System.Drawing.Size(107, 17);
+			this.SaveDebug.TabIndex = 41;
+			this.SaveDebug.Text = "Save Debug Info";
+			this.SaveDebug.UseVisualStyleBackColor = true;
+			// 
 			// ZoneForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(476, 354);
 			this.ControlBox = false;
+			this.Controls.Add(this.SaveDebug);
 			this.Controls.Add(this.label10);
 			this.Controls.Add(this.AtlasSize);
 			this.Controls.Add(this.GroupFileIO);
@@ -306,5 +318,6 @@
 		private System.Windows.Forms.Label label10;
 		private System.Windows.Forms.Button SaveEmissives;
 		private System.Windows.Forms.Button LoadDebug;
+		private System.Windows.Forms.CheckBox SaveDebug;
 	}
 }

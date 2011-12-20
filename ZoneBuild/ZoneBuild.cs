@@ -442,7 +442,8 @@ namespace ZoneBuild
 			if(fileName != null)
 			{
 				mZoneForm.Text	=fileName;
-				mMap.Write(fileName, mMatLib.GetMaterials().Count, mVisMap.SaveVisZoneData);
+				mMap.Write(fileName, mZoneForm.SaveDebugInfo,
+					mMatLib.GetMaterials().Count, mVisMap.SaveVisZoneData);
 
 				//write out the zoneDraw
 				mIndoorMesh.Write(fileName + "Draw");
