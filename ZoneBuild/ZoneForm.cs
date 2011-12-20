@@ -143,7 +143,13 @@ namespace ZoneBuild
 
 		void OnSaveZone(object sender, EventArgs e)
 		{
-			mSFD.DefaultExt	="*.gbsp";
+			//google was useless for the "file is not valid" problem
+			mSFD.CheckFileExists	=false;
+			mSFD.CreatePrompt		=false;
+			mSFD.ValidateNames		=false;
+			mSFD.DefaultExt			="*.Zone";
+			mSFD.Filter				="Zone files (*.Zone)|*.Zone|All files (*.*)|*.*";
+
 			DialogResult	dr	=mSFD.ShowDialog();
 
 			if(dr == DialogResult.Cancel)

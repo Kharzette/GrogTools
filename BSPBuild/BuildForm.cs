@@ -335,6 +335,12 @@ namespace BSPBuild
 
 			emmName	+=".Emissives";
 
+			if(!File.Exists(emmName))
+			{
+				//not a big deal, just use white
+				return;
+			}
+
 			FileStream		fs	=new FileStream(emmName, FileMode.Open, FileAccess.Read);
 			BinaryReader	br	=new BinaryReader(fs);
 

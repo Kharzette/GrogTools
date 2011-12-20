@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{08BBC525-1393-4F15-9FD0-7FDF48A93EE4}</ProjectGuid>
+    <ProjectGuid>{FDF8436F-D2EE-4AC5-9188-11CE6CF28975}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>BSPBuild</RootNamespace>
