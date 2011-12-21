@@ -145,8 +145,6 @@
 			// Distributed
 			// 
 			this.Distributed.AutoSize = true;
-			this.Distributed.Checked = true;
-			this.Distributed.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.Distributed.Location = new System.Drawing.Point(332, 16);
 			this.Distributed.Name = "Distributed";
 			this.Distributed.Size = new System.Drawing.Size(76, 17);

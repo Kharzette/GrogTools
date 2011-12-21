@@ -184,7 +184,7 @@ namespace VisServer
 
 			mVisParams.mbDistribute		=Distributed.Checked;
 			mVisParams.mbFullVis		=!RoughVis.Checked;
-			mVisParams.mbSortPortals	=true;
+			mVisParams.mbSortPortals	=false;
 			mVisParams.mbResume			=false;
 			mBSPParams.mbVerbose		=Verbose.Checked;
 
