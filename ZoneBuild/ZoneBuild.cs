@@ -169,7 +169,7 @@ namespace ZoneBuild
 
 			mPlayerControl.Update(msDelta, mGameCam.View, mInput.Player1.mKBS, mInput.Player1.mMS, mInput.Player1.mGPS);
 
-			mGameCam.Update(msDelta, mPlayerControl.Position, mPlayerControl.Pitch, mPlayerControl.Yaw, mPlayerControl.Roll);
+			mGameCam.Update(msDelta, -mPlayerControl.Position, mPlayerControl.Pitch, mPlayerControl.Yaw, mPlayerControl.Roll);
 
 			mMatLib.UpdateWVP(mGameCam.World, mGameCam.View, mGameCam.Projection, -mPlayerControl.Position);
 			mBFX.World		=mGameCam.World;
