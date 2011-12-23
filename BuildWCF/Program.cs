@@ -55,7 +55,7 @@ namespace BuildWCF
 
 			try
 			{
-				result	=VisMap.FloodPortalsSlow(visData, startPort, endPort);
+				result	=VisMap.PortalFrustFlood(visData, startPort, endPort);
 			}
 			catch(Exception e)
 			{
@@ -104,7 +104,7 @@ namespace BuildWCF
 
 			mState	=visState as VisState;
 
-			Console.WriteLine("Received " + mState.mVisData.Length + " portals");
+			Console.WriteLine("Received " + mState.mVisData.Length + " bytes of portals");
 
 			VisMap.eSlowFloodPartDone	+=OnSlowVisPieceDone;
 
