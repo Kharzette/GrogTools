@@ -158,7 +158,7 @@ namespace ZoneBuild
 			if(mInput.Player1.mKBS.IsKeyDown(Keys.L)
 				|| mInput.Player1.mGPS.IsButtonDown(Buttons.LeftShoulder))
 			{
-				mDynamicLightPos	=-mPlayerControl.Position;
+				mDynamicLightPos	=mPlayerControl.Position;
 				mMatLib.SetParameterOnAll("mLight0Position", mDynamicLightPos);
 				mMatLib.SetParameterOnAll("mLight0Color", Vector3.One);
 				mMatLib.SetParameterOnAll("mLightRange", 200.0f);
