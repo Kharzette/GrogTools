@@ -159,7 +159,6 @@ namespace BSPBuild
 		{
 			bool	bSuccess	=(bool)sender;
 
-			ProgressWatcher.eProgressUpdated	-=OnProgressUpdated;
 			ClearProgress();
 			mbWorking	=false;
 			EnableFileIO(true);
