@@ -136,7 +136,8 @@ namespace ZoneBuild
 			mZoneForm.eSaveZone				+=OnSaveZone;
 			mZoneForm.eZoneGBSP				+=OnZoneGBSP;
 			mZoneForm.eSaveEmissives		+=OnSaveEmissives;
-			mZoneForm.eLoadDebug			+=OnLoadRays;
+//			mZoneForm.eLoadDebug			+=OnLoadRays;
+			mZoneForm.eLoadDebug			+=OnLoadDebugFaces;
 
 			mKoot	=mSharedCM.Load<SpriteFont>("Fonts/Koot20");
 		}
@@ -185,6 +186,8 @@ namespace ZoneBuild
 			GraphicsDevice.Clear(Color.CornflowerBlue);
 
 			GraphicsDevice	g	=mGDM.GraphicsDevice;
+
+			g.DepthStencilState	=DepthStencilState.Default;
 
 			if(mMap != null)
 			{
@@ -256,6 +259,83 @@ namespace ZoneBuild
 		void OnMaterialsCleared(object sender, EventArgs ea)
 		{
 			//might need to readd lightmap tex
+		}
+
+
+		void OnLoadDebugFaces(object sender, EventArgs ea)
+		{
+			string	fileName	=sender as string;
+
+			if(fileName == null)
+			{
+				return;
+			}
+
+			FileStream		fs	=new FileStream(fileName, FileMode.Open, FileAccess.Read);
+			BinaryReader	br	=new BinaryReader(fs);
+
+			int	count	=br.ReadInt32();
+
+			List<GBSPPoly>	polys	=new List<GBSPPoly>();
+			List<Vector3>	norms	=new List<Vector3>();
+			for(int i=0;i < count;i++)
+			{
+				GBSPPoly	p	=new GBSPPoly(0);
+				p.Read(br);
+				polys.Add(p);
+
+				Vector3	normLine	=Vector3.Zero;
+				normLine.X	=br.ReadSingle();
+				normLine.Y	=br.ReadSingle();
+				normLine.Z	=br.ReadSingle();
+
+				norms.Add(normLine);
+
+				normLine.X	=br.ReadSingle();
+				normLine.Y	=br.ReadSingle();
+				normLine.Z	=br.ReadSingle();
+
+				norms.Add(normLine);
+			}
+
+			List<Vector3>	verts	=new List<Vector3>();
+			List<UInt32>	inds	=new List<UInt32>();
+
+			foreach(GBSPPoly p in polys)
+			{
+				p.GetTriangles(verts, inds, false);
+			}
+
+			mPortVB	=new VertexBuffer(mGDM.GraphicsDevice, typeof(VertexPositionColor), verts.Count, BufferUsage.WriteOnly);
+
+			VertexPositionColor	[]vpc	=new VertexPositionColor[verts.Count];
+
+			for(int i=0;i < verts.Count;i++)
+			{
+				vpc[i].Position	=verts[i];
+				vpc[i].Color	=UtilityLib.Mathery.RandomColor(mRnd);
+			}
+
+			mPortVB.SetData<VertexPositionColor>(vpc);
+
+			mPortIB	=new IndexBuffer(mGDM.GraphicsDevice, IndexElementSize.ThirtyTwoBits, inds.Count, BufferUsage.WriteOnly);
+
+			mPortIB.SetData<UInt32>(inds.ToArray());
+
+			mLineVB	=new VertexBuffer(mGDM.GraphicsDevice, typeof(VertexPositionColor), norms.Count, BufferUsage.WriteOnly);
+
+			vpc	=new VertexPositionColor[norms.Count];
+
+			for(int i=0;i < norms.Count;i+=2)
+			{
+				vpc[i].Position	=norms[i];
+				vpc[i].Color	=Color.Blue;
+
+				vpc[i + 1].Position	=norms[i + 1];
+				vpc[i + 1].Color	=Color.Green;
+			}
+
+			mLineVB.SetData<VertexPositionColor>(vpc);
 		}
 
 
