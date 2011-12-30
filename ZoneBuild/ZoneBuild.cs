@@ -189,9 +189,9 @@ namespace ZoneBuild
 
 			g.DepthStencilState	=DepthStencilState.Default;
 
-			if(mMap != null)
+			if(mMap != null && mVisMap != null)
 			{
-				mIndoorMesh.Draw(g, mGameCam, -mPlayerControl.Position, mVisMap.IsMaterialVisibleFromPos);
+				mIndoorMesh.Draw(g, mGameCam, mPlayerControl.Position, mVisMap.IsMaterialVisibleFromPos);
 			}
 
 			KeyboardState	kbstate	=Keyboard.GetState();
