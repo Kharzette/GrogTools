@@ -53,6 +53,8 @@ namespace BSPBuild
 				mBSPParams.mbVerbose		=VerboseBSP.Checked;
 				mBSPParams.mbEntityVerbose	=VerboseEntity.Checked;
 				mBSPParams.mbFixTJunctions	=FixTJunctions.Checked;
+				mBSPParams.mbSlickAsGouraud	=SlickAsGouraud.Checked;
+				mBSPParams.mbWarpAsMirror	=WarpAsMirror.Checked;
 
 				return	mBSPParams;
 			}
@@ -110,11 +112,11 @@ namespace BSPBuild
 
 			mMap	=new Map();
 
-			mMap.LoadBrushFile(mOFD.FileName);
+			mMap.LoadBrushFile(mOFD.FileName, BSPParameters.mbSlickAsGouraud, BSPParameters.mbWarpAsMirror);
 			SetBuildEnabled(true);
 			SetSaveEnabled(false);
-
 		}
+
 
 		void OnNumClustersChanged(object sender, EventArgs ea)
 		{

@@ -71,6 +71,8 @@
 			this.NumPlanes = new System.Windows.Forms.TextBox();
 			this.Progress1 = new System.Windows.Forms.ProgressBar();
 			this.ConsoleOut = new System.Windows.Forms.TextBox();
+			this.SlickAsGouraud = new System.Windows.Forms.CheckBox();
+			this.WarpAsMirror = new System.Windows.Forms.CheckBox();
 			this.GroupFileIO.SuspendLayout();
 			this.GroupBuildSettings.SuspendLayout();
 			this.LightSettingsGroupBox.SuspendLayout();
@@ -143,12 +145,14 @@
 			// 
 			// GroupBuildSettings
 			// 
+			this.GroupBuildSettings.Controls.Add(this.WarpAsMirror);
+			this.GroupBuildSettings.Controls.Add(this.SlickAsGouraud);
 			this.GroupBuildSettings.Controls.Add(this.FixTJunctions);
 			this.GroupBuildSettings.Controls.Add(this.VerboseEntity);
 			this.GroupBuildSettings.Controls.Add(this.VerboseBSP);
 			this.GroupBuildSettings.Location = new System.Drawing.Point(349, 12);
 			this.GroupBuildSettings.Name = "GroupBuildSettings";
-			this.GroupBuildSettings.Size = new System.Drawing.Size(115, 127);
+			this.GroupBuildSettings.Size = new System.Drawing.Size(115, 137);
 			this.GroupBuildSettings.TabIndex = 22;
 			this.GroupBuildSettings.TabStop = false;
 			this.GroupBuildSettings.Text = "Build Settings";
@@ -603,6 +607,30 @@
 			this.ConsoleOut.Size = new System.Drawing.Size(452, 182);
 			this.ConsoleOut.TabIndex = 32;
 			// 
+			// SlickAsGouraud
+			// 
+			this.SlickAsGouraud.AutoSize = true;
+			this.SlickAsGouraud.Checked = true;
+			this.SlickAsGouraud.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.SlickAsGouraud.Location = new System.Drawing.Point(6, 88);
+			this.SlickAsGouraud.Name = "SlickAsGouraud";
+			this.SlickAsGouraud.Size = new System.Drawing.Size(102, 17);
+			this.SlickAsGouraud.TabIndex = 23;
+			this.SlickAsGouraud.Text = "Slick = Gouraud";
+			this.SlickAsGouraud.UseVisualStyleBackColor = true;
+			// 
+			// WarpAsMirror
+			// 
+			this.WarpAsMirror.AutoSize = true;
+			this.WarpAsMirror.Checked = true;
+			this.WarpAsMirror.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.WarpAsMirror.Location = new System.Drawing.Point(6, 111);
+			this.WarpAsMirror.Name = "WarpAsMirror";
+			this.WarpAsMirror.Size = new System.Drawing.Size(90, 17);
+			this.WarpAsMirror.TabIndex = 24;
+			this.WarpAsMirror.Text = "Warp = Mirror";
+			this.WarpAsMirror.UseVisualStyleBackColor = true;
+			// 
 			// BuildForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -682,6 +710,8 @@
 		private System.Windows.Forms.TextBox NumPlanes;
 		private System.Windows.Forms.ProgressBar Progress1;
 		private System.Windows.Forms.TextBox ConsoleOut;
+		private System.Windows.Forms.CheckBox WarpAsMirror;
+		private System.Windows.Forms.CheckBox SlickAsGouraud;
 	}
 }
 
