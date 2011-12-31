@@ -135,10 +135,6 @@ namespace VisServer
 			ProgressWatcher.eProgressUpdated	-=OnProgressUpdated;
 
 			UpdateProgressBar(Progress1, 0, 0, 0);
-
-//			SharedForms.FormExtensions.Invoke(StatusBottom, () => Text = "Idle");
-
-//			Enabled	=true;
 		}
 
 		void OnResumeVis(object sender, EventArgs e)

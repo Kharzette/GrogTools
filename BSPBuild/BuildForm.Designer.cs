@@ -35,6 +35,8 @@
 			this.OpenBrushFile = new System.Windows.Forms.Button();
 			this.SaveGBSP = new System.Windows.Forms.Button();
 			this.GroupBuildSettings = new System.Windows.Forms.GroupBox();
+			this.WarpAsMirror = new System.Windows.Forms.CheckBox();
+			this.SlickAsGouraud = new System.Windows.Forms.CheckBox();
 			this.FixTJunctions = new System.Windows.Forms.CheckBox();
 			this.VerboseEntity = new System.Windows.Forms.CheckBox();
 			this.VerboseBSP = new System.Windows.Forms.CheckBox();
@@ -71,8 +73,6 @@
 			this.NumPlanes = new System.Windows.Forms.TextBox();
 			this.Progress1 = new System.Windows.Forms.ProgressBar();
 			this.ConsoleOut = new System.Windows.Forms.TextBox();
-			this.SlickAsGouraud = new System.Windows.Forms.CheckBox();
-			this.WarpAsMirror = new System.Windows.Forms.CheckBox();
 			this.GroupFileIO.SuspendLayout();
 			this.GroupBuildSettings.SuspendLayout();
 			this.LightSettingsGroupBox.SuspendLayout();
@@ -157,6 +157,30 @@
 			this.GroupBuildSettings.TabStop = false;
 			this.GroupBuildSettings.Text = "Build Settings";
 			// 
+			// WarpAsMirror
+			// 
+			this.WarpAsMirror.AutoSize = true;
+			this.WarpAsMirror.Checked = true;
+			this.WarpAsMirror.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.WarpAsMirror.Location = new System.Drawing.Point(6, 111);
+			this.WarpAsMirror.Name = "WarpAsMirror";
+			this.WarpAsMirror.Size = new System.Drawing.Size(90, 17);
+			this.WarpAsMirror.TabIndex = 24;
+			this.WarpAsMirror.Text = "Warp = Mirror";
+			this.WarpAsMirror.UseVisualStyleBackColor = true;
+			// 
+			// SlickAsGouraud
+			// 
+			this.SlickAsGouraud.AutoSize = true;
+			this.SlickAsGouraud.Checked = true;
+			this.SlickAsGouraud.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.SlickAsGouraud.Location = new System.Drawing.Point(6, 88);
+			this.SlickAsGouraud.Name = "SlickAsGouraud";
+			this.SlickAsGouraud.Size = new System.Drawing.Size(102, 17);
+			this.SlickAsGouraud.TabIndex = 23;
+			this.SlickAsGouraud.Text = "Slick = Gouraud";
+			this.SlickAsGouraud.UseVisualStyleBackColor = true;
+			// 
 			// FixTJunctions
 			// 
 			this.FixTJunctions.AutoSize = true;
@@ -182,8 +206,6 @@
 			// VerboseBSP
 			// 
 			this.VerboseBSP.AutoSize = true;
-			this.VerboseBSP.Checked = true;
-			this.VerboseBSP.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.VerboseBSP.Location = new System.Drawing.Point(6, 19);
 			this.VerboseBSP.Name = "VerboseBSP";
 			this.VerboseBSP.Size = new System.Drawing.Size(65, 17);
@@ -535,6 +557,7 @@
 			this.NumPortals.ReadOnly = true;
 			this.NumPortals.Size = new System.Drawing.Size(76, 20);
 			this.NumPortals.TabIndex = 19;
+			this.NumPortals.TabStop = false;
 			// 
 			// LabelNumCollisionFaces
 			// 
@@ -561,6 +584,7 @@
 			this.NumClusters.ReadOnly = true;
 			this.NumClusters.Size = new System.Drawing.Size(76, 20);
 			this.NumClusters.TabIndex = 15;
+			this.NumClusters.TabStop = false;
 			// 
 			// NumVerts
 			// 
@@ -569,6 +593,7 @@
 			this.NumVerts.ReadOnly = true;
 			this.NumVerts.Size = new System.Drawing.Size(76, 20);
 			this.NumVerts.TabIndex = 14;
+			this.NumVerts.TabStop = false;
 			// 
 			// LabelNumRawFaces
 			// 
@@ -606,30 +631,6 @@
 			this.ConsoleOut.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
 			this.ConsoleOut.Size = new System.Drawing.Size(452, 182);
 			this.ConsoleOut.TabIndex = 32;
-			// 
-			// SlickAsGouraud
-			// 
-			this.SlickAsGouraud.AutoSize = true;
-			this.SlickAsGouraud.Checked = true;
-			this.SlickAsGouraud.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.SlickAsGouraud.Location = new System.Drawing.Point(6, 88);
-			this.SlickAsGouraud.Name = "SlickAsGouraud";
-			this.SlickAsGouraud.Size = new System.Drawing.Size(102, 17);
-			this.SlickAsGouraud.TabIndex = 23;
-			this.SlickAsGouraud.Text = "Slick = Gouraud";
-			this.SlickAsGouraud.UseVisualStyleBackColor = true;
-			// 
-			// WarpAsMirror
-			// 
-			this.WarpAsMirror.AutoSize = true;
-			this.WarpAsMirror.Checked = true;
-			this.WarpAsMirror.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.WarpAsMirror.Location = new System.Drawing.Point(6, 111);
-			this.WarpAsMirror.Name = "WarpAsMirror";
-			this.WarpAsMirror.Size = new System.Drawing.Size(90, 17);
-			this.WarpAsMirror.TabIndex = 24;
-			this.WarpAsMirror.Text = "Warp = Mirror";
-			this.WarpAsMirror.UseVisualStyleBackColor = true;
 			// 
 			// BuildForm
 			// 
