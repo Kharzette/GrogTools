@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.IO;
+using System.Threading;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -183,6 +184,8 @@ namespace FullBuild
 		{
 			if(mbWorking)
 			{
+				base.Update(gameTime);
+				Thread.Sleep(10);
 				return;
 			}
 
