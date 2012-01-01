@@ -113,6 +113,7 @@ namespace FullBuild
 			mSB			=new SpriteBatch(GraphicsDevice);
 			mSharedCM	=new ContentManager(Services, "SharedContent");
 			mBFX		=new BasicEffect(mGDM.GraphicsDevice);
+			mKoot		=mSharedCM.Load<SpriteFont>("Fonts/Koot20");
 
 			mBFX.VertexColorEnabled	=true;
 			mBFX.LightingEnabled	=false;
@@ -168,6 +169,8 @@ namespace FullBuild
 			CoreEvents.eNumClustersChanged		+=OnNumClustersChanged;
 			CoreEvents.eNumPlanesChanged		+=OnNumPlanesChanged;
 			CoreEvents.eNumVertsChanged			+=OnNumVertsChanged;
+
+			LoadBuildFarm();
 		}
 
 
@@ -222,6 +225,44 @@ namespace FullBuild
 			}
 
 			GraphicsDevice.Clear(Color.CornflowerBlue);
+
+			GraphicsDevice	g	=mGDM.GraphicsDevice;
+
+			g.DepthStencilState	=DepthStencilState.Default;
+
+			if(mMap != null && mVisMap != null)
+			{
+				mIndoorMesh.Draw(g, mGameCam, mPlayerControl.Position, mVisMap.IsMaterialVisibleFromPos);
+			}
+
+			KeyboardState	kbstate	=Keyboard.GetState();
+			if(kbstate.IsKeyDown(Keys.L))
+			{
+				mMatLib.DrawMap("LightMapAtlas", mSB);
+			}
+
+			if(mLineVB != null)
+			{
+				g.SetVertexBuffer(mLineVB);
+
+				mBFX.CurrentTechnique.Passes[0].Apply();
+
+				g.DrawPrimitives(PrimitiveType.LineList, 0, mLineVB.VertexCount / 2);
+			}
+
+			if(mPortVB != null)
+			{
+				g.SetVertexBuffer(mPortVB);
+				g.Indices	=mPortIB;
+
+				mBFX.CurrentTechnique.Passes[0].Apply();
+
+				g.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, mPortVB.VertexCount, 0, mPortIB.IndexCount / 3);
+			}
+
+			mSB.Begin();
+			mSB.DrawString(mKoot, "Coordinates: " + -mPlayerControl.Position, mTextPos, Color.Yellow);
+			mSB.End();
 
 			base.Draw(gameTime);
 		}
