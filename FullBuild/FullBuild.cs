@@ -440,6 +440,8 @@ namespace FullBuild
 				mZoneForm.EnableFileIO(true);	//not threaded
 				mBSPForm.EnableFileIO(true);
 				mVisForm.EnableFileIO(true);
+
+				mOutputForm.Print("Materials generated.\n");
 			}
 		}
 
@@ -454,6 +456,8 @@ namespace FullBuild
 			}
 
 			mMatLib.SaveEmissives(fileName);
+
+			mOutputForm.Print("Emissive save complete.\n");
 		}
 
 
@@ -533,6 +537,8 @@ namespace FullBuild
 				mBSPForm.EnableFileIO(true);
 				mVisForm.EnableFileIO(true);
 				mZoneForm.SetZoneSaveEnabled(true);
+
+				mOutputForm.Print("Zoning complete.\n");
 			}
 		}
 
