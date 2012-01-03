@@ -68,17 +68,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BuildForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="BuildForm.Designer.cs">
-      <DependentUpon>BuildForm.cs</DependentUpon>
-    </Compile>
+    <Compile Include="BSPBuild.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="BuildForm.resx">
-      <DependentUpon>BuildForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -106,6 +98,10 @@
     <ProjectReference Include="..\..\Libs\UtilityLib\UtilityLib.csproj">
       <Project>{BB91910C-2595-4EB6-B48C-30BCC41457F6}</Project>
       <Name>UtilityLib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\SharedForms\SharedForms.csproj">
+      <Project>{29C0FFE8-5702-48A3-840D-54706748FF68}</Project>
+      <Name>SharedForms</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -15,7 +15,15 @@ namespace BSPBuild
 		{
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new BuildForm());
+
+			SharedForms.BSPForm	bspForm	=new SharedForms.BSPForm();
+			SharedForms.Output	outForm	=new SharedForms.Output();
+
+			BSPBuild	bspBuild	=new BSPBuild(bspForm);
+
+			outForm.Show();
+
+			Application.Run(bspForm);
 		}
 	}
 }
