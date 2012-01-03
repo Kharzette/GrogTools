@@ -95,6 +95,10 @@
       <Project>{B1FB8732-424A-4598-B850-A7D650CEBF53}</Project>
       <Name>BSPCore64</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Libs\SharedForms\SharedForms64.csproj">
+      <Project>{ADEB2534-851E-49C2-8EE7-B2EA580B916E}</Project>
+      <Name>SharedForms64</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Libs\UtilityLib\UtilityLib64.csproj">
       <Project>{44142343-F71A-4BA3-9776-5F1E659190C7}</Project>
       <Name>UtilityLib64</Name>
@@ -102,10 +106,6 @@
     <ProjectReference Include="..\..\Libs\XNAMathery\XNAMathery.csproj">
       <Project>{7AF20683-E58F-4EBF-B33E-FE550841AF31}</Project>
       <Name>XNAMathery</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\SharedForms\SharedForms.csproj">
-      <Project>{29C0FFE8-5702-48A3-840D-54706748FF68}</Project>
-      <Name>SharedForms</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -156,10 +156,6 @@
       <Name>SharedContent</Name>
       <XnaReferenceType>Content</XnaReferenceType>
     </ProjectReference>
-    <ProjectReference Include="..\..\SharedForms\SharedForms.csproj">
-      <Project>{29C0FFE8-5702-48A3-840D-54706748FF68}</Project>
-      <Name>SharedForms</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">

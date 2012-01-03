@@ -99,10 +99,6 @@
       <Project>{BB91910C-2595-4EB6-B48C-30BCC41457F6}</Project>
       <Name>UtilityLib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\SharedForms\SharedForms.csproj">
-      <Project>{29C0FFE8-5702-48A3-840D-54706748FF68}</Project>
-      <Name>SharedForms</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
