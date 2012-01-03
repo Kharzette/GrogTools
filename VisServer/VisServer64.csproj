@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="VisApp.cs" />
     <Compile Include="VisServer.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -95,6 +96,10 @@
     <ProjectReference Include="..\..\Libs\BSPVis\BSPVis64.csproj">
       <Project>{BC5D04C4-1AE8-490A-ADB6-44BCB80D2480}</Project>
       <Name>BSPVis64</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Libs\SharedForms\SharedForms64.csproj">
+      <Project>{ADEB2534-851E-49C2-8EE7-B2EA580B916E}</Project>
+      <Name>SharedForms64</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

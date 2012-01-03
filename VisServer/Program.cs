@@ -15,7 +15,15 @@ namespace VisServer
 		{
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new VisServer());
+
+			SharedForms.VisForm	visForm	=new SharedForms.VisForm();
+			SharedForms.Output	outForm	=new SharedForms.Output();
+
+			VisApp	va	=new VisApp(visForm, outForm);
+
+			outForm.Show();
+
+			Application.Run(visForm);
 		}
 	}
 }
