@@ -121,6 +121,12 @@ namespace VisServer
 			vp.mbSortPortals	=mVisForm.bSortPortals;
 			bp.mbVerbose		=false;	//if you want spam
 
+			//ensure sorted is off if going dist
+			if(vp.mbDistribute)
+			{
+				vp.mbSortPortals	=false;
+			}
+
 			mVisMap	=new VisMap();
 
 			mVisMap.VisGBSPFile(fileName, vp, bp, mBuildFarm);
