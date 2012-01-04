@@ -473,6 +473,8 @@ namespace FullBuild
 
 				//write out the zoneDraw
 				mIndoorMesh.Write(fileName + "Draw");
+
+				mOutputForm.Print("Zone save complete.\n");
 			}
 		}
 
