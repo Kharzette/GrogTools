@@ -38,8 +38,7 @@ namespace FullBuild
 		MeshLib.IndoorMesh		mIndoorMesh;
 
 		//lighting emissives
-		Dictionary<string, Microsoft.Xna.Framework.Color>	mEmissives
-			=new Dictionary<string, Microsoft.Xna.Framework.Color>();
+		Dictionary<string, Microsoft.Xna.Framework.Color>	mEmissives;
 
 		//build farm end points
 		List<string>					mEndPoints	=new List<string>();
@@ -287,51 +286,11 @@ namespace FullBuild
 
 		Vector3 EmissiveForMaterial(string matName)
 		{
-			if(mEmissives.ContainsKey(matName))
+			if(mEmissives != null && mEmissives.ContainsKey(matName))
 			{
 				return	mEmissives[matName].ToVector3();
 			}
 			return	Vector3.One;
-		}
-
-
-		void LoadEmissives(string fileName)
-		{
-			string	emmName	=UtilityLib.FileUtil.StripExtension(fileName);
-
-			emmName	+=".Emissives";
-
-			if(!File.Exists(emmName))
-			{
-				//not a big deal, just use white
-				return;
-			}
-
-			FileStream		fs	=new FileStream(emmName, FileMode.Open, FileAccess.Read);
-			BinaryReader	br	=new BinaryReader(fs);
-
-			UInt32	magic	=br.ReadUInt32();
-			if(magic != 0xED1551BE)
-			{
-				CoreEvents.Print("Bad magic number for emissive file\n");
-			}
-
-			Microsoft.Xna.Framework.Color	tempColor	=new Microsoft.Xna.Framework.Color();
-
-			mEmissives.Clear();
-
-			int	count	=br.ReadInt32();
-			for(int i=0;i < count;i++)
-			{
-				string	matName	=br.ReadString();
-
-				tempColor.PackedValue	=br.ReadUInt32();
-
-				mEmissives.Add(matName, tempColor);
-			}
-
-			br.Close();
-			fs.Close();
 		}
 
 
@@ -600,7 +559,7 @@ namespace FullBuild
 			}
 
 			mbWorking	=true;
-			LoadEmissives(fileName);
+			mEmissives	=UtilityLib.FileUtil.LoadEmissives(fileName);
 
 			mBSPForm.SetSaveEnabled(false);
 			mBSPForm.SetBuildEnabled(false);

@@ -16,8 +16,7 @@ namespace BSPBuild
 		Map	mMap;
 
 		//lighting emissives
-		Dictionary<string, Microsoft.Xna.Framework.Color>	mEmissives
-			=new Dictionary<string, Microsoft.Xna.Framework.Color>();
+		Dictionary<string, Microsoft.Xna.Framework.Color>	mEmissives;
 
 
 		internal BSPBuild(SharedForms.BSPForm bspForm)
@@ -89,7 +88,7 @@ namespace BSPBuild
 				return;
 			}
 
-			LoadEmissives(fileName);
+			mEmissives	=UtilityLib.FileUtil.LoadEmissives(fileName);
 
 			mBSPForm.SetSaveEnabled(false);
 			mBSPForm.SetBuildEnabled(false);
@@ -162,7 +161,7 @@ namespace BSPBuild
 
 		Vector3 EmissiveForMaterial(string matName)
 		{
-			if(mEmissives.ContainsKey(matName))
+			if(mEmissives != null && mEmissives.ContainsKey(matName))
 			{
 				return	mEmissives[matName].ToVector3();
 			}
@@ -179,6 +178,7 @@ namespace BSPBuild
 			if(!File.Exists(emmName))
 			{
 				//not a big deal, just use white
+				CoreEvents.Print("No emissives, just using solid white.\n");
 				return;
 			}
 
@@ -207,6 +207,8 @@ namespace BSPBuild
 
 			br.Close();
 			fs.Close();
+
+			CoreEvents.Print("Loaded " + mEmissives.Count + " emissive colors.\n");
 		}
 	}
 }
