@@ -148,6 +148,7 @@ namespace FullBuild
 			mZoneForm.eSaveZone				+=OnSaveZone;
 			mZoneForm.eZoneGBSP				+=OnZoneGBSP;
 			mZoneForm.eSaveEmissives		+=OnSaveEmissives;
+			mZoneForm.eLoadDebug			+=OnLoadDebug;
 			mBSPForm.eBuild					+=OnBuild;
 			mBSPForm.eLight					+=OnLight;
 			mBSPForm.eOpenMap				+=OnOpenMap;
@@ -710,6 +711,49 @@ namespace FullBuild
 		void OnReLoadVisFarm(object sender, EventArgs e)
 		{
 			LoadBuildFarm();
+		}
+
+
+		void OnLoadDebug(object sender, EventArgs ea)
+		{
+			string	fileName	=sender as string;
+
+			if(fileName == null)
+			{
+				return;
+			}
+
+			FileStream		fs	=new FileStream(fileName, FileMode.Open, FileAccess.Read);
+			BinaryReader	br	=new BinaryReader(fs);
+
+			List<Vector3>	points	=new List<Vector3>();
+
+			int	numPoints	=br.ReadInt32();
+			for(int i=0;i < numPoints;i++)
+			{
+				Vector3	p	=Vector3.Zero;
+
+				p.X	=br.ReadSingle();
+				p.Y	=br.ReadSingle();
+				p.Z	=br.ReadSingle();
+
+				points.Add(p);
+			}
+
+			br.Close();
+			fs.Close();
+
+			mLineVB	=new VertexBuffer(mGDM.GraphicsDevice, typeof(VertexPositionColor),
+				points.Count, BufferUsage.WriteOnly);
+
+			VertexPositionColor	[]normVerts	=new VertexPositionColor[points.Count];
+			for(int i=0;i < points.Count;i++)
+			{
+				normVerts[i].Position	=points[i];
+				normVerts[i].Color		=Color.Green;
+			}
+
+			mLineVB.SetData<VertexPositionColor>(normVerts);
 		}
 
 
