@@ -120,6 +120,7 @@ namespace VisServer
 			vp.mbResume			=false;
 			vp.mbSortPortals	=mVisForm.bSortPortals;
 			bp.mbVerbose		=false;	//if you want spam
+			bp.mMaxThreads		=4;		//gui for this is on bspform
 
 			//ensure sorted is off if going dist
 			if(vp.mbDistribute)
