@@ -249,10 +249,9 @@ namespace BuildWCF
 		static void Main(string[] args)
 		{
 			//Step 1 of the address configuration procedure: Create a URI to serve as the base address.
-			Uri	baseAddr	=new Uri("http://localhost:8000/ServiceModelSamples/Service");
+			Uri	baseAddr	=new Uri("http://localhost:8000/");
 			
 			//Step 2 of the hosting procedure: Create ServiceHost
-//			HaxdServiceHost selfHost = new HaxdServiceHost(typeof(MapVisService), baseAddr);
 			ServiceHost selfHost = new ServiceHost(typeof(MapVisService), baseAddr);
 
 			try
