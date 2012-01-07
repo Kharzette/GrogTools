@@ -332,11 +332,8 @@ namespace FullBuild
 		#region Event Handlers
 		void OnMaterialNuked(object sender, EventArgs ea)
 		{
-			if(mMap != null)
-			{
-				//rebuild material vis
-				mVisMap.VisMaterials();
-			}
+			//shouldn't mess with materials if something is loaded
+			mMap	=null;
 		}
 
 
@@ -357,7 +354,8 @@ namespace FullBuild
 
 		void OnMaterialsCleared(object sender, EventArgs ea)
 		{
-			//might need to readd lightmap tex
+			//shouldn't mess with materials if something is loaded
+			mMap	=null;
 		}
 
 
@@ -488,6 +486,7 @@ namespace FullBuild
 
 					mLineVB.SetData<VertexPositionColor>(normVerts);
 */
+					mMatForm.SetReadOnly(true);
 					mVisMap	=new VisMap();
 					mVisMap.SetMap(mMap);
 					mVisMap.LoadVisData(fileName);
@@ -510,6 +509,8 @@ namespace FullBuild
 					}
 					mMatLib.RefreshShaderParameters();
 					mMatForm.UpdateMaterials();
+
+					mVisMap.SetMaterialVisBytes(mats.Count);
 				}
 				mZoneForm.EnableFileIO(true);
 				mBSPForm.EnableFileIO(true);
