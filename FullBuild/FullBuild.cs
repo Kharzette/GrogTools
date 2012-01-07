@@ -143,6 +143,7 @@ namespace FullBuild
 			//form events
 			mMatForm.eMaterialNuked			+=OnMaterialNuked;
 			mMatForm.eLibraryCleared		+=OnMaterialsCleared;
+			mMatForm.eLibrarySaved			+=OnMaterialLibSaved;
 			mZoneForm.eGenerateMaterials	+=OnGenerateMaterials;
 			mZoneForm.eMaterialVis			+=OnMaterialVis;
 			mZoneForm.eSaveZone				+=OnSaveZone;
@@ -335,6 +336,21 @@ namespace FullBuild
 			{
 				//rebuild material vis
 				mVisMap.VisMaterials();
+			}
+		}
+
+
+		void OnMaterialLibSaved(object sender, EventArgs ea)
+		{
+			string	fileName	=sender as string;
+
+			if(fileName == null)
+			{
+				CoreEvents.Print("A material library was saved somewhere, but I have no idea where.");
+			}
+			else
+			{
+				CoreEvents.Print("Material library file " + fileName + " saved.\n");
 			}
 		}
 
