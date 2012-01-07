@@ -29,12 +29,12 @@ namespace BuildWCF
 		List<VisState>	mFinishedData	=new List<VisState>();
 
 
-		public bool FloodPortalsSlow(object state)
+		public bool PortalFlowCB(object state)
 		{
-			return	FloodPortalsSlow(mState.mVisData, mState.mStartPort, mState.mEndPort);
+			return	PortalFlowBytes(mState.mVisData, mState.mStartPort, mState.mEndPort);
 		}
 
-		public bool FloodPortalsSlow(byte []visData, int startPort, int endPort)
+		public bool PortalFlowBytes(byte []visData, int startPort, int endPort)
 		{
 			bool	bWorking	=false;
 			lock(mWorkState)
@@ -55,7 +55,7 @@ namespace BuildWCF
 
 			try
 			{
-				result	=VisMap.PortalFrustFlood(visData, startPort, endPort);
+				result	=VisMap.PortalFlow(visData, startPort, endPort);
 			}
 			catch(Exception e)
 			{
@@ -106,7 +106,7 @@ namespace BuildWCF
 
 			Console.WriteLine("Received " + mState.mVisData.Length + " bytes of portals");
 
-			VisMap.eSlowFloodPartDone	+=OnSlowVisPieceDone;
+			VisMap.eFlowChunkComplete	+=OnFlowVisPieceDone;
 
 			return	true;
 		}
@@ -117,7 +117,7 @@ namespace BuildWCF
 
 			mState	=null;
 
-			VisMap.eSlowFloodPartDone	-=OnSlowVisPieceDone;
+			VisMap.eFlowChunkComplete	-=OnFlowVisPieceDone;
 
 			return	true;
 		}
@@ -148,7 +148,7 @@ namespace BuildWCF
 			return	found.mVisData;
 		}
 
-		void OnSlowVisPieceDone(object sender, EventArgs ea)
+		void OnFlowVisPieceDone(object sender, EventArgs ea)
 		{
 			VisState	vs	=sender as VisState;
 
@@ -164,7 +164,7 @@ namespace BuildWCF
 			}
 		}
 
-		public bool BeginFloodPortalsSlow(object visState)
+		public bool PortalFlow(object visState)
 		{
 			VisState	vs	=visState as VisState;
 
@@ -179,7 +179,7 @@ namespace BuildWCF
 			mState.mStartPort	=vs.mStartPort;
 			mState.mEndPort		=vs.mEndPort;
 
-			var	task	=Task<bool>.Factory.StartNew(FloodPortalsSlow, null);
+			var	task	=Task<bool>.Factory.StartNew(PortalFlowCB, null);
 
 			return	true;
 		}
@@ -202,44 +202,6 @@ namespace BuildWCF
 			Mo.Dispose();
 			
 			return	ret;
-		}
-	}
-
-
-	public class HaxdServiceHost : ServiceHost
-	{
-		public HaxdServiceHost(Type type, Uri baseAddr) : base(type, baseAddr)
-		{
-		}
-
-		protected override void ApplyConfiguration()
-		{
-			// workaround for passing a custom configFilename
-			string configFilename = (string)CallContext.GetData("_config");
-
-			configFilename	=AppDomain.CurrentDomain.BaseDirectory + "App.config";
-
-			Console.WriteLine(configFilename);
-			
-			ExeConfigurationFileMap filemap = new ExeConfigurationFileMap();
-			
-			filemap.ExeConfigFilename =
-				string.IsNullOrEmpty(configFilename) ?
-				AppDomain.CurrentDomain.SetupInformation.ConfigurationFile : configFilename;
-			
-			Configuration config =
-				ConfigurationManager.OpenMappedExeConfiguration(filemap, ConfigurationUserLevel.None);
-			
-			ServiceModelSectionGroup serviceModel = ServiceModelSectionGroup.GetSectionGroup(config);
-			foreach (ServiceElement se in serviceModel.Services.Services)
-			{
-				if (se.Name == this.Description.ConfigurationName)
-				{
-					base.LoadConfigurationSection(se);
-					return;
-				}
-			}
-			throw new ArgumentException("ServiceElement doesn't exist");
 		}
 	}
 
