@@ -186,7 +186,7 @@ namespace FullBuild
 			if(mbWorking)
 			{
 				base.Update(gameTime);
-				Thread.Sleep(10);
+				Thread.Sleep(0);
 				return;
 			}
 
@@ -225,6 +225,7 @@ namespace FullBuild
 		{
 			if(mbWorking)
 			{
+				base.Draw(gameTime);
 				return;
 			}
 
