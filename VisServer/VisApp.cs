@@ -150,6 +150,7 @@ namespace VisServer
 			vp.mbFullVis		=!mVisForm.bRough;
 			vp.mbResume			=true;
 			vp.mbSortPortals	=mVisForm.bSortPortals;
+			bp.mbVerbose		=true;	//for connection spam
 
 			mVisMap	=new VisMap();
 

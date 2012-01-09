@@ -122,7 +122,7 @@ namespace BuildWCF
 			return	true;
 		}
 
-		public byte []IsFinished(object visState)
+		public byte []IsFinished(object visState, out bool bWorkingOnIt)
 		{
 			VisState	inState	=visState as VisState;
 
@@ -141,8 +141,22 @@ namespace BuildWCF
 				}
 			}
 
+			bWorkingOnIt	=true;
+
 			if(found == null)
 			{
+				//make sure we are actually working on this
+				lock(mState)
+				{
+					if(mState.mStartPort != inState.mStartPort)
+					{
+						bWorkingOnIt	=false;
+					}
+					if(mState.mEndPort != inState.mEndPort)
+					{
+						bWorkingOnIt	=false;
+					}
+				}
 				return	null;
 			}
 			return	found.mVisData;
