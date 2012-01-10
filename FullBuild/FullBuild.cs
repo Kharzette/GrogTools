@@ -355,8 +355,14 @@ namespace FullBuild
 
 		void OnMaterialsCleared(object sender, EventArgs ea)
 		{
-			//shouldn't mess with materials if something is loaded
-			mMap	=null;
+			if(mIndoorMesh != null)
+			{
+				Texture2D	atlas	=mIndoorMesh.GetLightMapAtlas();
+				if(atlas != null)
+				{
+					mMatLib.AddMap("LightMapAtlas", atlas);
+				}
+			}
 		}
 
 

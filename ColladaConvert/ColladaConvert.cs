@@ -27,6 +27,7 @@ namespace ColladaConvert
 		
 		UtilityLib.PlayerSteering	mSteering;
 		UtilityLib.GameCamera		mGameCam;
+		UtilityLib.Input			mInput;
 
 		//material gui
 		SharedForms.MaterialForm	mMF;
@@ -85,6 +86,8 @@ namespace ColladaConvert
 				mGDM.GraphicsDevice.Viewport.Height);
 
 			mSteering.Method	=UtilityLib.PlayerSteering.SteeringMethod.Fly;
+
+			mInput	=new UtilityLib.Input();
 
 			//default cam pos off to one side
 //			Vector3	camPos	=Vector3.Zero;
@@ -549,10 +552,13 @@ namespace ColladaConvert
 
 			float	msDelta	=gameTime.ElapsedGameTime.Milliseconds;
 
-			mSteering.Update(msDelta, mGameCam.View, Keyboard.GetState(),
-				Mouse.GetState(), GamePad.GetState(PlayerIndex.One));
+			mInput.Update(msDelta);
+
+			UtilityLib.Input.PlayerInput	pi	=mInput.Player1;
+
+			mSteering.Update(msDelta, mGameCam.View, pi.mKBS, pi.mMS, pi.mGPS);
 			
-			mGameCam.Update(msDelta, mSteering.Position, mSteering.Pitch, mSteering.Yaw, mSteering.Roll);
+			mGameCam.Update(msDelta, -mSteering.Position, mSteering.Pitch, mSteering.Yaw, mSteering.Roll);
 
 			//rotate the light vector
 
