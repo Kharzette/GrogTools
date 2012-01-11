@@ -187,11 +187,6 @@
       <Project>{29C0FFE8-5702-48A3-840D-54706748FF68}</Project>
       <Name>SharedForms32</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\SharedContent\SharedContent.contentproj">
-      <Project>{9E3808C2-1EF9-49BC-BCD6-5B80C519BC19}</Project>
-      <Name>SharedContent</Name>
-      <XnaReferenceType>Content</XnaReferenceType>
-    </ProjectReference>
     <ProjectReference Include="..\..\Libs\UtilityLib\UtilityLib.csproj">
       <Project>{BB91910C-2595-4EB6-B48C-30BCC41457F6}</Project>
       <Name>UtilityLib</Name>

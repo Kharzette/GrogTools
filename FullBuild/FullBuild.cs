@@ -22,7 +22,8 @@ namespace FullBuild
 	{
 		GraphicsDeviceManager	mGDM;
 		SpriteBatch				mSB;
-		ContentManager			mSharedCM;
+		ContentManager			mGameCM;
+		ContentManager			mShaderLib;
 
 		//forms
 		SharedForms.BSPForm			mBSPForm;
@@ -49,8 +50,7 @@ namespace FullBuild
 		Vector2			mTextPos;
 		Random			mRnd	=new Random();
 		Vector3			mDynamicLightPos;
-		VertexBuffer	mLineVB, mPortVB;
-		IndexBuffer		mPortIB;
+		VertexBuffer	mLineVB;
 		BasicEffect		mBFX;
 
 		//control / view
@@ -111,15 +111,16 @@ namespace FullBuild
 		protected override void LoadContent()
 		{
 			mSB			=new SpriteBatch(GraphicsDevice);
-			mSharedCM	=new ContentManager(Services, "SharedContent");
+			mGameCM		=new ContentManager(Services, "GameContent");
+			mShaderLib	=new ContentManager(Services, "ShaderLib");
 			mBFX		=new BasicEffect(mGDM.GraphicsDevice);
-			mKoot		=mSharedCM.Load<SpriteFont>("Fonts/Koot20");
+			mKoot		=mGameCM.Load<SpriteFont>("Fonts/Koot20");
 
 			mBFX.VertexColorEnabled	=true;
 			mBFX.LightingEnabled	=false;
 			mBFX.TextureEnabled		=false;
 
-			mMatLib		=new MaterialLib.MaterialLib(mGDM.GraphicsDevice, Content, mSharedCM, true);
+			mMatLib		=new MaterialLib.MaterialLib(mGDM.GraphicsDevice, mGameCM, mShaderLib, true);
 			mIndoorMesh	=new MeshLib.IndoorMesh(GraphicsDevice, mMatLib);
 
 			mBSPForm	=new SharedForms.BSPForm();
@@ -253,16 +254,6 @@ namespace FullBuild
 				mBFX.CurrentTechnique.Passes[0].Apply();
 
 				g.DrawPrimitives(PrimitiveType.LineList, 0, mLineVB.VertexCount / 2);
-			}
-
-			if(mPortVB != null)
-			{
-				g.SetVertexBuffer(mPortVB);
-				g.Indices	=mPortIB;
-
-				mBFX.CurrentTechnique.Passes[0].Apply();
-
-				g.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, mPortVB.VertexCount, 0, mPortIB.IndexCount / 3);
 			}
 
 			mSB.Begin();
