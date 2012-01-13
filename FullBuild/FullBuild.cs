@@ -215,7 +215,7 @@ namespace FullBuild
 
 			mGameCam.Update(msDelta, -mPlayerControl.Position, mPlayerControl.Pitch, mPlayerControl.Yaw, mPlayerControl.Roll);
 
-			mMatLib.UpdateWVP(mGameCam.World, mGameCam.View, mGameCam.Projection, -mPlayerControl.Position);
+			mMatLib.UpdateWVP(mGameCam.World, mGameCam.View, mGameCam.Projection, mPlayerControl.Position);
 			mBFX.World		=mGameCam.World;
 			mBFX.View		=mGameCam.View;
 			mBFX.Projection	=mGameCam.Projection;
