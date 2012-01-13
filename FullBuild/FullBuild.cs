@@ -37,6 +37,7 @@ namespace FullBuild
 		VisMap					mVisMap;
 		MaterialLib.MaterialLib	mMatLib;
 		MeshLib.IndoorMesh		mIndoorMesh;
+		List<string>			mAllTextures	=new List<string>();
 
 		//lighting emissives
 		Dictionary<string, Microsoft.Xna.Framework.Color>	mEmissives;
@@ -151,6 +152,7 @@ namespace FullBuild
 			mZoneForm.eZoneGBSP				+=OnZoneGBSP;
 			mZoneForm.eSaveEmissives		+=OnSaveEmissives;
 			mZoneForm.eLoadDebug			+=OnLoadDebug;
+			mZoneForm.eDumpTextures			+=OnDumpTextures;
 			mBSPForm.eBuild					+=OnBuild;
 			mBSPForm.eLight					+=OnLight;
 			mBSPForm.eOpenMap				+=OnOpenMap;
@@ -386,34 +388,59 @@ namespace FullBuild
 		void OnGenerateMaterials(object sender, EventArgs ea)
 		{
 			string	fileName	=sender as string;
-
-			if(fileName != null)
+			if(fileName == null)
 			{
-				mZoneForm.Text	=fileName;
-				mZoneForm.SetZoneSaveEnabled(false);
-				mZoneForm.EnableFileIO(false);
-				mBSPForm.EnableFileIO(false);
-				mVisForm.EnableFileIO(false);
-				mMap	=new Map();
+				return;
+			}
+			mZoneForm.Text	=fileName;
+			mZoneForm.SetZoneSaveEnabled(false);
+			mZoneForm.EnableFileIO(false);
+			mBSPForm.EnableFileIO(false);
+			mVisForm.EnableFileIO(false);
+			mMap	=new Map();
 
-				mMatLib.NukeAllMaterials();
-				List<MaterialLib.Material>	mats	=mMap.GenerateMaterials(fileName);
+			mMatLib.NukeAllMaterials();
+			List<MaterialLib.Material>	mats	=mMap.GenerateMaterials(fileName);
 
-				foreach(MaterialLib.Material mat in mats)
+			foreach(MaterialLib.Material mat in mats)
+			{
+				mMatLib.AddMaterial(mat);
+			}
+			mMatLib.RefreshShaderParameters();
+			mMatForm.UpdateMaterials();
+
+			mVisMap	=new VisMap();
+			mVisMap.LoadVisData(fileName);
+
+			mZoneForm.EnableFileIO(true);	//not threaded
+			mBSPForm.EnableFileIO(true);
+			mVisForm.EnableFileIO(true);
+
+			mOutputForm.Print("Materials generated.\n");
+
+			//store a list of textures used
+			foreach(MaterialLib.Material m in mats)
+			{
+				string	texName	="";
+				int		starPos	=m.Name.LastIndexOf('*');
+				if(starPos == -1)
 				{
-					mMatLib.AddMaterial(mat);
+					texName	=m.Name;
 				}
-				mMatLib.RefreshShaderParameters();
-				mMatForm.UpdateMaterials();
+				else
+				{
+					texName	=m.Name.Substring(0, m.Name.LastIndexOf('*'));
+				}
 
-				mVisMap	=new VisMap();
-				mVisMap.LoadVisData(fileName);
+				//lower case
+				texName	=texName.ToLower();
 
-				mZoneForm.EnableFileIO(true);	//not threaded
-				mBSPForm.EnableFileIO(true);
-				mVisForm.EnableFileIO(true);
+				if(mAllTextures.Contains(texName))
+				{
+					continue;
+				}
 
-				mOutputForm.Print("Materials generated.\n");
+				mAllTextures.Add(texName);
 			}
 		}
 
@@ -726,6 +753,16 @@ namespace FullBuild
 		void OnReLoadVisFarm(object sender, EventArgs e)
 		{
 			LoadBuildFarm();
+		}
+
+
+		void OnDumpTextures(object sender, EventArgs e)
+		{
+			mAllTextures.Sort();
+			foreach(string tex in mAllTextures)
+			{
+				CoreEvents.Print("\t" + tex + "\n");
+			}
 		}
 
 
