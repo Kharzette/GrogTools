@@ -53,6 +53,7 @@ namespace FullBuild
 		Vector3			mDynamicLightPos;
 		VertexBuffer	mLineVB;
 		BasicEffect		mBFX;
+		float			mWarpFactor;
 
 		//control / view
 		UtilityLib.GameCamera		mGameCam;
@@ -194,6 +195,13 @@ namespace FullBuild
 			}
 
 			float	msDelta	=gameTime.ElapsedGameTime.Milliseconds;
+
+			mWarpFactor	+=msDelta / 1000.0f;
+			while(mWarpFactor > MathHelper.TwoPi)
+			{
+				mWarpFactor	-=MathHelper.TwoPi;
+			}
+			mMatLib.SetParameterOnAll("mWarpFactor", mWarpFactor);
 
 			mInput.Update(msDelta);
 
