@@ -267,7 +267,7 @@ namespace FullBuild
 			}
 
 			mSB.Begin();
-			mSB.DrawString(mKoot, "Coordinates: " + -mPlayerControl.Position, mTextPos, Color.Yellow);
+			mSB.DrawString(mKoot, "Coordinates: " + mPlayerControl.Position, mTextPos, Color.Yellow);
 			mSB.End();
 
 			base.Draw(gameTime);
