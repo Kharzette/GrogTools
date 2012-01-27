@@ -51,9 +51,7 @@ namespace BSPBuild
 
 			mMap	=new Map();
 
-			mMap.LoadBrushFile(fileName,
-				mBSPForm.BSPParameters.mbSlickAsGouraud,
-				mBSPForm.BSPParameters.mbWarpAsMirror);
+			mMap.LoadBrushFile(fileName, mBSPForm.BSPParameters);
 
 			mBSPForm.SetBuildEnabled(true);
 			mBSPForm.SetSaveEnabled(false);

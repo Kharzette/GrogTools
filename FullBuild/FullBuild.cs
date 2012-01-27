@@ -519,7 +519,6 @@ namespace FullBuild
 
 					mLineVB.SetData<VertexPositionColor>(normVerts);
 */
-					mMatForm.SetReadOnly(true);
 					mVisMap	=new VisMap();
 					mVisMap.SetMap(mMap);
 					mVisMap.LoadVisData(fileName);
@@ -565,9 +564,7 @@ namespace FullBuild
 
 			mMap	=new Map();
 
-			mMap.LoadBrushFile(fileName,
-				mBSPForm.BSPParameters.mbSlickAsGouraud,
-				mBSPForm.BSPParameters.mbWarpAsMirror);
+			mMap.LoadBrushFile(fileName, mBSPForm.BSPParameters);
 
 			mBSPForm.SetBuildEnabled(true);
 			mBSPForm.SetSaveEnabled(false);
