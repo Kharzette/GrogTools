@@ -179,13 +179,23 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Games\TreasurePeaks\TreasurePeaksContent\TreasurePeaksContent.contentproj">
+      <Project>{FEA130C3-0811-49AE-BB07-E4A387443EB0}</Project>
+      <Name>TreasurePeaksContent %28Content%29</Name>
+      <XnaReferenceType>Content</XnaReferenceType>
+    </ProjectReference>
     <ProjectReference Include="..\..\Libs\MaterialLib\MaterialLib.csproj">
       <Project>{E6EAA6B0-1140-4BE3-AEFD-0DF83A7A705B}</Project>
       <Name>MaterialLib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Libs\SharedForms\SharedForms32.csproj">
-      <Project>{29C0FFE8-5702-48A3-840D-54706748FF68}</Project>
-      <Name>SharedForms32</Name>
+    <ProjectReference Include="..\..\Libs\ShaderLib\ShaderLib.contentproj">
+      <Project>{F921E3ED-B43E-4B82-B4EB-C9BC2E373B1F}</Project>
+      <Name>ShaderLib</Name>
+      <XnaReferenceType>Content</XnaReferenceType>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Libs\SharedForms\SharedFormsTS.csproj">
+      <Project>{3B62D87E-CE0B-4310-8A01-9A974BEC04AF}</Project>
+      <Name>SharedFormsTS</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Libs\UtilityLib\UtilityLib.csproj">
       <Project>{BB91910C-2595-4EB6-B48C-30BCC41457F6}</Project>

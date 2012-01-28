@@ -15,7 +15,7 @@ namespace ColladaConvert
 	public class ColladaConvert : Microsoft.Xna.Framework.Game
 	{
 		GraphicsDeviceManager	mGDM;
-		ContentManager			mSharedCM;
+		ContentManager			mGameCM, mShaderLib;
 		VertexBuffer			mVB, mBoundsVB;
 		IndexBuffer				mIB, mBoundsIB;
 		Effect					mFX;
@@ -103,8 +103,9 @@ namespace ColladaConvert
 
 		protected override void LoadContent()
 		{
-			mSharedCM	=new ContentManager(Services, "SharedContent");
-			mMatLib		=new MaterialLib.MaterialLib(mGDM.GraphicsDevice, Content, mSharedCM, true);
+			mGameCM		=new ContentManager(Services, "GameContent");
+			mShaderLib	=new ContentManager(Services, "ShaderLib");
+			mMatLib		=new MaterialLib.MaterialLib(mGDM.GraphicsDevice, mGameCM, mShaderLib, true);
 			mAnimLib	=new AnimLib();
 			mCharacter	=new Character(mMatLib, mAnimLib);
 			mStaticMesh	=new StaticMeshObject(mMatLib);
@@ -113,7 +114,7 @@ namespace ColladaConvert
 			mCharacter.SetTransform(Matrix.Identity);
 
 			//load debug shaders
-			mFX	=mSharedCM.Load<Effect>("Shaders/Static");
+			mFX	=mShaderLib.Load<Effect>("Shaders/Static");
 
 			mDesu	=Content.Load<Texture2D>("Textures/desu");
 			mEureka	=Content.Load<Texture2D>("Textures/Eureka");
