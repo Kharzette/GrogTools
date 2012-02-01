@@ -582,7 +582,7 @@ namespace ColladaConvert
 			mFX.Parameters["mLightDirection"].SetValue(mLightDir);
 			mFX.Parameters["mTexture"].SetValue(mDesu);
 
-			mMatLib.UpdateWVP(mGameCam.World, mGameCam.View, mGameCam.Projection, -mSteering.Position);
+			mMatLib.UpdateWVP(mGameCam.World, mGameCam.View, mGameCam.Projection, mSteering.Position);
 
 			//put in some keys for messing with bones
 			float	time		=(float)gameTime.ElapsedGameTime.TotalMilliseconds;
