@@ -47,6 +47,8 @@ namespace ColladaConvert
 
 		void OnLoadModel(object sender, EventArgs e)
 		{
+			mOFD.DefaultExt		="*.dae";
+			mOFD.Filter			="DAE Collada files (*.dae)|*.dae|All files (*.*)|*.*";
 			mOFD.Multiselect	=false;
 			DialogResult	dr	=mOFD.ShowDialog();
 
@@ -87,6 +89,8 @@ namespace ColladaConvert
 
 		void OnSaveLibrary(object sender, EventArgs e)
 		{
+			mSFD.DefaultExt		="*.AnimLib";
+			mSFD.Filter			="Animation library files (*.AnimLib)|*.AnimLib|All files (*.*)|*.*";
 			DialogResult	dr	=mSFD.ShowDialog();
 
 			if(dr == DialogResult.Cancel)
@@ -100,6 +104,8 @@ namespace ColladaConvert
 
 		void OnLoadLibrary(object sender, EventArgs e)
 		{
+			mOFD.DefaultExt		="*.AnimLib";
+			mOFD.Filter			="Animation library files (*.AnimLib)|*.AnimLib|All files (*.*)|*.*";
 			mOFD.Multiselect	=false;
 			DialogResult	dr	=mOFD.ShowDialog();
 
@@ -114,6 +120,8 @@ namespace ColladaConvert
 
 		void OnSaveCharacter(object sender, EventArgs e)
 		{
+			mSFD.DefaultExt		="*.Character";
+			mSFD.Filter			="Character files (*.Character)|*.Character|All files (*.*)|*.*";
 			DialogResult	dr	=mSFD.ShowDialog();
 
 			if(dr == DialogResult.Cancel)
@@ -127,6 +135,8 @@ namespace ColladaConvert
 
 		void OnLoadCharacter(object sender, EventArgs e)
 		{
+			mOFD.DefaultExt		="*.Character";
+			mOFD.Filter			="Character files (*.Character)|*.Character|All files (*.*)|*.*";
 			mOFD.Multiselect	=false;
 			DialogResult	dr	=mOFD.ShowDialog();
 
@@ -181,6 +191,8 @@ namespace ColladaConvert
 
 		void OnLoadStaticModel(object sender, EventArgs e)
 		{
+			mOFD.DefaultExt		="*.dae";
+			mOFD.Filter			="DAE Collada files (*.dae)|*.dae|All files (*.*)|*.*";
 			mOFD.Multiselect	=false;
 			DialogResult	dr	=mOFD.ShowDialog();
 
@@ -195,6 +207,8 @@ namespace ColladaConvert
 
 		void OnLoadAnim(object sender, EventArgs e)
 		{
+			mOFD.DefaultExt		="*.dae";
+			mOFD.Filter			="DAE Collada files (*.dae)|*.dae|All files (*.*)|*.*";
 			mOFD.Multiselect	=true;
 			DialogResult	dr	=mOFD.ShowDialog();
 
@@ -214,6 +228,8 @@ namespace ColladaConvert
 
 		void OnSaveStatic(object sender, EventArgs e)
 		{
+			mSFD.DefaultExt		="*.Static";
+			mSFD.Filter			="Static mesh files (*.Static)|*.Static|All files (*.*)|*.*";
 			DialogResult	dr	=mSFD.ShowDialog();
 
 			if(dr == DialogResult.Cancel)
@@ -227,6 +243,8 @@ namespace ColladaConvert
 
 		void OnLoadStatic(object sender, EventArgs e)
 		{
+			mOFD.DefaultExt		="*.Static";
+			mOFD.Filter			="Static mesh files (*.Static)|*.Static|All files (*.*)|*.*";
 			mOFD.Multiselect	=true;
 			DialogResult	dr	=mOFD.ShowDialog();
 

@@ -15,10 +15,12 @@ namespace ColladaConvert
 	public class ColladaConvert : Microsoft.Xna.Framework.Game
 	{
 		GraphicsDeviceManager	mGDM;
+		SpriteBatch				mSB;
 		ContentManager			mGameCM, mShaderLib;
 		VertexBuffer			mVB, mBoundsVB;
 		IndexBuffer				mIB, mBoundsIB;
 		Effect					mFX;
+		SpriteFont				mPesc12;
 
 		MaterialLib.MaterialLib	mMatLib;
 		AnimLib					mAnimLib;
@@ -103,6 +105,7 @@ namespace ColladaConvert
 
 		protected override void LoadContent()
 		{
+			mSB			=new SpriteBatch(mGDM.GraphicsDevice);
 			mGameCM		=new ContentManager(Services, "GameContent");
 			mShaderLib	=new ContentManager(Services, "ShaderLib");
 			mMatLib		=new MaterialLib.MaterialLib(mGDM.GraphicsDevice, mGameCM, mShaderLib, true);
@@ -114,7 +117,8 @@ namespace ColladaConvert
 			mCharacter.SetTransform(Matrix.Identity);
 
 			//load debug shaders
-			mFX	=mShaderLib.Load<Effect>("Shaders/Static");
+			mFX		=mShaderLib.Load<Effect>("Shaders/Static");
+			mPesc12	=mGameCM.Load<SpriteFont>("Fonts/Pescadero12");
 
 			mDesu	=Content.Load<Texture2D>("Textures/desu");
 			mEureka	=Content.Load<Texture2D>("Textures/Eureka");
@@ -643,6 +647,11 @@ namespace ColladaConvert
 				g.DrawIndexedPrimitives(PrimitiveType.TriangleList,
 					0, 0, 8, 0, 6 * 2 * mNumBounds);
 			}
+
+			mSB.Begin();
+			mSB.DrawString(mPesc12, "Coords: " + mSteering.Position,
+					Vector2.One * 20.0f, Color.Yellow);
+			mSB.End();
 
 			base.Draw(gameTime);
 		}
