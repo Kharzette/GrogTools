@@ -33,6 +33,8 @@ namespace ColladaConvert
 		public event	EventHandler	eLoadStatic;
 		public event	EventHandler	eLoadMotionDat;
 		public event	EventHandler	eLoadBoneMap;
+		public event	EventHandler	eBoundMesh;
+		public event	EventHandler	eShowBound;
 
 
 		public AnimForm(MeshLib.AnimLib anlib)
@@ -287,6 +289,32 @@ namespace ColladaConvert
 			}
 
 			UtilityLib.Misc.SafeInvoke(eLoadMotionDat, mOFD.FileName);
+		}
+
+
+		void OnBoundMesh(object sender, EventArgs e)
+		{
+			UtilityLib.Misc.SafeInvoke(eBoundMesh, null);
+		}
+
+
+		void OnBoundShowBoxChanged(object sender, EventArgs e)
+		{
+			if(ShowBox.Checked)
+			{
+				ShowSphere.Checked	=false;
+			}
+			UtilityLib.Misc.SafeInvoke(eShowBound, (ShowBox.Checked)? 1 : 0);
+		}
+
+
+		void OnBoundShowSphereChanged(object sender, EventArgs e)
+		{
+			if(ShowSphere.Checked)
+			{
+				ShowBox.Checked	=false;
+			}
+			UtilityLib.Misc.SafeInvoke(eShowBound, (ShowSphere.Checked)? 2 : 0);
 		}
 	}
 }

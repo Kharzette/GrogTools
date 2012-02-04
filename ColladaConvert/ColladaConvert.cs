@@ -17,15 +17,18 @@ namespace ColladaConvert
 		GraphicsDeviceManager	mGDM;
 		SpriteBatch				mSB;
 		ContentManager			mGameCM, mShaderLib;
-		VertexBuffer			mVB, mBoundsVB;
-		IndexBuffer				mIB, mBoundsIB;
+		VertexBuffer			mVB;
+		IndexBuffer				mIB;
 		Effect					mFX;
+		BasicEffect				mBFX;
 		SpriteFont				mPesc12;
+		UtilityLib.PrimObject	mBoundPrim;
 
 		MaterialLib.MaterialLib	mMatLib;
 		AnimLib					mAnimLib;
 		Character				mCharacter;
 		StaticMeshObject		mStaticMesh;
+		bool					mbCharacterLoaded;	//so I know which mesh obj to use
 		
 		UtilityLib.PlayerSteering	mSteering;
 		UtilityLib.GameCamera		mGameCam;
@@ -42,9 +45,7 @@ namespace ColladaConvert
 		Texture2D	mDesu;
 		Texture2D	mEureka;
 		Vector3		mLightDir;
-
-		//number of bounds drawing
-		int	mNumBounds;
+		Random		mRand	=new Random();
 
 
 		public static event EventHandler	eAnimsUpdated;
@@ -110,6 +111,7 @@ namespace ColladaConvert
 			mShaderLib	=new ContentManager(Services, "ShaderLib");
 			mMatLib		=new MaterialLib.MaterialLib(mGDM.GraphicsDevice, mGameCM, mShaderLib, true);
 			mAnimLib	=new AnimLib();
+			mBFX		=new BasicEffect(mGDM.GraphicsDevice);
 			mCharacter	=new Character(mMatLib, mAnimLib);
 			mStaticMesh	=new StaticMeshObject(mMatLib);
 
@@ -201,6 +203,8 @@ namespace ColladaConvert
 			mCF.eSaveStatic				+=OnSaveStatic;
 			mCF.eLoadMotionDat			+=OnLoadMotionDat;
 			mCF.eLoadBoneMap			+=OnLoadBoneMap;
+			mCF.eBoundMesh				+=OnBoundMesh;
+			mCF.eShowBound				+=OnShowBound;
 
 			mMF	=new SharedForms.MaterialForm(mGDM.GraphicsDevice, mMatLib, true);
 			mMF.Visible	=true;
@@ -217,9 +221,7 @@ namespace ColladaConvert
 				"AnimFormPos", true,
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
-//			mMF.eBoundsUpdated	+=OnBoundsChanged;
 			mMF.eNukedMeshPart	+=OnNukedMeshPart;
-//			mMF.eBoundMesh		+=OnBoundMesh;
 		}
 
 
@@ -230,14 +232,17 @@ namespace ColladaConvert
 
 		void InitializeEffect()
 		{
-			Vector4	[]lightColor	=new Vector4[3];
-			lightColor[0]	=new Vector4(0.9f, 0.9f, 0.9f, 1.0f);
-			lightColor[1]	=new Vector4(0.6f, 0.5f, 0.5f, 1.0f);
-			lightColor[2]	=new Vector4(0.1f, 0.1f, 0.1f, 1.0f);
-
-			Vector4	ambColor	=new Vector4(0.0f, 0.0f, 0.0f, 1.0f);
 			Vector3	lightDir	=new Vector3(1.0f, -1.0f, 0.1f);
 			lightDir.Normalize();
+
+			mBFX.AmbientLightColor				=Vector3.One * 0.2f;
+			mBFX.LightingEnabled				=true;
+			mBFX.DirectionalLight0.Direction	=-lightDir;
+			mBFX.DirectionalLight0.Enabled		=true;
+			mBFX.DirectionalLight1.Enabled		=false;
+			mBFX.DirectionalLight2.Enabled		=false;
+			mBFX.DirectionalLight0.DiffuseColor	=new Vector3(0.9f, 0.9f, 0.9f);
+			mBFX.Alpha							=0.5f;
 		}
 
 
@@ -257,6 +262,8 @@ namespace ColladaConvert
 			mCharacter	=ColladaFileUtils.LoadCharacter(sender as string, mGDM.GraphicsDevice, mMatLib, mAnimLib);
 
 			mCharacter.SetTransform(Matrix.Identity);
+
+			mbCharacterLoaded	=true;
 
 			mMF.UpdateMeshPartList(mCharacter.GetMeshPartList(), null);
 			eAnimsUpdated(mAnimLib.GetAnims(), null);
@@ -285,175 +292,95 @@ namespace ColladaConvert
 		{
 			Mesh	msh	=sender as Mesh;
 
-			//try both, not sure which it would be in
-			mCharacter.NukeMesh(msh);
-			mStaticMesh.NukeMesh(msh);
+			if(mbCharacterLoaded)
+			{
+				mCharacter.NukeMesh(msh);
+			}
+			else
+			{
+				mStaticMesh.NukeMesh(msh);
+			}
+		}
+
+
+		void OnShowBound(object sender, EventArgs ea)
+		{
+			Nullable<int>	which	=sender as Nullable<int>;
+
+			if(which == null)
+			{
+				mBoundPrim	=null;
+			}
+			else if(which.Value == 0)
+			{
+				mBoundPrim	=null;
+			}
+			else if(which.Value == 1)
+			{
+				ReBuildBoundsDrawData(true);
+			}
+			else if(which.Value == 2)
+			{
+				ReBuildBoundsDrawData(false);
+			}
 		}
 
 
 		void OnBoundMesh(object sender, EventArgs ea)
 		{
-			mCharacter.Bound();
+			if(mbCharacterLoaded)
+			{
+				mCharacter.UpdateBounds();
+			}
+			else
+			{
+				mStaticMesh.UpdateBounds();
+			}
 		}
 
 
-		void OnBoundsChanged(object sender, EventArgs ea)
+		void ReBuildBoundsDrawData(bool bBox)
 		{
-			//clear existing
-			mBoundsVB	=null;
-			mBoundsIB	=null;
+			BoundingBox		box;
+			BoundingSphere	sphere;
 
-			List<IRayCastable>	bnds	=(List<IRayCastable>)sender;
+			box.Min			=Vector3.Zero;
+			box.Max			=Vector3.Zero;
+			sphere.Center	=Vector3.Zero;
+			sphere.Radius	=0.0f;
 
-			if(bnds.Count <= 0)
+			if(mbCharacterLoaded)
 			{
-				bnds.Add(mCharacter.GetBounds());
+				if(bBox)
+				{
+					box	=mCharacter.GetBoxBound();
+				}
+				else
+				{
+					sphere	=mCharacter.GetSphereBound();
+				}
 			}
-			ReBuildBoundsDrawData(bnds);
-		}
-
-
-		void ReBuildBoundsDrawData(List<IRayCastable> bnds)
-		{
-			if(bnds.Count == 0)
+			else
 			{
-				return;
+				if(bBox)
+				{
+					box	=mStaticMesh.GetBoxBound();
+				}
+				else
+				{
+					sphere	=mStaticMesh.GetSphereBound();
+				}
 			}
 
-			int	numCorners	=0;
-			foreach(IRayCastable bnd in bnds)
+			if(bBox)
 			{
-				numCorners	+=2;
+				mBoundPrim	=UtilityLib.PrimFactory.CreateCube(mGDM.GraphicsDevice, box, null);
 			}
-			mBoundsVB	=new VertexBuffer(mGDM.GraphicsDevice, typeof(VertexPositionNormalTexture), numCorners * 4, BufferUsage.WriteOnly);
-
-			VertexPositionNormalTexture	[]vpnt	=new VertexPositionNormalTexture[numCorners * 4];
-
-			int	idx	=0;
-			foreach(IRayCastable bnd in bnds)
+			else
 			{
-				Vector3	min, max;
-
-				bnd.GetMinMax(out min, out max);
-
-				float	xDiff	=max.X - min.X;
-				float	yDiff	=max.Y - min.Y;
-				float	zDiff	=max.Z - min.Z;
-
-				vpnt[idx++].Position	=min;
-				vpnt[idx++].Position	=min + Vector3.UnitX * xDiff;
-				vpnt[idx++].Position	=min + Vector3.UnitX * xDiff + Vector3.UnitY * yDiff;
-				vpnt[idx++].Position	=min + Vector3.UnitY * yDiff;
-				vpnt[idx++].Position	=min + Vector3.UnitZ * zDiff;
-				vpnt[idx++].Position	=min + Vector3.UnitZ * zDiff + Vector3.UnitX * xDiff;
-				vpnt[idx++].Position	=min + Vector3.UnitZ * zDiff + Vector3.UnitY * yDiff;
-				vpnt[idx++].Position	=min + Vector3.UnitZ * zDiff + Vector3.UnitX * xDiff + Vector3.UnitY * yDiff;
+				mBoundPrim	=UtilityLib.PrimFactory.CreateSphere(mGDM.GraphicsDevice,
+					sphere.Center, sphere.Radius, null);
 			}
-			mBoundsVB.SetData<VertexPositionNormalTexture>(vpnt);
-
-			mBoundsIB	=new IndexBuffer(mGDM.GraphicsDevice, IndexElementSize.SixteenBits, (numCorners * 3) * 6, BufferUsage.WriteOnly);
-
-			UInt16	[]inds	=new UInt16[(numCorners * 3) * 6];
-
-			mNumBounds	=numCorners / 2;
-
-			idx	=0;
-			UInt16 bndIdx	=0;
-			foreach(IRayCastable bnd in bnds)
-			{
-				UInt16	idxOffset	=bndIdx;
-				//awesome compiler bug here, have to do this in 2 steps
-				idxOffset	*=8;
-
-				//max coordinates here
-				//-z facing 
-				//same compiler bug, two lines instead of 1
-				inds[idx]	=0;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=1;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=2;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=0;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=2;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=3;
-				inds[idx++]	+=idxOffset;
-
-				//-y facing
-				inds[idx]	=0;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=4;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=5;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=0;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=5;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=1;
-				inds[idx++]	+=idxOffset;
-
-				//-x facing
-				inds[idx]	=0;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=3;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=6;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=0;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=6;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=4;
-				inds[idx++]	+=idxOffset;
-
-				//x facing
-				inds[idx]	=1;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=5;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=7;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=1;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=7;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=2;
-				inds[idx++]	+=idxOffset;
-
-				//y facing
-				inds[idx]	=7;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=6;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=3;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=7;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=3;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=2;
-				inds[idx++]	+=idxOffset;
-
-				//z facing
-				inds[idx]	=4;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=6;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=7;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=4;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=7;
-				inds[idx++]	+=idxOffset;
-				inds[idx]	=5;
-				inds[idx++]	+=idxOffset;
-
-				bndIdx++;
-			}
-			mBoundsIB.SetData<UInt16>(inds);
 		}
 
 
@@ -637,15 +564,9 @@ namespace ColladaConvert
 				0, 0, 4, 0, 2);
 
 			//draw bounds if any
-			if(mBoundsVB != null)// && mMF.bDrawBounds())
+			if(mBoundPrim != null)
 			{
-				g.SetVertexBuffer(mBoundsVB);
-				g.Indices	=mBoundsIB;
-
-				mFX.CurrentTechnique.Passes[0].Apply();
-
-				g.DrawIndexedPrimitives(PrimitiveType.TriangleList,
-					0, 0, 8, 0, 6 * 2 * mNumBounds);
+				mBoundPrim.Draw(g, mBFX, mGameCam.View, mGameCam.Projection);
 			}
 
 			mSB.Begin();
