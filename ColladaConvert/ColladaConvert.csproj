@@ -91,6 +91,9 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
       <Private>False</Private>
     </Reference>
+    <Reference Include="XMeshCLR">
+      <HintPath>..\..\Libs\XMeshHelper\Debug\XMeshCLR.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Animation.cs" />

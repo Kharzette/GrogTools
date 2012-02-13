@@ -6,6 +6,8 @@ using System.Drawing;
 using System.Diagnostics;
 using System.Text;
 using System.Windows.Forms;
+using XMeshCLR;
+
 
 namespace ColladaConvert
 {
@@ -315,6 +317,13 @@ namespace ColladaConvert
 				ShowBox.Checked	=false;
 			}
 			UtilityLib.Misc.SafeInvoke(eShowBound, (ShowSphere.Checked)? 2 : 0);
+		}
+
+
+		void OnOptimize(object sender, EventArgs e)
+		{
+			ManagedHelloWorld	mhw	=new ManagedHelloWorld();
+			mhw.SayThis("By the mailed fist of Torm!!");
 		}
 	}
 }

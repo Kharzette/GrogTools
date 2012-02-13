@@ -484,13 +484,13 @@ namespace ColladaConvert
 
 			float	msDelta	=gameTime.ElapsedGameTime.Milliseconds;
 
-			mInput.Update(msDelta);
+			mInput.Update();
 
 			UtilityLib.Input.PlayerInput	pi	=mInput.Player1;
 
-			mSteering.Update(msDelta, mGameCam.View, pi.mKBS, pi.mMS, pi.mGPS);
+			mSteering.Update(msDelta, mGameCam, pi.mKBS, pi.mMS, pi.mGPS);
 			
-			mGameCam.Update(msDelta, -mSteering.Position, mSteering.Pitch, mSteering.Yaw, mSteering.Roll);
+			mGameCam.Update(-mSteering.Position, mSteering.Pitch, mSteering.Yaw, mSteering.Roll);
 
 			//rotate the light vector
 

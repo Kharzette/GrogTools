@@ -56,6 +56,9 @@
 			this.ShowBox = new System.Windows.Forms.CheckBox();
 			this.ShowSphere = new System.Windows.Forms.CheckBox();
 			this.BoundMesh = new System.Windows.Forms.Button();
+			this.groupBox7 = new System.Windows.Forms.GroupBox();
+			this.Shadowize = new System.Windows.Forms.Button();
+			this.Optimize = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.AnimGrid)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.TimeScale)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.MaxError)).BeginInit();
@@ -66,6 +69,7 @@
 			this.groupBox5.SuspendLayout();
 			this.groupBox6.SuspendLayout();
 			this.BoundGroup.SuspendLayout();
+			this.groupBox7.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// LoadAnim
@@ -397,11 +401,41 @@
 			// 
 			this.BoundMesh.Location = new System.Drawing.Point(6, 19);
 			this.BoundMesh.Name = "BoundMesh";
-			this.BoundMesh.Size = new System.Drawing.Size(84, 25);
+			this.BoundMesh.Size = new System.Drawing.Size(86, 25);
 			this.BoundMesh.TabIndex = 0;
 			this.BoundMesh.Text = "Calc Bound";
 			this.BoundMesh.UseVisualStyleBackColor = true;
 			this.BoundMesh.Click += new System.EventHandler(this.OnBoundMesh);
+			// 
+			// groupBox7
+			// 
+			this.groupBox7.Controls.Add(this.Optimize);
+			this.groupBox7.Controls.Add(this.Shadowize);
+			this.groupBox7.Location = new System.Drawing.Point(420, 385);
+			this.groupBox7.Name = "groupBox7";
+			this.groupBox7.Size = new System.Drawing.Size(98, 99);
+			this.groupBox7.TabIndex = 23;
+			this.groupBox7.TabStop = false;
+			this.groupBox7.Text = "DirectX X Libs";
+			// 
+			// Shadowize
+			// 
+			this.Shadowize.Location = new System.Drawing.Point(6, 19);
+			this.Shadowize.Name = "Shadowize";
+			this.Shadowize.Size = new System.Drawing.Size(86, 25);
+			this.Shadowize.TabIndex = 0;
+			this.Shadowize.Text = "Shadowize";
+			this.Shadowize.UseVisualStyleBackColor = true;
+			// 
+			// Optimize
+			// 
+			this.Optimize.Location = new System.Drawing.Point(6, 50);
+			this.Optimize.Name = "Optimize";
+			this.Optimize.Size = new System.Drawing.Size(86, 25);
+			this.Optimize.TabIndex = 1;
+			this.Optimize.Text = "Optimize";
+			this.Optimize.UseVisualStyleBackColor = true;
+			this.Optimize.Click += new System.EventHandler(this.OnOptimize);
 			// 
 			// AnimForm
 			// 
@@ -409,6 +443,7 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(529, 504);
 			this.ControlBox = false;
+			this.Controls.Add(this.groupBox7);
 			this.Controls.Add(this.BoundGroup);
 			this.Controls.Add(this.groupBox6);
 			this.Controls.Add(this.groupBox5);
@@ -435,6 +470,7 @@
 			this.groupBox6.PerformLayout();
 			this.BoundGroup.ResumeLayout(false);
 			this.BoundGroup.PerformLayout();
+			this.groupBox7.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -469,5 +505,8 @@
 		private System.Windows.Forms.Button BoundMesh;
 		private System.Windows.Forms.CheckBox ShowSphere;
 		private System.Windows.Forms.CheckBox ShowBox;
+		private System.Windows.Forms.GroupBox groupBox7;
+		private System.Windows.Forms.Button Optimize;
+		private System.Windows.Forms.Button Shadowize;
 	}
 }
