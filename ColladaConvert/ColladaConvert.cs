@@ -83,12 +83,13 @@ namespace ColladaConvert
 			mGameCam	=new UtilityLib.GameCamera(mGDM.GraphicsDevice.Viewport.Width,
 				mGDM.GraphicsDevice.Viewport.Height,
 				mGDM.GraphicsDevice.Viewport.AspectRatio,
-				1.0f, 1000.0f);
+				0.1f, 1000.0f);
 
 			mSteering	=new UtilityLib.PlayerSteering(mGDM.GraphicsDevice.Viewport.Width,
 				mGDM.GraphicsDevice.Viewport.Height);
 
 			mSteering.Method	=UtilityLib.PlayerSteering.SteeringMethod.Fly;
+			mSteering.Speed		=0.001f;
 
 			mInput	=new UtilityLib.Input();
 
@@ -482,7 +483,7 @@ namespace ColladaConvert
 				Exit();
 			}
 
-			float	msDelta	=gameTime.ElapsedGameTime.Milliseconds;
+			int	msDelta	=gameTime.ElapsedGameTime.Milliseconds;
 
 			mInput.Update();
 
@@ -513,7 +514,7 @@ namespace ColladaConvert
 			mFX.Parameters["mLightDirection"].SetValue(mLightDir);
 			mFX.Parameters["mTexture"].SetValue(mDesu);
 
-			mMatLib.UpdateWVP(mGameCam.World, mGameCam.View, mGameCam.Projection, mSteering.Position);
+			mMatLib.UpdateWVP(Matrix.Identity, mGameCam.View, mGameCam.Projection, mSteering.Position);
 
 			//put in some keys for messing with bones
 			float	time		=(float)gameTime.ElapsedGameTime.TotalMilliseconds;
