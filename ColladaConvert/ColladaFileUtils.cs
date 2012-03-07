@@ -103,7 +103,8 @@ namespace ColladaConvert
 
 		internal static StaticMeshObject LoadStatic(string					path,
 													GraphicsDevice			gd,
-													MaterialLib.MaterialLib	matLib)
+													MaterialLib.MaterialLib	matLib,
+													bool					bMax)
 		{
 			COLLADA	colladaFile	=DeSerializeCOLLADA(path);
 
@@ -114,7 +115,10 @@ namespace ColladaConvert
 			//Not sure why skinned objects don't, but it could
 			//be that the root scene controller thingy does
 			//this very transform, probably set by the exporter?
-			CoordinateSystemAdjust(chunks, colladaFile);
+			if(bMax)
+			{
+				CoordinateSystemAdjust(chunks, colladaFile);
+			}
 
 			BuildFinalVerts(colladaFile, gd, chunks);
 

@@ -390,7 +390,7 @@ namespace ColladaConvert
 		{
 			string	path	=(string)sender;
 
-			mStaticMesh	=ColladaFileUtils.LoadStatic(path, mGDM.GraphicsDevice, mMatLib);
+			mStaticMesh	=ColladaFileUtils.LoadStatic(path, mGDM.GraphicsDevice, mMatLib, mCF.FromMax);
 
 			mStaticMesh.SetTransform(Matrix.Identity);
 
