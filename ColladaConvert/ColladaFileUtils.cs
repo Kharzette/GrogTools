@@ -472,7 +472,7 @@ namespace ColladaConvert
 							continue;
 						}
 						
-						MeshConverter	cnk	=new MeshConverter(polys.material);
+						MeshConverter	cnk	=new MeshConverter(polys.material, geom.name);
 
 						cnk.CreateBaseVerts(verts, bSkinned);
 

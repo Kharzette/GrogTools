@@ -81,7 +81,7 @@ namespace ColladaConvert
 
 	public class MeshConverter
 	{
-		string			mName;
+		string			mName, mGeomName;
 		TrackedVert		[]mBaseVerts;
 		int				mNumBaseVerts;
 		List<ushort>	mIndexList	=new List<ushort>();
@@ -94,9 +94,10 @@ namespace ColladaConvert
 		Mesh	mConverted;
 
 
-		public MeshConverter(string name)
+		public MeshConverter(string name, string geoName)
 		{
-			mName	=name;
+			mName		=name;
+			mGeomName	=geoName;
 		}
 
 
@@ -107,6 +108,12 @@ namespace ColladaConvert
 
 
 		public string GetName()
+		{
+			return	mName;
+		}
+
+
+		public string GetGeomName()
 		{
 			return	mName;
 		}
@@ -130,11 +137,11 @@ namespace ColladaConvert
 			//create a new gamemesh
 			if(bSkinned)
 			{
-				mConverted	=new SkinnedMesh(mName);
+				mConverted	=new SkinnedMesh(mGeomName);
 			}
 			else
 			{
-				mConverted	=new StaticMesh(mName);
+				mConverted	=new StaticMesh(mGeomName);
 			}
 		}
 
