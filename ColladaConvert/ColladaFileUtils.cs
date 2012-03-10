@@ -111,6 +111,9 @@ namespace ColladaConvert
 			StaticMeshObject	smo		=new StaticMeshObject(matLib);
 			List<MeshConverter>	chunks	=GetMeshChunks(colladaFile, false);
 
+			//bake scene node modifiers into verts
+			BakeSceneNodesIntoVerts(colladaFile, chunks);
+
 			//Static objects need a coordinate system fix.
 			//Not sure why skinned objects don't, but it could
 			//be that the root scene controller thingy does
@@ -119,6 +122,7 @@ namespace ColladaConvert
 			{
 				CoordinateSystemAdjust(chunks, colladaFile);
 			}
+
 
 			BuildFinalVerts(colladaFile, gd, chunks);
 
@@ -341,6 +345,52 @@ namespace ColladaConvert
 
 
 		static void BakeSceneNodesIntoVerts(COLLADA				colladaFile,
+											List<MeshConverter>	chunks)
+		{
+			//bake scene node modifiers into controllers
+			foreach(MeshConverter mc in chunks)
+			{
+				geometry	g	=GetGeometryByID(colladaFile, mc.mGeometryID);
+				if(g == null)
+				{
+					continue;
+				}
+				foreach(object item2 in colladaFile.Items)
+				{
+					library_visual_scenes	lvs	=item2 as library_visual_scenes;
+					if(lvs == null)
+					{
+						continue;
+					}
+					foreach(visual_scene vs in lvs.visual_scene)
+					{
+						foreach(node n in vs.node)
+						{
+							foreach(instance_geometry ig in n.instance_geometry)
+							{
+								if(ig.url.Substring(1) == g.id)
+								{
+									if(!CNodeHasKeyData(n))
+									{
+										continue;
+									}
+									KeyFrame	kf	=GetKeyFromCNode(n);
+
+									Matrix	mat	=Matrix.CreateScale(kf.mScale) *
+										Matrix.CreateFromQuaternion(kf.mRotation) *
+										Matrix.CreateTranslation(kf.mPosition);
+									
+									mc.BakeTransformIntoVerts(mat);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+
+		static void BakeSceneNodesIntoVerts(COLLADA				colladaFile,
 											Skeleton			skel,
 											List<MeshConverter>	chunks)
 		{
@@ -473,6 +523,8 @@ namespace ColladaConvert
 						}
 						
 						MeshConverter	cnk	=new MeshConverter(polys.material, geom.name);
+
+						
 
 						cnk.CreateBaseVerts(verts, bSkinned);
 
@@ -705,6 +757,33 @@ namespace ColladaConvert
 		}
 
 
+		static bool CNodeHasKeyData(node n)
+		{
+			if(n.Items == null)
+			{
+				return	false;
+			}
+
+			Matrix	mat	=Matrix.Identity;
+			for(int i=0;i < n.Items.Length;i++)
+			{
+				if(n.ItemsElementName[i] == ItemsChoiceType2.rotate)
+				{
+					return	true;
+				}
+				else if(n.ItemsElementName[i] == ItemsChoiceType2.translate)
+				{
+					return	true;
+				}
+				else if(n.ItemsElementName[i] == ItemsChoiceType2.scale)
+				{
+					return	true;
+				}
+			}
+			return	false;
+		}
+
+
 		static KeyFrame GetKeyFromCNode(node n)
 		{
 			KeyFrame	key	=new KeyFrame();
@@ -834,6 +913,33 @@ namespace ColladaConvert
 				}
 			}
 		}
+
+
+		static geometry GetGeometryByID(COLLADA colladaFile, string id)
+		{
+			foreach(object item in colladaFile.Items)
+			{
+				library_geometries	geoms	=item as library_geometries;
+				if(geoms == null)
+				{
+					continue;
+				}
+				foreach(object geomItem in geoms.geometry)
+				{
+					geometry	geom	=geomItem as geometry;
+					if(geom == null)
+					{
+						continue;
+					}
+					if(geom.id == id)
+					{
+						return	geom;
+					}
+				}
+			}
+			return	null;
+		}
+
 
 		internal static List<Matrix> GetMatrixListFromFA(float_array fa)
 		{
