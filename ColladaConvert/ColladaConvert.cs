@@ -85,12 +85,6 @@ namespace ColladaConvert
 				mGDM.GraphicsDevice.Viewport.AspectRatio,
 				0.1f, 1000.0f);
 
-			mSteering	=new UtilityLib.PlayerSteering(mGDM.GraphicsDevice.Viewport.Width,
-				mGDM.GraphicsDevice.Viewport.Height);
-
-			mSteering.Method	=UtilityLib.PlayerSteering.SteeringMethod.Fly;
-			mSteering.Speed		=0.001f;
-
 			mInput	=new UtilityLib.Input();
 
 			//default cam pos off to one side
@@ -223,6 +217,11 @@ namespace ColladaConvert
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
 			mMF.eNukedMeshPart	+=OnNukedMeshPart;
+
+			mSteering	=new UtilityLib.PlayerSteering(mGDM.GraphicsDevice.Viewport.Width,
+				mGDM.GraphicsDevice.Viewport.Height);
+			mSteering.Method	=UtilityLib.PlayerSteering.SteeringMethod.Fly;
+			mSteering.Speed		=0.001f;
 		}
 
 
