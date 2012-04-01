@@ -104,31 +104,50 @@ namespace ColladaConvert
 		internal static StaticMeshObject LoadStatic(string					path,
 													GraphicsDevice			gd,
 													MaterialLib.MaterialLib	matLib,
-													bool					bMax)
+													bool					bMax,
+													bool					bBake)
 		{
 			COLLADA	colladaFile	=DeSerializeCOLLADA(path);
+
+			//don't have a way to test this
+			Debug.Assert(colladaFile.asset.up_axis != UpAxisType.X_UP);
 
 			StaticMeshObject	smo		=new StaticMeshObject(matLib);
 			List<MeshConverter>	chunks	=GetMeshChunks(colladaFile, false);
 
-			//bake scene node modifiers into verts
-			BakeSceneNodesIntoVerts(colladaFile, chunks);
-
-			//Static objects need a coordinate system fix.
-			//Not sure why skinned objects don't, but it could
-			//be that the root scene controller thingy does
-			//this very transform, probably set by the exporter?
-			if(bMax)
+			if(bBake)
 			{
-				CoordinateSystemAdjust(chunks, colladaFile);
+				BakeSceneNodesIntoVerts(colladaFile, chunks);
+				BuildFinalVerts(colladaFile, gd, chunks);
+
+				foreach(MeshConverter mc in chunks)
+				{
+					Mesh	m	=mc.GetConvertedMesh();
+
+					m.SetTransform(Matrix.Identity);
+
+					smo.AddMeshPart(m);
+				}
 			}
-
-
-			BuildFinalVerts(colladaFile, gd, chunks);
-
-			foreach(MeshConverter mc in chunks)
+			else
 			{
-				smo.AddMeshPart(mc.GetConvertedMesh());
+				//adjust coordinate system
+				Matrix	shiftMat	=Matrix.Identity;
+				if(colladaFile.asset.up_axis == UpAxisType.Z_UP)
+				{
+					shiftMat	=Matrix.CreateRotationX(-MathHelper.PiOver2);
+				}
+
+				BuildFinalVerts(colladaFile, gd, chunks);
+				foreach(MeshConverter mc in chunks)
+				{
+					Mesh	m	=mc.GetConvertedMesh();
+					Matrix	mat	=GetSceneNodeTransform(colladaFile, mc);
+
+					//set transform of each mesh
+					m.SetTransform(mat * shiftMat);
+					smo.AddMeshPart(m);
+				}
 			}
 
 			return	smo;
@@ -344,48 +363,57 @@ namespace ColladaConvert
 		}
 
 
+		static Matrix GetSceneNodeTransform(COLLADA colFile, MeshConverter chunk)
+		{
+			geometry	g	=GetGeometryByID(colFile, chunk.mGeometryID);
+			if(g == null)
+			{
+				return	Matrix.Identity;
+			}
+
+			foreach(object item2 in colFile.Items)
+			{
+				library_visual_scenes	lvs	=item2 as library_visual_scenes;
+				if(lvs == null)
+				{
+					continue;
+				}
+				foreach(visual_scene vs in lvs.visual_scene)
+				{
+					foreach(node n in vs.node)
+					{
+						foreach(instance_geometry ig in n.instance_geometry)
+						{
+							if(ig.url.Substring(1) == g.id)
+							{
+								if(!CNodeHasKeyData(n))
+								{
+									continue;
+								}
+								KeyFrame	kf	=GetKeyFromCNode(n);
+
+								Matrix	mat	=Matrix.CreateScale(kf.mScale) *
+									Matrix.CreateFromQuaternion(kf.mRotation) *
+									Matrix.CreateTranslation(kf.mPosition);
+									
+								return	mat;
+							}
+						}
+					}
+				}
+			}
+			return	Matrix.Identity;
+		}
+
+
 		static void BakeSceneNodesIntoVerts(COLLADA				colladaFile,
 											List<MeshConverter>	chunks)
 		{
 			//bake scene node modifiers into controllers
 			foreach(MeshConverter mc in chunks)
 			{
-				geometry	g	=GetGeometryByID(colladaFile, mc.mGeometryID);
-				if(g == null)
-				{
-					continue;
-				}
-				foreach(object item2 in colladaFile.Items)
-				{
-					library_visual_scenes	lvs	=item2 as library_visual_scenes;
-					if(lvs == null)
-					{
-						continue;
-					}
-					foreach(visual_scene vs in lvs.visual_scene)
-					{
-						foreach(node n in vs.node)
-						{
-							foreach(instance_geometry ig in n.instance_geometry)
-							{
-								if(ig.url.Substring(1) == g.id)
-								{
-									if(!CNodeHasKeyData(n))
-									{
-										continue;
-									}
-									KeyFrame	kf	=GetKeyFromCNode(n);
-
-									Matrix	mat	=Matrix.CreateScale(kf.mScale) *
-										Matrix.CreateFromQuaternion(kf.mRotation) *
-										Matrix.CreateTranslation(kf.mPosition);
-									
-									mc.BakeTransformIntoVerts(mat);
-								}
-							}
-						}
-					}
-				}
+				Matrix	mat	=GetSceneNodeTransform(colladaFile, mc);
+				mc.BakeTransformIntoVerts(mat);
 			}
 		}
 
@@ -803,11 +831,12 @@ namespace ColladaConvert
 					Debug.Assert(rot != null);
 
 					Vector3	axis	=Vector3.Zero;
-					axis.X	=rot.Values[0];
-					axis.Y	=rot.Values[1];
-					axis.Z	=rot.Values[2];
+					axis.X			=rot.Values[0];
+					axis.Y			=rot.Values[1];
+					axis.Z			=rot.Values[2];
+					float	angle	=MathHelper.ToRadians(rot.Values[3]);
 
-					mat	=Matrix.CreateFromAxisAngle(axis, rot.Values[3])
+					mat	=Matrix.CreateFromAxisAngle(axis, angle)
 						* mat;
 				}
 				else if(n.ItemsElementName[i] == ItemsChoiceType2.translate)

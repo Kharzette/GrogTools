@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Diagnostics;
 using System.Text;
 using System.Windows.Forms;
-using XMeshCLR;
+//using XMeshCLR;
 
 
 namespace ColladaConvert
@@ -41,6 +41,11 @@ namespace ColladaConvert
 		public bool FromMax
 		{
 			get { return MaxConvert.Checked; }
+		}
+
+		public bool BakeTransforms
+		{
+			get { return BakeVerts.Checked; }
 		}
 
 
@@ -327,8 +332,8 @@ namespace ColladaConvert
 
 		void OnOptimize(object sender, EventArgs e)
 		{
-			ManagedHelloWorld	mhw	=new ManagedHelloWorld();
-			mhw.SayThis("By the mailed fist of Torm!!");
+//			ManagedHelloWorld	mhw	=new ManagedHelloWorld();
+//			mhw.SayThis("By the mailed fist of Torm!!");
 		}
 	}
 }

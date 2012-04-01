@@ -196,6 +196,10 @@
       <Name>ShaderLib</Name>
       <XnaReferenceType>Content</XnaReferenceType>
     </ProjectReference>
+    <ProjectReference Include="..\..\Libs\SharedForms\SharedFormsTS.csproj">
+      <Project>{3B62D87E-CE0B-4310-8A01-9A974BEC04AF}</Project>
+      <Name>SharedFormsTS</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Libs\UtilityLib\UtilityLib.csproj">
       <Project>{BB91910C-2595-4EB6-B48C-30BCC41457F6}</Project>
       <Name>UtilityLib</Name>
