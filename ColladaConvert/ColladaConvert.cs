@@ -47,8 +47,15 @@ namespace ColladaConvert
 		Vector3		mLightDir;
 		Random		mRand	=new Random();
 
+		//spinning light
+		float	mLX, mLY, mLZ;
 
 		public static event EventHandler	eAnimsUpdated;
+
+		const float	LightXRot	=0.00003f;
+		const float	LightYRot	=0.00009f;
+		const float	LightZRot	=0.00006f;
+
 
 		public ColladaConvert()
 		{
@@ -494,25 +501,26 @@ namespace ColladaConvert
 			mGameCam.Update(-mSteering.Position, mSteering.Pitch, mSteering.Yaw, mSteering.Roll);
 
 			//rotate the light vector
+			mLX	+=(LightXRot * msDelta);
+			mLY	+=(LightYRot * msDelta);
+			mLZ	+=(LightZRot * msDelta);
 
-			//grab a time value to use to spin the axii
-			float spinAmount	=gameTime.TotalGameTime.Milliseconds;
-
-			//scale it back a bit
-			spinAmount	*=0.00001f;
+			UtilityLib.Mathery.WrapAngleDegrees(ref mLX);
+			UtilityLib.Mathery.WrapAngleDegrees(ref mLY);
+			UtilityLib.Mathery.WrapAngleDegrees(ref mLZ);
 
 			//build a matrix that spins over time
-			Matrix	mat	=Matrix.CreateFromYawPitchRoll
-				(spinAmount * 3.0f,
-				spinAmount,
-				spinAmount * 0.5f);
+			Matrix	mat	=Matrix.CreateFromYawPitchRoll(mLY, mLX, mLZ);
 
 			//transform (rotate) the vector
-			mLightDir	=Vector3.TransformNormal(mLightDir, mat);
+			mLightDir	=Vector3.TransformNormal(Vector3.UnitX, mat);
+			mLightDir.Normalize();
 
 			//update it in the shader
 			mFX.Parameters["mLightDirection"].SetValue(mLightDir);
 			mFX.Parameters["mTexture"].SetValue(mDesu);
+
+			mMatLib.SetParameterOnAll("mLightDirection", mLightDir);
 
 			mMatLib.UpdateWVP(Matrix.Identity, mGameCam.View, mGameCam.Projection, mSteering.Position);
 
@@ -520,6 +528,12 @@ namespace ColladaConvert
 			float	time		=(float)gameTime.ElapsedGameTime.TotalMilliseconds;
 
 			mCharacter.Animate(mCurrentAnimName, (float)(gameTime.TotalGameTime.TotalSeconds) * mTimeScale);
+
+			//hotkeys
+			if(mInput.Player1.WasKeyPressed(Keys.M))
+			{
+				mMF.ApplyMat();
+			}
 
 			base.Update(gameTime);
 		}
