@@ -382,6 +382,10 @@ namespace ColladaConvert
 				{
 					foreach(node n in vs.node)
 					{
+						if(n.instance_geometry == null)
+						{
+							continue;
+						}
 						foreach(instance_geometry ig in n.instance_geometry)
 						{
 							if(ig.url.Substring(1) == g.id)

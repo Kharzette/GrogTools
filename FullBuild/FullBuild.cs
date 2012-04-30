@@ -194,7 +194,7 @@ namespace FullBuild
 				return;
 			}
 
-			float	msDelta	=gameTime.ElapsedGameTime.Milliseconds;
+			int	msDelta	=gameTime.ElapsedGameTime.Milliseconds;
 
 			mWarpFactor	+=msDelta / 1000.0f;
 			while(mWarpFactor > MathHelper.TwoPi)
@@ -203,7 +203,7 @@ namespace FullBuild
 			}
 			mMatLib.SetParameterOnAll("mWarpFactor", mWarpFactor);
 
-			mInput.Update(msDelta);
+			mInput.Update();
 
 			KeyboardState	kbs	=Keyboard.GetState();
 
@@ -219,12 +219,12 @@ namespace FullBuild
 
 			mIndoorMesh.Update(msDelta);
 
-			mPlayerControl.Update(msDelta, mGameCam.View, mInput.Player1.mKBS, mInput.Player1.mMS, mInput.Player1.mGPS);
+			mPlayerControl.Update(msDelta, mGameCam, mInput.Player1.mKBS, mInput.Player1.mMS, mInput.Player1.mGPS);
 
-			mGameCam.Update(msDelta, -mPlayerControl.Position, mPlayerControl.Pitch, mPlayerControl.Yaw, mPlayerControl.Roll);
+			mGameCam.Update(-mPlayerControl.Position, mPlayerControl.Pitch, mPlayerControl.Yaw, mPlayerControl.Roll);
 
-			mMatLib.UpdateWVP(mGameCam.World, mGameCam.View, mGameCam.Projection, mPlayerControl.Position);
-			mBFX.World		=mGameCam.World;
+			mMatLib.UpdateWVP(Matrix.Identity, mGameCam.View, mGameCam.Projection, mPlayerControl.Position);
+			mBFX.World		=Matrix.Identity;
 			mBFX.View		=mGameCam.View;
 			mBFX.Projection	=mGameCam.Projection;
 
