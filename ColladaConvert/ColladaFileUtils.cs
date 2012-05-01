@@ -104,7 +104,6 @@ namespace ColladaConvert
 		internal static StaticMeshObject LoadStatic(string					path,
 													GraphicsDevice			gd,
 													MaterialLib.MaterialLib	matLib,
-													bool					bMax,
 													bool					bBake)
 		{
 			COLLADA	colladaFile	=DeSerializeCOLLADA(path);

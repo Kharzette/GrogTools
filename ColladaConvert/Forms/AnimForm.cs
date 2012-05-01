@@ -38,11 +38,6 @@ namespace ColladaConvert
 		public event	EventHandler	eBoundMesh;
 		public event	EventHandler	eShowBound;
 
-		public bool FromMax
-		{
-			get { return MaxConvert.Checked; }
-		}
-
 		public bool BakeTransforms
 		{
 			get { return BakeVerts.Checked; }

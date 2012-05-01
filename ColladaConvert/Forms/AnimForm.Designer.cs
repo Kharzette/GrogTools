@@ -47,7 +47,7 @@
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
-			this.MaxConvert = new System.Windows.Forms.CheckBox();
+			this.BakeVerts = new System.Windows.Forms.CheckBox();
 			this.groupBox4 = new System.Windows.Forms.GroupBox();
 			this.label2 = new System.Windows.Forms.Label();
 			this.groupBox5 = new System.Windows.Forms.GroupBox();
@@ -60,7 +60,6 @@
 			this.groupBox7 = new System.Windows.Forms.GroupBox();
 			this.Optimize = new System.Windows.Forms.Button();
 			this.Shadowize = new System.Windows.Forms.Button();
-			this.BakeVerts = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this.AnimGrid)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.TimeScale)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.MaxError)).BeginInit();
@@ -299,26 +298,25 @@
 			// 
 			this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.groupBox3.Controls.Add(this.BakeVerts);
-			this.groupBox3.Controls.Add(this.MaxConvert);
 			this.groupBox3.Controls.Add(this.LoadModel);
 			this.groupBox3.Controls.Add(this.LoadStaticModel);
 			this.groupBox3.Controls.Add(this.LoadAnim);
 			this.groupBox3.Location = new System.Drawing.Point(271, 204);
 			this.groupBox3.Name = "groupBox3";
-			this.groupBox3.Size = new System.Drawing.Size(142, 157);
+			this.groupBox3.Size = new System.Drawing.Size(142, 143);
 			this.groupBox3.TabIndex = 18;
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = "Collada Files";
 			// 
-			// MaxConvert
+			// BakeVerts
 			// 
-			this.MaxConvert.AutoSize = true;
-			this.MaxConvert.Location = new System.Drawing.Point(6, 112);
-			this.MaxConvert.Name = "MaxConvert";
-			this.MaxConvert.Size = new System.Drawing.Size(72, 17);
-			this.MaxConvert.TabIndex = 13;
-			this.MaxConvert.Text = "From Max";
-			this.MaxConvert.UseVisualStyleBackColor = true;
+			this.BakeVerts.AutoSize = true;
+			this.BakeVerts.Location = new System.Drawing.Point(6, 112);
+			this.BakeVerts.Name = "BakeVerts";
+			this.BakeVerts.Size = new System.Drawing.Size(106, 17);
+			this.BakeVerts.TabIndex = 24;
+			this.BakeVerts.Text = "Bake Transforms";
+			this.BakeVerts.UseVisualStyleBackColor = true;
 			// 
 			// groupBox4
 			// 
@@ -369,7 +367,7 @@
 			this.groupBox6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.groupBox6.Controls.Add(this.TimeScale);
 			this.groupBox6.Controls.Add(this.label1);
-			this.groupBox6.Location = new System.Drawing.Point(252, 367);
+			this.groupBox6.Location = new System.Drawing.Point(252, 353);
 			this.groupBox6.Name = "groupBox6";
 			this.groupBox6.Size = new System.Drawing.Size(133, 52);
 			this.groupBox6.TabIndex = 21;
@@ -426,6 +424,7 @@
 			this.groupBox7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.groupBox7.Controls.Add(this.Optimize);
 			this.groupBox7.Controls.Add(this.Shadowize);
+			this.groupBox7.Enabled = false;
 			this.groupBox7.Location = new System.Drawing.Point(419, 306);
 			this.groupBox7.Name = "groupBox7";
 			this.groupBox7.Size = new System.Drawing.Size(98, 81);
@@ -451,16 +450,6 @@
 			this.Shadowize.TabIndex = 0;
 			this.Shadowize.Text = "Shadowize";
 			this.Shadowize.UseVisualStyleBackColor = true;
-			// 
-			// BakeVerts
-			// 
-			this.BakeVerts.AutoSize = true;
-			this.BakeVerts.Location = new System.Drawing.Point(6, 135);
-			this.BakeVerts.Name = "BakeVerts";
-			this.BakeVerts.Size = new System.Drawing.Size(106, 17);
-			this.BakeVerts.TabIndex = 24;
-			this.BakeVerts.Text = "Bake Transforms";
-			this.BakeVerts.UseVisualStyleBackColor = true;
 			// 
 			// AnimForm
 			// 
@@ -534,7 +523,6 @@
 		private System.Windows.Forms.GroupBox groupBox7;
 		private System.Windows.Forms.Button Optimize;
 		private System.Windows.Forms.Button Shadowize;
-		private System.Windows.Forms.CheckBox MaxConvert;
 		private System.Windows.Forms.CheckBox BakeVerts;
 	}
 }

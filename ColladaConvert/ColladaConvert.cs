@@ -397,7 +397,7 @@ namespace ColladaConvert
 			string	path	=(string)sender;
 
 			mStaticMesh	=ColladaFileUtils.LoadStatic(path, mGDM.GraphicsDevice,
-				mMatLib, mCF.FromMax, mCF.BakeTransforms);
+				mMatLib, mCF.BakeTransforms);
 
 			mStaticMesh.SetTransform(Matrix.Identity);
 
@@ -528,6 +528,13 @@ namespace ColladaConvert
 			float	time		=(float)gameTime.ElapsedGameTime.TotalMilliseconds;
 
 			mCharacter.Animate(mCurrentAnimName, (float)(gameTime.TotalGameTime.TotalSeconds) * mTimeScale);
+
+			KeyboardState	kbs	=Keyboard.GetState();
+			if(kbs.IsKeyDown(Keys.J))
+			{
+				int	j	=0;
+				j++;
+			}
 
 			//hotkeys
 			if(mInput.Player1.WasKeyPressed(Keys.M))
