@@ -529,17 +529,11 @@ namespace ColladaConvert
 
 			mCharacter.Animate(mCurrentAnimName, (float)(gameTime.TotalGameTime.TotalSeconds) * mTimeScale);
 
-			KeyboardState	kbs	=Keyboard.GetState();
-			if(kbs.IsKeyDown(Keys.J))
-			{
-				int	j	=0;
-				j++;
-			}
-
 			//hotkeys
 			if(mInput.Player1.WasKeyPressed(Keys.M))
 			{
-				mMF.ApplyMat();
+				//this goes off when typing in text fields!
+//				mMF.ApplyMat();
 			}
 
 			base.Update(gameTime);
