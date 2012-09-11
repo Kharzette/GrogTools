@@ -501,10 +501,12 @@ namespace ColladaConvert
 			mGameCam.Update(-mSteering.Position, mSteering.Pitch, mSteering.Yaw, mSteering.Roll);
 
 			//rotate the light vector
-			mLX	+=(LightXRot * msDelta);
-			mLY	+=(LightYRot * msDelta);
-			mLZ	+=(LightZRot * msDelta);
-
+			if(GamePad.GetState(PlayerIndex.One).IsButtonDown(Buttons.LeftShoulder))
+			{
+				mLX	+=(LightXRot * msDelta);
+				mLY	+=(LightYRot * msDelta);
+				mLZ	+=(LightZRot * msDelta);
+			}
 			UtilityLib.Mathery.WrapAngleDegrees(ref mLX);
 			UtilityLib.Mathery.WrapAngleDegrees(ref mLY);
 			UtilityLib.Mathery.WrapAngleDegrees(ref mLZ);
