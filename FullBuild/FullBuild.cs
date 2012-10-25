@@ -38,6 +38,8 @@ namespace FullBuild
 		MaterialLib.MaterialLib	mMatLib;
 		MeshLib.IndoorMesh		mIndoorMesh;
 		List<string>			mAllTextures	=new List<string>();
+//		List<Vector3>			mPathNodes		=new List<Vector3>();
+//		PathLib.PathGrid		mPathGrid;
 
 		//lighting emissives
 		Dictionary<string, Microsoft.Xna.Framework.Color>	mEmissives;
@@ -60,6 +62,7 @@ namespace FullBuild
 		UtilityLib.PlayerSteering	mPlayerControl;
 		UtilityLib.Input			mInput;
 		bool						mbWorking;
+		TriggerHelper				mTHelper	=new TriggerHelper();
 
 
 		public FullBuild()
@@ -519,6 +522,28 @@ namespace FullBuild
 
 					mLineVB.SetData<VertexPositionColor>(normVerts);
 */
+
+					//generate pathing information
+//					mPathNodes	=mMap.GetGoodPathPoints();
+/*
+					mLineVB	=new VertexBuffer(mGDM.GraphicsDevice, typeof(VertexPositionColor), mPathNodes.Count * 2, BufferUsage.WriteOnly);
+
+					VertexPositionColor	[]normVerts	=new VertexPositionColor[mPathNodes.Count * 2];
+					for(int i=0;i < mPathNodes.Count;i++)
+					{
+						normVerts[i * 2].Position	=mPathNodes[i];
+						normVerts[i * 2].Color		=Color.Green;
+
+						normVerts[(i * 2) + 1].Position	=mPathNodes[i] + Vector3.UnitY * 20.0f;
+						normVerts[(i * 2) + 1].Color	=Color.Green;
+					}
+
+					mLineVB.SetData<VertexPositionColor>(normVerts);
+
+					mPathGrid	=PathLib.PathGrid.CreatePathGrid(false);
+
+					mPathGrid.GenerateFromPoints(mPathNodes);
+					*/
 					mVisMap	=new VisMap();
 					mVisMap.SetMap(mMap);
 					mVisMap.LoadVisData(fileName);

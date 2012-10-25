@@ -122,7 +122,7 @@ namespace ColladaConvert
 
 			//load debug shaders
 			mFX		=mShaderLib.Load<Effect>("Shaders/Static");
-			mPesc12	=mGameCM.Load<SpriteFont>("Fonts/Pescadero12");
+			mPesc12	=Content.Load<SpriteFont>("Fonts/Pescadero12");
 
 			mDesu	=Content.Load<Texture2D>("Textures/desu");
 			mEureka	=Content.Load<Texture2D>("Textures/Eureka");
@@ -228,7 +228,7 @@ namespace ColladaConvert
 			mSteering	=new UtilityLib.PlayerSteering(mGDM.GraphicsDevice.Viewport.Width,
 				mGDM.GraphicsDevice.Viewport.Height);
 			mSteering.Method	=UtilityLib.PlayerSteering.SteeringMethod.Fly;
-			mSteering.Speed		=0.001f;
+			mSteering.Speed		=0.2f;
 		}
 
 
@@ -507,6 +507,7 @@ namespace ColladaConvert
 				mLY	+=(LightYRot * msDelta);
 				mLZ	+=(LightZRot * msDelta);
 			}
+
 			UtilityLib.Mathery.WrapAngleDegrees(ref mLX);
 			UtilityLib.Mathery.WrapAngleDegrees(ref mLY);
 			UtilityLib.Mathery.WrapAngleDegrees(ref mLZ);
@@ -584,6 +585,8 @@ namespace ColladaConvert
 			//draw bounds if any
 			if(mBoundPrim != null)
 			{
+				mBoundPrim.World	=mStaticMesh.GetTransform();
+
 				mBoundPrim.Draw(g, mBFX, mGameCam.View, mGameCam.Projection);
 			}
 

@@ -127,6 +127,11 @@
     <Content Include="GameThumbnail.png" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Games\ColdVoid\GameContent\GameContent.contentproj">
+      <Project>{8F66A1EA-C917-4D47-BF18-CA9F339F8E5D}</Project>
+      <Name>GameContent %28Content%29</Name>
+      <XnaReferenceType>Content</XnaReferenceType>
+    </ProjectReference>
     <ProjectReference Include="..\..\Libs\BSPCore\BSPCore32.csproj">
       <Project>{62BDDCD2-0FDD-4FD4-B2B8-B9ED59B4D98C}</Project>
       <Name>BSPCore32</Name>
@@ -159,11 +164,6 @@
     <ProjectReference Include="..\..\Libs\UtilityLib\UtilityLib.csproj">
       <Project>{BB91910C-2595-4EB6-B48C-30BCC41457F6}</Project>
       <Name>UtilityLib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Ludum23\GameContent\GameContent.contentproj">
-      <Project>{65952809-57AD-427F-90F1-BFBE0D208679}</Project>
-      <Name>GameContent</Name>
-      <XnaReferenceType>Content</XnaReferenceType>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
