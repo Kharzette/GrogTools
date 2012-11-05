@@ -40,6 +40,7 @@ namespace FullBuild
 		List<string>			mAllTextures	=new List<string>();
 //		List<Vector3>			mPathNodes		=new List<Vector3>();
 //		PathLib.PathGrid		mPathGrid;
+		Dictionary<int, Matrix>	mModelMats;
 
 		//lighting emissives
 		Dictionary<string, Microsoft.Xna.Framework.Color>	mEmissives;
@@ -251,7 +252,7 @@ namespace FullBuild
 
 			if(mMap != null && mVisMap != null)
 			{
-				mIndoorMesh.Draw(g, mGameCam, mPlayerControl.Position, mVisMap.IsMaterialVisibleFromPos);
+				mIndoorMesh.Draw(g, mGameCam, mPlayerControl.Position, mVisMap.IsMaterialVisibleFromPos, mModelMats);
 			}
 
 			KeyboardState	kbstate	=Keyboard.GetState();
@@ -338,7 +339,8 @@ namespace FullBuild
 		void OnMaterialNuked(object sender, EventArgs ea)
 		{
 			//shouldn't mess with materials if something is loaded
-			mMap	=null;
+			mMap		=null;
+			mModelMats	=null;
 		}
 
 
@@ -559,6 +561,8 @@ namespace FullBuild
 					mIndoorMesh.BuildFullBright(g, mMap.BuildFullBrightRenderData, mMap.GetPlanes());
 					mIndoorMesh.BuildMirror(g, mMap.BuildMirrorRenderData, mMap.GetPlanes());
 					mIndoorMesh.BuildSky(g, mMap.BuildSkyRenderData, mMap.GetPlanes());
+
+					mModelMats	=mMap.GetModelTransforms();
 
 					foreach(MaterialLib.Material mat in mats)
 					{
