@@ -14,6 +14,7 @@ using Microsoft.Xna.Framework.Media;
 using BSPCore;
 using BSPZone;
 using BSPVis;
+using UtilityLib;
 
 
 namespace FullBuild
@@ -67,7 +68,8 @@ namespace FullBuild
 		UtilityLib.GameCamera		mGameCam;
 		UtilityLib.PlayerSteering	mPlayerControl;
 		UtilityLib.Input			mInput;
-		bool						mbWorking;
+		bool						mbWorking, mbFullBuilding;
+		string						mFullBuildFileName;
 		TriggerHelper				mTHelper	=new TriggerHelper();
 
 
@@ -178,6 +180,8 @@ namespace FullBuild
 			mBSPForm.eLight					+=OnLight;
 			mBSPForm.eOpenMap				+=OnOpenMap;
 			mBSPForm.eSave					+=OnSaveGBSP;
+			mBSPForm.eFullBuild				+=OnFullBuild;
+			mBSPForm.eUpdateEntities		+=OnUpdateEntities;
 			mVisForm.eQueryVisFarm			+=OnQueryVisFarm;
 			mVisForm.eReloadVisFarm			+=OnReLoadVisFarm;
 			mVisForm.eResumeVis				+=OnResumeVis;
@@ -552,7 +556,8 @@ namespace FullBuild
 
 			if(fileName != null)
 			{
-				mZoneForm.Text	=fileName;
+				Action<System.Windows.Forms.Form>	setText	=frm => frm.Text = fileName;
+				SharedForms.FormExtensions.Invoke(mZoneForm, setText);
 				mZoneForm.EnableFileIO(false);
 				mBSPForm.EnableFileIO(false);
 				mVisForm.EnableFileIO(false);
@@ -638,6 +643,27 @@ namespace FullBuild
 		}
 
 
+		void OnFullBuild(object sender, EventArgs ea)
+		{
+			string	fileName	=sender as string;
+			if(fileName == null)
+			{
+				return;
+			}
+
+			mbFullBuilding		=true;
+			mFullBuildFileName	=FileUtil.StripExtension(fileName);
+
+			OnOpenMap(sender, ea);
+			OnBuild(sender, ea);
+		}
+
+
+		void OnUpdateEntities(object sender, EventArgs ea)
+		{
+		}
+
+
 		void OnOpenMap(object sender, EventArgs ea)
 		{
 			string	fileName	=sender as string;
@@ -716,6 +742,11 @@ namespace FullBuild
 			mBSPForm.EnableFileIO(true);
 			mVisForm.EnableFileIO(true);
 			mbWorking	=false;
+
+			if(mbFullBuilding)
+			{
+				OnSaveGBSP(mFullBuildFileName + ".gbsp", null);
+			}
 		}
 
 
@@ -727,6 +758,14 @@ namespace FullBuild
 			mBSPForm.EnableFileIO(true);
 			mVisForm.EnableFileIO(true);
 			mbWorking	=false;
+
+			if(mbFullBuilding)
+			{
+				mbWorking	=true;
+				OnZoneGBSP(mFullBuildFileName + ".gbsp", null);
+				mbFullBuilding	=false;
+				mbWorking		=false;
+			}
 		}
 
 
@@ -738,6 +777,11 @@ namespace FullBuild
 			mBSPForm.EnableFileIO(true);
 			mVisForm.EnableFileIO(true);
 			mbWorking	=false;
+
+			if(mbFullBuilding)
+			{
+				OnVis(mFullBuildFileName + ".gbsp", null);
+			}
 		}
 
 
@@ -830,6 +874,11 @@ namespace FullBuild
 			mZoneForm.EnableFileIO(true);
 			mBSPForm.EnableFileIO(true);
 			mVisForm.EnableFileIO(true);
+
+			if(mbFullBuilding)
+			{
+				OnLight(mFullBuildFileName + ".gbsp", null);
+			}
 		}
 
 
@@ -902,7 +951,7 @@ namespace FullBuild
 		{
 			int	num	=(int)sender;
 
-			mBSPForm.NumberOfClusters	="" + num;
+//			mBSPForm.NumberOfClusters	="" + num;
 		}
 
 
@@ -910,7 +959,7 @@ namespace FullBuild
 		{
 			int	num	=(int)sender;
 
-			mBSPForm.NumberOfVerts	="" + num;
+//			mBSPForm.NumberOfVerts	="" + num;
 		}
 
 
@@ -918,7 +967,7 @@ namespace FullBuild
 		{
 			int	num	=(int)sender;
 
-			mBSPForm.NumberOfPortals	="" + num;
+//			mBSPForm.NumberOfPortals	="" + num;
 		}
 
 
@@ -926,7 +975,7 @@ namespace FullBuild
 		{
 			int	num	=(int)sender;
 
-			mBSPForm.NumberOfPlanes	="" + num;
+//			mBSPForm.NumberOfPlanes	="" + num;
 		}
 		#endregion
 	}
