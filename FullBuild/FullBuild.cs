@@ -440,7 +440,8 @@ namespace FullBuild
 				return;
 			}
 
-			mZoneForm.Text	=fileName;
+			Action<System.Windows.Forms.Form>	setText	=frm => frm.Text = fileName;
+			SharedForms.FormExtensions.Invoke(mZoneForm, setText);
 			mZoneForm.SetZoneSaveEnabled(false);
 			mZoneForm.EnableFileIO(false);
 			mBSPForm.EnableFileIO(false);
@@ -661,6 +662,30 @@ namespace FullBuild
 
 		void OnUpdateEntities(object sender, EventArgs ea)
 		{
+			string	fileName	=sender as string;
+			if(fileName == null)
+			{
+				return;
+			}
+
+			//load the update entities from the .map
+			Map	updatedMap	=new Map();
+			updatedMap.LoadBrushFile(fileName, mBSPForm.BSPParameters);
+
+			//existing gbsp file
+			string	gbspFileName	=FileUtil.StripExtension(fileName);
+			gbspFileName			+=".gbsp";
+
+			Map	oldMap	=new Map();
+			GFXHeader	hdr	=oldMap.LoadGBSPFile(gbspFileName);
+			if(hdr == null)
+			{
+				mOutputForm.Print("Problem with " + gbspFileName + "\n");
+				return;
+			}
+
+			oldMap.UpdateEntities(updatedMap);
+			oldMap.SaveGBSPEntities(gbspFileName);
 		}
 
 
@@ -761,6 +786,8 @@ namespace FullBuild
 
 			if(mbFullBuilding)
 			{
+				OnMaterialVis(mFullBuildFileName + ".gbsp", null);
+
 				mbWorking	=true;
 				OnZoneGBSP(mFullBuildFileName + ".gbsp", null);
 				mbFullBuilding	=false;
