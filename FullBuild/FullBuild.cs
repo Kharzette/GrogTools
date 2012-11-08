@@ -672,20 +672,7 @@ namespace FullBuild
 			Map	updatedMap	=new Map();
 			updatedMap.LoadBrushFile(fileName, mBSPForm.BSPParameters);
 
-			//existing gbsp file
-			string	gbspFileName	=FileUtil.StripExtension(fileName);
-			gbspFileName			+=".gbsp";
-
-			Map	oldMap	=new Map();
-			GFXHeader	hdr	=oldMap.LoadGBSPFile(gbspFileName);
-			if(hdr == null)
-			{
-				mOutputForm.Print("Problem with " + gbspFileName + "\n");
-				return;
-			}
-
-			oldMap.UpdateEntities(updatedMap);
-			oldMap.SaveGBSPEntities(gbspFileName);
+			updatedMap.SaveUpdatedEntities(fileName);
 		}
 
 
