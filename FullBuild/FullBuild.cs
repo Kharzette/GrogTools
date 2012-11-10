@@ -311,7 +311,7 @@ namespace FullBuild
 
 			if(mMap != null && mVisMap != null)
 			{
-				mIndoorMesh.Draw(g, mGameCam, mPlayerControl.Position, mVisMap.IsMaterialVisibleFromPos, mModelMats);
+				mIndoorMesh.Draw(g, mGameCam, mPlayerControl.Position, mVisMap.IsMaterialVisibleFromPos, GetModelMatrix);
 			}
 
 			KeyboardState	kbstate	=Keyboard.GetState();
@@ -958,6 +958,22 @@ namespace FullBuild
 			}
 
 			mLineVB.SetData<VertexPositionColor>(normVerts);
+		}
+
+
+		Matrix GetModelMatrix(int modelIndex)
+		{
+			if(mModelMats == null)
+			{
+				return	Matrix.Identity;
+			}
+
+			if(!mModelMats.ContainsKey(modelIndex))
+			{
+				return	Matrix.Identity;
+			}
+
+			return	mModelMats[modelIndex];
 		}
 
 
