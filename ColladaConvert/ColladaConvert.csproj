@@ -68,29 +68,20 @@
   <ItemGroup>
     <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
     <Reference Include="Microsoft.Xna.Framework.Game, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
-    <Reference Include="Microsoft.Xna.Framework.GamerServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Xna.Framework.Graphics, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
-    <Reference Include="Microsoft.Xna.Framework.Storage, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL" />
     <Reference Include="mscorlib">
       <Private>False</Private>
     </Reference>
     <Reference Include="System">
       <Private>False</Private>
     </Reference>
-    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml">
-      <Private>False</Private>
-    </Reference>
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
       <Private>False</Private>
     </Reference>
-    <Reference Include="System.Xml.Linq">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-      <Private>False</Private>
-    </Reference>
+    <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Animation.cs" />
@@ -179,9 +170,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Games\TreasurePeaks\SkyIslands\SkyIslandsContent\SkyIslandsContent.contentproj">
-      <Project>{E46BF28D-23D9-42DA-9077-C6D895C4D32C}</Project>
-      <Name>SkyIslandsContent %28GameContent%29</Name>
+    <ProjectReference Include="..\..\Games\Styx\GameContent\GameContent.contentproj">
+      <Project>{D7FC83D5-6E5D-441E-B4AE-1B170EDDAB19}</Project>
+      <Name>GameContent</Name>
       <XnaReferenceType>Content</XnaReferenceType>
     </ProjectReference>
     <ProjectReference Include="..\..\Libs\MaterialLib\MaterialLib.csproj">
@@ -193,9 +184,9 @@
       <Name>ShaderLib</Name>
       <XnaReferenceType>Content</XnaReferenceType>
     </ProjectReference>
-    <ProjectReference Include="..\..\Libs\SharedForms\SharedFormsTS.csproj">
-      <Project>{3B62D87E-CE0B-4310-8A01-9A974BEC04AF}</Project>
-      <Name>SharedFormsTS</Name>
+    <ProjectReference Include="..\..\Libs\SharedForms\SharedForms32.csproj">
+      <Project>{29C0FFE8-5702-48A3-840D-54706748FF68}</Project>
+      <Name>SharedForms32</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Libs\UtilityLib\UtilityLib.csproj">
       <Project>{BB91910C-2595-4EB6-B48C-30BCC41457F6}</Project>
