@@ -149,6 +149,10 @@
       <Project>{29C0FFE8-5702-48A3-840D-54706748FF68}</Project>
       <Name>SharedForms32</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Libs\SpriteMapLib\SpriteMapLib.csproj">
+      <Project>{9FFB87A8-2180-4386-872F-BD5563F75BA6}</Project>
+      <Name>SpriteMapLib</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Libs\UtilityLib\UtilityLib.csproj">
       <Project>{BB91910C-2595-4EB6-B48C-30BCC41457F6}</Project>
       <Name>UtilityLib</Name>
@@ -160,6 +164,11 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ParticleForm.resx">
+      <DependentUpon>ParticleForm.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />
