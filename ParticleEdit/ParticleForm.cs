@@ -36,44 +36,44 @@ namespace ParticleEdit
 			get { return (float)EmitPerMS.Value; }
 		}
 
-		public int SpinMin
+		public float SpinMin
 		{
-			get { return (int)(SpinVelocityMin.Value * 1000); }
+			get { return (float)SpinVelocityMin.Value; }
 		}
 
-		public int SpinMax
+		public float SpinMax
 		{
-			get { return (int)(SpinVelocityMax.Value * 1000); }
+			get { return (float)SpinVelocityMax.Value; }
 		}
 
-		public int VelMin
+		public float VelMin
 		{
-			get { return (int)(VelocityMin.Value * 1000); }
+			get { return (float)VelocityMin.Value; }
 		}
 
-		public int VelMax
+		public float VelMax
 		{
-			get { return (int)(VelocityMax.Value * 1000); }
+			get { return (float)VelocityMax.Value; }
 		}
 
-		public int SizeMin
+		public float SizeMin
 		{
-			get { return (int)(SizeVelocityMin.Value * 1000); }
+			get { return (float)SizeVelocityMin.Value; }
 		}
 
-		public int SizeMax
+		public float SizeMax
 		{
-			get { return (int)(SizeVelocityMax.Value * 1000); }
+			get { return (float)SizeVelocityMax.Value; }
 		}
 
-		public int AlphaMin
+		public float AlphaMin
 		{
-			get { return (int)(AlphaVelocityMin.Value * 1000); }
+			get { return (float)AlphaVelocityMin.Value; }
 		}
 
-		public int AlphaMax
+		public float AlphaMax
 		{
-			get { return (int)(AlphaVelocityMax.Value * 1000); }
+			get { return (float)AlphaVelocityMax.Value; }
 		}
 
 		public int LifeMin

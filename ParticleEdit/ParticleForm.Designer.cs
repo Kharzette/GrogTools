@@ -188,12 +188,12 @@
 			// 
 			// VelocityMax
 			// 
-			this.VelocityMax.DecimalPlaces = 3;
+			this.VelocityMax.DecimalPlaces = 4;
 			this.VelocityMax.Increment = new decimal(new int[] {
             1,
             0,
             0,
-            196608});
+            262144});
 			this.VelocityMax.Location = new System.Drawing.Point(183, 97);
 			this.VelocityMax.Name = "VelocityMax";
 			this.VelocityMax.Size = new System.Drawing.Size(58, 20);
@@ -206,49 +206,64 @@
 			// 
 			// SizeVelocityMin
 			// 
-			this.SizeVelocityMin.DecimalPlaces = 3;
+			this.SizeVelocityMin.DecimalPlaces = 4;
 			this.SizeVelocityMin.Increment = new decimal(new int[] {
             1,
             0,
             0,
-            196608});
+            262144});
 			this.SizeVelocityMin.Location = new System.Drawing.Point(183, 123);
+			this.SizeVelocityMin.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            -2147483648});
 			this.SizeVelocityMin.Name = "SizeVelocityMin";
 			this.SizeVelocityMin.Size = new System.Drawing.Size(58, 20);
 			this.SizeVelocityMin.TabIndex = 34;
 			this.SizeVelocityMin.Value = new decimal(new int[] {
-            1,
+            5,
             0,
             0,
-            196608});
+            -2147221504});
 			// 
 			// SizeVelocityMax
 			// 
-			this.SizeVelocityMax.DecimalPlaces = 3;
+			this.SizeVelocityMax.DecimalPlaces = 4;
 			this.SizeVelocityMax.Increment = new decimal(new int[] {
             1,
             0,
             0,
-            196608});
+            262144});
 			this.SizeVelocityMax.Location = new System.Drawing.Point(183, 149);
+			this.SizeVelocityMax.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            -2147483648});
 			this.SizeVelocityMax.Name = "SizeVelocityMax";
 			this.SizeVelocityMax.Size = new System.Drawing.Size(58, 20);
 			this.SizeVelocityMax.TabIndex = 33;
 			this.SizeVelocityMax.Value = new decimal(new int[] {
-            2,
+            5,
             0,
             0,
-            196608});
+            262144});
 			// 
 			// SpinVelocityMin
 			// 
-			this.SpinVelocityMin.DecimalPlaces = 3;
+			this.SpinVelocityMin.DecimalPlaces = 4;
 			this.SpinVelocityMin.Increment = new decimal(new int[] {
             1,
             0,
             0,
-            196608});
+            262144});
 			this.SpinVelocityMin.Location = new System.Drawing.Point(183, 175);
+			this.SpinVelocityMin.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            -2147483648});
 			this.SpinVelocityMin.Name = "SpinVelocityMin";
 			this.SpinVelocityMin.Size = new System.Drawing.Size(58, 20);
 			this.SpinVelocityMin.TabIndex = 32;
@@ -256,61 +271,76 @@
             1,
             0,
             0,
-            196608});
+            262144});
 			// 
 			// SpinVelocityMax
 			// 
-			this.SpinVelocityMax.DecimalPlaces = 3;
+			this.SpinVelocityMax.DecimalPlaces = 4;
 			this.SpinVelocityMax.Increment = new decimal(new int[] {
             1,
             0,
             0,
-            196608});
+            262144});
 			this.SpinVelocityMax.Location = new System.Drawing.Point(183, 201);
+			this.SpinVelocityMax.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            -2147483648});
 			this.SpinVelocityMax.Name = "SpinVelocityMax";
 			this.SpinVelocityMax.Size = new System.Drawing.Size(58, 20);
 			this.SpinVelocityMax.TabIndex = 31;
 			this.SpinVelocityMax.Value = new decimal(new int[] {
-            2,
+            5,
             0,
             0,
-            196608});
+            262144});
 			// 
 			// AlphaVelocityMin
 			// 
-			this.AlphaVelocityMin.DecimalPlaces = 3;
+			this.AlphaVelocityMin.DecimalPlaces = 4;
 			this.AlphaVelocityMin.Increment = new decimal(new int[] {
             1,
             0,
             0,
-            196608});
+            262144});
 			this.AlphaVelocityMin.Location = new System.Drawing.Point(183, 19);
+			this.AlphaVelocityMin.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            -2147483648});
 			this.AlphaVelocityMin.Name = "AlphaVelocityMin";
 			this.AlphaVelocityMin.Size = new System.Drawing.Size(58, 20);
 			this.AlphaVelocityMin.TabIndex = 30;
 			this.AlphaVelocityMin.Value = new decimal(new int[] {
-            1,
+            5,
             0,
             0,
-            196608});
+            -2147221504});
 			// 
 			// AlphaVelocityMax
 			// 
-			this.AlphaVelocityMax.DecimalPlaces = 3;
+			this.AlphaVelocityMax.DecimalPlaces = 4;
 			this.AlphaVelocityMax.Increment = new decimal(new int[] {
             1,
             0,
             0,
-            196608});
+            262144});
 			this.AlphaVelocityMax.Location = new System.Drawing.Point(183, 45);
+			this.AlphaVelocityMax.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            -2147483648});
 			this.AlphaVelocityMax.Name = "AlphaVelocityMax";
 			this.AlphaVelocityMax.Size = new System.Drawing.Size(58, 20);
 			this.AlphaVelocityMax.TabIndex = 29;
 			this.AlphaVelocityMax.Value = new decimal(new int[] {
-            2,
+            5,
             0,
             0,
-            196608});
+            262144});
 			// 
 			// CreateEmitter
 			// 
@@ -547,21 +577,21 @@
 			// 
 			// VelocityMin
 			// 
-			this.VelocityMin.DecimalPlaces = 3;
+			this.VelocityMin.DecimalPlaces = 4;
 			this.VelocityMin.Increment = new decimal(new int[] {
             1,
             0,
             0,
-            196608});
+            262144});
 			this.VelocityMin.Location = new System.Drawing.Point(183, 71);
 			this.VelocityMin.Name = "VelocityMin";
 			this.VelocityMin.Size = new System.Drawing.Size(58, 20);
 			this.VelocityMin.TabIndex = 2;
 			this.VelocityMin.Value = new decimal(new int[] {
-            1,
+            5,
             0,
             0,
-            196608});
+            262144});
 			// 
 			// label2
 			// 
