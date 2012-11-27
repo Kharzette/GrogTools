@@ -100,6 +100,23 @@ namespace ParticleEdit
 			mPF.eCreate					+=OnCreate;
 			mTexForm.eTexDictChanged	+=OnTexDictChanged;
 			mTexForm.eTexChanged		+=OnTexChanged;
+
+
+			//hack to get pix working
+			Dictionary<string, TextureElement>	texLib	=new Dictionary<string,TextureElement>();
+			
+			TextureElement.LoadTexLib(Content.RootDirectory + "/TexLibs/Particles.TexLib", Content, texLib);
+
+			Dictionary<string, Texture2D>	texs	=new Dictionary<string, Texture2D>();
+
+			foreach(KeyValuePair<string, TextureElement> tex in texLib)
+			{
+				texs.Add(tex.Key, tex.Value.GetTexture(0));
+
+				mCurTex	=tex.Key;
+			}
+
+			mPB	=new ParticleLib.ParticleBoss(mGDM.GraphicsDevice, mFX, texs);
 		}
 
 
