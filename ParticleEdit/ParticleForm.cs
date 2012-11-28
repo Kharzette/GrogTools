@@ -26,6 +26,11 @@ namespace ParticleEdit
 			get { return (float)StartSize.Value; }
 		}
 
+		public float StartingAlpha
+		{
+			get { return (float)StartAlpha.Value; }
+		}
+
 		public int PartDuration
 		{
 			get { return (int)Duration.Value; }
@@ -84,6 +89,21 @@ namespace ParticleEdit
 		public int LifeMax
 		{
 			get { return (int)(LifeTimeMax.Value * 1000); }
+		}
+
+		public float GravYaw
+		{
+			get { return (float)GravityYaw.Value; }
+		}
+
+		public float GravPitch
+		{
+			get { return (float)GravityPitch.Value; }
+		}
+
+		public float GravRoll
+		{
+			get { return (float)GravityRoll.Value; }
 		}
 
 

@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using SpriteMapLib;
+using UtilityLib;
 
 
 namespace ParticleEdit
@@ -16,6 +17,7 @@ namespace ParticleEdit
 		SpriteBatch				mSB;
 		ContentManager			mSLib;
 		Effect					mFX;
+		SpriteFont				mPescadero12;
 
 		ParticleForm				mPF;
 		SharedForms.TextureElements	mTexForm;
@@ -24,9 +26,11 @@ namespace ParticleEdit
 
 		string	mCurTex;
 		bool	mbActive	=true;
-		Matrix	mWorld, mView, mProj;
 
-		MouseState	mCurMS, mPrevMS;
+		//camera controls
+		GameCamera		mGCam;
+		PlayerSteering	mPS;
+		Input			mInput;
 
 
 		public ParticleEdit()
@@ -61,15 +65,17 @@ namespace ParticleEdit
 				mainWindow.Location	=
 					global::ParticleEdit.Properties.Settings.Default.MainWindowPos;
 			}
+
+			mGCam	=new GameCamera(800, 600, 16f/9f, 1f, 2000f);
+			mPS		=new PlayerSteering(800, 600);
+			mInput	=new Input();
+
+			mPS.Method	=PlayerSteering.SteeringMethod.Fly;
 		}
 
 
 		protected override void Initialize()
 		{
-			mView	=Matrix.CreateLookAt(Vector3.Backward * 10f, Vector3.Zero, Vector3.Up);
-			mProj	=Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver2, 800f / 600f, 0.01f, 1000f);
-			mWorld	=Matrix.Identity;
-
 			base.Initialize();
 		}
 
@@ -79,6 +85,8 @@ namespace ParticleEdit
 			mSB	=new SpriteBatch(GraphicsDevice);
 
 			mFX	=mSLib.Load<Effect>("Shaders/Static");
+
+			mPescadero12	=Content.Load<SpriteFont>("Fonts/Pescadero12");
 
 			mPF			=new ParticleForm();
 			mPF.Visible	=true;
@@ -127,12 +135,15 @@ namespace ParticleEdit
 
 		protected override void Update(GameTime gameTime)
 		{
-			KeyboardState	keyState	=Keyboard.GetState();
-
-			mPrevMS	=mCurMS;
-			mCurMS	=Mouse.GetState();
-
 			int	msDelta	=gameTime.ElapsedGameTime.Milliseconds;
+
+			mInput.Update();
+
+			Input.PlayerInput	pi	=mInput.Player1;
+
+			mPS.Update(msDelta, mGCam, pi.mKBS, pi.mMS, pi.mGPS);
+
+			mGCam.Update(-mPS.Position, mPS.Pitch, mPS.Yaw, mPS.Roll);
 
 			if(mbActive && mPB != null)
 			{
@@ -149,8 +160,14 @@ namespace ParticleEdit
 
 			if(mbActive && mPB != null)
 			{
-				mPB.Draw(mView, mProj);
+				mPB.Draw(mGCam.View, mGCam.Projection);
 			}
+
+			mSB.Begin();
+
+			mSB.DrawString(mPescadero12, "Coords: " + mPS.Position, Vector2.One * 20.0f, Color.Yellow);
+
+			mSB.End();
 
 			base.Draw(gameTime);
 		}
@@ -163,8 +180,27 @@ namespace ParticleEdit
 				return;
 			}
 
+			float	yaw		=mPF.GravYaw;
+			float	pitch	=mPF.GravPitch;
+			float	roll	=mPF.GravRoll;
+
+			Mathery.WrapAngleDegrees(ref yaw);
+			Mathery.WrapAngleDegrees(ref pitch);
+			Mathery.WrapAngleDegrees(ref roll);
+
+			yaw		=MathHelper.ToRadians(yaw);
+			pitch	=MathHelper.ToRadians(pitch);
+			roll	=MathHelper.ToRadians(roll);
+
+			Matrix	gravMat	=Matrix.CreateFromYawPitchRoll(yaw, pitch, roll);
+
+			Vector3	gravity	=Vector3.TransformNormal(Vector3.UnitX, gravMat);
+
+			gravity	/=1000000f;
+
 			mPB.CreateEmitter(mCurTex,
-				mPF.MaxParts, Vector3.Zero, mPF.StartingSize,
+				mPF.MaxParts, Vector3.Zero, gravity,
+				mPF.StartingSize, mPF.StartingAlpha,
 				mPF.PartDuration * 1000, mPF.EmitMS, mPF.SpinMin,
 				mPF.SpinMax, mPF.VelMin, mPF.VelMax,
 				mPF.SizeMin, mPF.SizeMax, mPF.AlphaMin,

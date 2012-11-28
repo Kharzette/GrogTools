@@ -634,12 +634,6 @@
 			// 
 			// GravityYaw
 			// 
-			this.GravityYaw.DecimalPlaces = 2;
-			this.GravityYaw.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            131072});
 			this.GravityYaw.Location = new System.Drawing.Point(6, 19);
 			this.GravityYaw.Minimum = new decimal(new int[] {
             100,
@@ -661,12 +655,6 @@
 			// 
 			// GravityPitch
 			// 
-			this.GravityPitch.DecimalPlaces = 2;
-			this.GravityPitch.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            131072});
 			this.GravityPitch.Location = new System.Drawing.Point(6, 45);
 			this.GravityPitch.Minimum = new decimal(new int[] {
             100,
@@ -688,12 +676,6 @@
 			// 
 			// GravityRoll
 			// 
-			this.GravityRoll.DecimalPlaces = 2;
-			this.GravityRoll.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            131072});
 			this.GravityRoll.Location = new System.Drawing.Point(6, 71);
 			this.GravityRoll.Minimum = new decimal(new int[] {
             100,
