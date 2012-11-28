@@ -183,6 +183,7 @@ namespace ParticleEdit
 			float	yaw		=mPF.GravYaw;
 			float	pitch	=mPF.GravPitch;
 			float	roll	=mPF.GravRoll;
+			float	str		=mPF.GravStrength;
 
 			Mathery.WrapAngleDegrees(ref yaw);
 			Mathery.WrapAngleDegrees(ref pitch);
@@ -196,7 +197,7 @@ namespace ParticleEdit
 
 			Vector3	gravity	=Vector3.TransformNormal(Vector3.UnitX, gravMat);
 
-			gravity	/=1000000f;
+			gravity	*=str;
 
 			mPB.CreateEmitter(mCurTex,
 				mPF.MaxParts, Vector3.Zero, gravity,

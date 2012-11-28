@@ -106,6 +106,11 @@ namespace ParticleEdit
 			get { return (float)GravityRoll.Value; }
 		}
 
+		public float GravStrength
+		{
+			get { return (float)GravityStrength.Value; }
+		}
+
 
 		public ParticleForm()
 		{
