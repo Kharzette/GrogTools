@@ -25,7 +25,8 @@ namespace ParticleEdit
 		ParticleLib.ParticleBoss	mPB;
 
 		string	mCurTex;
-		bool	mbActive	=true;
+		bool	mbActive		=true;
+		int		mCurSelection	=-1;
 
 		//camera controls
 		GameCamera		mGCam;
@@ -106,6 +107,9 @@ namespace ParticleEdit
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
 			mPF.eCreate					+=OnCreate;
+			mPF.eItemNuked				+=OnEmitterNuked;
+			mPF.eValueChanged			+=OnValueChanged;
+			mPF.eSelectionChanged		+=OnEmitterSelChanged;
 			mTexForm.eTexDictChanged	+=OnTexDictChanged;
 			mTexForm.eTexChanged		+=OnTexChanged;
 
@@ -147,7 +151,10 @@ namespace ParticleEdit
 
 			if(mbActive && mPB != null)
 			{
-				mPB.Update(msDelta);
+				if(mPB.Update(msDelta))
+				{
+					UpdateListView();
+				}
 			}
 
 			base.Update(gameTime);
@@ -199,13 +206,57 @@ namespace ParticleEdit
 
 			gravity	*=str;
 
-			mPB.CreateEmitter(mCurTex,
-				mPF.MaxParts, Vector3.Zero, gravity,
+			mPB.CreateEmitter(mCurTex, mPF.PartColor,
+				mPF.MaxParts, Vector3.Zero,
+				mPF.GravYaw, mPF.GravPitch, mPF.GravRoll, mPF.GravStrength,
 				mPF.StartingSize, mPF.StartingAlpha,
 				mPF.PartDuration * 1000, mPF.EmitMS, mPF.SpinMin,
 				mPF.SpinMax, mPF.VelMin, mPF.VelMax,
 				mPF.SizeMin, mPF.SizeMax, mPF.AlphaMin,
 				mPF.AlphaMax, mPF.LifeMin, mPF.LifeMax);
+
+			UpdateListView();
+		}
+
+
+		void OnValueChanged(object sender, EventArgs ea)
+		{
+			ParticleLib.Emitter	em	=mPB.GetEmitterByIndex(mCurSelection);
+			if(em == null)
+			{
+				return;
+			}
+
+			mPF.UpdateEmitter(em);
+
+			mPB.SetColorByIndex(mCurSelection, mPF.PartColor);
+		}
+
+
+		void OnEmitterNuked(object sender, EventArgs ea)
+		{
+			Nullable<int>	index	=sender as Nullable<int>;
+			if(index == null)
+			{
+				return;
+			}
+			mPB.NukeEmitter(index.Value);
+
+			UpdateListView();
+		}
+
+
+		void OnEmitterSelChanged(object sender, EventArgs ea)
+		{
+			Nullable<int>	index	=sender as Nullable<int>;
+			if(index == null)
+			{
+				return;
+			}
+
+			mCurSelection	=index.Value;
+
+			UpdateControls(index.Value);
 		}
 
 
@@ -248,6 +299,43 @@ namespace ParticleEdit
 		void OnAppActivated(object sender, EventArgs e)
 		{
 			mbActive	=true;
+		}
+
+
+		void UpdateListView()
+		{
+			int	count	=mPB.GetEmitterCount();
+			if(count <= 0)
+			{
+				return;
+			}
+
+			List<string>	emitters	=new List<string>();
+
+			for(int i=0;i < count;i++)
+			{
+				ParticleLib.Emitter	em	=mPB.GetEmitterByIndex(i);
+
+				if(em == null)
+				{
+					continue;
+				}
+
+				emitters.Add("Emitter" + string.Format("{0:000}", i));
+			}
+
+			mPF.UpdateListView(emitters);
+		}
+
+
+		void UpdateControls(int index)
+		{
+			if(index < 0)
+			{
+				return;
+			}
+
+			mPF.UpdateControls(mPB.GetEmitterByIndex(index), mPB.GetColorByIndex(index));
 		}
 	}
 }
