@@ -61,16 +61,6 @@ namespace ParticleEdit
 			}
 		}
 
-		public int PartDuration
-		{
-			get { return (int)Duration.Value; }
-			set
-			{
-				Action<NumericUpDown>	upVal	=numer => numer.Value = (decimal)(value) / 1000;
-				SharedForms.FormExtensions.Invoke(Duration, upVal);
-			}
-		}
-
 		public float EmitMS
 		{
 			get { return (float)EmitPerMS.Value; }
@@ -257,10 +247,8 @@ namespace ParticleEdit
 
 		internal void UpdateEmitter(ParticleLib.Emitter em)
 		{
-			em.mMaxParticles			=MaxParts;
 			em.mStartSize				=StartingSize;
 			em.mStartAlpha				=StartingAlpha;
-			em.mDurationMS				=PartDuration;
 			em.mEmitMS					=EmitMS;
 			em.mRotationalVelocityMin	=SpinMin;
 			em.mRotationalVelocityMax	=SpinMax;
@@ -276,6 +264,7 @@ namespace ParticleEdit
 			em.mGravityPitch			=GravPitch;
 			em.mGravityRoll				=GravRoll;
 			em.mGravityStrength			=GravStrength;
+			em.mbOn						=Active.Checked;
 
 			em.UpdateGravity();
 		}
@@ -283,10 +272,8 @@ namespace ParticleEdit
 
 		internal void UpdateControls(ParticleLib.Emitter em, Microsoft.Xna.Framework.Vector4 color)
 		{
-			MaxParts		=em.mMaxParticles;
 			StartingSize	=em.mStartSize;
 			StartingAlpha	=em.mStartAlpha;
-			PartDuration	=em.mDurationMS;
 			EmitMS			=em.mEmitMS;
 			SpinMin			=em.mRotationalVelocityMin;
 			SpinMax			=em.mRotationalVelocityMax;
@@ -303,6 +290,7 @@ namespace ParticleEdit
 			GravRoll		=em.mGravityRoll;
 			GravStrength	=em.mGravityStrength;
 			PartColor		=color;
+			Active.Checked	=em.mbOn;
 		}
 
 
@@ -327,10 +315,12 @@ namespace ParticleEdit
 
 			if(EmitterListView.SelectedItems.Count <= 0)
 			{
+				MaxParticles.Enabled	=true;
 				Misc.SafeInvoke(eSelectionChanged, new Nullable<int>(-1));
 			}
 			else
 			{
+				MaxParticles.Enabled	=false;
 				Misc.SafeInvoke(eSelectionChanged, new Nullable<int>(EmitterListView.SelectedItems[0].Index));
 			}
 		}

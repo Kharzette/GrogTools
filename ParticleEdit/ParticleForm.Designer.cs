@@ -31,6 +31,7 @@
 			this.MaxParticles = new System.Windows.Forms.NumericUpDown();
 			this.label1 = new System.Windows.Forms.Label();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.Active = new System.Windows.Forms.CheckBox();
 			this.label15 = new System.Windows.Forms.Label();
 			this.StartAlpha = new System.Windows.Forms.NumericUpDown();
 			this.LifeTimeMin = new System.Windows.Forms.NumericUpDown();
@@ -39,8 +40,6 @@
 			this.label14 = new System.Windows.Forms.Label();
 			this.StartSize = new System.Windows.Forms.NumericUpDown();
 			this.label5 = new System.Windows.Forms.Label();
-			this.Duration = new System.Windows.Forms.NumericUpDown();
-			this.label4 = new System.Windows.Forms.Label();
 			this.EmitPerMS = new System.Windows.Forms.NumericUpDown();
 			this.label3 = new System.Windows.Forms.Label();
 			this.VelocityMax = new System.Windows.Forms.NumericUpDown();
@@ -80,7 +79,6 @@
 			((System.ComponentModel.ISupportInitialize)(this.LifeTimeMin)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.LifeTimeMax)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.StartSize)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.Duration)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.EmitPerMS)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.VelocityMax)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.SizeVelocityMin)).BeginInit();
@@ -138,6 +136,7 @@
 			// 
 			// groupBox1
 			// 
+			this.groupBox1.Controls.Add(this.Active);
 			this.groupBox1.Controls.Add(this.label15);
 			this.groupBox1.Controls.Add(this.StartAlpha);
 			this.groupBox1.Controls.Add(this.LifeTimeMin);
@@ -146,8 +145,6 @@
 			this.groupBox1.Controls.Add(this.label14);
 			this.groupBox1.Controls.Add(this.StartSize);
 			this.groupBox1.Controls.Add(this.label5);
-			this.groupBox1.Controls.Add(this.Duration);
-			this.groupBox1.Controls.Add(this.label4);
 			this.groupBox1.Controls.Add(this.EmitPerMS);
 			this.groupBox1.Controls.Add(this.label3);
 			this.groupBox1.Controls.Add(this.MaxParticles);
@@ -158,6 +155,19 @@
 			this.groupBox1.TabIndex = 2;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Emitter Details";
+			// 
+			// Active
+			// 
+			this.Active.AutoSize = true;
+			this.Active.Checked = true;
+			this.Active.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.Active.Location = new System.Drawing.Point(6, 175);
+			this.Active.Name = "Active";
+			this.Active.Size = new System.Drawing.Size(56, 17);
+			this.Active.TabIndex = 38;
+			this.Active.Text = "Active";
+			this.Active.UseVisualStyleBackColor = true;
+			this.Active.CheckedChanged += new System.EventHandler(this.OnValueChanged);
 			// 
 			// label15
 			// 
@@ -200,7 +210,7 @@
             0,
             0,
             65536});
-			this.LifeTimeMin.Location = new System.Drawing.Point(6, 149);
+			this.LifeTimeMin.Location = new System.Drawing.Point(6, 123);
 			this.LifeTimeMin.Name = "LifeTimeMin";
 			this.LifeTimeMin.Size = new System.Drawing.Size(58, 20);
 			this.LifeTimeMin.TabIndex = 22;
@@ -214,7 +224,7 @@
 			// label13
 			// 
 			this.label13.AutoSize = true;
-			this.label13.Location = new System.Drawing.Point(70, 151);
+			this.label13.Location = new System.Drawing.Point(70, 125);
 			this.label13.Name = "label13";
 			this.label13.Size = new System.Drawing.Size(63, 13);
 			this.label13.TabIndex = 23;
@@ -228,7 +238,7 @@
             0,
             0,
             65536});
-			this.LifeTimeMax.Location = new System.Drawing.Point(6, 175);
+			this.LifeTimeMax.Location = new System.Drawing.Point(6, 149);
 			this.LifeTimeMax.Name = "LifeTimeMax";
 			this.LifeTimeMax.Size = new System.Drawing.Size(58, 20);
 			this.LifeTimeMax.TabIndex = 20;
@@ -242,7 +252,7 @@
 			// label14
 			// 
 			this.label14.AutoSize = true;
-			this.label14.Location = new System.Drawing.Point(70, 177);
+			this.label14.Location = new System.Drawing.Point(70, 151);
 			this.label14.Name = "label14";
 			this.label14.Size = new System.Drawing.Size(66, 13);
 			this.label14.TabIndex = 21;
@@ -286,44 +296,6 @@
 			this.label5.TabIndex = 9;
 			this.label5.Text = "Start Size";
 			// 
-			// Duration
-			// 
-			this.Duration.DecimalPlaces = 1;
-			this.Duration.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
-			this.Duration.Location = new System.Drawing.Point(6, 97);
-			this.Duration.Maximum = new decimal(new int[] {
-            100000,
-            0,
-            0,
-            0});
-			this.Duration.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            -2147483648});
-			this.Duration.Name = "Duration";
-			this.Duration.Size = new System.Drawing.Size(58, 20);
-			this.Duration.TabIndex = 6;
-			this.Duration.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            -2147483648});
-			this.Duration.ValueChanged += new System.EventHandler(this.OnValueChanged);
-			// 
-			// label4
-			// 
-			this.label4.AutoSize = true;
-			this.label4.Location = new System.Drawing.Point(70, 99);
-			this.label4.Name = "label4";
-			this.label4.Size = new System.Drawing.Size(47, 13);
-			this.label4.TabIndex = 7;
-			this.label4.Text = "Duration";
-			// 
 			// EmitPerMS
 			// 
 			this.EmitPerMS.DecimalPlaces = 3;
@@ -332,7 +304,7 @@
             0,
             0,
             196608});
-			this.EmitPerMS.Location = new System.Drawing.Point(6, 123);
+			this.EmitPerMS.Location = new System.Drawing.Point(6, 97);
 			this.EmitPerMS.Minimum = new decimal(new int[] {
             1,
             0,
@@ -351,7 +323,7 @@
 			// label3
 			// 
 			this.label3.AutoSize = true;
-			this.label3.Location = new System.Drawing.Point(70, 125);
+			this.label3.Location = new System.Drawing.Point(70, 99);
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(65, 13);
 			this.label3.TabIndex = 5;
@@ -824,7 +796,6 @@
 			((System.ComponentModel.ISupportInitialize)(this.LifeTimeMin)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.LifeTimeMax)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.StartSize)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.Duration)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.EmitPerMS)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.VelocityMax)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.SizeVelocityMin)).EndInit();
@@ -866,8 +837,6 @@
 		private System.Windows.Forms.Label label10;
 		private System.Windows.Forms.NumericUpDown StartSize;
 		private System.Windows.Forms.Label label5;
-		private System.Windows.Forms.NumericUpDown Duration;
-		private System.Windows.Forms.Label label4;
 		private System.Windows.Forms.NumericUpDown EmitPerMS;
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.NumericUpDown VelocityMin;
@@ -895,5 +864,6 @@
 		private System.Windows.Forms.Button button1;
 		private System.Windows.Forms.Panel ColorPanel;
 		private System.Windows.Forms.ListView EmitterListView;
+		private System.Windows.Forms.CheckBox Active;
 	}
 }

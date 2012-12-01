@@ -151,10 +151,7 @@ namespace ParticleEdit
 
 			if(mbActive && mPB != null)
 			{
-				if(mPB.Update(msDelta))
-				{
-					UpdateListView();
-				}
+				mPB.Update(msDelta);
 			}
 
 			base.Update(gameTime);
@@ -209,9 +206,8 @@ namespace ParticleEdit
 			mPB.CreateEmitter(mCurTex, mPF.PartColor,
 				mPF.MaxParts, Vector3.Zero,
 				mPF.GravYaw, mPF.GravPitch, mPF.GravRoll, mPF.GravStrength,
-				mPF.StartingSize, mPF.StartingAlpha,
-				mPF.PartDuration * 1000, mPF.EmitMS, mPF.SpinMin,
-				mPF.SpinMax, mPF.VelMin, mPF.VelMax,
+				mPF.StartingSize, mPF.StartingAlpha, mPF.EmitMS,
+				mPF.SpinMin, mPF.SpinMax, mPF.VelMin, mPF.VelMax,
 				mPF.SizeMin, mPF.SizeMax, mPF.AlphaMin,
 				mPF.AlphaMax, mPF.LifeMin, mPF.LifeMax);
 
