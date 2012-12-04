@@ -16,6 +16,7 @@ namespace ParticleEdit
 	{
 		Color		mCurrentColor	=Color.White;
 		ColorDialog	mColorPicker	=new ColorDialog();
+		bool		mbUpdating;
 
 		internal event EventHandler	eCreate;
 		internal event EventHandler	eItemNuked;
@@ -29,11 +30,51 @@ namespace ParticleEdit
 			InitializeComponent();
 
 			ColorPanel.BackColor	=mCurrentColor;
+
+			Array	shaz	=Enum.GetValues(typeof(ParticleLib.Emitter.Shapes));
+
+			Shape.Items.Clear();
+
+			foreach(object val in shaz)
+			{
+				Shape.Items.Add(val);
+			}
+
+			Shape.SelectedIndex	=0;
 		}
 
 		public bool IsCell
 		{
 			get { return Cell.Checked; }
+			set
+			{
+				Action<CheckBox>	upVal	=numer => numer.Checked = value;
+				SharedForms.FormExtensions.Invoke(Cell, upVal);
+			}
+		}
+
+		public ParticleLib.Emitter.Shapes EmShape
+		{
+			get { return (ParticleLib.Emitter.Shapes)Shape.SelectedItem; }
+			set
+			{
+				if(!Shape.Items.Contains(value))
+				{
+					return;
+				}
+				Action<ComboBox>	upVal	=box => box.SelectedIndex =box.Items.IndexOf(value);
+				SharedForms.FormExtensions.Invoke(Shape, upVal);
+			}
+		}
+
+		public float EmShapeSize
+		{
+			get { return (float)ShapeSize.Value; }
+			set
+			{
+				Action<NumericUpDown>	upVal	=numer => numer.Value = (decimal)value;
+				SharedForms.FormExtensions.Invoke(ShapeSize, upVal);
+			}
 		}
 
 		public int MaxParts
@@ -270,13 +311,23 @@ namespace ParticleEdit
 			em.mGravityRoll				=GravRoll;
 			em.mGravityStrength			=GravStrength;
 			em.mbOn						=Active.Checked;
+			em.mShape					=EmShape;
+			em.mShapeSize				=EmShapeSize;
 
 			em.UpdateGravity();
 		}
 
 
-		internal void UpdateControls(ParticleLib.Emitter em, Microsoft.Xna.Framework.Vector4 color)
+		internal void UpdateControls(ParticleLib.Emitter em,
+			Microsoft.Xna.Framework.Vector4 color, bool bCell)
 		{
+			if(mbUpdating)
+			{
+				return;
+			}
+
+			mbUpdating	=true;
+
 			StartingSize	=em.mStartSize;
 			StartingAlpha	=em.mStartAlpha;
 			EmitMS			=em.mEmitMS;
@@ -296,6 +347,11 @@ namespace ParticleEdit
 			GravStrength	=em.mGravityStrength;
 			PartColor		=color;
 			Active.Checked	=em.mbOn;
+			EmShape			=em.mShape;
+			EmShapeSize		=em.mShapeSize;
+			IsCell			=bCell;
+
+			mbUpdating	=false;
 		}
 
 
@@ -333,6 +389,11 @@ namespace ParticleEdit
 
 		void OnValueChanged(object sender, EventArgs e)
 		{
+			if(mbUpdating)
+			{
+				return;
+			}
+
 			Misc.SafeInvoke(eValueChanged, null);
 		}
 
@@ -359,6 +420,11 @@ namespace ParticleEdit
 
 		void OnCellChanged(object sender, EventArgs e)
 		{
+			if(mbUpdating)
+			{
+				return;
+			}
+
 			Misc.SafeInvoke(eCellChanged, new Nullable<bool>(Cell.Checked));
 		}
 	}

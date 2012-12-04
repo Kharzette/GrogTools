@@ -188,6 +188,7 @@ namespace ParticleEdit
 			gravity	*=str;
 
 			mPB.CreateEmitter(mCurTex, mPF.PartColor, mPF.IsCell,
+				mPF.EmShape, mPF.EmShapeSize,
 				mPF.MaxParts, Vector3.Zero,
 				mPF.GravYaw, mPF.GravPitch, mPF.GravRoll, mPF.GravStrength,
 				mPF.StartingSize, mPF.StartingAlpha, mPF.EmitMS,
@@ -341,7 +342,8 @@ namespace ParticleEdit
 				return;
 			}
 
-			mPF.UpdateControls(mPB.GetEmitterByIndex(index), mPB.GetColorByIndex(index));
+			mPF.UpdateControls(mPB.GetEmitterByIndex(index),
+				mPB.GetColorByIndex(index), mPB.GetCellByIndex(index));
 		}
 	}
 }

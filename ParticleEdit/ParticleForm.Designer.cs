@@ -31,6 +31,7 @@
 			this.MaxParticles = new System.Windows.Forms.NumericUpDown();
 			this.label1 = new System.Windows.Forms.Label();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.Cell = new System.Windows.Forms.CheckBox();
 			this.Active = new System.Windows.Forms.CheckBox();
 			this.label15 = new System.Windows.Forms.Label();
 			this.StartAlpha = new System.Windows.Forms.NumericUpDown();
@@ -70,10 +71,12 @@
 			this.label16 = new System.Windows.Forms.Label();
 			this.GravityYaw = new System.Windows.Forms.NumericUpDown();
 			this.ColorGroup = new System.Windows.Forms.GroupBox();
+			this.label4 = new System.Windows.Forms.Label();
+			this.ShapeSize = new System.Windows.Forms.NumericUpDown();
+			this.Shape = new System.Windows.Forms.ComboBox();
 			this.ColorPanel = new System.Windows.Forms.Panel();
 			this.button1 = new System.Windows.Forms.Button();
 			this.EmitterListView = new System.Windows.Forms.ListView();
-			this.Cell = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this.MaxParticles)).BeginInit();
 			this.groupBox1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.StartAlpha)).BeginInit();
@@ -96,6 +99,7 @@
 			((System.ComponentModel.ISupportInitialize)(this.GravityPitch)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.GravityYaw)).BeginInit();
 			this.ColorGroup.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.ShapeSize)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// MaxParticles
@@ -153,10 +157,23 @@
 			this.groupBox1.Controls.Add(this.label1);
 			this.groupBox1.Location = new System.Drawing.Point(12, 12);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(161, 206);
+			this.groupBox1.Size = new System.Drawing.Size(161, 204);
 			this.groupBox1.TabIndex = 2;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Emitter Details";
+			// 
+			// Cell
+			// 
+			this.Cell.AutoSize = true;
+			this.Cell.Checked = true;
+			this.Cell.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.Cell.Location = new System.Drawing.Point(68, 175);
+			this.Cell.Name = "Cell";
+			this.Cell.Size = new System.Drawing.Size(43, 17);
+			this.Cell.TabIndex = 39;
+			this.Cell.Text = "Cell";
+			this.Cell.UseVisualStyleBackColor = true;
+			this.Cell.CheckedChanged += new System.EventHandler(this.OnCellChanged);
 			// 
 			// Active
 			// 
@@ -481,7 +498,7 @@
 			// 
 			// CreateEmitter
 			// 
-			this.CreateEmitter.Location = new System.Drawing.Point(381, 222);
+			this.CreateEmitter.Location = new System.Drawing.Point(12, 222);
 			this.CreateEmitter.Name = "CreateEmitter";
 			this.CreateEmitter.Size = new System.Drawing.Size(75, 23);
 			this.CreateEmitter.TabIndex = 28;
@@ -738,20 +755,72 @@
 			// 
 			// ColorGroup
 			// 
+			this.ColorGroup.Controls.Add(this.label4);
+			this.ColorGroup.Controls.Add(this.ShapeSize);
+			this.ColorGroup.Controls.Add(this.Shape);
 			this.ColorGroup.Controls.Add(this.ColorPanel);
 			this.ColorGroup.Controls.Add(this.button1);
 			this.ColorGroup.Location = new System.Drawing.Point(375, 148);
 			this.ColorGroup.Name = "ColorGroup";
-			this.ColorGroup.Size = new System.Drawing.Size(156, 68);
+			this.ColorGroup.Size = new System.Drawing.Size(156, 97);
 			this.ColorGroup.TabIndex = 30;
 			this.ColorGroup.TabStop = false;
-			this.ColorGroup.Text = "Color";
+			this.ColorGroup.Text = "Color and Shape";
+			// 
+			// label4
+			// 
+			this.label4.AutoSize = true;
+			this.label4.Location = new System.Drawing.Point(71, 49);
+			this.label4.Name = "label4";
+			this.label4.Size = new System.Drawing.Size(27, 13);
+			this.label4.TabIndex = 41;
+			this.label4.Text = "Size";
+			// 
+			// ShapeSize
+			// 
+			this.ShapeSize.DecimalPlaces = 1;
+			this.ShapeSize.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+			this.ShapeSize.Location = new System.Drawing.Point(6, 47);
+			this.ShapeSize.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+			this.ShapeSize.Name = "ShapeSize";
+			this.ShapeSize.Size = new System.Drawing.Size(58, 20);
+			this.ShapeSize.TabIndex = 32;
+			this.ShapeSize.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+			this.ShapeSize.ValueChanged += new System.EventHandler(this.OnValueChanged);
+			// 
+			// Shape
+			// 
+			this.Shape.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.Shape.FormattingEnabled = true;
+			this.Shape.Items.AddRange(new object[] {
+            "Point",
+            "Sphere",
+            "Box",
+            "Line",
+            "Plane"});
+			this.Shape.Location = new System.Drawing.Point(6, 71);
+			this.Shape.Name = "Shape";
+			this.Shape.Size = new System.Drawing.Size(121, 21);
+			this.Shape.TabIndex = 40;
+			this.Shape.SelectedIndexChanged += new System.EventHandler(this.OnValueChanged);
 			// 
 			// ColorPanel
 			// 
 			this.ColorPanel.Location = new System.Drawing.Point(88, 13);
 			this.ColorPanel.Name = "ColorPanel";
-			this.ColorPanel.Size = new System.Drawing.Size(62, 49);
+			this.ColorPanel.Size = new System.Drawing.Size(62, 29);
 			this.ColorPanel.TabIndex = 1;
 			// 
 			// button1
@@ -776,19 +845,6 @@
 			this.EmitterListView.View = System.Windows.Forms.View.List;
 			this.EmitterListView.SelectedIndexChanged += new System.EventHandler(this.OnSelectedIndexChanged);
 			this.EmitterListView.KeyUp += new System.Windows.Forms.KeyEventHandler(this.OnKeyUp);
-			// 
-			// Cell
-			// 
-			this.Cell.AutoSize = true;
-			this.Cell.Checked = true;
-			this.Cell.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.Cell.Location = new System.Drawing.Point(68, 175);
-			this.Cell.Name = "Cell";
-			this.Cell.Size = new System.Drawing.Size(43, 17);
-			this.Cell.TabIndex = 39;
-			this.Cell.Text = "Cell";
-			this.Cell.UseVisualStyleBackColor = true;
-			this.Cell.CheckedChanged += new System.EventHandler(this.OnCellChanged);
 			// 
 			// ParticleForm
 			// 
@@ -829,6 +885,8 @@
 			((System.ComponentModel.ISupportInitialize)(this.GravityPitch)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.GravityYaw)).EndInit();
 			this.ColorGroup.ResumeLayout(false);
+			this.ColorGroup.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.ShapeSize)).EndInit();
 			this.ResumeLayout(false);
 
 		}
@@ -881,5 +939,8 @@
 		private System.Windows.Forms.ListView EmitterListView;
 		private System.Windows.Forms.CheckBox Active;
 		private System.Windows.Forms.CheckBox Cell;
+		private System.Windows.Forms.ComboBox Shape;
+		private System.Windows.Forms.Label label4;
+		private System.Windows.Forms.NumericUpDown ShapeSize;
 	}
 }
