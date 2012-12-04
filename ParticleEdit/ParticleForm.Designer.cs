@@ -73,6 +73,7 @@
 			this.ColorPanel = new System.Windows.Forms.Panel();
 			this.button1 = new System.Windows.Forms.Button();
 			this.EmitterListView = new System.Windows.Forms.ListView();
+			this.Cell = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this.MaxParticles)).BeginInit();
 			this.groupBox1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.StartAlpha)).BeginInit();
@@ -136,6 +137,7 @@
 			// 
 			// groupBox1
 			// 
+			this.groupBox1.Controls.Add(this.Cell);
 			this.groupBox1.Controls.Add(this.Active);
 			this.groupBox1.Controls.Add(this.label15);
 			this.groupBox1.Controls.Add(this.StartAlpha);
@@ -775,6 +777,19 @@
 			this.EmitterListView.SelectedIndexChanged += new System.EventHandler(this.OnSelectedIndexChanged);
 			this.EmitterListView.KeyUp += new System.Windows.Forms.KeyEventHandler(this.OnKeyUp);
 			// 
+			// Cell
+			// 
+			this.Cell.AutoSize = true;
+			this.Cell.Checked = true;
+			this.Cell.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.Cell.Location = new System.Drawing.Point(68, 175);
+			this.Cell.Name = "Cell";
+			this.Cell.Size = new System.Drawing.Size(43, 17);
+			this.Cell.TabIndex = 39;
+			this.Cell.Text = "Cell";
+			this.Cell.UseVisualStyleBackColor = true;
+			this.Cell.CheckedChanged += new System.EventHandler(this.OnCellChanged);
+			// 
 			// ParticleForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -865,5 +880,6 @@
 		private System.Windows.Forms.Panel ColorPanel;
 		private System.Windows.Forms.ListView EmitterListView;
 		private System.Windows.Forms.CheckBox Active;
+		private System.Windows.Forms.CheckBox Cell;
 	}
 }

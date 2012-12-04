@@ -19,6 +19,7 @@ namespace ParticleEdit
 
 		internal event EventHandler	eCreate;
 		internal event EventHandler	eItemNuked;
+		internal event EventHandler	eCellChanged;
 		internal event EventHandler	eValueChanged;
 		internal event EventHandler	eSelectionChanged;
 
@@ -30,6 +31,10 @@ namespace ParticleEdit
 			ColorPanel.BackColor	=mCurrentColor;
 		}
 
+		public bool IsCell
+		{
+			get { return Cell.Checked; }
+		}
 
 		public int MaxParts
 		{
@@ -349,6 +354,12 @@ namespace ParticleEdit
 					Misc.SafeInvoke(eItemNuked, new Nullable<int>(index));
 				}
 			}
+		}
+
+
+		void OnCellChanged(object sender, EventArgs e)
+		{
+			Misc.SafeInvoke(eCellChanged, new Nullable<bool>(Cell.Checked));
 		}
 	}
 }

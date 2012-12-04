@@ -108,27 +108,11 @@ namespace ParticleEdit
 
 			mPF.eCreate					+=OnCreate;
 			mPF.eItemNuked				+=OnEmitterNuked;
+			mPF.eCellChanged			+=OnCellChanged;
 			mPF.eValueChanged			+=OnValueChanged;
 			mPF.eSelectionChanged		+=OnEmitterSelChanged;
 			mTexForm.eTexDictChanged	+=OnTexDictChanged;
 			mTexForm.eTexChanged		+=OnTexChanged;
-
-
-			//hack to get pix working
-			Dictionary<string, TextureElement>	texLib	=new Dictionary<string,TextureElement>();
-			
-			TextureElement.LoadTexLib(Content.RootDirectory + "/TexLibs/Particles.TexLib", Content, texLib);
-
-			Dictionary<string, Texture2D>	texs	=new Dictionary<string, Texture2D>();
-
-			foreach(KeyValuePair<string, TextureElement> tex in texLib)
-			{
-				texs.Add(tex.Key, tex.Value.GetTexture(0));
-
-				mCurTex	=tex.Key;
-			}
-
-			mPB	=new ParticleLib.ParticleBoss(mGDM.GraphicsDevice, mFX, texs);
 		}
 
 
@@ -203,7 +187,7 @@ namespace ParticleEdit
 
 			gravity	*=str;
 
-			mPB.CreateEmitter(mCurTex, mPF.PartColor,
+			mPB.CreateEmitter(mCurTex, mPF.PartColor, mPF.IsCell,
 				mPF.MaxParts, Vector3.Zero,
 				mPF.GravYaw, mPF.GravPitch, mPF.GravRoll, mPF.GravStrength,
 				mPF.StartingSize, mPF.StartingAlpha, mPF.EmitMS,
@@ -212,6 +196,18 @@ namespace ParticleEdit
 				mPF.AlphaMax, mPF.LifeMin, mPF.LifeMax);
 
 			UpdateListView();
+		}
+
+
+		void OnCellChanged(object sender, EventArgs ea)
+		{
+			Nullable<bool>	bOn	=sender as Nullable<bool>;
+			if(bOn == null || mCurSelection < 0)
+			{
+				return;
+			}
+
+			mPB.SetCellByIndex(mCurSelection, bOn.Value);
 		}
 
 
@@ -253,6 +249,12 @@ namespace ParticleEdit
 			mCurSelection	=index.Value;
 
 			UpdateControls(index.Value);
+
+			//set the texture form selection
+			if(mPB != null && mCurSelection >= 0)
+			{
+				mTexForm.SetCurrentTexElement(mPB.GetTexturePathByIndex(mCurSelection));
+			}
 		}
 
 
@@ -268,7 +270,10 @@ namespace ParticleEdit
 
 			foreach(KeyValuePair<string, TextureElement> tex in texDict)
 			{
-				texs.Add(tex.Key, tex.Value.GetTexture(0));
+				Texture2D	tex2D	=tex.Value.GetTexture(0);
+				tex2D.Name			=tex.Key;
+
+				texs.Add(tex.Key, tex2D);
 			}
 
 			mPB	=new ParticleLib.ParticleBoss(mGDM.GraphicsDevice, mFX, texs);
@@ -283,6 +288,11 @@ namespace ParticleEdit
 				return;
 			}
 			mCurTex	=te.Asset_Path;
+
+			if(mPB != null && mCurSelection >= 0)
+			{
+				mPB.SetTextureByIndex(mCurSelection, te.GetTexture(0));
+			}
 		}
 
 
