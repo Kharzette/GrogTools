@@ -31,11 +31,11 @@ namespace ParticleEdit
 
 			ColorPanel.BackColor	=mCurrentColor;
 
-			Array	shaz	=Enum.GetValues(typeof(ParticleLib.Emitter.Shapes));
+			Array	shapeVals	=Enum.GetValues(typeof(ParticleLib.Emitter.Shapes));
 
 			Shape.Items.Clear();
 
-			foreach(object val in shaz)
+			foreach(object val in shapeVals)
 			{
 				Shape.Items.Add(val);
 			}
