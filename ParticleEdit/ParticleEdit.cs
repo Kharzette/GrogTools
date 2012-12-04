@@ -181,12 +181,6 @@ namespace ParticleEdit
 			pitch	=MathHelper.ToRadians(pitch);
 			roll	=MathHelper.ToRadians(roll);
 
-			Matrix	gravMat	=Matrix.CreateFromYawPitchRoll(yaw, pitch, roll);
-
-			Vector3	gravity	=Vector3.TransformNormal(Vector3.UnitX, gravMat);
-
-			gravity	*=str;
-
 			mPB.CreateEmitter(mCurTex, mPF.PartColor, mPF.IsCell,
 				mPF.EmShape, mPF.EmShapeSize,
 				mPF.MaxParts, Vector3.Zero,

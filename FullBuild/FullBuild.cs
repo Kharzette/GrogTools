@@ -673,6 +673,8 @@ namespace FullBuild
 			updatedMap.LoadBrushFile(fileName, mBSPForm.BSPParameters);
 
 			updatedMap.SaveUpdatedEntities(fileName);
+
+			mOutputForm.Print("GBSP File Updated\n");
 		}
 
 
