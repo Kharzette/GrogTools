@@ -68,7 +68,7 @@ namespace FullBuild
 		UtilityLib.GameCamera		mGameCam;
 		UtilityLib.PlayerSteering	mPlayerControl;
 		UtilityLib.Input			mInput;
-		bool						mbWorking, mbFullBuilding, mbUpdatingEntities;
+		bool						mbWorking, mbFullBuilding;
 		string						mFullBuildFileName;
 		TriggerHelper				mTHelper	=new TriggerHelper();
 
@@ -668,7 +668,6 @@ namespace FullBuild
 				return;
 			}
 
-			mbUpdatingEntities	=true;
 			mFullBuildFileName	=FileUtil.StripExtension(fileName);
 
 			//load the update entities from the .map

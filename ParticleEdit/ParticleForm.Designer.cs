@@ -655,12 +655,12 @@
 			// 
 			// GravityStrength
 			// 
-			this.GravityStrength.DecimalPlaces = 2;
+			this.GravityStrength.DecimalPlaces = 3;
 			this.GravityStrength.Increment = new decimal(new int[] {
             1,
             0,
             0,
-            131072});
+            196608});
 			this.GravityStrength.Location = new System.Drawing.Point(6, 97);
 			this.GravityStrength.Minimum = new decimal(new int[] {
             100,
