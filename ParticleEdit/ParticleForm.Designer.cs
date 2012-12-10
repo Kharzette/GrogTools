@@ -300,7 +300,7 @@
 			this.StartSize.Size = new System.Drawing.Size(58, 20);
 			this.StartSize.TabIndex = 8;
 			this.StartSize.Value = new decimal(new int[] {
-            1,
+            8,
             0,
             0,
             0});
@@ -366,7 +366,7 @@
 			this.VelocityMax.Size = new System.Drawing.Size(58, 20);
 			this.VelocityMax.TabIndex = 35;
 			this.VelocityMax.Value = new decimal(new int[] {
-            1,
+            8,
             0,
             0,
             0});
