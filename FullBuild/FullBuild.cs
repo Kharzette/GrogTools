@@ -68,7 +68,7 @@ namespace FullBuild
 		UtilityLib.GameCamera		mGameCam;
 		UtilityLib.PlayerSteering	mPlayerControl;
 		UtilityLib.Input			mInput;
-		bool						mbWorking, mbFullBuilding;
+		bool						mbWorking, mbFullBuilding, mbUpdatingEntities;
 		string						mFullBuildFileName;
 		TriggerHelper				mTHelper	=new TriggerHelper();
 
@@ -668,6 +668,9 @@ namespace FullBuild
 				return;
 			}
 
+			mbUpdatingEntities	=true;
+			mFullBuildFileName	=FileUtil.StripExtension(fileName);
+
 			//load the update entities from the .map
 			Map	updatedMap	=new Map();
 			updatedMap.LoadBrushFile(fileName, mBSPForm.BSPParameters);
@@ -675,6 +678,9 @@ namespace FullBuild
 			updatedMap.SaveUpdatedEntities(fileName);
 
 			mOutputForm.Print("GBSP File Updated\n");
+
+			OnZoneGBSP(mFullBuildFileName + ".gbsp", null);
+			OnSaveZone(mFullBuildFileName + ".Zone", null);
 		}
 
 

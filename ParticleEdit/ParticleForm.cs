@@ -23,6 +23,7 @@ namespace ParticleEdit
 		internal event EventHandler	eCellChanged;
 		internal event EventHandler	eValueChanged;
 		internal event EventHandler	eSelectionChanged;
+		internal event EventHandler	eCopyEmitterToClipBoard;
 
 
 		internal ParticleForm() : base()
@@ -413,6 +414,17 @@ namespace ParticleEdit
 
 					//nuke from system
 					Misc.SafeInvoke(eItemNuked, new Nullable<int>(index));
+				}
+			}
+			else if(e.KeyCode == Keys.C && e.Control)
+			{
+				if(EmitterListView.SelectedItems.Count == 1)
+				{
+					ListViewItem	itm	=EmitterListView.SelectedItems[0];
+
+					int	index	=itm.Index;
+
+					Misc.SafeInvoke(eCopyEmitterToClipBoard, new Nullable<int>(index));
 				}
 			}
 		}

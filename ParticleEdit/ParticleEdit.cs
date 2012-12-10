@@ -111,6 +111,7 @@ namespace ParticleEdit
 			mPF.eCellChanged			+=OnCellChanged;
 			mPF.eValueChanged			+=OnValueChanged;
 			mPF.eSelectionChanged		+=OnEmitterSelChanged;
+			mPF.eCopyEmitterToClipBoard	+=OnCopyEmitterToClipBoard;
 			mTexForm.eTexDictChanged	+=OnTexDictChanged;
 			mTexForm.eTexChanged		+=OnTexChanged;
 		}
@@ -217,6 +218,22 @@ namespace ParticleEdit
 			mPF.UpdateEmitter(em);
 
 			mPB.SetColorByIndex(mCurSelection, mPF.PartColor);
+		}
+
+
+		void OnCopyEmitterToClipBoard(object sender, EventArgs ea)
+		{
+			Nullable<int>	index	=sender as Nullable<int>;
+			if(index == null)
+			{
+				return;
+			}
+
+			string	ent	=mPB.GetEmitterEntityString(index.Value);
+			if(ent != null && ent != "")
+			{
+				System.Windows.Forms.Clipboard.SetText(ent);
+			}
 		}
 
 
