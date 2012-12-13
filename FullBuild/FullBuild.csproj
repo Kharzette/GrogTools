@@ -103,9 +103,9 @@
     <Content Include="GameThumbnail.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Games\Styx\GameContent\GameContent.contentproj">
-      <Project>{D7FC83D5-6E5D-441E-B4AE-1B170EDDAB19}</Project>
-      <Name>GameContent</Name>
+    <ProjectReference Include="..\..\Games\LudumDare\Ludum25WarmUp\GameContent\GameContent.contentproj">
+      <Project>{3670E0C9-F3C1-4483-851D-8B82BC333B9F}</Project>
+      <Name>GameContent %28Content%29</Name>
       <XnaReferenceType>Content</XnaReferenceType>
     </ProjectReference>
     <ProjectReference Include="..\..\Libs\BSPCore\BSPCore32.csproj">

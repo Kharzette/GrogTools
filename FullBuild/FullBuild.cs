@@ -311,7 +311,7 @@ namespace FullBuild
 
 			if(mMap != null && mVisMap != null)
 			{
-				mIndoorMesh.Draw(g, mGameCam, mPlayerControl.Position, mVisMap.IsMaterialVisibleFromPos, GetModelMatrix);
+				mIndoorMesh.Draw(g, mGameCam, mPlayerControl.Position, mVisMap.IsMaterialVisibleFromPos, GetModelMatrix, RenderExternal);
 			}
 
 			KeyboardState	kbstate	=Keyboard.GetState();
@@ -348,6 +348,11 @@ namespace FullBuild
 				global::FullBuild.FBSettings.Default.PropertyValues[posName];
 
 			form.Location	=(System.Drawing.Point)val.PropertyValue;
+		}
+
+
+		void RenderExternal(MaterialLib.AlphaPool ap, Matrix view, Matrix proj)
+		{
 		}
 
 

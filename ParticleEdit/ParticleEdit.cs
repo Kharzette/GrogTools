@@ -17,7 +17,9 @@ namespace ParticleEdit
 		SpriteBatch				mSB;
 		ContentManager			mSLib;
 		Effect					mFX;
-		SpriteFont				mPescadero12;
+
+		//fonts
+		Dictionary<string, SpriteFont>	mFonts;
 
 		ParticleForm				mPF;
 		SharedForms.TextureElements	mTexForm;
@@ -87,7 +89,7 @@ namespace ParticleEdit
 
 			mFX	=mSLib.Load<Effect>("Shaders/Static");
 
-			mPescadero12	=Content.Load<SpriteFont>("Fonts/Pescadero12");
+			mFonts	=FileUtil.LoadAllFonts(Content);
 
 			mPF			=new ParticleForm();
 			mPF.Visible	=true;
@@ -154,7 +156,7 @@ namespace ParticleEdit
 
 			mSB.Begin();
 
-			mSB.DrawString(mPescadero12, "Coords: " + mPS.Position, Vector2.One * 20.0f, Color.Yellow);
+			mSB.DrawString(mFonts.Values.First(), "Coords: " + mPS.Position, Vector2.One * 20.0f, Color.Yellow);
 
 			mSB.End();
 

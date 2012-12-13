@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using UtilityLib;
 using MeshLib;
 
 
@@ -20,8 +21,11 @@ namespace ColladaConvert
 		IndexBuffer				mIB;
 		Effect					mFX;
 		BasicEffect				mBFX;
-		SpriteFont				mPesc12;
-		UtilityLib.PrimObject	mBoundPrim;
+		PrimObject				mBoundPrim;
+
+		//fonts
+		Dictionary<string, SpriteFont>	mFonts;
+		SpriteFont						mFirstFont;
 
 		MaterialLib.MaterialLib	mMatLib;
 		AnimLib					mAnimLib;
@@ -29,9 +33,9 @@ namespace ColladaConvert
 		StaticMeshObject		mStaticMesh;
 		bool					mbCharacterLoaded;	//so I know which mesh obj to use
 		
-		UtilityLib.PlayerSteering	mSteering;
-		UtilityLib.GameCamera		mGameCam;
-		UtilityLib.Input			mInput;
+		PlayerSteering	mSteering;
+		GameCamera		mGameCam;
+		Input			mInput;
 
 		//material gui
 		SharedForms.MaterialForm	mMF;
@@ -86,12 +90,19 @@ namespace ColladaConvert
 
 		protected override void Initialize()
 		{
-			mGameCam	=new UtilityLib.GameCamera(mGDM.GraphicsDevice.Viewport.Width,
+			mGameCam	=new GameCamera(mGDM.GraphicsDevice.Viewport.Width,
 				mGDM.GraphicsDevice.Viewport.Height,
 				mGDM.GraphicsDevice.Viewport.AspectRatio,
 				0.1f, 1000.0f);
 
-			mInput	=new UtilityLib.Input();
+			mInput	=new Input();
+
+			mFonts	=FileUtil.LoadAllFonts(Content);
+			foreach(KeyValuePair<string, SpriteFont> font in mFonts)
+			{
+				mFirstFont	=font.Value;
+				break;
+			}
 
 			//default cam pos off to one side
 //			Vector3	camPos	=Vector3.Zero;
@@ -121,7 +132,6 @@ namespace ColladaConvert
 
 			//load debug shaders
 			mFX		=mShaderLib.Load<Effect>("Shaders/Static");
-			mPesc12	=Content.Load<SpriteFont>("Fonts/Pescadero12");
 
 			mDesu	=Content.Load<Texture2D>("Textures/desu");
 			mEureka	=Content.Load<Texture2D>("Textures/Eureka");
@@ -224,9 +234,9 @@ namespace ColladaConvert
 
 			mMF.eNukedMeshPart	+=OnNukedMeshPart;
 
-			mSteering	=new UtilityLib.PlayerSteering(mGDM.GraphicsDevice.Viewport.Width,
+			mSteering	=new PlayerSteering(mGDM.GraphicsDevice.Viewport.Width,
 				mGDM.GraphicsDevice.Viewport.Height);
-			mSteering.Method	=UtilityLib.PlayerSteering.SteeringMethod.Fly;
+			mSteering.Method	=PlayerSteering.SteeringMethod.Fly;
 			mSteering.Speed		=0.2f;
 		}
 
@@ -282,7 +292,7 @@ namespace ColladaConvert
 
 			mAnimLib.LoadKinectMotionDat(fileName);
 
-			UtilityLib.Misc.SafeInvoke(eAnimsUpdated, mAnimLib.GetAnims());
+			Misc.SafeInvoke(eAnimsUpdated, mAnimLib.GetAnims());
 		}
 
 
@@ -380,11 +390,11 @@ namespace ColladaConvert
 
 			if(bBox)
 			{
-				mBoundPrim	=UtilityLib.PrimFactory.CreateCube(mGDM.GraphicsDevice, box, null);
+				mBoundPrim	=PrimFactory.CreateCube(mGDM.GraphicsDevice, box, null);
 			}
 			else
 			{
-				mBoundPrim	=UtilityLib.PrimFactory.CreateSphere(mGDM.GraphicsDevice,
+				mBoundPrim	=PrimFactory.CreateSphere(mGDM.GraphicsDevice,
 					sphere.Center, sphere.Radius, null);
 			}
 		}
@@ -493,7 +503,7 @@ namespace ColladaConvert
 
 			mInput.Update();
 
-			UtilityLib.Input.PlayerInput	pi	=mInput.Player1;
+			Input.PlayerInput	pi	=mInput.Player1;
 
 			mSteering.Update(msDelta, mGameCam, pi.mKBS, pi.mMS, pi.mGPS);
 			
@@ -507,9 +517,9 @@ namespace ColladaConvert
 				mLZ	+=(LightZRot * msDelta);
 			}
 
-			UtilityLib.Mathery.WrapAngleDegrees(ref mLX);
-			UtilityLib.Mathery.WrapAngleDegrees(ref mLY);
-			UtilityLib.Mathery.WrapAngleDegrees(ref mLZ);
+			Mathery.WrapAngleDegrees(ref mLX);
+			Mathery.WrapAngleDegrees(ref mLY);
+			Mathery.WrapAngleDegrees(ref mLZ);
 
 			//build a matrix that spins over time
 			Matrix	mat	=Matrix.CreateFromYawPitchRoll(mLY, mLX, mLZ);
@@ -590,7 +600,7 @@ namespace ColladaConvert
 			}
 
 			mSB.Begin();
-			mSB.DrawString(mPesc12, "Coords: " + mSteering.Position,
+			mSB.DrawString(mFirstFont, "Coords: " + mSteering.Position,
 					Vector2.One * 20.0f, Color.Yellow);
 			mSB.End();
 
