@@ -51,7 +51,7 @@ namespace FullBuild
 		ConcurrentQueue<MapVisClient>	mBuildFarm	=new ConcurrentQueue<MapVisClient>();
 
 		//debug draw stuff
-		SpriteFont		mKoot;
+		Dictionary<string, SpriteFont>	mFonts;
 		Vector2			mTextPos;
 		Random			mRnd	=new Random();
 		Vector3			mDynamicLightPos;
@@ -76,7 +76,7 @@ namespace FullBuild
 		public FullBuild()
 		{
 			mGDM	=new GraphicsDeviceManager(this);
-			Content.RootDirectory	="Content";
+			Content.RootDirectory	="GameContent";
 
 			mGDM.PreferredBackBufferWidth	=848;
 			mGDM.PreferredBackBufferHeight	=480;
@@ -138,7 +138,8 @@ namespace FullBuild
 			mGameCM		=new ContentManager(Services, "GameContent");
 			mShaderLib	=new ContentManager(Services, "ShaderLib");
 			mBFX		=new BasicEffect(mGDM.GraphicsDevice);
-			mKoot		=mGameCM.Load<SpriteFont>("Fonts/Koot20");
+
+			mFonts	=UtilityLib.FileUtil.LoadAllFonts(Content);
 
 			mBFX.VertexColorEnabled	=true;
 			mBFX.LightingEnabled	=false;
@@ -330,7 +331,7 @@ namespace FullBuild
 			}
 
 			mSB.Begin();
-			mSB.DrawString(mKoot, "Coordinates: " + mPlayerControl.Position, mTextPos, Color.Yellow);
+			mSB.DrawString(mFonts.Values.First(), "Coordinates: " + mPlayerControl.Position, mTextPos, Color.Yellow);
 			mSB.End();
 
 			base.Draw(gameTime);

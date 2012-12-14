@@ -154,7 +154,7 @@ namespace ParticleEdit
 				mPB.Draw(mGCam.View, mGCam.Projection);
 			}
 
-			mSB.Begin();
+			mSB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
 
 			mSB.DrawString(mFonts.Values.First(), "Coords: " + mPS.Position, Vector2.One * 20.0f, Color.Yellow);
 

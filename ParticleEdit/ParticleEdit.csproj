@@ -131,9 +131,9 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Games\LudumDare\Ludum25WarmUp\GameContent\GameContent.contentproj">
-      <Project>{3670E0C9-F3C1-4483-851D-8B82BC333B9F}</Project>
-      <Name>GameContent %28Content%29</Name>
+    <ProjectReference Include="..\..\Games\LudumDare\Ludum25\GameContent\GameContent.contentproj">
+      <Project>{B1A6B0DF-B68A-4355-9E53-82D05B9BD3D5}</Project>
+      <Name>GameContent</Name>
       <XnaReferenceType>Content</XnaReferenceType>
     </ProjectReference>
     <ProjectReference Include="..\..\Libs\ParticleLib\ParticleLib.csproj">
