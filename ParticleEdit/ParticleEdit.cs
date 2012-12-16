@@ -211,6 +211,11 @@ namespace ParticleEdit
 
 		void OnValueChanged(object sender, EventArgs ea)
 		{
+			if(mCurSelection < 0)
+			{
+				return;
+			}
+
 			ParticleLib.Emitter	em	=mPB.GetEmitterByIndex(mCurSelection);
 			if(em == null)
 			{
