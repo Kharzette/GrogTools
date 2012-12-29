@@ -131,8 +131,8 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Games\LudumDare\Ludum25\GameContent\GameContent.contentproj">
-      <Project>{B1A6B0DF-B68A-4355-9E53-82D05B9BD3D5}</Project>
+    <ProjectReference Include="..\..\Games\FrontierFamily\GameContent\GameContent.contentproj">
+      <Project>{BCB8723F-403A-4F59-BA70-77D34EDCA31A}</Project>
       <Name>GameContent</Name>
       <XnaReferenceType>Content</XnaReferenceType>
     </ProjectReference>

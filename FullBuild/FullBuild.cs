@@ -287,7 +287,6 @@ namespace FullBuild
 
 			mGameCam.Update(-mPlayerControl.Position, mPlayerControl.Pitch, mPlayerControl.Yaw, mPlayerControl.Roll);
 
-			mMatLib.UpdateWVP(Matrix.Identity, mGameCam.View, mGameCam.Projection, mPlayerControl.Position);
 			mBFX.World		=Matrix.Identity;
 			mBFX.View		=mGameCam.View;
 			mBFX.Projection	=mGameCam.Projection;
@@ -312,7 +311,7 @@ namespace FullBuild
 
 			if(mMap != null && mVisMap != null)
 			{
-				mIndoorMesh.Draw(g, mGameCam, mPlayerControl.Position, mVisMap.IsMaterialVisibleFromPos, GetModelMatrix, RenderExternal);
+				mIndoorMesh.Draw(g, mGameCam, mVisMap.IsMaterialVisibleFromPos, GetModelMatrix, RenderExternal);
 			}
 
 			KeyboardState	kbstate	=Keyboard.GetState();
