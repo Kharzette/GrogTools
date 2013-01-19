@@ -52,17 +52,12 @@ namespace FullBuild
 
 		//debug draw stuff
 		Dictionary<string, SpriteFont>	mFonts;
-		Vector2			mTextPos;
-		Random			mRnd	=new Random();
-		Vector3			mDynamicLightPos;
-		VertexBuffer	mLineVB;
-		BasicEffect		mBFX;
-		float			mWarpFactor;
-
-		UtilityLib.Mover3	mTestMover	=new UtilityLib.Mover3();
-		bool				mbForward;
-		Vector3				mTestStart, mTestEnd;
-		float				mTestRot;
+		Vector2							mTextPos;
+		Random							mRnd	=new Random();
+		Vector3							mDynamicLightPos;
+		VertexBuffer					mLineVB;
+		BasicEffect						mBFX;
+		float							mWarpFactor;
 
 		//control / view
 		UtilityLib.GameCamera		mGameCam;
@@ -116,17 +111,6 @@ namespace FullBuild
 				mGDM.GraphicsDevice.Viewport.Height);
 
 			mPlayerControl.Method	=UtilityLib.PlayerSteering.SteeringMethod.Fly;
-
-			mTestStart	=Vector3.Zero;
-			mTestEnd	=Vector3.Zero;
-
-			mTestStart.X	=-375;
-			mTestStart.Y	=-22;
-			
-			mTestEnd.X	=-600;
-			mTestEnd.Y	=-22;
-
-			mTestMover.SetUpMove(mTestStart, mTestStart, 5.0f, 0.2f, 0.2f);
 
 			base.Initialize();
 		}
@@ -220,36 +204,6 @@ namespace FullBuild
 			}
 
 			int	msDelta	=gameTime.ElapsedGameTime.Milliseconds;
-
-			mTestRot	+=msDelta * 0.0001f;
-			mTestRot	=MathHelper.WrapAngle(mTestRot);
-
-			mTestMover.Update(msDelta);
-			if(false && mTestMover.Done())
-			{
-				mbForward	=!mbForward;
-
-				if(mbForward)
-				{
-					mTestStart.X	=-375;
-					mTestStart.Y	=-22;
-			
-					mTestEnd.X	=-600;
-					mTestEnd.Y	=-22;
-
-					mTestMover.SetUpMove(mTestStart, mTestEnd, 5.0f, 0.2f, 0.2f);
-				}
-				else
-				{
-					mTestStart.X	=-375;
-					mTestStart.Y	=-22;
-			
-					mTestEnd.X	=-600;
-					mTestEnd.Y	=-22;
-
-					mTestMover.SetUpMove(mTestEnd, mTestStart, 5.0f, 0.2f, 0.2f);
-				}
-			}
 
 			if(mModelMats != null)
 			{
