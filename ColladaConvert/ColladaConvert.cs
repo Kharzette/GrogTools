@@ -16,12 +16,10 @@ namespace ColladaConvert
 	{
 		GraphicsDeviceManager	mGDM;
 		SpriteBatch				mSB;
-		ContentManager			mGameCM, mShaderLib;
-		VertexBuffer			mVB;
-		IndexBuffer				mIB;
-		Effect					mFX;
+		ContentManager			mSLib;
 		BasicEffect				mBFX;
 		PrimObject				mBoundPrim;
+		PrimObject				mXAxis, mYAxis, mZAxis;
 
 		//fonts
 		Dictionary<string, SpriteFont>	mFonts;
@@ -32,6 +30,7 @@ namespace ColladaConvert
 		Character				mCharacter;
 		StaticMeshObject		mStaticMesh;
 		bool					mbCharacterLoaded;	//so I know which mesh obj to use
+		bool					mbDrawAxis	=true;
 		
 		PlayerSteering	mSteering;
 		GameCamera		mGameCam;
@@ -44,9 +43,6 @@ namespace ColladaConvert
 		AnimForm	mCF;
 		string		mCurrentAnimName;
 		float		mTimeScale;			//anim playback speed
-
-		Texture2D	mDesu;
-		Texture2D	mEureka;
 		Vector3		mLightDir;
 		Random		mRand	=new Random();
 
@@ -58,12 +54,13 @@ namespace ColladaConvert
 		const float	LightXRot	=0.00003f;
 		const float	LightYRot	=0.00009f;
 		const float	LightZRot	=0.00006f;
+		const float	AxisSize	=50f;
 
 
 		public ColladaConvert()
 		{
 			mGDM	=new GraphicsDeviceManager(this);
-			Content.RootDirectory	="Content";
+			Content.RootDirectory	="GameContent";
 
 			mCurrentAnimName	="";
 			mTimeScale			=1.0f;
@@ -97,6 +94,14 @@ namespace ColladaConvert
 
 			mInput	=new Input();
 
+			base.Initialize();
+		}
+
+
+		protected override void LoadContent()
+		{
+			GraphicsDevice	gd	=mGDM.GraphicsDevice;
+
 			mFonts	=FileUtil.LoadAllFonts(Content);
 			foreach(KeyValuePair<string, SpriteFont> font in mFonts)
 			{
@@ -104,97 +109,25 @@ namespace ColladaConvert
 				break;
 			}
 
-			//default cam pos off to one side
-//			Vector3	camPos	=Vector3.Zero;
-//			camPos.X	=102.0f;
-//			camPos.Y	=-96.0f;
-//			camPos.Z	=187.0f;
-
-//			mGameCam.CamPos	=-camPos;
-
-			base.Initialize();
-		}
-
-
-		protected override void LoadContent()
-		{
-			mSB			=new SpriteBatch(mGDM.GraphicsDevice);
-			mGameCM		=new ContentManager(Services, "GameContent");
-			mShaderLib	=new ContentManager(Services, "ShaderLib");
-			mMatLib		=new MaterialLib.MaterialLib(mGDM.GraphicsDevice, mGameCM, mShaderLib, true);
+			mSB			=new SpriteBatch(gd);
+			mSLib		=new ContentManager(Services, "ShaderLib");
+			mMatLib		=new MaterialLib.MaterialLib(gd, Content, mSLib, true);
 			mAnimLib	=new AnimLib();
-			mBFX		=new BasicEffect(mGDM.GraphicsDevice);
+			mBFX		=new BasicEffect(gd);
 			mCharacter	=new Character(mMatLib, mAnimLib);
 			mStaticMesh	=new StaticMeshObject(mMatLib);
 
 			mStaticMesh.SetTransform(Matrix.Identity);
 			mCharacter.SetTransform(Matrix.Identity);
 
-			//load debug shaders
-			mFX		=mShaderLib.Load<Effect>("Shaders/Static");
+			//axis boxes
+			BoundingBox	xBox	=Misc.MakeBox(AxisSize, 1f, 1f);
+			BoundingBox	yBox	=Misc.MakeBox(1f, AxisSize, 1f);
+			BoundingBox	zBox	=Misc.MakeBox(1f, 1f, AxisSize);
 
-			mDesu	=Content.Load<Texture2D>("Textures/desu");
-			mEureka	=Content.Load<Texture2D>("Textures/Eureka");
-
-			Point	topLeft, bottomRight;
-			topLeft.X		=0;
-			topLeft.Y		=0;
-			bottomRight.X	=5;
-			bottomRight.Y	=10;
-
-			//fill in some verts two quads
-			VertexPositionNormalTexture	[]verts	=new VertexPositionNormalTexture[8];
-			verts[0].Position.X	=topLeft.X;
-			verts[1].Position.X	=bottomRight.X;
-			verts[2].Position.X	=topLeft.X;
-			verts[3].Position.X	=bottomRight.X;
-
-			verts[4].Position.Z	=topLeft.X;
-			verts[5].Position.Z	=bottomRight.X;
-			verts[6].Position.Z	=topLeft.X;
-			verts[7].Position.Z	=bottomRight.X;
-
-			verts[0].Position.Y	=topLeft.Y;
-			verts[1].Position.Y	=topLeft.Y;
-			verts[2].Position.Y	=bottomRight.Y;
-			verts[3].Position.Y	=bottomRight.Y;
-
-			verts[4].Position.Y	=topLeft.Y;
-			verts[5].Position.Y	=topLeft.Y;
-			verts[6].Position.Y	=bottomRight.Y;
-			verts[7].Position.Y	=bottomRight.Y;
-
-			verts[0].TextureCoordinate	=Vector2.UnitY;
-			verts[1].TextureCoordinate	=Vector2.UnitX + Vector2.UnitY;
-			verts[3].TextureCoordinate	=Vector2.UnitX;
-			verts[4].TextureCoordinate	=Vector2.UnitY;
-			verts[5].TextureCoordinate	=Vector2.UnitX + Vector2.UnitY;
-			verts[7].TextureCoordinate	=Vector2.UnitX;
-
-			//create vertex and index buffers
-			mIB	=new IndexBuffer(mGDM.GraphicsDevice, IndexElementSize.SixteenBits, 12, BufferUsage.WriteOnly);
-			mVB	=new VertexBuffer(mGDM.GraphicsDevice, typeof(VertexPositionNormalTexture), 8, BufferUsage.WriteOnly);
-
-			//put our data into the vertex buffer
-			mVB.SetData<VertexPositionNormalTexture>(verts);
-
-			//mark the indexes
-			ushort	[]ind	=new ushort[12];
-			ind[0]	=0;
-			ind[1]	=1;
-			ind[2]	=2;
-			ind[3]	=2;
-			ind[4]	=1;
-			ind[5]	=3;
-			ind[6]	=4;
-			ind[7]	=5;
-			ind[8]	=6;
-			ind[9]	=6;
-			ind[10]	=5;
-			ind[11]	=7;
-
-			//fill in index buffer
-			mIB.SetData<ushort>(ind);
+			mXAxis	=PrimFactory.CreateCube(gd, xBox, null);
+			mYAxis	=PrimFactory.CreateCube(gd, yBox, null);
+			mZAxis	=PrimFactory.CreateCube(gd, zBox, null);
 
 			InitializeEffect();
 
@@ -216,8 +149,9 @@ namespace ColladaConvert
 			mCF.eLoadBoneMap			+=OnLoadBoneMap;
 			mCF.eBoundMesh				+=OnBoundMesh;
 			mCF.eShowBound				+=OnShowBound;
+			mCF.eShowAxis				+=OnShowAxis;
 
-			mMF	=new SharedForms.MaterialForm(mGDM.GraphicsDevice, mMatLib, true);
+			mMF	=new SharedForms.MaterialForm(gd, mMatLib, true);
 			mMF.Visible	=true;
 
 			//bind matform window position
@@ -234,7 +168,7 @@ namespace ColladaConvert
 
 			mMF.eNukedMeshPart	+=OnNukedMeshPart;
 
-			mSteering	=new PlayerSteering(mGDM.GraphicsDevice.Viewport.Width,
+			mSteering	=new PlayerSteering(gd.Viewport.Width,
 				mGDM.GraphicsDevice.Viewport.Height);
 			mSteering.Method	=PlayerSteering.SteeringMethod.Fly;
 			mSteering.Speed		=0.2f;
@@ -258,7 +192,6 @@ namespace ColladaConvert
 			mBFX.DirectionalLight1.Enabled		=false;
 			mBFX.DirectionalLight2.Enabled		=false;
 			mBFX.DirectionalLight0.DiffuseColor	=new Vector3(0.9f, 0.9f, 0.9f);
-			mBFX.Alpha							=0.5f;
 		}
 
 
@@ -338,6 +271,17 @@ namespace ColladaConvert
 			else if(which.Value == 2)
 			{
 				ReBuildBoundsDrawData(false);
+			}
+		}
+
+
+		void OnShowAxis(object sender, EventArgs ea)
+		{
+			Nullable<bool>	show	=sender as Nullable<bool>;
+
+			if(show != null)
+			{
+				mbDrawAxis	=show.Value;
 			}
 		}
 
@@ -528,10 +472,6 @@ namespace ColladaConvert
 			mLightDir	=Vector3.TransformNormal(Vector3.UnitX, mat);
 			mLightDir.Normalize();
 
-			//update it in the shader
-			mFX.Parameters["mLightDirection"].SetValue(mLightDir);
-			mFX.Parameters["mTexture"].SetValue(mDesu);
-
 			mMatLib.SetParameterOnAll("mLightDirection", mLightDir);
 
 			mMatLib.UpdateWVP(Matrix.Identity, mGameCam.View, mGameCam.Projection, mSteering.Position);
@@ -561,40 +501,30 @@ namespace ColladaConvert
 			mCharacter.Draw(g);
 			mStaticMesh.Draw(g);
 
-			g.SetVertexBuffer(mVB);
-			g.Indices	=mIB;
+			if(mbDrawAxis)
+			{
+				//X axis red
+				mBFX.AmbientLightColor	=Vector3.UnitX;
+				mXAxis.Draw(g, mBFX, mGameCam.View, mGameCam.Projection);
 
-			//default light direction
-			mLightDir.X	=-0.3f;
-			mLightDir.Y	=-1.0f;
-			mLightDir.Z	=-0.2f;
-			mLightDir.Normalize();
+				//Y axis green
+				mBFX.AmbientLightColor	=Vector3.UnitY;
+				mYAxis.Draw(g, mBFX, mGameCam.View, mGameCam.Projection);
 
-			mFX.Parameters["mLightDirection"].SetValue(mLightDir);
+				//Z axis blue
+				mBFX.AmbientLightColor	=Vector3.UnitZ;
+				mZAxis.Draw(g, mBFX, mGameCam.View, mGameCam.Projection);
+			}
 
-			g.BlendState	=BlendState.AlphaBlend;
-
-			mFX.CurrentTechnique	=mFX.Techniques[0];
-			
-			mFX.Parameters["mTexture"].SetValue(mEureka);
-
-			mFX.CurrentTechnique.Passes[0].Apply();
-
-			g.DrawIndexedPrimitives(PrimitiveType.TriangleList,
-				4, 0, 4, 0, 2);
-
-
-			mFX.Parameters["mTexture"].SetValue(mDesu);
-
-			mFX.CurrentTechnique.Passes[0].Apply();
-
-			g.DrawIndexedPrimitives(PrimitiveType.TriangleList,
-				0, 0, 4, 0, 2);
+			mBFX.AmbientLightColor	=Vector3.One;
 
 			//draw bounds if any
 			if(mBoundPrim != null)
 			{
 				mBoundPrim.World	=mStaticMesh.GetTransform();
+				mBFX.Alpha			=0.5f;
+
+				g.BlendState	=BlendState.NonPremultiplied;
 
 				mBoundPrim.Draw(g, mBFX, mGameCam.View, mGameCam.Projection);
 			}

@@ -36,6 +36,7 @@ namespace ColladaConvert
 		public event	EventHandler	eLoadBoneMap;
 		public event	EventHandler	eBoundMesh;
 		public event	EventHandler	eShowBound;
+		public event	EventHandler	eShowAxis;
 
 		public bool BakeTransforms
 		{
@@ -311,6 +312,12 @@ namespace ColladaConvert
 				ShowSphere.Checked	=false;
 			}
 			UtilityLib.Misc.SafeInvoke(eShowBound, (ShowBox.Checked)? 1 : 0);
+		}
+
+
+		void OnAxisDrawChanged(object sender, EventArgs e)
+		{
+			UtilityLib.Misc.SafeInvoke(eShowAxis, DrawAxis.Checked);
 		}
 
 

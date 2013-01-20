@@ -60,6 +60,7 @@
 			this.groupBox7 = new System.Windows.Forms.GroupBox();
 			this.Optimize = new System.Windows.Forms.Button();
 			this.Shadowize = new System.Windows.Forms.Button();
+			this.DrawAxis = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this.AnimGrid)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.TimeScale)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.MaxError)).BeginInit();
@@ -96,9 +97,9 @@
 			// AnimGrid
 			// 
 			this.AnimGrid.AllowUserToAddRows = false;
-			this.AnimGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+			this.AnimGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+						| System.Windows.Forms.AnchorStyles.Left)
+						| System.Windows.Forms.AnchorStyles.Right)));
 			this.AnimGrid.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
 			this.AnimGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
 			this.AnimGrid.Location = new System.Drawing.Point(11, 13);
@@ -451,12 +452,26 @@
 			this.Shadowize.Text = "Shadowize";
 			this.Shadowize.UseVisualStyleBackColor = true;
 			// 
+			// DrawAxis
+			// 
+			this.DrawAxis.AutoSize = true;
+			this.DrawAxis.Checked = true;
+			this.DrawAxis.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.DrawAxis.Location = new System.Drawing.Point(419, 394);
+			this.DrawAxis.Name = "DrawAxis";
+			this.DrawAxis.Size = new System.Drawing.Size(73, 17);
+			this.DrawAxis.TabIndex = 24;
+			this.DrawAxis.Text = "Draw Axis";
+			this.DrawAxis.UseVisualStyleBackColor = true;
+			this.DrawAxis.CheckedChanged += new System.EventHandler(this.OnAxisDrawChanged);
+			// 
 			// AnimForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(529, 442);
 			this.ControlBox = false;
+			this.Controls.Add(this.DrawAxis);
 			this.Controls.Add(this.groupBox7);
 			this.Controls.Add(this.BoundGroup);
 			this.Controls.Add(this.groupBox6);
@@ -487,6 +502,7 @@
 			this.BoundGroup.PerformLayout();
 			this.groupBox7.ResumeLayout(false);
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 
@@ -524,5 +540,6 @@
 		private System.Windows.Forms.Button Optimize;
 		private System.Windows.Forms.Button Shadowize;
 		private System.Windows.Forms.CheckBox BakeVerts;
+		private System.Windows.Forms.CheckBox DrawAxis;
 	}
 }
