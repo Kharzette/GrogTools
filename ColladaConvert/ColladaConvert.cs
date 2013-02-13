@@ -51,9 +51,9 @@ namespace ColladaConvert
 
 		public static event EventHandler	eAnimsUpdated;
 
-		const float	LightXRot	=0.00003f;
-		const float	LightYRot	=0.00009f;
-		const float	LightZRot	=0.00006f;
+		const float	LightXRot	=0.003f;
+		const float	LightYRot	=0.009f;
+		const float	LightZRot	=0.006f;
 		const float	AxisSize	=50f;
 
 
