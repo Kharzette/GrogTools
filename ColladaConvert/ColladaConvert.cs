@@ -12,7 +12,7 @@ using MeshLib;
 
 namespace ColladaConvert
 {
-	public class ColladaConvert : Microsoft.Xna.Framework.Game
+	public class ColladaConvert : Game
 	{
 		GraphicsDeviceManager	mGDM;
 		SpriteBatch				mSB;
