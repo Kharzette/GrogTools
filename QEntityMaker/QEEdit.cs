@@ -11,7 +11,19 @@ namespace QEntityMaker
 {
 	public partial class QEEdit : Form
 	{
+		//editable key value pair
+		class EntityKVP
+		{
+			public string	Key		{ get; set; }
+			public string	Value	{ get; set; }
+		}
+
 		OpenFileDialog	mOFD	=new OpenFileDialog();
+
+		const string	EntityFolder	="GrogLibs Entities.qtxfolder";
+
+		BindingList<EntityKVP>	mSelectedEntityFields
+			=new BindingList<EntityKVP>();
 
 
 		public QEEdit()
@@ -205,6 +217,81 @@ namespace QEntityMaker
 			fs.Close();
 
 			ParseTree(fileContents);
+		}
+
+
+		bool IsInEntityFolder(TreeNode tn)
+		{
+			if(tn == null)
+			{
+				return	false;
+			}
+
+			if(tn.Text.StartsWith(EntityFolder))
+			{
+				return	true;
+			}
+
+			if(tn.Parent == null)
+			{
+				return	false;
+			}
+			return	IsInEntityFolder(tn.Parent);
+		}
+
+
+		void PopulateFieldGrid(TreeNode tn)
+		{
+			//start over
+//			EntityFields.Rows.Clear();
+//			EntityFields.Columns.Clear();
+
+			EntityFields.DataSource	=null;
+
+			mSelectedEntityFields.Clear();
+
+			//fill in data
+			foreach(TreeNode kid in tn.Nodes)
+			{
+				//skip tree nodes
+				if(kid.Nodes.Count > 0)
+				{
+					continue;
+				}
+
+				EntityKVP	ekvp	=new EntityKVP();
+
+				ekvp.Key	=kid.Text;
+				ekvp.Value	=(string)kid.Tag;
+
+				mSelectedEntityFields.Add(ekvp);
+			}
+
+			EntityFields.DataSource	=mSelectedEntityFields;
+		}
+
+
+		void OnAfterSelect(object sender, TreeViewEventArgs e)
+		{
+			//see if this is an entity
+			if(!IsInEntityFolder(e.Node.Parent))
+			{
+				return;
+			}
+
+			//make sure not a foldery thing
+			if(e.Node.Text.Contains("*"))
+			{
+				return;
+			}
+
+			//make sure not an entity subfield
+			if(!e.Node.Text.Contains(":e"))
+			{
+				return;
+			}
+
+			PopulateFieldGrid(e.Node);
 		}
 	}
 }
