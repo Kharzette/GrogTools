@@ -22,6 +22,8 @@ namespace QEntityMaker
 
 		OpenFileDialog	mOFD	=new OpenFileDialog();
 
+		string	mRenameEnd	="";
+
 		const string	EntityFolder	="GrogLibs Entities.qtxfolder";
 
 
@@ -40,7 +42,7 @@ namespace QEntityMaker
 				Properties.Settings.Default, "QuarkEntityFile", true,
 				DataSourceUpdateMode.OnPropertyChanged));
 
-			QuarkEntityFile.TextChanged	+=OnQEFTextChanged;
+			QuarkEntityFile.TextChanged	+=OnQEFTextChanged;			
 		}
 
 
@@ -249,6 +251,10 @@ namespace QEntityMaker
 			fs.Close();
 
 			ParseTree(fileContents);
+
+			EntityTree.ExpandAll();
+
+			EntityTree.TopNode	=EntityTree.Nodes[0];
 		}
 
 
@@ -280,6 +286,10 @@ namespace QEntityMaker
 
 		void OnAfterSelect(object sender, TreeViewEventArgs e)
 		{
+			AddGroupBox.Enabled		=false;
+			DeleteEntity.Enabled	=false;
+			RenameGroupBox.Enabled	=false;
+
 			//see if this is an entity
 			if(!IsInEntityFolder(e.Node.Parent))
 			{
@@ -289,16 +299,18 @@ namespace QEntityMaker
 			//make sure not a foldery thing
 			if(e.Node.Text.Contains("*"))
 			{
+				AddGroupBox.Enabled		=true;
 				return;
 			}
 
 			//make sure not an entity subfield
-			if(!e.Node.Text.Contains(":e"))
+			if(e.Node.Text.Contains(":e")
+				|| e.Node.Text.Contains(":b"))
 			{
-				return;
+				PopulateFieldGrid(e.Node);
+				DeleteEntity.Enabled	=true;
+				RenameGroupBox.Enabled	=true;
 			}
-
-			PopulateFieldGrid(e.Node);
 		}
 
 
@@ -503,6 +515,134 @@ namespace QEntityMaker
 
 			EntityTree.Enabled		=true;
 			EntityFields.Enabled	=true;
+		}
+
+
+		void OnAddEntity(object sender, EventArgs e)
+		{
+			TreeNode	tn	=new TreeNode();
+
+			TreeNode	mom	=EntityTree.SelectedNode;
+
+			//grab the category text
+			string	cat	=mom.Text;
+
+			cat	=cat.ToLower();
+
+			int	catIndex	=cat.IndexOf("_");
+
+			cat	=cat.Substring(0, catIndex);
+
+			tn.Text	=cat + "_new:e =";
+
+			BindingList<EntityKVP>	kvps	=new BindingList<EntityKVP>();
+
+			if(AutoAddOrigin.Checked)
+			{
+				EntityKVP	kvp	=new EntityKVP();
+
+				kvp.Key		="origin";
+				kvp.Value	="0 0 0";
+
+				kvps.Add(kvp);
+			}
+
+			if(AutoAddMeshName.Checked)
+			{
+				EntityKVP	kvp	=new EntityKVP();
+
+				kvp.Key		="meshname";
+				kvp.Value	="Default.Static";
+
+				kvps.Add(kvp);
+			}
+
+			if(AutoAddDesc.Checked)
+			{
+				EntityKVP	kvp	=new EntityKVP();
+
+				kvp.Key		=";desc";
+				kvp.Value	="An automatically generated description";
+
+				kvps.Add(kvp);
+			}
+
+			tn.Tag	=kvps;
+
+			mom.Nodes.Add(tn);
+		}
+
+
+		void OnDeleteEntity(object sender, EventArgs e)
+		{
+			EntityTree.SelectedNode.Parent.Nodes.Remove(EntityTree.SelectedNode);
+		}
+
+
+		void OnRenameEntity(object sender, EventArgs e)
+		{
+			string	name	=EntityTree.SelectedNode.Text;
+
+			//chop off the end stuff
+			int	colonPos	=name.IndexOf(':');
+
+			mRenameEnd	=name.Substring(colonPos);
+
+			RenameBox.Text		=name.Substring(0, colonPos);
+			RenameBox.Enabled	=true;
+
+			RenameBox.Leave	+=OnRenameDone;
+
+			RenameBox.Focus();
+		}
+
+
+		void OnRenameDone(object sender, EventArgs ea)
+		{
+			RenameDone(RenameBox.Text);
+		}
+
+
+		void RenameDone(string name)
+		{
+			RenameBox.Enabled	=false;
+			
+			EntityTree.SelectedNode.Text	=name + mRenameEnd;
+
+			RenameBox.Text	="";
+
+			RenameBox.Leave	-=OnRenameDone;
+		}
+
+
+		void OnRenameBoxKey(object sender, KeyPressEventArgs e)
+		{
+			char	pressed	=e.KeyChar;
+
+			if(pressed == '\r')
+			{
+				RenameDone(RenameBox.Text);
+				e.Handled	=true;
+			}
+		}
+
+
+		void OnTreeKeyUp(object sender, KeyEventArgs e)
+		{
+			if(!EntityTree.Focused)
+			{
+				return;
+			}
+
+			if(e.KeyCode == Keys.Delete)
+			{
+				EntityTree.SelectedNode.Parent.Nodes.Remove(EntityTree.SelectedNode);
+				e.Handled	=true;
+			}
+			else if(e.KeyCode == Keys.F2)
+			{
+				OnRenameEntity(null, null);
+			}
 		}
 	}
 }
