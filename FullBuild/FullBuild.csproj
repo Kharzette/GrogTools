@@ -137,9 +137,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Games\OneGameAMonth\Pratformer\GameContent\GameContent.contentproj">
-      <Project>{1034B9E1-06BC-4E79-818C-B3A403A3A5CF}</Project>
-      <Name>GameContent %28Content%29</Name>
+    <ProjectReference Include="..\..\Games\OneGameAMonth\RichKids\GameContent\GameContent.contentproj">
+      <Project>{DBAB4CD9-A906-4354-8400-03E6BD834CA5}</Project>
+      <Name>GameContent</Name>
       <XnaReferenceType>Content</XnaReferenceType>
     </ProjectReference>
     <ProjectReference Include="..\..\Libs\BSPCore\BSPCore32.csproj">

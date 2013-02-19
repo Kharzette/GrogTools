@@ -665,7 +665,7 @@ namespace QEntityMaker
 
 			usual.mbUsesSingleQuotes	=true;
 			usual.Key					="bbox";
-			usual.Value					="-16 -16 -24 16 16 32";
+			usual.Value					="-16 -16 -16 16 16 16";
 			formStuff.Add(usual);
 
 			form.Tag	=formStuff;

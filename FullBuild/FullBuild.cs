@@ -50,14 +50,16 @@ namespace FullBuild
 		List<string>					mEndPoints	=new List<string>();
 		ConcurrentQueue<MapVisClient>	mBuildFarm	=new ConcurrentQueue<MapVisClient>();
 
+		//ordered list of fonts
+		IOrderedEnumerable<KeyValuePair<string, SpriteFont>>	mFonts;
+
 		//debug draw stuff
-		Dictionary<string, SpriteFont>	mFonts;
-		Vector2							mTextPos;
-		Random							mRnd	=new Random();
-		Vector3							mDynamicLightPos;
-		VertexBuffer					mLineVB;
-		BasicEffect						mBFX;
-		float							mWarpFactor;
+		Vector2			mTextPos;
+		Random			mRnd	=new Random();
+		Vector3			mDynamicLightPos;
+		VertexBuffer	mLineVB;
+		BasicEffect		mBFX;
+		float			mWarpFactor;
 
 		//control / view
 		UtilityLib.GameCamera		mGameCam;
@@ -123,7 +125,9 @@ namespace FullBuild
 			mShaderLib	=new ContentManager(Services, "ShaderLib");
 			mBFX		=new BasicEffect(mGDM.GraphicsDevice);
 
-			mFonts	=UtilityLib.FileUtil.LoadAllFonts(Content);
+			Dictionary<string, SpriteFont>	fonts	=UtilityLib.FileUtil.LoadAllFonts(Content);
+
+			mFonts	=fonts.OrderBy(fnt => fnt.Value.LineSpacing);
 
 			mBFX.VertexColorEnabled	=true;
 			mBFX.LightingEnabled	=false;
@@ -284,7 +288,7 @@ namespace FullBuild
 			}
 
 			mSB.Begin();
-			mSB.DrawString(mFonts.Values.First(), "Coordinates: " + mPlayerControl.Position, mTextPos, Color.Yellow);
+			mSB.DrawString(mFonts.First().Value, "Coordinates: " + mPlayerControl.Position, mTextPos, Color.Yellow);
 			mSB.End();
 
 			base.Draw(gameTime);
