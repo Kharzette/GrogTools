@@ -22,9 +22,6 @@ namespace QEntityMaker
 
 		const string	EntityFolder	="GrogLibs Entities.qtxfolder";
 
-		BindingList<EntityKVP>	mSelectedEntityFields
-			=new BindingList<EntityKVP>();
-
 
 		public QEEdit()
 		{
@@ -81,7 +78,7 @@ namespace QEntityMaker
 		}
 
 
-		void ParseGuts(string file, TreeNode node)
+		BindingList<EntityKVP> ParseGuts(string file, TreeNode node)
 		{
 			//check for { }
 			int	open	=file.IndexOf('{');
@@ -89,17 +86,44 @@ namespace QEntityMaker
 
 			file	=file.Trim();
 
+			BindingList<EntityKVP>	kvps	=new BindingList<EntityKVP>();
+
 			while(true)
 			{
 				int	nextNewLine	=file.IndexOf('\n');
 
 				string	gut	=file.Substring(0, nextNewLine);
 
+				int	eqPosPreTrim	=gut.IndexOf('=');
+
+				gut	=gut.Trim();
+
 				int	eqPos	=gut.IndexOf('=');
 
-				if(eqPos == -1 || eqPos == (nextNewLine - 1))
+				if(eqPos == -1 || eqPosPreTrim == (nextNewLine - 1) || gut.StartsWith("\""))
 				{
-					return;
+					//watch for double lines
+					if(gut.StartsWith("\""))
+					{
+						//trim crap and quotes
+						if(gut.EndsWith("\""))
+						{
+							gut	=gut.Substring(1, gut.Length - 2);
+						}
+						else
+						{
+							gut	=gut.Substring(1, gut.Length - 1);
+							gut	+="\"";
+						}
+
+						//tack onto end of previous value
+						kvps[kvps.Count - 1].Value	+=gut;
+
+						//advance
+						file	=file.Substring(nextNewLine + 1);
+						continue;
+					}
+					return	kvps;
 				}
 
 				string	key	=gut.Substring(0, eqPos - 1);
@@ -113,13 +137,12 @@ namespace QEntityMaker
 				//trim quotes
 				value	=value.Substring(1, value.Length - 2);
 
-				TreeNode	kid	=new TreeNode();
+				EntityKVP	ekvp	=new EntityKVP();
 
-				kid.Text		=key;
-				kid.Tag			=value;
-				kid.ToolTipText	=value;
+				ekvp.Key	=key;
+				ekvp.Value	=value;
 
-				node.Nodes.Add(kid);
+				kvps.Add(ekvp);
 
 				file	=file.Substring(nextNewLine + 1);
 			}
@@ -147,7 +170,7 @@ namespace QEntityMaker
 
 					file	=file.Substring(open + 1);
 
-					ParseGuts(file, tn);
+					tn.Tag	=ParseGuts(file, tn);
 
 					parent.Nodes.Add(tn);
 
@@ -181,6 +204,8 @@ namespace QEntityMaker
 				tn.Text	=PreviousLine(file, open);
 
 				file	=file.Substring(open + 1);
+
+				tn.Tag	=ParseGuts(file, tn);
 
 				EntityTree.Nodes.Add(tn);
 
@@ -242,32 +267,7 @@ namespace QEntityMaker
 
 		void PopulateFieldGrid(TreeNode tn)
 		{
-			//start over
-//			EntityFields.Rows.Clear();
-//			EntityFields.Columns.Clear();
-
-			EntityFields.DataSource	=null;
-
-			mSelectedEntityFields.Clear();
-
-			//fill in data
-			foreach(TreeNode kid in tn.Nodes)
-			{
-				//skip tree nodes
-				if(kid.Nodes.Count > 0)
-				{
-					continue;
-				}
-
-				EntityKVP	ekvp	=new EntityKVP();
-
-				ekvp.Key	=kid.Text;
-				ekvp.Value	=(string)kid.Tag;
-
-				mSelectedEntityFields.Add(ekvp);
-			}
-
-			EntityFields.DataSource	=mSelectedEntityFields;
+			EntityFields.DataSource	=tn.Tag;
 		}
 
 
@@ -292,6 +292,203 @@ namespace QEntityMaker
 			}
 
 			PopulateFieldGrid(e.Node);
+		}
+
+
+		int SpaceOver(StreamWriter sw, int depth)
+		{
+			int	ret	=0;
+			for(int i=0;i < depth;i++)
+			{
+				sw.Write("  ");
+				ret	+=2;
+			}
+			return	ret;
+		}
+
+
+		//split long strings into chunks with the hex codes pulled out
+		List<string>	SplitUpValue(string value)
+		{
+			List<string>	ret	=new List<string>();
+
+			while(true)
+			{
+				int	hexPos	=value.IndexOf("\"$0D\"");
+				if(hexPos == -1)
+				{
+					ret.Add(value);
+					break;
+				}
+
+				string	part	=value.Substring(0, hexPos);
+
+				ret.Add(part);
+
+				string	hex	=value.Substring(hexPos, 5);
+
+				ret.Add(hex);
+
+				if(value.Length < (hexPos + 5))
+				{
+					break;
+				}
+
+				value	=value.Substring(hexPos + 5);
+			}
+
+			return	ret;
+		}
+
+
+		void WriteRecursive(StreamWriter sw, TreeNode tn, int depth)
+		{
+			SpaceOver(sw, depth - 1);
+
+			sw.Write(tn.Text + "\n");
+
+			SpaceOver(sw, depth - 1);
+
+			sw.Write("{\n");
+
+			if(tn.Tag != null)
+			{
+				BindingList<EntityKVP>	tagged	=tn.Tag as BindingList<EntityKVP>;
+
+				foreach(EntityKVP ekvp in tagged)
+				{
+					int	width	=SpaceOver(sw, depth);
+
+					//measure width, quark has problems with wide strings
+					int	keyWidth	=width + ekvp.Key.Length + 4;
+
+					if((keyWidth + ekvp.Value.Length) < 80)
+					{
+						sw.Write(ekvp.Key + " = \"" + ekvp.Value + "\"\n");
+					}
+					else
+					{
+						//write the key
+						sw.Write(ekvp.Key + " = \"");
+
+						//hex codes in the strings are a problem
+						//quark likes 80 wide stuff, but if a hex code
+						//occurs, it doesn't split them
+						List<string>	chunks	=SplitUpValue(ekvp.Value);
+
+						int	totalWidth	=keyWidth + (ekvp.Value.Length + 1);
+						int	endPoint	=78 - keyWidth;
+
+						//write chunks out to a width of 80
+						for(int i=0;i < chunks.Count;i++)
+						{
+							string	chunk	=chunks[i];
+
+							if((chunk.Length + keyWidth) < 80)
+							{
+								sw.Write(chunk);
+								keyWidth	+=chunk.Length;
+							}
+							else
+							{
+								//break over onto another line
+								//but if this chunk is a hex code,
+								//don't split it
+								if(chunk == "\"$0D\"")
+								{
+									//move to next line
+									sw.Write("\"\n");
+
+									int	beg	=SpaceOver(sw, depth);
+
+									//additional space and quote
+									sw.Write(" \"");
+									beg	+=2;
+
+									keyWidth	=beg;
+
+									//back up one and iterate
+									i--;
+								}
+								else
+								{
+									while(true)
+									{
+										if((chunk.Length + keyWidth) < 80)
+										{
+											sw.Write(chunk);
+											keyWidth	+=chunk.Length;
+											break;
+										}
+										string	chopped	=chunk.Substring(0, 78 - keyWidth);
+
+										//write a split chunk
+										sw.Write(chopped + "\"\n");
+
+										int	beg	=SpaceOver(sw, depth);
+
+										//additional space and quote
+										sw.Write(" \"");
+										beg	+=2;
+
+										if(chunk.Length <= (78 - keyWidth))
+										{
+											break;
+										}
+
+										chunk	=chunk.Substring(78 - keyWidth);
+
+										keyWidth	=beg;
+									}
+								}
+							}
+						}
+
+						//write "\n
+						sw.Write("\"\n");
+					}
+				}
+			}
+
+			foreach(TreeNode kid in tn.Nodes)
+			{
+				WriteRecursive(sw, kid, depth + 1);
+			}
+
+			SpaceOver(sw, depth - 1);
+
+			sw.Write("}\n");
+
+			return;
+		}
+
+
+		void OnSave(object sender, EventArgs e)
+		{
+			if(QuarkEntityFile.Text == null || QuarkEntityFile.Text == "")
+			{
+				return;
+			}
+
+			FileStream	fs	=new FileStream(QuarkEntityFile.Text, FileMode.Create, FileAccess.Write);
+			if(fs == null)
+			{
+				EntityTree.Nodes.Add("Can't open " + QuarkEntityFile.Text);
+				return;
+			}
+
+			EntityTree.Enabled		=false;
+			EntityFields.Enabled	=false;
+
+			StreamWriter	sw	=new StreamWriter(fs);
+
+			WriteRecursive(sw, EntityTree.Nodes[0], 1);
+
+			sw.Close();
+			fs.Close();
+
+			EntityTree.Enabled		=true;
+			EntityFields.Enabled	=true;
 		}
 	}
 }

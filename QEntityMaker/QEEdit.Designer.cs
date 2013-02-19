@@ -88,6 +88,7 @@
 			this.Save.TabIndex = 11;
 			this.Save.Text = "Save";
 			this.Save.UseVisualStyleBackColor = true;
+			this.Save.Click += new System.EventHandler(this.OnSave);
 			// 
 			// QEEdit
 			// 
