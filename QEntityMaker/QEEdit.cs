@@ -25,6 +25,16 @@ namespace QEntityMaker
 		string	mRenameEnd	="";
 
 		const string	EntityFolder	="GrogLibs Entities.qtxfolder";
+		const string	FormsFolder		="Entity forms.fctx";
+
+		//hints
+		const string	AngleHint		="Rotation about Y in degrees";
+		const string	AnglesHint		="Specifies a facing direction in 3 dimensions, defined by pitch, yaw, and roll. (Default=0 0 0).";
+		const string	DelayHint		="Specifies a delay in seconds before firing";
+		const string	TargetHint		="Targetname of the entity to be triggered";
+		const string	TargetNameHint	="Name of this entity for targeting by others";
+		const string	MessageHint		="A string message to display";
+		const string	MeshNameHint	="Name of the mesh to render, usually something.Static";
 
 
 		public QEEdit()
@@ -258,14 +268,14 @@ namespace QEntityMaker
 		}
 
 
-		bool IsInEntityFolder(TreeNode tn)
+		bool IsInFolder(TreeNode tn, string folderName)
 		{
 			if(tn == null)
 			{
 				return	false;
 			}
 
-			if(tn.Text.StartsWith(EntityFolder))
+			if(tn.Text.StartsWith(folderName))
 			{
 				return	true;
 			}
@@ -274,7 +284,7 @@ namespace QEntityMaker
 			{
 				return	false;
 			}
-			return	IsInEntityFolder(tn.Parent);
+			return	IsInFolder(tn.Parent, folderName);
 		}
 
 
@@ -291,9 +301,13 @@ namespace QEntityMaker
 			RenameGroupBox.Enabled	=false;
 
 			//see if this is an entity
-			if(!IsInEntityFolder(e.Node.Parent))
+			if(!IsInFolder(e.Node.Parent, EntityFolder))
 			{
-				return;
+				//see if in forms folder
+				if(!IsInFolder(e.Node.Parent, FormsFolder))
+				{
+					return;
+				}
 			}
 
 			//make sure not a foldery thing
@@ -303,13 +317,19 @@ namespace QEntityMaker
 				return;
 			}
 
-			//make sure not an entity subfield
+			//check for entity subfield
 			if(e.Node.Text.Contains(":e")
 				|| e.Node.Text.Contains(":b"))
 			{
 				PopulateFieldGrid(e.Node);
 				DeleteEntity.Enabled	=true;
 				RenameGroupBox.Enabled	=true;
+			}
+			else if(e.Node.Text.Contains(":form")
+				|| e.Node.Parent.Text.Contains(":form"))
+			{
+				//for editing of forms
+				PopulateFieldGrid(e.Node);
 			}
 		}
 
@@ -532,8 +552,9 @@ namespace QEntityMaker
 			int	catIndex	=cat.IndexOf("_");
 
 			cat	=cat.Substring(0, catIndex);
+			cat	+="_new";
 
-			tn.Text	=cat + "_new:e =";
+			tn.Text	=cat + ":e =";
 
 			BindingList<EntityKVP>	kvps	=new BindingList<EntityKVP>();
 
@@ -569,13 +590,180 @@ namespace QEntityMaker
 
 			tn.Tag	=kvps;
 
+			if(AutoAddForm.Checked)
+			{
+				AddFormForEntity(tn, cat);
+			}
+
 			mom.Nodes.Add(tn);
+		}
+
+
+		TreeNode	FindNode(TreeNode tree, string name)
+		{
+			if(tree.Text.StartsWith(name))
+			{
+				return	tree;
+			}
+
+			foreach(TreeNode kid in tree.Nodes)
+			{
+				TreeNode	ret	=FindNode(kid, name);
+				if(ret != null)
+				{
+					return	ret;
+				}
+			}
+			return	null;
+		}
+
+
+		TreeNode CreateBasicFormNode(string title, string hint)
+		{
+			TreeNode	ret	=new TreeNode();
+
+			ret.Text	=title + ": =";
+
+			BindingList<EntityKVP>	stuff	=new BindingList<EntityKVP>();
+
+			EntityKVP	usual	=new EntityKVP();
+
+			usual.Key	="Txt";
+			usual.Value	="&";
+			stuff.Add(usual);
+
+			usual	=new EntityKVP();
+
+			usual.Key	="Hint";
+			usual.Value	=hint;
+			stuff.Add(usual);
+
+			ret.Tag	=stuff;
+
+			return	ret;
+		}
+
+
+		void AddFormForEntity(TreeNode tn, string entName)
+		{
+			TreeNode	forms	=FindNode(EntityTree.Nodes[0], FormsFolder);
+
+			TreeNode	form	=new TreeNode();
+
+			form.Text	=entName + ":form =";
+
+			BindingList<EntityKVP>	formStuff	=new BindingList<EntityKVP>();
+
+			//add the usual help and bbox
+			EntityKVP	usual	=new EntityKVP();
+
+			usual.Key	="Help";
+			usual.Value	="A newly created Entity type.";
+			formStuff.Add(usual);
+
+			usual	=new EntityKVP();
+
+			usual.mbUsesSingleQuotes	=true;
+			usual.Key					="bbox";
+			usual.Value					="-16 -16 -24 16 16 32";
+			formStuff.Add(usual);
+
+			form.Tag	=formStuff;
+
+			foreach(EntityKVP kvp in tn.Tag as BindingList<EntityKVP>)
+			{
+				if(kvp.Key == "origin")
+				{
+					continue;
+				}
+
+				if(kvp.Key == "angle")
+				{
+					form.Nodes.Add(CreateBasicFormNode(kvp.Key, AngleHint));
+				}
+				else if(kvp.Key == "angles")
+				{
+					form.Nodes.Add(CreateBasicFormNode(kvp.Key, AnglesHint));
+				}
+				else if(kvp.Key == "delay")
+				{
+					form.Nodes.Add(CreateBasicFormNode(kvp.Key, DelayHint));
+				}
+				else if(kvp.Key == "target")
+				{
+					form.Nodes.Add(CreateBasicFormNode(kvp.Key, TargetHint));
+				}
+				else if(kvp.Key == "targetname")
+				{
+					form.Nodes.Add(CreateBasicFormNode(kvp.Key, TargetNameHint));
+				}
+				else if(kvp.Key == "message")
+				{
+					form.Nodes.Add(CreateBasicFormNode(kvp.Key, MessageHint));
+				}
+				else if(kvp.Key == "meshname")
+				{
+					form.Nodes.Add(CreateBasicFormNode(kvp.Key, MeshNameHint));
+				}
+				else if(kvp.Key == ";desc")
+				{
+					form.Nodes.Add(CreateBasicFormNode(kvp.Key, kvp.Value));
+				}
+				else
+				{
+					form.Nodes.Add(CreateBasicFormNode(kvp.Key, "An unknown field of some sort"));
+				}
+			}
+
+			forms.Nodes.Add(form);
+		}
+
+
+		void DeleteFormForEntity(TreeNode toNuke)
+		{
+			string	formName	=toNuke.Text;
+
+			int	colonPos	=formName.IndexOf(':');
+
+			formName	=formName.Substring(0, colonPos);
+			formName	+=":form =";
+
+			TreeNode	formNode	=FindNode(EntityTree.Nodes[0], formName);
+
+			if(formNode != null)
+			{
+				formNode.Remove();
+			}
+		}
+
+
+		void RenameFormForEntity(TreeNode toRename, string newName)
+		{
+			string	formName	=toRename.Text;
+
+			int	colonPos	=formName.IndexOf(':');
+
+			formName	=formName.Substring(0, colonPos);
+			formName	+=":form =";
+
+			TreeNode	formNode	=FindNode(EntityTree.Nodes[0], formName);
+
+			if(formNode != null)
+			{
+				formNode.Text	=newName + ":form =";
+			}
 		}
 
 
 		void OnDeleteEntity(object sender, EventArgs e)
 		{
-			EntityTree.SelectedNode.Parent.Nodes.Remove(EntityTree.SelectedNode);
+			TreeNode	toNuke	=EntityTree.SelectedNode;
+
+			//nuke the form if it is there
+			DeleteFormForEntity(toNuke);
+
+			//remove from tree
+			toNuke.Remove();
 		}
 
 
@@ -606,6 +794,8 @@ namespace QEntityMaker
 		void RenameDone(string name)
 		{
 			RenameBox.Enabled	=false;
+
+			RenameFormForEntity(EntityTree.SelectedNode, name);
 			
 			EntityTree.SelectedNode.Text	=name + mRenameEnd;
 
@@ -636,7 +826,7 @@ namespace QEntityMaker
 
 			if(e.KeyCode == Keys.Delete)
 			{
-				EntityTree.SelectedNode.Parent.Nodes.Remove(EntityTree.SelectedNode);
+				OnDeleteEntity(null, null);
 				e.Handled	=true;
 			}
 			else if(e.KeyCode == Keys.F2)

@@ -45,6 +45,7 @@
 			this.AddGroupBox = new System.Windows.Forms.GroupBox();
 			this.RenameGroupBox = new System.Windows.Forms.GroupBox();
 			this.RenameBox = new System.Windows.Forms.TextBox();
+			this.AutoAddForm = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this.EntityFields)).BeginInit();
 			this.AddGroupBox.SuspendLayout();
 			this.RenameGroupBox.SuspendLayout();
@@ -122,7 +123,7 @@
 			// 
 			this.DeleteEntity.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.DeleteEntity.Enabled = false;
-			this.DeleteEntity.Location = new System.Drawing.Point(511, 137);
+			this.DeleteEntity.Location = new System.Drawing.Point(511, 167);
 			this.DeleteEntity.Name = "DeleteEntity";
 			this.DeleteEntity.Size = new System.Drawing.Size(75, 23);
 			this.DeleteEntity.TabIndex = 13;
@@ -158,6 +159,8 @@
 			// AutoAddMeshName
 			// 
 			this.AutoAddMeshName.AutoSize = true;
+			this.AutoAddMeshName.Checked = true;
+			this.AutoAddMeshName.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.AutoAddMeshName.Location = new System.Drawing.Point(6, 42);
 			this.AutoAddMeshName.Name = "AutoAddMeshName";
 			this.AutoAddMeshName.Size = new System.Drawing.Size(125, 17);
@@ -182,6 +185,7 @@
 			// AddGroupBox
 			// 
 			this.AddGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.AddGroupBox.Controls.Add(this.AutoAddForm);
 			this.AddGroupBox.Controls.Add(this.AutoAddOrigin);
 			this.AddGroupBox.Controls.Add(this.AutoAddDesc);
 			this.AddGroupBox.Controls.Add(this.AutoAddMeshName);
@@ -189,7 +193,7 @@
 			this.AddGroupBox.Enabled = false;
 			this.AddGroupBox.Location = new System.Drawing.Point(386, 41);
 			this.AddGroupBox.Name = "AddGroupBox";
-			this.AddGroupBox.Size = new System.Drawing.Size(200, 90);
+			this.AddGroupBox.Size = new System.Drawing.Size(200, 120);
 			this.AddGroupBox.TabIndex = 19;
 			this.AddGroupBox.TabStop = false;
 			this.AddGroupBox.Text = "Add Entity";
@@ -201,7 +205,7 @@
 			this.RenameGroupBox.Controls.Add(this.RenameEntity);
 			this.RenameGroupBox.Controls.Add(this.RenameBox);
 			this.RenameGroupBox.Enabled = false;
-			this.RenameGroupBox.Location = new System.Drawing.Point(386, 166);
+			this.RenameGroupBox.Location = new System.Drawing.Point(386, 196);
 			this.RenameGroupBox.Name = "RenameGroupBox";
 			this.RenameGroupBox.Size = new System.Drawing.Size(200, 84);
 			this.RenameGroupBox.TabIndex = 20;
@@ -218,6 +222,19 @@
 			this.RenameBox.Size = new System.Drawing.Size(141, 20);
 			this.RenameBox.TabIndex = 15;
 			this.RenameBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.OnRenameBoxKey);
+			// 
+			// AutoAddForm
+			// 
+			this.AutoAddForm.AutoSize = true;
+			this.AutoAddForm.Checked = true;
+			this.AutoAddForm.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.AutoAddForm.Location = new System.Drawing.Point(6, 89);
+			this.AutoAddForm.Name = "AutoAddForm";
+			this.AutoAddForm.Size = new System.Drawing.Size(96, 17);
+			this.AutoAddForm.TabIndex = 19;
+			this.AutoAddForm.Text = "Auto Add Form";
+			this.mTips.SetToolTip(this.AutoAddForm, "Adds a form to the Form section, giving a bounding box and hints in QuArK");
+			this.AutoAddForm.UseVisualStyleBackColor = true;
 			// 
 			// QEEdit
 			// 
@@ -262,6 +279,7 @@
 		private System.Windows.Forms.CheckBox AutoAddDesc;
 		private System.Windows.Forms.GroupBox AddGroupBox;
 		private System.Windows.Forms.GroupBox RenameGroupBox;
+		private System.Windows.Forms.CheckBox AutoAddForm;
 	}
 }
 
