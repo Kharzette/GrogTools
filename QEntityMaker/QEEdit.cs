@@ -16,6 +16,8 @@ namespace QEntityMaker
 		{
 			public string	Key		{ get; set; }
 			public string	Value	{ get; set; }
+
+			internal bool	mbUsesSingleQuotes;
 		}
 
 		OpenFileDialog	mOFD	=new OpenFileDialog();
@@ -134,10 +136,15 @@ namespace QEntityMaker
 
 				value	=value.Trim();
 
+				EntityKVP	ekvp	=new EntityKVP();
+
+				if(value.StartsWith("'") && value.EndsWith("'"))
+				{
+					ekvp.mbUsesSingleQuotes	=true;
+				}
+
 				//trim quotes
 				value	=value.Substring(1, value.Length - 2);
-
-				EntityKVP	ekvp	=new EntityKVP();
 
 				ekvp.Key	=key;
 				ekvp.Value	=value;
@@ -364,7 +371,14 @@ namespace QEntityMaker
 
 					if((keyWidth + ekvp.Value.Length) < 80)
 					{
-						sw.Write(ekvp.Key + " = \"" + ekvp.Value + "\"\n");
+						if(!ekvp.mbUsesSingleQuotes)
+						{
+							sw.Write(ekvp.Key + " = \"" + ekvp.Value + "\"\n");
+						}
+						else
+						{
+							sw.Write(ekvp.Key + " = '" + ekvp.Value + "'\n");
+						}
 					}
 					else
 					{
