@@ -328,6 +328,8 @@ namespace ColladaConvert
 					weights.RemoveAt(smIdx);
 					indexes.RemoveAt(smIdx);
 
+					numInfluences--;
+
 					//boost other weights by the amount
 					//diminished by the loss of the
 					//smallest weight

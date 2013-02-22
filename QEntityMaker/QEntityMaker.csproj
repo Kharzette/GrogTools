@@ -46,6 +46,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="QEditEvents.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="QEditHelpers.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="QEEdit.cs">
       <SubType>Form</SubType>
     </Compile>

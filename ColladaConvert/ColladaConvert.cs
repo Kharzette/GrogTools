@@ -117,6 +117,8 @@ namespace ColladaConvert
 			mCharacter	=new Character(mMatLib, mAnimLib);
 			mStaticMesh	=new StaticMeshObject(mMatLib);
 
+			mMatLib.SetCellTexture();
+
 			mStaticMesh.SetTransform(Matrix.Identity);
 			mCharacter.SetTransform(Matrix.Identity);
 
