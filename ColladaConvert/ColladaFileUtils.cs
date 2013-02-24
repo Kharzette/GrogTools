@@ -897,56 +897,6 @@ namespace ColladaConvert
 		}
 
 
-		//correct from max coord system
-		static void CoordinateSystemAdjust(List<MeshConverter> chunks, COLLADA colladaFile)
-		{
-			Matrix	shiftMat	=Matrix.CreateRotationX(-MathHelper.PiOver2);
-			foreach(MeshConverter chunk in chunks)
-			{
-				chunk.BakeTransformIntoVerts(shiftMat);
-			}
-
-			//dig out the normals
-			foreach(object item in colladaFile.Items)
-			{
-				library_geometries	geoms	=item as library_geometries;
-				if(geoms == null)
-				{
-					continue;
-				}
-				foreach(object geomItem in geoms.geometry)
-				{
-					geometry	geom	=geomItem as geometry;
-					if(geom == null)
-					{
-						continue;
-					}
-					foreach(MeshConverter cnk in chunks)
-					{
-						string	name	=cnk.GetName();
-						if(cnk.mGeometryID == geom.id)
-						{
-							float_array	norms		=GetGeometryFloatArrayBySemantic(geom, "NORMAL", 0, name);
-							for(int i=0;i < norms.Values.Length;i+=3)
-							{
-								Vector3	norm	=Vector3.Zero;
-								norm.X	=norms.Values[i];
-								norm.Y	=norms.Values[i + 1];
-								norm.Z	=norms.Values[i + 2];
-
-								norm	=Vector3.TransformNormal(norm, shiftMat);
-
-								norms.Values[i]		=norm.X;
-								norms.Values[i + 1]	=norm.Y;
-								norms.Values[i + 2]	=norm.Z;
-							}
-						}
-					}
-				}
-			}
-		}
-
-
 		static geometry GetGeometryByID(COLLADA colladaFile, string id)
 		{
 			foreach(object item in colladaFile.Items)

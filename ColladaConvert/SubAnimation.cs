@@ -140,8 +140,10 @@ namespace ColladaConvert
 		}
 
 
-		internal void SetKeys(string bone, List<float> times, List<MeshLib.KeyFrame> keys)
+		internal Animation.KeyPartsUsed SetKeys(string bone, List<float> times, List<MeshLib.KeyFrame> keys)
 		{
+			Animation.KeyPartsUsed	ret	=0;
+
 			foreach(channel chan in mChannels)
 			{
 				//extract the node name and address
@@ -192,28 +194,34 @@ namespace ColladaConvert
 					if(elName == "rotateX")
 					{
 						keys[v].mRotation.X	=val;
+						ret					|=Animation.KeyPartsUsed.RotateX;
 					}
 					else if(elName == "rotateY")
 					{
 						keys[v].mRotation.Y	=val;
+						ret					|=Animation.KeyPartsUsed.RotateY;
 					}
 					else if(elName == "rotateZ")
 					{
 						keys[v].mRotation.Z	=val;
+						ret					|=Animation.KeyPartsUsed.RotateZ;
 					}
 					else if(elName == "translate")
 					{
 						if(addr == "X")
 						{
 							keys[v].mPosition.X	=val;
+							ret					|=Animation.KeyPartsUsed.TranslateX;
 						}
 						else if(addr == "Y")
 						{
 							keys[v].mPosition.Y	=val;
+							ret					|=Animation.KeyPartsUsed.TranslateY;
 						}
 						else if(addr == "Z")
 						{
 							keys[v].mPosition.Z	=val;
+							ret					|=Animation.KeyPartsUsed.TranslateZ;
 						}
 					}
 					else if(elName == "scale")
@@ -221,14 +229,17 @@ namespace ColladaConvert
 						if(addr == "X")
 						{
 							keys[v].mScale.X	=val;
+							ret					|=Animation.KeyPartsUsed.ScaleX;
 						}
 						else if(addr == "Y")
 						{
 							keys[v].mScale.Y	=val;
+							ret					|=Animation.KeyPartsUsed.ScaleY;
 						}
 						else if(addr == "Z")
 						{
 							keys[v].mScale.Z	=val;
+							ret					|=Animation.KeyPartsUsed.ScaleZ;
 						}
 					}
 				}
@@ -236,6 +247,7 @@ namespace ColladaConvert
 				//this will leave euler angles in
 				//the quaternion, will fix in Animation.cs
 			}
+			return	ret;
 		}
 	}
 }

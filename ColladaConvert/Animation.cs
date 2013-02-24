@@ -8,6 +8,19 @@ namespace ColladaConvert
 {
 	public class Animation
 	{
+		public enum KeyPartsUsed
+		{
+			TranslateX	=1,
+			TranslateY	=2,
+			TranslateZ	=4,
+			RotateX		=8,
+			RotateY		=16,
+			RotateZ		=32,
+			ScaleX		=64,
+			ScaleY		=128,
+			ScaleZ		=256
+		}
+
 		string	mName;
 
 		List<SubAnimation>	mSubAnims	=new List<SubAnimation>();
@@ -77,10 +90,12 @@ namespace ColladaConvert
 					keys.Add(new MeshLib.KeyFrame());
 				}
 
+				KeyPartsUsed	parts	=0;
+
 				//set keys
 				foreach(SubAnimation sa in mSubAnims)
 				{
-					sa.SetKeys(bone, times, keys);
+					parts	|=sa.SetKeys(bone, times, keys);
 				}
 
 				//fix quaternions
@@ -93,9 +108,50 @@ namespace ColladaConvert
 					kf.mRotation	=Quaternion.CreateFromRotationMatrix(mat);
 				}
 
-
 				//find and set bone key reference
 				MeshLib.KeyFrame	boneKey	=skel.GetBoneKey(bone);
+
+				//patch up the keys with any missing channel data
+				foreach(MeshLib.KeyFrame kf in keys)
+				{
+					//fill in missing parts with original bone
+					if(!UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.TranslateX))
+					{
+						kf.mPosition.X	=boneKey.mPosition.X;
+					}
+					if(!UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.TranslateY))
+					{
+						kf.mPosition.Y	=boneKey.mPosition.Y;
+					}
+					if(!UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.TranslateZ))
+					{
+						kf.mPosition.Z	=boneKey.mPosition.Z;
+					}
+					if(!UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.RotateX))
+					{
+						kf.mRotation.X	=boneKey.mRotation.X;
+					}
+					if(!UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.RotateY))
+					{
+						kf.mRotation.Y	=boneKey.mRotation.Y;
+					}
+					if(!UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.RotateZ))
+					{
+						kf.mRotation.Z	=boneKey.mRotation.Z;
+					}
+					if(!UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.ScaleX))
+					{
+						kf.mScale.X	=boneKey.mScale.X;
+					}
+					if(!UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.ScaleY))
+					{
+						kf.mScale.Y	=boneKey.mScale.Y;
+					}
+					if(!UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.ScaleZ))
+					{
+						kf.mScale.Z	=boneKey.mScale.Z;
+					}
+				}
 
 				return	new MeshLib.SubAnim(bone, times, keys);
 			}
