@@ -1,11 +1,14 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+using System.Linq;
+using System.ComponentModel;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Kinect;
 using UtilityLib;
 using MeshLib;
 
@@ -21,9 +24,8 @@ namespace ColladaConvert
 		PrimObject				mBoundPrim;
 		PrimObject				mXAxis, mYAxis, mZAxis;
 
-		//fonts
-		Dictionary<string, SpriteFont>	mFonts;
-		SpriteFont						mFirstFont;
+		//ordered list of fonts
+		IOrderedEnumerable<KeyValuePair<string, SpriteFont>>	mFonts;
 
 		MaterialLib.MaterialLib	mMatLib;
 		AnimLib					mAnimLib;
@@ -31,7 +33,21 @@ namespace ColladaConvert
 		StaticMeshObject		mStaticMesh;
 		bool					mbCharacterLoaded;	//so I know which mesh obj to use
 		bool					mbDrawAxis	=true;
+		bool					mbPaused;
+		Int64					mAnimTime;
+
+		//kinect stuff
+		KinectSensor		mSensor;
+		SkeletonStream		mSkelStream;
+		bool				mbCountingDown;
+		int					mCountDown, mAnimNameCounter;
+		bool				mbFirstTimeStamp;
+		Int64				mTimeStampAdjust;
+
+		//recorded data from the sensor
+		CaptureData	mSkelFrames	=new CaptureData();
 		
+		//control
 		PlayerSteering	mSteering;
 		GameCamera		mGameCam;
 		Input			mInput;
@@ -45,6 +61,9 @@ namespace ColladaConvert
 		float		mTimeScale;			//anim playback speed
 		Vector3		mLightDir;
 		Random		mRand	=new Random();
+
+		//kinect gui
+		KinectForm	mKF;
 
 		//spinning light
 		float	mLX, mLY, mLZ;
@@ -94,6 +113,12 @@ namespace ColladaConvert
 
 			mInput	=new Input();
 
+			if(KinectSensor.KinectSensors.Count > 0)
+			{
+				mSensor	=KinectSensor.KinectSensors[0];
+				mSensor.SkeletonFrameReady	+=OnSkeletonFrameReady;
+			}
+
 			base.Initialize();
 		}
 
@@ -102,12 +127,8 @@ namespace ColladaConvert
 		{
 			GraphicsDevice	gd	=mGDM.GraphicsDevice;
 
-			mFonts	=FileUtil.LoadAllFonts(Content);
-			foreach(KeyValuePair<string, SpriteFont> font in mFonts)
-			{
-				mFirstFont	=font.Value;
-				break;
-			}
+			Dictionary<string, SpriteFont>	fonts	=UtilityLib.FileUtil.LoadAllFonts(Content);
+			mFonts	=fonts.OrderBy(fnt => fnt.Value.LineSpacing);
 
 			mSB			=new SpriteBatch(gd);
 			mSLib		=new ContentManager(Services, "ShaderLib");
@@ -152,9 +173,23 @@ namespace ColladaConvert
 			mCF.eBoundMesh				+=OnBoundMesh;
 			mCF.eShowBound				+=OnShowBound;
 			mCF.eShowAxis				+=OnShowAxis;
+			mCF.ePause					+=OnPause;
 
 			mMF	=new SharedForms.MaterialForm(gd, mMatLib, true);
 			mMF.Visible	=true;
+
+			if(mSensor != null)
+			{
+				mKF	=new KinectForm(mAnimLib);
+				mKF.Visible	=true;
+			}
+
+			mKF.eToggleRecord	+=OnToggleRecord;
+			mKF.eLoadRawData	+=OnLoadRawData;
+			mKF.eSaveRawData	+=OnSaveRawData;
+			mKF.eConvertToAnim	+=OnConvertToAnim;
+			mKF.eTrimStart		+=OnTrimStart;
+			mKF.eTrimEnd		+=OnTrimEnd;
 
 			//bind matform window position
 			mMF.DataBindings.Add(new System.Windows.Forms.Binding("Location",
@@ -168,12 +203,26 @@ namespace ColladaConvert
 				"AnimFormPos", true,
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
+			//bind kinectform window position
+			mKF.DataBindings.Add(new System.Windows.Forms.Binding("Location",
+				global::ColladaConvert.Settings.Default,
+				"KinectFormPos", true,
+				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+
 			mMF.eNukedMeshPart	+=OnNukedMeshPart;
 
 			mSteering	=new PlayerSteering(gd.Viewport.Width,
 				mGDM.GraphicsDevice.Viewport.Height);
 			mSteering.Method	=PlayerSteering.SteeringMethod.Fly;
 			mSteering.Speed		=0.2f;
+
+			//for testing
+//			mAnimLib.ReadFromFile("C:/Users/kharz_000/Documents/3dsmax/export/MixamoGirl.AnimLib", true);
+//			mMatLib.ReadFromFile("C:/Users/kharz_000/Documents/3dsmax/export/MixamoGirl.MatLib", true, gd);
+//			mMF.UpdateMaterials();
+//			mCharacter.ReadFromFile("C:/Users/kharz_000/Documents/3dsmax/export/MixamoGirlBouncy.Character", gd, true);
+//			mMF.UpdateMeshPartList(mCharacter.GetMeshPartList(), null);
+//			eAnimsUpdated(mAnimLib.GetAnims(), null);
 		}
 
 
@@ -225,17 +274,17 @@ namespace ColladaConvert
 		{
 			string	fileName	=sender as string;
 
-			mAnimLib.LoadKinectMotionDat(fileName);
+//			mAnimLib.LoadKinectMotionDat(fileName);
 
-			Misc.SafeInvoke(eAnimsUpdated, mAnimLib.GetAnims());
+//			Misc.SafeInvoke(eAnimsUpdated, mAnimLib.GetAnims());
 		}
 
 
 		void OnLoadBoneMap(object sender, EventArgs ea)
 		{
-			string	fileName	=sender as string;
+//			string	fileName	=sender as string;
 
-			mAnimLib.LoadBoneMap(fileName);
+//			mAnimLib.LoadBoneMap(fileName);
 		}
 
 
@@ -397,6 +446,104 @@ namespace ColladaConvert
 		}
 
 
+		void OnTrimStart(object sender, EventArgs ea)
+		{
+			Nullable<Int32>	amount	=sender as Nullable<Int32>;
+			if(amount == null || !amount.HasValue)
+			{
+				return;
+			}
+
+			mSkelFrames.TrimStart(amount.Value);
+		}
+
+
+		void OnTrimEnd(object sender, EventArgs ea)
+		{
+			Nullable<Int32>	amount	=sender as Nullable<Int32>;
+			if(amount == null || !amount.HasValue)
+			{
+				return;
+			}
+
+			mSkelFrames.TrimEnd(amount.Value);
+		}
+
+
+		void OnLoadRawData(object sender, EventArgs ea)
+		{
+			string	path	=(string)sender;
+			if(path == null)
+			{
+				return;
+			}
+
+			FileStream	fs	=new FileStream(path, FileMode.Open, FileAccess.Read);
+			if(fs == null)
+			{
+				return;
+			}
+
+			BinaryReader	br	=new BinaryReader(fs);
+
+			UInt32	magic	=br.ReadUInt32();
+			if(magic != 0x9A1FDA7A)
+			{
+				br.Close();
+				fs.Close();
+				return;
+			}
+
+			mSkelFrames.Read(br);
+
+			br.Close();
+			fs.Close();
+
+			mKF.UpdateCapturedDataStats(mSkelFrames.mFrames.Count, mSkelFrames.mTimes.Last());
+		}
+
+
+		void OnSaveRawData(object sender, EventArgs ea)
+		{
+			string	path	=(string)sender;
+			if(path == null || mSkelFrames.mFrames.Count <= 0)
+			{
+				return;
+			}
+
+			FileStream	fs	=new FileStream(path, FileMode.Create, FileAccess.Write);
+			if(fs == null)
+			{
+				return;
+			}
+
+			BinaryWriter	bw	=new BinaryWriter(fs);
+
+			UInt32	magic	=0x9A1FDA7A;
+
+			bw.Write(magic);
+
+			mSkelFrames.Write(bw);
+
+			bw.Close();
+			fs.Close();
+		}
+
+
+		void OnConvertToAnim(object sender, EventArgs ea)
+		{
+			BindingList<KinectMap>	mapping	=sender as BindingList<KinectMap>;
+			if(mapping == null)
+			{
+				return;
+			}
+
+			mAnimLib.CreateKinectAnimation(mapping, mCharacter.GetSkinByIndex(0),
+				mSkelFrames, "KinectAnim" + mAnimNameCounter++);
+			eAnimsUpdated(mAnimLib.GetAnims(), null);
+		}
+
+
 		void OnLoadStatic(object sender, EventArgs ea)
 		{
 			string	path	=(string)sender;
@@ -434,6 +581,91 @@ namespace ColladaConvert
 			Decimal	val	=(Decimal)sender;
 
 			mTimeScale	=Convert.ToSingle(val);
+		}
+
+
+		void StartRecording()
+		{
+			mSkelFrames.Clear();
+			mSensor.Start();
+			mSkelStream	=KinectSensor.KinectSensors[0].SkeletonStream;				
+
+			TransformSmoothParameters	tsp	=new TransformSmoothParameters();
+
+			tsp.Correction			=0.5f;
+			tsp.JitterRadius		=0.9f;
+			tsp.MaxDeviationRadius	=0.15f;
+			tsp.Prediction			=0.5f;
+			tsp.Smoothing			=0.7f;
+
+			mSkelStream.Enable(tsp);
+		}
+
+
+		void OnPause(object sender, EventArgs ea)
+		{
+			mbPaused	=!mbPaused;
+		}
+
+
+		void OnToggleRecord(object sender, EventArgs ea)
+		{
+			Nullable<bool>	useInferred	=sender as Nullable<bool>;
+			if(mSensor == null)
+			{
+				return;
+			}
+
+			if(mSensor.IsRunning)
+			{
+				mSensor.Stop();
+				mSkelStream.Disable();
+				mSkelStream	=null;
+				float	len	=0;
+
+				if(mSkelFrames.mTimes.Count <= 0)
+				{
+					len	=0f;
+				}
+				else
+				{
+					len	=mSkelFrames.mTimes.Last();
+				}
+
+				mKF.UpdateCapturedDataStats(mSkelFrames.mFrames.Count, len);
+			}
+			else if(mbCountingDown)
+			{
+				mbCountingDown	=false;
+			}
+			else
+			{
+				mbCountingDown		=true;
+				mCountDown			=5000;
+				mbFirstTimeStamp	=true;
+			}
+		}
+
+
+		void OnSkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs sfrea)
+		{
+			SkeletonFrame	sf	=sfrea.OpenSkeletonFrame();
+
+			if(sf != null)
+			{
+				Microsoft.Kinect.Skeleton	[]data	=new Microsoft.Kinect.Skeleton[sf.SkeletonArrayLength];
+				sf.CopySkeletonDataTo(data);
+
+				Int64	timeStamp	=sf.Timestamp;
+
+				if(mbFirstTimeStamp)
+				{
+					mbFirstTimeStamp	=!mbFirstTimeStamp;
+					mTimeStampAdjust	=timeStamp;
+				}
+
+				mSkelFrames.Add(data, (sf.Timestamp - mTimeStampAdjust) / 1000.0f);
+			}
 		}
 
 
@@ -478,16 +710,29 @@ namespace ColladaConvert
 
 			mMatLib.UpdateWVP(Matrix.Identity, mGameCam.View, mGameCam.Projection, mSteering.Position);
 
-			//put in some keys for messing with bones
-			float	time		=(float)gameTime.ElapsedGameTime.TotalMilliseconds;
+			if(!mbPaused)
+			{
+				mAnimTime	+=gameTime.ElapsedGameTime.Milliseconds;
+			}
 
-			mCharacter.Animate(mCurrentAnimName, (float)(gameTime.TotalGameTime.TotalSeconds) * mTimeScale);
+			mCharacter.Animate(mCurrentAnimName,
+				(mAnimTime / 1000.0f) * mTimeScale);
 
 			//hotkeys
 			if(mInput.Player1.WasKeyPressed(Keys.M))
 			{
 				//this goes off when typing in text fields!
 //				mMF.ApplyMat();
+			}
+
+			if(mbCountingDown)
+			{
+				mCountDown	-=msDelta;
+				if(mCountDown <= 0)
+				{
+					mbCountingDown	=false;
+					StartRecording();
+				}
 			}
 
 			base.Update(gameTime);
@@ -532,8 +777,16 @@ namespace ColladaConvert
 			}
 
 			mSB.Begin();
-			mSB.DrawString(mFirstFont, "Coords: " + mSteering.Position,
+			mSB.DrawString(mFonts.First().Value, "Coords: " + mSteering.Position,
 					Vector2.One * 20.0f, Color.Yellow);
+			if(mSensor != null)
+			{
+				if(mbCountingDown)
+				{
+					mSB.DrawString(mFonts.ElementAt(1).Value, "" + mCountDown,
+						Vector2.One * 20.0f + Vector2.UnitY * 200, Color.Yellow);
+				}
+			}
 			mSB.End();
 
 			base.Draw(gameTime);

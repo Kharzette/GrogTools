@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Xml;
 using Microsoft.Xna.Framework;
@@ -18,7 +19,8 @@ namespace ColladaConvert
 			RotateZ		=32,
 			ScaleX		=64,
 			ScaleY		=128,
-			ScaleZ		=256
+			ScaleZ		=256,
+			All			=511
 		}
 
 		string	mName;
@@ -28,17 +30,25 @@ namespace ColladaConvert
 
 		public Animation(animation anim)
 		{
-			foreach(object anObj in anim.Items)
+			if(anim.Items.OfType<animation>().Count() > 0)
 			{
-				animation	anm	=anObj as animation;
-				if(anm == null)
+				foreach(object anObj in anim.Items)
 				{
-					continue;
+					animation	anm	=anObj as animation;
+					if(anm == null)
+					{
+						continue;
+					}
+
+					mName	=anim.name;
+
+					SubAnimation	sa	=new SubAnimation(anm);
+					mSubAnims.Add(sa);
 				}
-
-				mName	=anim.name;
-
-				SubAnimation	sa	=new SubAnimation(anm);
+			}
+			else
+			{
+				SubAnimation	sa	=new SubAnimation(anim);
 				mSubAnims.Add(sa);
 			}
 		}
@@ -50,7 +60,7 @@ namespace ColladaConvert
 		}
 
 
-		internal MeshLib.SubAnim	GetAnims(MeshLib.Skeleton skel)
+		internal MeshLib.SubAnim	GetAnims(MeshLib.Skeleton skel, library_visual_scenes lvs)
 		{
 			//grab full list of bones
 			List<string>	boneNames	=new List<string>();
@@ -92,14 +102,17 @@ namespace ColladaConvert
 
 				KeyPartsUsed	parts	=0;
 
+				//track axis angle style keys
+				List<MeshLib.KeyFrame>	axisAngleKeys	=new List<MeshLib.KeyFrame>();
+
 				//set keys
 				foreach(SubAnimation sa in mSubAnims)
 				{
-					parts	|=sa.SetKeys(bone, times, keys);
+					parts	|=sa.SetKeys(bone, times, keys, lvs, axisAngleKeys);
 				}
 
-				//fix quaternions
-				foreach(MeshLib.KeyFrame kf in keys)
+				//fix axis angle keyframes
+				foreach(MeshLib.KeyFrame kf in axisAngleKeys)
 				{
 					Matrix	mat	=Matrix.CreateFromAxisAngle(Vector3.UnitX, MathHelper.ToRadians(kf.mRotation.X));
 					mat	*=Matrix.CreateFromAxisAngle(Vector3.UnitY, MathHelper.ToRadians(kf.mRotation.Y));

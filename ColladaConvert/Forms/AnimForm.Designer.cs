@@ -43,15 +43,12 @@
 			this.LoadStaticModel = new System.Windows.Forms.Button();
 			this.SaveStatic = new System.Windows.Forms.Button();
 			this.LoadStatic = new System.Windows.Forms.Button();
-			this.LoadMotionDat = new System.Windows.Forms.Button();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
 			this.BakeVerts = new System.Windows.Forms.CheckBox();
 			this.groupBox4 = new System.Windows.Forms.GroupBox();
 			this.label2 = new System.Windows.Forms.Label();
-			this.groupBox5 = new System.Windows.Forms.GroupBox();
-			this.LoadBoneMap = new System.Windows.Forms.Button();
 			this.groupBox6 = new System.Windows.Forms.GroupBox();
 			this.BoundGroup = new System.Windows.Forms.GroupBox();
 			this.ShowBox = new System.Windows.Forms.CheckBox();
@@ -61,6 +58,7 @@
 			this.Optimize = new System.Windows.Forms.Button();
 			this.Shadowize = new System.Windows.Forms.Button();
 			this.DrawAxis = new System.Windows.Forms.CheckBox();
+			this.Pause = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.AnimGrid)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.TimeScale)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.MaxError)).BeginInit();
@@ -68,7 +66,6 @@
 			this.groupBox2.SuspendLayout();
 			this.groupBox3.SuspendLayout();
 			this.groupBox4.SuspendLayout();
-			this.groupBox5.SuspendLayout();
 			this.groupBox6.SuspendLayout();
 			this.BoundGroup.SuspendLayout();
 			this.groupBox7.SuspendLayout();
@@ -97,16 +94,16 @@
 			// AnimGrid
 			// 
 			this.AnimGrid.AllowUserToAddRows = false;
-			this.AnimGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this.AnimGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.AnimGrid.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
 			this.AnimGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
 			this.AnimGrid.Location = new System.Drawing.Point(11, 13);
 			this.AnimGrid.MultiSelect = false;
 			this.AnimGrid.Name = "AnimGrid";
 			this.AnimGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-			this.AnimGrid.Size = new System.Drawing.Size(507, 184);
+			this.AnimGrid.Size = new System.Drawing.Size(507, 187);
 			this.AnimGrid.TabIndex = 2;
 			this.AnimGrid.CellValidated += new System.Windows.Forms.DataGridViewCellEventHandler(this.OnCellValidated);
 			this.AnimGrid.SelectionChanged += new System.EventHandler(this.AnimGrid_SelectionChanged);
@@ -258,23 +255,13 @@
 			this.LoadStatic.UseVisualStyleBackColor = true;
 			this.LoadStatic.Click += new System.EventHandler(this.OnLoadStatic);
 			// 
-			// LoadMotionDat
-			// 
-			this.LoadMotionDat.Location = new System.Drawing.Point(6, 50);
-			this.LoadMotionDat.Name = "LoadMotionDat";
-			this.LoadMotionDat.Size = new System.Drawing.Size(112, 25);
-			this.LoadMotionDat.TabIndex = 15;
-			this.LoadMotionDat.Text = "Load Kinect Motion";
-			this.LoadMotionDat.UseVisualStyleBackColor = true;
-			this.LoadMotionDat.Click += new System.EventHandler(this.OnLoadMotionDat);
-			// 
 			// groupBox1
 			// 
 			this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.groupBox1.Controls.Add(this.button2);
 			this.groupBox1.Controls.Add(this.SaveAnimLib);
 			this.groupBox1.Controls.Add(this.ClearAll);
-			this.groupBox1.Location = new System.Drawing.Point(12, 204);
+			this.groupBox1.Location = new System.Drawing.Point(12, 236);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(129, 114);
 			this.groupBox1.TabIndex = 16;
@@ -288,7 +275,7 @@
 			this.groupBox2.Controls.Add(this.LoadStatic);
 			this.groupBox2.Controls.Add(this.SaveCharacter);
 			this.groupBox2.Controls.Add(this.SaveStatic);
-			this.groupBox2.Location = new System.Drawing.Point(147, 203);
+			this.groupBox2.Location = new System.Drawing.Point(147, 236);
 			this.groupBox2.Name = "groupBox2";
 			this.groupBox2.Size = new System.Drawing.Size(118, 144);
 			this.groupBox2.TabIndex = 17;
@@ -302,7 +289,7 @@
 			this.groupBox3.Controls.Add(this.LoadModel);
 			this.groupBox3.Controls.Add(this.LoadStaticModel);
 			this.groupBox3.Controls.Add(this.LoadAnim);
-			this.groupBox3.Location = new System.Drawing.Point(271, 204);
+			this.groupBox3.Location = new System.Drawing.Point(271, 236);
 			this.groupBox3.Name = "groupBox3";
 			this.groupBox3.Size = new System.Drawing.Size(142, 143);
 			this.groupBox3.TabIndex = 18;
@@ -325,7 +312,7 @@
 			this.groupBox4.Controls.Add(this.label2);
 			this.groupBox4.Controls.Add(this.MaxError);
 			this.groupBox4.Controls.Add(this.Compress);
-			this.groupBox4.Location = new System.Drawing.Point(147, 353);
+			this.groupBox4.Location = new System.Drawing.Point(12, 356);
 			this.groupBox4.Name = "groupBox4";
 			this.groupBox4.Size = new System.Drawing.Size(99, 77);
 			this.groupBox4.TabIndex = 19;
@@ -341,36 +328,15 @@
 			this.label2.TabIndex = 12;
 			this.label2.Text = "Error";
 			// 
-			// groupBox5
-			// 
-			this.groupBox5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.groupBox5.Controls.Add(this.LoadBoneMap);
-			this.groupBox5.Controls.Add(this.LoadMotionDat);
-			this.groupBox5.Location = new System.Drawing.Point(12, 324);
-			this.groupBox5.Name = "groupBox5";
-			this.groupBox5.Size = new System.Drawing.Size(129, 82);
-			this.groupBox5.TabIndex = 20;
-			this.groupBox5.TabStop = false;
-			this.groupBox5.Text = "Kinect Mocap";
-			// 
-			// LoadBoneMap
-			// 
-			this.LoadBoneMap.Location = new System.Drawing.Point(6, 19);
-			this.LoadBoneMap.Name = "LoadBoneMap";
-			this.LoadBoneMap.Size = new System.Drawing.Size(97, 25);
-			this.LoadBoneMap.TabIndex = 16;
-			this.LoadBoneMap.Text = "Load Bone Map";
-			this.LoadBoneMap.UseVisualStyleBackColor = true;
-			this.LoadBoneMap.Click += new System.EventHandler(this.OnLoadBoneMap);
-			// 
 			// groupBox6
 			// 
 			this.groupBox6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.groupBox6.Controls.Add(this.Pause);
 			this.groupBox6.Controls.Add(this.TimeScale);
 			this.groupBox6.Controls.Add(this.label1);
-			this.groupBox6.Location = new System.Drawing.Point(252, 353);
+			this.groupBox6.Location = new System.Drawing.Point(117, 386);
 			this.groupBox6.Name = "groupBox6";
-			this.groupBox6.Size = new System.Drawing.Size(133, 52);
+			this.groupBox6.Size = new System.Drawing.Size(190, 47);
 			this.groupBox6.TabIndex = 21;
 			this.groupBox6.TabStop = false;
 			this.groupBox6.Text = "Playback";
@@ -381,7 +347,7 @@
 			this.BoundGroup.Controls.Add(this.ShowBox);
 			this.BoundGroup.Controls.Add(this.ShowSphere);
 			this.BoundGroup.Controls.Add(this.BoundMesh);
-			this.BoundGroup.Location = new System.Drawing.Point(419, 203);
+			this.BoundGroup.Location = new System.Drawing.Point(419, 236);
 			this.BoundGroup.Name = "BoundGroup";
 			this.BoundGroup.Size = new System.Drawing.Size(98, 97);
 			this.BoundGroup.TabIndex = 22;
@@ -426,7 +392,7 @@
 			this.groupBox7.Controls.Add(this.Optimize);
 			this.groupBox7.Controls.Add(this.Shadowize);
 			this.groupBox7.Enabled = false;
-			this.groupBox7.Location = new System.Drawing.Point(419, 306);
+			this.groupBox7.Location = new System.Drawing.Point(419, 339);
 			this.groupBox7.Name = "groupBox7";
 			this.groupBox7.Size = new System.Drawing.Size(98, 81);
 			this.groupBox7.TabIndex = 23;
@@ -457,7 +423,7 @@
 			this.DrawAxis.AutoSize = true;
 			this.DrawAxis.Checked = true;
 			this.DrawAxis.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.DrawAxis.Location = new System.Drawing.Point(419, 394);
+			this.DrawAxis.Location = new System.Drawing.Point(340, 385);
 			this.DrawAxis.Name = "DrawAxis";
 			this.DrawAxis.Size = new System.Drawing.Size(73, 17);
 			this.DrawAxis.TabIndex = 24;
@@ -465,17 +431,26 @@
 			this.DrawAxis.UseVisualStyleBackColor = true;
 			this.DrawAxis.CheckedChanged += new System.EventHandler(this.OnAxisDrawChanged);
 			// 
+			// Pause
+			// 
+			this.Pause.Location = new System.Drawing.Point(129, 19);
+			this.Pause.Name = "Pause";
+			this.Pause.Size = new System.Drawing.Size(55, 22);
+			this.Pause.TabIndex = 5;
+			this.Pause.Text = "Pause";
+			this.Pause.UseVisualStyleBackColor = true;
+			this.Pause.Click += new System.EventHandler(this.OnPause);
+			// 
 			// AnimForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(529, 442);
+			this.ClientSize = new System.Drawing.Size(529, 445);
 			this.ControlBox = false;
 			this.Controls.Add(this.DrawAxis);
 			this.Controls.Add(this.groupBox7);
 			this.Controls.Add(this.BoundGroup);
 			this.Controls.Add(this.groupBox6);
-			this.Controls.Add(this.groupBox5);
 			this.Controls.Add(this.groupBox4);
 			this.Controls.Add(this.groupBox3);
 			this.Controls.Add(this.groupBox2);
@@ -495,7 +470,6 @@
 			this.groupBox3.PerformLayout();
 			this.groupBox4.ResumeLayout(false);
 			this.groupBox4.PerformLayout();
-			this.groupBox5.ResumeLayout(false);
 			this.groupBox6.ResumeLayout(false);
 			this.groupBox6.PerformLayout();
 			this.BoundGroup.ResumeLayout(false);
@@ -523,14 +497,11 @@
 		private System.Windows.Forms.Button LoadStaticModel;
 		private System.Windows.Forms.Button SaveStatic;
 		private System.Windows.Forms.Button LoadStatic;
-		private System.Windows.Forms.Button LoadMotionDat;
 		private System.Windows.Forms.GroupBox groupBox1;
 		private System.Windows.Forms.GroupBox groupBox2;
 		private System.Windows.Forms.GroupBox groupBox3;
 		private System.Windows.Forms.GroupBox groupBox4;
 		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.GroupBox groupBox5;
-		private System.Windows.Forms.Button LoadBoneMap;
 		private System.Windows.Forms.GroupBox groupBox6;
 		private System.Windows.Forms.GroupBox BoundGroup;
 		private System.Windows.Forms.Button BoundMesh;
@@ -541,5 +512,6 @@
 		private System.Windows.Forms.Button Shadowize;
 		private System.Windows.Forms.CheckBox BakeVerts;
 		private System.Windows.Forms.CheckBox DrawAxis;
+		private System.Windows.Forms.Button Pause;
 	}
 }

@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Diagnostics;
 using System.Text;
 using System.Windows.Forms;
+using UtilityLib;
 //using XMeshCLR;
 
 
@@ -21,22 +22,23 @@ namespace ColladaConvert
 		SaveFileDialog	mSFD	=new SaveFileDialog();
 
 		//events
-		public event	EventHandler	eLoadAnim;
-		public event	EventHandler	eLoadModel;
-		public event	EventHandler	eLoadStaticModel;
-		public event	EventHandler	eAnimSelectionChanged;
-		public event	EventHandler	eTimeScaleChanged;
-		public event	EventHandler	eSaveLibrary;
-		public event	EventHandler	eSaveCharacter;
-		public event	EventHandler	eLoadCharacter;
-		public event	EventHandler	eLoadLibrary;
-		public event	EventHandler	eSaveStatic;
-		public event	EventHandler	eLoadStatic;
-		public event	EventHandler	eLoadMotionDat;
-		public event	EventHandler	eLoadBoneMap;
-		public event	EventHandler	eBoundMesh;
-		public event	EventHandler	eShowBound;
-		public event	EventHandler	eShowAxis;
+		public event EventHandler	eLoadAnim;
+		public event EventHandler	eLoadModel;
+		public event EventHandler	eLoadStaticModel;
+		public event EventHandler	eAnimSelectionChanged;
+		public event EventHandler	eTimeScaleChanged;
+		public event EventHandler	eSaveLibrary;
+		public event EventHandler	eSaveCharacter;
+		public event EventHandler	eLoadCharacter;
+		public event EventHandler	eLoadLibrary;
+		public event EventHandler	eSaveStatic;
+		public event EventHandler	eLoadStatic;
+		public event EventHandler	eLoadMotionDat;
+		public event EventHandler	eLoadBoneMap;
+		public event EventHandler	eBoundMesh;
+		public event EventHandler	eShowBound;
+		public event EventHandler	eShowAxis;
+		public event EventHandler	ePause;
 
 		public bool BakeTransforms
 		{
@@ -281,7 +283,7 @@ namespace ColladaConvert
 				return;
 			}
 
-			UtilityLib.Misc.SafeInvoke(eLoadBoneMap, mOFD.FileName);
+			Misc.SafeInvoke(eLoadBoneMap, mOFD.FileName);
 		}
 
 
@@ -295,13 +297,13 @@ namespace ColladaConvert
 				return;
 			}
 
-			UtilityLib.Misc.SafeInvoke(eLoadMotionDat, mOFD.FileName);
+			Misc.SafeInvoke(eLoadMotionDat, mOFD.FileName);
 		}
 
 
 		void OnBoundMesh(object sender, EventArgs e)
 		{
-			UtilityLib.Misc.SafeInvoke(eBoundMesh, null);
+			Misc.SafeInvoke(eBoundMesh, null);
 		}
 
 
@@ -311,13 +313,13 @@ namespace ColladaConvert
 			{
 				ShowSphere.Checked	=false;
 			}
-			UtilityLib.Misc.SafeInvoke(eShowBound, (ShowBox.Checked)? 1 : 0);
+			Misc.SafeInvoke(eShowBound, (ShowBox.Checked)? 1 : 0);
 		}
 
 
 		void OnAxisDrawChanged(object sender, EventArgs e)
 		{
-			UtilityLib.Misc.SafeInvoke(eShowAxis, DrawAxis.Checked);
+			Misc.SafeInvoke(eShowAxis, DrawAxis.Checked);
 		}
 
 
@@ -327,7 +329,7 @@ namespace ColladaConvert
 			{
 				ShowBox.Checked	=false;
 			}
-			UtilityLib.Misc.SafeInvoke(eShowBound, (ShowSphere.Checked)? 2 : 0);
+			Misc.SafeInvoke(eShowBound, (ShowSphere.Checked)? 2 : 0);
 		}
 
 
@@ -335,6 +337,12 @@ namespace ColladaConvert
 		{
 //			ManagedHelloWorld	mhw	=new ManagedHelloWorld();
 //			mhw.SayThis("By the mailed fist of Torm!!");
+		}
+
+
+		void OnPause(object sender, EventArgs e)
+		{
+			Misc.SafeInvoke(ePause, null);
 		}
 	}
 }

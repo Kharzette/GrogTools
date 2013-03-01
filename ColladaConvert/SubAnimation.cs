@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -61,7 +61,7 @@ namespace ColladaConvert
 				int		sidx	=chan.target.IndexOf('/');
 				string	nName	=chan.target.Substring(0, sidx);
 
-				if(nName != bone)
+				if(!nName.StartsWith(bone))
 				{
 					continue;
 				}
@@ -92,8 +92,10 @@ namespace ColladaConvert
 		}
 
 
-		float LerpValue(float time, float_array chanTimes, float_array chanValues)
+		List<float> LerpValue(float time, float_array chanTimes, float_array chanValues, int stride)
 		{
+			List<float>	ret	=new List<float>();
+
 			//calc totaltime
 			float	totalTime	=chanTimes.Values[chanTimes.Values.Length - 1]
 				- chanTimes.Values[0];
@@ -133,14 +135,21 @@ namespace ColladaConvert
 
 			Debug.Assert(percentage >= 0.0f && percentage <= 1.0f);
 
-			float value	=MathHelper.Lerp(chanValues.Values[startIndex],
-				chanValues.Values[startIndex + 1], percentage);
+			for(int i=0;i < stride;i++)
+			{
+				float value	=MathHelper.Lerp(chanValues.Values[startIndex],
+					chanValues.Values[startIndex + 1], percentage);
 
-			return	value;
+				ret.Add(value);
+			}
+			return	ret;
 		}
 
 
-		internal Animation.KeyPartsUsed SetKeys(string bone, List<float> times, List<MeshLib.KeyFrame> keys)
+		internal Animation.KeyPartsUsed SetKeys(string bone,
+			List<float> times, List<MeshLib.KeyFrame> keys,
+			library_visual_scenes scenes,
+			List<MeshLib.KeyFrame> axisAngleKeys)
 		{
 			Animation.KeyPartsUsed	ret	=0;
 
@@ -150,7 +159,7 @@ namespace ColladaConvert
 				int		sidx	=chan.target.IndexOf('/');
 				string	nName	=chan.target.Substring(0, sidx);
 
-				if(nName != bone)
+				if(!nName.StartsWith(bone))
 				{
 					continue;
 				}
@@ -168,13 +177,6 @@ namespace ColladaConvert
 				string	srcC1	=GetSourceForSemantic(samp, "IN_TANGENT");
 				string	srcC2	=GetSourceForSemantic(samp, "OUT_TANGENT");
 
-				//extract the node name and address
-				string	addr	=chan.target.Substring(sidx + 1);
-				int		pidx	=addr.IndexOf('.');
-				string	elName	=addr.Substring(0, pidx);
-
-				addr	=addr.Substring(pidx + 1);
-
 				float_array	chanTimes	=mSources[srcInp].Item as float_array;
 				float_array	chanValues	=mSources[srcOut].Item as float_array;
 				List<float>	outValues	=new List<float>();
@@ -183,69 +185,193 @@ namespace ColladaConvert
 				//along the overall list of times
 				for(int tidx=0;tidx < times.Count;tidx++)
 				{
-					outValues.Add(LerpValue(times[tidx], chanTimes, chanValues));
+					outValues.AddRange(LerpValue(times[tidx], chanTimes,
+						chanValues,
+						(int)mSources[srcOut].technique_common.accessor.stride));
 				}
 
-				//insert values into the proper spot
-				for(int v=0;v < outValues.Count;v++)
+				int		slashIndex	=chan.target.IndexOf("/");
+				string	nodeID		=chan.target.Substring(0, slashIndex);
+				string	nodeElement	=chan.target.Substring(slashIndex + 1);
+
+				//see if the element has an additional address
+				string	addr	=null;
+				int		dotIdx	=nodeElement.IndexOf('.');
+				if(dotIdx != -1)
 				{
-					float	val	=outValues[v];
+					addr		=nodeElement.Substring(dotIdx + 1);
+					nodeElement	=nodeElement.Substring(0, dotIdx);
+				}
 
-					if(elName == "rotateX")
+				node	targeted	=ColladaFileUtils.LookUpNode(scenes, nodeID);
+				int		idx			=ColladaFileUtils.GetNodeItemIndex(targeted, nodeElement);
+
+				if(targeted.ItemsElementName[idx] == ItemsChoiceType2.lookat)
+				{
+					Debug.Assert(false);	//haven't dealt with this one yet
+				}
+				else if(targeted.ItemsElementName[idx] == ItemsChoiceType2.matrix)
+				{
+					//this doesn't really work yet
+					List<Matrix>	mats	=ColladaFileUtils.GetMatrixListFromFloatList(outValues);
+					for(int v=0;v < mats.Count;v++)
 					{
-						keys[v].mRotation.X	=val;
-						ret					|=Animation.KeyPartsUsed.RotateX;
+						mats[v].Decompose(out keys[v].mScale, out keys[v].mRotation, out keys[v].mScale);
 					}
-					else if(elName == "rotateY")
+					ret	|=Animation.KeyPartsUsed.All;
+				}
+				else if(targeted.ItemsElementName[idx] == ItemsChoiceType2.rotate)
+				{
+					if(addr == null)
 					{
-						keys[v].mRotation.Y	=val;
-						ret					|=Animation.KeyPartsUsed.RotateY;
+						//I'm guessing these would be true quaternions
+						//I don't really support that, as I store the
+						//usual axis angle stuff I've seen in a quaternion
+						//and then later fix it up to be a real quaternion
+						Debug.Assert(false);
 					}
-					else if(elName == "rotateZ")
+					else if(addr == "ANGLE")
 					{
-						keys[v].mRotation.Z	=val;
-						ret					|=Animation.KeyPartsUsed.RotateZ;
-					}
-					else if(elName == "translate")
-					{
-						if(addr == "X")
+						Debug.Assert(targeted.Items[idx] is rotate);
+
+						rotate	rot	=targeted.Items[idx] as rotate;
+
+						if(rot.Values[0] > 0.999f)
 						{
-							keys[v].mPosition.X	=val;
-							ret					|=Animation.KeyPartsUsed.TranslateX;
+							for(int v=0;v < outValues.Count;v++)
+							{
+								float	val	=outValues[v];
+								keys[v].mRotation.X	=val;
+								if(!axisAngleKeys.Contains(keys[v]))
+								{
+									axisAngleKeys.Add(keys[v]);
+								}
+							}
+							ret	|=Animation.KeyPartsUsed.RotateX;
 						}
-						else if(addr == "Y")
+						else if(rot.Values[1] > 0.999f)
 						{
-							keys[v].mPosition.Y	=val;
-							ret					|=Animation.KeyPartsUsed.TranslateY;
+							for(int v=0;v < outValues.Count;v++)
+							{
+								float	val	=outValues[v];
+								keys[v].mRotation.Y	=val;
+								if(!axisAngleKeys.Contains(keys[v]))
+								{
+									axisAngleKeys.Add(keys[v]);
+								}
+							}
+							ret	|=Animation.KeyPartsUsed.RotateY;
 						}
-						else if(addr == "Z")
+						else if(rot.Values[2] > 0.999f)
 						{
-							keys[v].mPosition.Z	=val;
-							ret					|=Animation.KeyPartsUsed.TranslateZ;
+							for(int v=0;v < outValues.Count;v++)
+							{
+								float	val	=outValues[v];
+								keys[v].mRotation.Z	=val;
+								if(!axisAngleKeys.Contains(keys[v]))
+								{
+									axisAngleKeys.Add(keys[v]);
+								}
+							}
+							ret	|=Animation.KeyPartsUsed.RotateZ;
 						}
-					}
-					else if(elName == "scale")
-					{
-						if(addr == "X")
+						else
 						{
-							keys[v].mScale.X	=val;
-							ret					|=Animation.KeyPartsUsed.ScaleX;
-						}
-						else if(addr == "Y")
-						{
-							keys[v].mScale.Y	=val;
-							ret					|=Animation.KeyPartsUsed.ScaleY;
-						}
-						else if(addr == "Z")
-						{
-							keys[v].mScale.Z	=val;
-							ret					|=Animation.KeyPartsUsed.ScaleZ;
+							Debug.Assert(false);	//broken!
 						}
 					}
 				}
-
-				//this will leave euler angles in
-				//the quaternion, will fix in Animation.cs
+				else if(targeted.ItemsElementName[idx] == ItemsChoiceType2.scale)
+				{
+					if(addr == null)
+					{
+						//I haven't seen this happen, but I'm guessing it
+						//would be vector3s
+						for(int v=0;v < outValues.Count;v+=3)
+						{
+							keys[v / 3].mScale.X	=outValues[v];
+							keys[v / 3].mScale.Y	=outValues[v + 1];
+							keys[v / 3].mScale.Z	=outValues[v + 2];
+						}
+						ret	|=Animation.KeyPartsUsed.ScaleX;
+						ret	|=Animation.KeyPartsUsed.ScaleY;
+						ret	|=Animation.KeyPartsUsed.ScaleZ;
+					}
+					else if(addr == "X")
+					{
+						for(int v=0;v < outValues.Count;v++)
+						{
+							float	val	=outValues[v];
+							keys[v].mScale.X	=val;
+						}
+						ret	|=Animation.KeyPartsUsed.ScaleX;
+					}
+					else if(addr == "Y")
+					{
+						for(int v=0;v < outValues.Count;v++)
+						{
+							float	val	=outValues[v];
+							keys[v].mScale.Y	=val;
+						}
+						ret	|=Animation.KeyPartsUsed.ScaleY;
+					}
+					else if(addr == "Z")
+					{
+						for(int v=0;v < outValues.Count;v++)
+						{
+							float	val	=outValues[v];
+							keys[v].mScale.Z	=val;
+						}
+						ret	|=Animation.KeyPartsUsed.ScaleZ;
+					}
+				}
+				else if(targeted.ItemsElementName[idx] == ItemsChoiceType2.skew)
+				{
+					Debug.Assert(false);	//haven't dealt with this one yet
+				}
+				else if(targeted.ItemsElementName[idx] == ItemsChoiceType2.translate)
+				{
+					if(addr == null)
+					{
+						//the values are vector3s in this case
+						for(int v=0;v < outValues.Count;v+=3)
+						{
+							keys[v / 3].mPosition.X	=outValues[v];
+							keys[v / 3].mPosition.Y	=outValues[v + 1];
+							keys[v / 3].mPosition.Z	=outValues[v + 2];
+						}
+						ret	|=Animation.KeyPartsUsed.TranslateX;
+						ret	|=Animation.KeyPartsUsed.TranslateY;
+						ret	|=Animation.KeyPartsUsed.TranslateZ;
+					}
+					else if(addr == "X")
+					{
+						for(int v=0;v < outValues.Count;v++)
+						{
+							float	val	=outValues[v];
+							keys[v].mPosition.X	=val;
+						}
+						ret	|=Animation.KeyPartsUsed.TranslateX;
+					}
+					else if(addr == "Y")
+					{
+						for(int v=0;v < outValues.Count;v++)
+						{
+							float	val	=outValues[v];
+							keys[v].mPosition.Y	=val;
+						}
+						ret	|=Animation.KeyPartsUsed.TranslateY;
+					}
+					else if(addr == "Z")
+					{
+						for(int v=0;v < outValues.Count;v++)
+						{
+							float	val	=outValues[v];
+							keys[v].mPosition.Z	=val;
+						}
+						ret	|=Animation.KeyPartsUsed.TranslateZ;
+					}
+				}
 			}
 			return	ret;
 		}

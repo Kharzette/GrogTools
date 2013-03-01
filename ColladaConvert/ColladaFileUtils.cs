@@ -1,10 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Xml;
-using System.Xml.Serialization;
 using System.IO;
+using System.Xml;
+using System.Linq;
+using System.Reflection;
 using System.Diagnostics;
 using System.ComponentModel;
+using System.Xml.Serialization;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
@@ -153,6 +155,31 @@ namespace ColladaConvert
 		}
 
 
+		static List<string> GetBoneNamesViaSID(string []sids, COLLADA cfile)
+		{
+			List<string>	boneNames	=new List<string>();
+
+			IEnumerable<library_visual_scenes>	lvs	=cfile.Items.OfType<library_visual_scenes>();
+
+			foreach(string sid in sids)
+			{
+				node	n	=LookUpNodeViaSID(lvs.First(), sid);
+
+				if(n == null)
+				{
+					//the max collada writer screws this up, using
+					//ids instead of sids that the spec asks for
+					n	=LookUpNode(lvs.First(), sid);
+				}
+				
+				Debug.Assert(n != null);
+
+				boneNames.Add(n.name);
+			}
+			return	boneNames;
+		}
+
+
 		static void CreateSkins(COLLADA				colladaFile,
 								Character			chr,
 								List<MeshConverter>	chunks)
@@ -205,7 +232,7 @@ namespace ColladaConvert
 						{
 							Name_array	na	=src.Item as Name_array;
 
-							skin.SetBoneNames(na.Values);
+							skin.SetBoneNames(GetBoneNamesViaSID(na.Values, colladaFile));
 						}
 						else if(src.id == invSrc)
 						{
@@ -238,23 +265,27 @@ namespace ColladaConvert
 		{
 			//create useful anims
 			List<SubAnim>	subs	=new List<SubAnim>();
-			foreach(object item in colladaFile.Items)
+
+			IEnumerable<library_visual_scenes>	lvs	=colladaFile.Items.OfType<library_visual_scenes>();
+			if(lvs.Count() <= 0)
 			{
-				library_animations	anims	=item as library_animations;
-				if(anims == null)
-				{
-					continue;
-				}
+				return	subs;
+			}
 
-				foreach(animation anim in anims.animation)
-				{
-					Animation	an	=new Animation(anim);
+			IEnumerable<library_animations>	anims	=colladaFile.Items.OfType<library_animations>();
+			if(anims.Count() <= 0)
+			{
+				return	subs;
+			}
 
-					SubAnim	sa	=an.GetAnims(skel);
-					if(sa != null)
-					{
-						subs.Add(sa);
-					}
+			foreach(animation anim in anims.First().animation)
+			{
+				Animation	an	=new Animation(anim);
+
+				SubAnim	sa	=an.GetAnims(skel, lvs.First());
+				if(sa != null)
+				{
+					subs.Add(sa);
 				}
 			}
 			return	subs;
@@ -279,6 +310,10 @@ namespace ColladaConvert
 					{
 						continue;
 					}
+
+					//blast any chunks with no verts (happens with max collada)
+					List<MeshConverter>	toNuke	=new List<MeshConverter>();
+
 					foreach(MeshConverter cnk in chunks)
 					{
 						string	name	=cnk.GetName();
@@ -304,6 +339,12 @@ namespace ColladaConvert
 							List<int>	colIdxs2	=GetGeometryIndexesBySemantic(geom, "COLOR", 2, name);
 							List<int>	colIdxs3	=GetGeometryIndexesBySemantic(geom, "COLOR", 3, name);
 							List<int>	vertCounts	=GetGeometryVertCount(geom, name);
+
+							if(vertCounts.Count == 0)
+							{
+								toNuke.Add(cnk);
+								continue;
+							}
 
 							cnk.AddNormTexByPoly(posIdxs, norms, normIdxs,
 								texCoords0, texIdxs0, texCoords1, texIdxs1,
@@ -357,6 +398,13 @@ namespace ColladaConvert
 								bCol0, bCol1, bCol2, bCol3);
 						}
 					}
+
+					//blast empty chunks
+					foreach(MeshConverter nuke in toNuke)
+					{
+						chunks.Remove(nuke);
+					}
+					toNuke.Clear();
 				}
 			}
 		}
@@ -542,20 +590,38 @@ namespace ColladaConvert
 					foreach(object polyObj in msh.Items)
 					{
 						polygons	polys	=polyObj as polygons;
-						if(polys == null)
+						polylist	plist	=polyObj as polylist;
+						triangles	tris	=polyObj as triangles;
+
+						if(polys == null && plist == null && tris == null)
 						{
 							continue;
 						}
 
-						float_array	verts	=GetGeometryFloatArrayBySemantic(geom, "VERTEX", 0, polys.material);
+						string	mat	=null;
+						if(polys != null)
+						{
+							mat	=polys.material;
+						}
+						else if(plist != null)
+						{
+							mat	=plist.material;
+						}
+						else if(tris != null)
+						{
+							mat	=tris.material;
+						}
+
+						float_array		verts	=null;
+						MeshConverter	cnk		=null;
+
+						verts	=GetGeometryFloatArrayBySemantic(geom, "VERTEX", 0, mat);
 						if(verts == null)
 						{
 							continue;
 						}
 						
-						MeshConverter	cnk	=new MeshConverter(polys.material, geom.name);
-
-						
+						cnk	=new MeshConverter(mat, geom.name);
 
 						cnk.CreateBaseVerts(verts, bSkinned);
 
@@ -617,14 +683,44 @@ namespace ColladaConvert
 			foreach(object polObj in msh.Items)
 			{
 				polygons	polys	=polObj as polygons;
-				if(polys == null || polys.Items == null || polys.material != material)
+				polylist	plist	=polObj as polylist;
+				triangles	tris	=polObj as triangles;
+
+				if(polys == null && plist == null && tris == null)
 				{
 					continue;
 				}
 
-				for(int i=0;i < polys.input.Length;i++)
+				InputLocalOffset	[]inputs	=null;
+
+				if(polys != null)
 				{
-					InputLocalOffset	inp	=polys.input[i];
+					inputs	=polys.input;
+					if(polys.material != material)
+					{
+						continue;
+					}
+				}
+				else if(plist != null)
+				{
+					inputs	=plist.input;
+					if(plist.material != material)
+					{
+						continue;
+					}
+				}
+				else if(tris != null)
+				{
+					inputs	=tris.input;
+					if(tris.material != material)
+					{
+						continue;
+					}
+				}
+
+				for(int i=0;i < inputs.Length;i++)
+				{
+					InputLocalOffset	inp	=inputs[i];
 					if(inp.semantic == sem && set == (int)inp.set)
 					{
 						//strip #
@@ -640,34 +736,54 @@ namespace ColladaConvert
 					continue;
 				}
 
-				foreach(object polyObj in polys.Items)
+				if(polys != null && polys.Items != null)
 				{
-					string	pols	=polyObj as string;
-					Debug.Assert(pols != null);
-
-					int	numSem	=polys.input.Length;
-					int	curIdx	=0;
-
-					string	[]tokens	=pols.Split(' ', '\n');
-					foreach(string tok in tokens)
+					foreach(object polyObj in polys.Items)
 					{
-						if(curIdx == ofs)
-						{
-							int	val	=0;
-							if(int.TryParse(tok, out val))
-							{
-								ret.Add(val);
-							}
-						}
-						curIdx++;
-						if(curIdx >= numSem)
-						{
-							curIdx	=0;
-						}
+						string	pols	=polyObj as string;
+						Debug.Assert(pols != null);
+
+						int		numSem		=polys.input.Length;
+						string	[]tokens	=pols.Split(' ', '\n');
+						ParseIndexes(tokens, ofs, numSem, ret);
 					}
+				}
+				else if(plist != null)
+				{
+					int		numSem		=plist.input.Length;
+					string	[]tokens	=plist.p.Split(' ', '\n');
+					ParseIndexes(tokens, ofs, numSem, ret);
+				}
+				else if(tris != null)
+				{
+					int		numSem		=tris.input.Length;
+					string	[]tokens	=tris.p.Split(' ', '\n');
+					ParseIndexes(tokens, ofs, numSem, ret);
 				}
 			}
 			return	ret;
+		}
+
+
+		static void ParseIndexes(string []tokens, int offset, int numSemantics, List<int> indexes)
+		{
+			int	curIdx	=0;
+			foreach(string tok in tokens)
+			{
+				if(curIdx == offset)
+				{
+					int	val	=0;
+					if(int.TryParse(tok, out val))
+					{
+						indexes.Add(val);
+					}
+				}
+				curIdx++;
+				if(curIdx >= numSemantics)
+				{
+					curIdx	=0;
+				}
+			}
 		}
 
 
@@ -683,20 +799,62 @@ namespace ColladaConvert
 			foreach(object polObj in msh.Items)
 			{
 				polygons	polys	=polObj as polygons;
-				if(polys == null || polys.Items == null || polys.material != material)
+				polylist	plist	=polObj as polylist;
+				triangles	tris	=polObj as triangles;
+
+				if(polys == null && plist == null && tris == null)
 				{
 					continue;
 				}
 
-				foreach(object polyObj in polys.Items)
+				if(polys != null)
 				{
-					string	pols	=polyObj as string;
-					Debug.Assert(pols != null);
+					if(polys.material != material || polys.Items == null)
+					{
+						continue;
+					}
+					foreach(object polyObj in polys.Items)
+					{
+						string	pols	=polyObj as string;
+						Debug.Assert(pols != null);
 
-					int	numSem	=polys.input.Length;
+						int	numSem	=polys.input.Length;
 
-					string	[]tokens	=pols.Split(' ', '\n');
-					ret.Add(tokens.Length / numSem);
+						string	[]tokens	=pols.Split(' ', '\n');
+						ret.Add(tokens.Length / numSem);
+					}
+				}
+				else if(plist != null)
+				{
+					if(plist.material != material)
+					{
+						continue;
+					}
+					string	[]tokens	=plist.vcount.Split(' ', '\n');
+
+					int	numSem	=plist.input.Length;
+					foreach(string tok in tokens)
+					{
+						int	vertCount;
+						
+						bool	bGood	=Int32.TryParse(tok, out vertCount);
+
+						Debug.Assert(bGood);
+
+						ret.Add(vertCount);
+					}
+				}
+				else if(tris != null)
+				{
+					if(tris.material != material)
+					{
+						continue;
+					}
+
+					for(int i=0;i < (int)tris.count;i++)
+					{
+						ret.Add(3);
+					}
 				}
 			}
 			return	ret;
@@ -717,14 +875,32 @@ namespace ColladaConvert
 			foreach(object polObj in msh.Items)
 			{
 				polygons	polys	=polObj as polygons;
-				if(polys == null || polys.Items == null || polys.material != material)
+				polylist	plist	=polObj as polylist;
+				triangles	tris	=polObj as triangles;
+
+				if(polys == null && plist == null && tris == null)
 				{
 					continue;
 				}
 
-				for(int i=0;i < polys.input.Length;i++)
+				InputLocalOffset	[]inputs	=null;
+
+				if(polys != null)
 				{
-					InputLocalOffset	inp	=polys.input[i];
+					inputs	=polys.input;
+				}
+				else if(plist != null)
+				{
+					inputs	=plist.input;
+				}
+				else if(tris != null)
+				{
+					inputs	=tris.input;
+				}
+
+				for(int i=0;i < inputs.Length;i++)
+				{
+					InputLocalOffset	inp	=inputs[i];
 					if(inp.semantic == sem && set == (int)inp.set)
 					{
 						//strip #
@@ -879,7 +1055,11 @@ namespace ColladaConvert
 			gsn	=new GSNode();
 
 			gsn.SetName(n.name);
-			gsn.SetKey(GetKeyFromCNode(n));
+
+			KeyFrame	kf	=GetKeyFromCNode(n);
+
+			gsn.SetKey(kf);
+			gsn.SetBindKey(kf);
 
 			if(n.node1 == null)
 			{
@@ -957,6 +1137,40 @@ namespace ColladaConvert
 		}
 
 
+		internal static List<Matrix> GetMatrixListFromFloatList(List<float> fa)
+		{
+			List<Matrix>	ret	=new List<Matrix>();
+
+			Debug.Assert(fa.Count % 16 == 0);
+
+			for(int i=0;i < (int)fa.Count;i+=16)
+			{
+				Matrix	mat	=new Matrix();
+
+				mat.M11	=fa[i + 0];
+				mat.M21	=fa[i + 1];
+				mat.M31	=fa[i + 2];
+				mat.M41	=fa[i + 3];
+				mat.M12	=fa[i + 4];
+				mat.M22	=fa[i + 5];
+				mat.M32	=fa[i + 6];
+				mat.M42	=fa[i + 7];
+				mat.M13	=fa[i + 8];
+				mat.M23	=fa[i + 9];
+				mat.M33	=fa[i + 10];
+				mat.M43	=fa[i + 11];
+				mat.M14	=fa[i + 12];
+				mat.M24	=fa[i + 13];
+				mat.M34	=fa[i + 14];
+				mat.M44	=fa[i + 15];
+
+				ret.Add(mat);
+			}
+
+			return	ret;
+		}
+
+
 		internal static void GetMatrixFromString(string str, out Matrix mat)
 		{
 			string[] tokens	=str.Split(' ', '\n', '\t');
@@ -1001,6 +1215,117 @@ namespace ColladaConvert
 			string	name	=path.Substring(lastSlash, extension - lastSlash);
 
 			return	name;
+		}
+
+
+		internal static node LookUpNode(node n, string id)
+		{
+			if(n.id == id)
+			{
+				return	n;
+			}
+
+			if(n.node1 == null)
+			{
+				return	null;
+			}
+
+			foreach(node child in n.node1)
+			{
+				node	ret	=LookUpNode(child, id);
+				if(ret != null)
+				{
+					return	ret;
+				}
+			}
+			return	null;
+		}
+
+
+		internal static node LookUpNodeViaSID(node n, string sid)
+		{
+			if(n.sid == sid)
+			{
+				return	n;
+			}
+
+			if(n.node1 == null)
+			{
+				return	null;
+			}
+
+			foreach(node child in n.node1)
+			{
+				node	ret	=LookUpNodeViaSID(child, sid);
+				if(ret != null)
+				{
+					return	ret;
+				}
+			}
+			return	null;
+		}
+
+
+		internal static node LookUpNode(library_visual_scenes lvs, string nodeID)
+		{
+			//find the node addressed
+			node	addressed	=null;
+			foreach(visual_scene vs in lvs.visual_scene)
+			{
+				foreach(node n in vs.node)
+				{
+					addressed	=LookUpNode(n, nodeID);
+					if(addressed != null)
+					{
+						break;
+					}
+				}
+			}
+			return	addressed;
+		}
+
+
+		internal static node LookUpNodeViaSID(library_visual_scenes lvs, string SID)
+		{
+			//find the node addressed
+			node	addressed	=null;
+			foreach(visual_scene vs in lvs.visual_scene)
+			{
+				foreach(node n in vs.node)
+				{
+					addressed	=LookUpNodeViaSID(n, SID);
+					if(addressed != null)
+					{
+						break;
+					}
+				}
+			}
+			return	addressed;
+		}
+
+
+		internal static int GetNodeItemIndex(node n, string sid)
+		{
+			for(int i=0;i < n.Items.Length;i++)
+			{
+				object	item	=n.Items[i];
+				Type	t		=item.GetType();
+
+				PropertyInfo	[]pinfo	=t.GetProperties();
+
+				foreach(PropertyInfo pi in pinfo)
+				{
+					if(pi.Name == "sid")
+					{
+						string	itemSid	=pi.GetValue(item, null) as string;
+						if(itemSid == sid)
+						{
+							return	i;
+						}
+					}
+				}
+			}
+			return	-1;
 		}
 	}
 }
