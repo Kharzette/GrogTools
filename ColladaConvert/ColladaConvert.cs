@@ -538,8 +538,9 @@ namespace ColladaConvert
 				return;
 			}
 
-			mAnimLib.CreateKinectAnimation(mapping, mCharacter.GetSkinByIndex(0),
-				mSkelFrames, "KinectAnim" + mAnimNameCounter++);
+			mAnimLib.CreateKinectAnimation(mapping, mSkelFrames,
+				"KinectAnim" + mAnimNameCounter++);
+
 			eAnimsUpdated(mAnimLib.GetAnims(), null);
 		}
 

@@ -74,7 +74,7 @@ namespace ColladaConvert
 
 				foreach(SubAnimation sa in mSubAnims)
 				{
-					List<float>	saTimes	=sa.GetTimesForBone(bone);
+					List<float>	saTimes	=sa.GetTimesForBone(bone, lvs);
 
 					foreach(float t in saTimes)
 					{

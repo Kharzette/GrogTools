@@ -163,12 +163,12 @@ namespace ColladaConvert
 
 			foreach(string sid in sids)
 			{
+				//supposed to use sids (I think, the spec is ambiguous)
+				//but if that fails use ids.  Maybe should use names I dunno
 				node	n	=LookUpNodeViaSID(lvs.First(), sid);
 
 				if(n == null)
 				{
-					//the max collada writer screws this up, using
-					//ids instead of sids that the spec asks for
 					n	=LookUpNode(lvs.First(), sid);
 				}
 				
@@ -1059,7 +1059,6 @@ namespace ColladaConvert
 			KeyFrame	kf	=GetKeyFromCNode(n);
 
 			gsn.SetKey(kf);
-			gsn.SetBindKey(kf);
 
 			if(n.node1 == null)
 			{

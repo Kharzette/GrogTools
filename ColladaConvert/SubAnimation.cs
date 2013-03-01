@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Diagnostics;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
@@ -51,7 +52,7 @@ namespace ColladaConvert
 		}
 
 
-		internal List<float> GetTimesForBone(string bone)
+		internal List<float> GetTimesForBone(string bone, library_visual_scenes lvs)
 		{
 			List<float>	ret	=new List<float>();
 
@@ -59,9 +60,26 @@ namespace ColladaConvert
 			{
 				//extract the node name and address
 				int		sidx	=chan.target.IndexOf('/');
-				string	nName	=chan.target.Substring(0, sidx);
+				string	sid		=chan.target.Substring(0, sidx);
 
-				if(!nName.StartsWith(bone))
+				//ok this is tricky, the spec says that the <source>
+				//referenced by the input with the JOINT semantic
+				//should contain a <Name_array> that contains sids
+				//to identify the joint nodes.  sids are used instead
+				//of IDREFs to allow a skin controller to be instantiated
+				//multiple times, where each instance can be animated
+				//independently.
+				//
+				//So max's default collada exporter doesn't even give the
+				//bones sids at all, and the other one whose name escapes
+				//me gives the bones sids, but then the address element
+				//says Name (note the case), so I guess you need to try
+				//to match via sid first and if that fails, use name?
+				node	n	=ColladaFileUtils.LookUpNode(lvs, sid);
+
+				Debug.Assert(n != null);
+
+				if(bone != n.name)
 				{
 					continue;
 				}
@@ -157,9 +175,13 @@ namespace ColladaConvert
 			{
 				//extract the node name and address
 				int		sidx	=chan.target.IndexOf('/');
-				string	nName	=chan.target.Substring(0, sidx);
+				string	sid		=chan.target.Substring(0, sidx);
 
-				if(!nName.StartsWith(bone))
+				node	n	=ColladaFileUtils.LookUpNode(scenes, sid);
+
+				Debug.Assert(n != null);
+
+				if(bone != n.name)
 				{
 					continue;
 				}
@@ -181,14 +203,13 @@ namespace ColladaConvert
 				float_array	chanValues	=mSources[srcOut].Item as float_array;
 				List<float>	outValues	=new List<float>();
 
-				//grab values for this channel
-				//along the overall list of times
-				for(int tidx=0;tidx < times.Count;tidx++)
-				{
-					outValues.AddRange(LerpValue(times[tidx], chanTimes,
-						chanValues,
-						(int)mSources[srcOut].technique_common.accessor.stride));
-				}
+				int	numChanKeys	=chanValues.Values.Length;
+
+				numChanKeys	/=(int)mSources[srcOut].technique_common.accessor.stride;
+
+				Debug.Assert(numChanKeys == (int)chanTimes.count);
+
+				outValues.AddRange(chanValues.Values);
 
 				int		slashIndex	=chan.target.IndexOf("/");
 				string	nodeID		=chan.target.Substring(0, slashIndex);
