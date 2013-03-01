@@ -88,6 +88,42 @@ namespace ColladaConvert
 			List<SubAnim>	subs	=GetSubAnimList(colladaFile, skel);
 			Anim	anm	=new Anim(subs);
 
+			//see if there are multiple skeletons
+			IEnumerable<library_visual_scenes>	lvss	=colladaFile.Items.OfType<library_visual_scenes>();
+
+			library_visual_scenes	lvs	=lvss.First();
+
+			Debug.Assert(lvs.visual_scene.Length == 1);
+
+			foreach(node n in lvs.visual_scene[0].node)
+			{
+				if(n.instance_controller != null)
+				{
+					Debug.Assert(n.instance_controller.Length == 1);
+
+					string	[]skels	=n.instance_controller.First().skeleton;
+
+					if(skels != null)
+					{
+						if(skels.Length > 1)
+						{
+							for(int i=1;i < skels.Length;i++)
+							{
+								string	skelName	=skels[i].Substring(1);
+
+								node	skelNode	=LookUpNodeViaSID(lvs, skelName);
+								if(skelNode == null)
+								{
+									skelNode	=LookUpNode(lvs, skelName);
+								}
+
+								anm.FixDetatchedSkeleton(skel, skelNode.name);
+							}
+						}
+					}
+				}
+			}
+
 			anm.SetBoneRefs(skel);
 			anm.Name	=NameFromPath(path);
 			alib.AddAnim(anm);
@@ -278,17 +314,182 @@ namespace ColladaConvert
 				return	subs;
 			}
 
+			List<Animation.KeyPartsUsed>	partsUsed	=new List<Animation.KeyPartsUsed>();
 			foreach(animation anim in anims.First().animation)
 			{
 				Animation	an	=new Animation(anim);
 
-				SubAnim	sa	=an.GetAnims(skel, lvs.First());
+				Animation.KeyPartsUsed	parts;
+
+				SubAnim	sa	=an.GetAnims(skel, lvs.First(), out parts);
 				if(sa != null)
 				{
 					subs.Add(sa);
+					partsUsed.Add(parts);
 				}
 			}
-			return	subs;
+
+			//merge animations affecting a single bone
+			List<SubAnim>					merged		=new List<SubAnim>();
+			List<Animation.KeyPartsUsed>	mergedParts	=new List<Animation.KeyPartsUsed>();
+
+			//grab full list of bones
+			List<string>	boneNames	=new List<string>();
+
+			skel.GetBoneNames(boneNames);
+			foreach(string bone in boneNames)
+			{
+				List<SubAnim>					combine			=new List<SubAnim>();
+				List<Animation.KeyPartsUsed>	combineParts	=new List<Animation.KeyPartsUsed>();
+
+				for(int i=0;i < subs.Count;i++)
+				{
+					SubAnim	sa	=subs[i];
+
+					if(sa.GetBoneName() == bone)
+					{
+						combine.Add(sa);
+						combineParts.Add(partsUsed[i]);
+					}
+				}
+
+				if(combine.Count == 1)
+				{
+					merged.Add(combine[0]);
+					mergedParts.Add(combineParts[0]);
+					continue;
+				}
+				else if(combine.Count <= 0)
+				{
+					continue;
+				}
+
+				//merge together
+				SubAnim		first		=combine.First();
+				KeyFrame	[]firstKeys	=first.GetKeys();
+				for(int i=1;i < combine.Count;i++)
+				{
+					KeyFrame	[]next	=combine[i].GetKeys();
+
+					Debug.Assert(firstKeys.Length == next.Length);
+
+					Animation.KeyPartsUsed	nextParts	=combineParts[i];
+
+					//ensure no overlap (shouldn't be)
+					Debug.Assert(((UInt32)nextParts & (UInt32)combineParts[0]) == 0);
+
+					MergeKeys(firstKeys, next, nextParts);
+
+					combineParts[0]	|=nextParts;
+				}
+
+				merged.Add(first);
+				mergedParts.Add(combineParts[0]);
+			}
+
+			//post merge, fill in any gaps in the keyframes with
+			//data from the nodes themselves
+			for(int i=0;i < merged.Count;i++)
+			{
+				SubAnim		sub			=merged[i];
+				string		boneName	=sub.GetBoneName();
+				KeyFrame	boneKey		=skel.GetBoneKey(boneName);
+				KeyFrame	[]keys		=sub.GetKeys();
+
+				foreach(KeyFrame key in keys)
+				{
+					FillKeyGaps(key, mergedParts[i], boneKey);
+				}
+			}
+
+			return	merged;
+		}
+
+
+		static void FillKeyGaps(KeyFrame key, Animation.KeyPartsUsed keyPartsUsed, KeyFrame boneKey)
+		{
+			if(!UtilityLib.Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.TranslateX))
+			{
+				key.mPosition.X	=boneKey.mPosition.X;
+			}
+			if(!UtilityLib.Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.TranslateY))
+			{
+				key.mPosition.Y	=boneKey.mPosition.Y;
+			}
+			if(!UtilityLib.Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.TranslateZ))
+			{
+				key.mPosition.Z	=boneKey.mPosition.Z;
+			}
+			if(!UtilityLib.Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.ScaleX))
+			{
+				key.mScale.X	=boneKey.mScale.X;
+			}
+			if(!UtilityLib.Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.ScaleY))
+			{
+				key.mScale.Y	=boneKey.mScale.Y;
+			}
+			if(!UtilityLib.Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.ScaleZ))
+			{
+				key.mScale.Z	=boneKey.mScale.Z;
+			}
+			if(!UtilityLib.Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.RotateX))
+			{
+				key.mRotation	=Quaternion.Concatenate(key.mRotation, boneKey.mRotation);
+			}
+			if(!UtilityLib.Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.RotateY))
+			{
+				key.mRotation	=Quaternion.Concatenate(key.mRotation, boneKey.mRotation);
+			}
+			if(!UtilityLib.Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.RotateZ))
+			{
+				key.mRotation	=Quaternion.Concatenate(key.mRotation, boneKey.mRotation);
+			}
+		}
+
+
+		static void MergeKeys(KeyFrame []first, KeyFrame []next, Animation.KeyPartsUsed nextParts)
+		{
+			Debug.Assert(first.Length == next.Length);
+
+			for(int i=0;i < first.Length;i++)
+			{
+				if(UtilityLib.Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.TranslateX))
+				{
+					first[i].mPosition.X	=next[i].mPosition.X;
+				}
+				if(UtilityLib.Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.TranslateY))
+				{
+					first[i].mPosition.Y	=next[i].mPosition.Y;
+				}
+				if(UtilityLib.Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.TranslateZ))
+				{
+					first[i].mPosition.Z	=next[i].mPosition.Z;
+				}
+				if(UtilityLib.Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.ScaleX))
+				{
+					first[i].mScale.X	=next[i].mScale.X;
+				}
+				if(UtilityLib.Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.ScaleY))
+				{
+					first[i].mScale.Y	=next[i].mScale.Y;
+				}
+				if(UtilityLib.Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.ScaleZ))
+				{
+					first[i].mScale.Z	=next[i].mScale.Z;
+				}
+				if(UtilityLib.Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.RotateX))
+				{
+					first[i].mRotation	=Quaternion.Concatenate(next[i].mRotation, first[i].mRotation);
+				}
+				if(UtilityLib.Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.RotateY))
+				{
+					first[i].mRotation	=Quaternion.Concatenate(next[i].mRotation, first[i].mRotation);
+				}
+				if(UtilityLib.Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.RotateZ))
+				{
+					first[i].mRotation	=Quaternion.Concatenate(next[i].mRotation, first[i].mRotation);
+				}
+			}
 		}
 
 

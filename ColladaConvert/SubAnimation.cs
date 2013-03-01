@@ -209,7 +209,14 @@ namespace ColladaConvert
 
 				Debug.Assert(numChanKeys == (int)chanTimes.count);
 
-				outValues.AddRange(chanValues.Values);
+				//grab values for this channel
+				//along the overall list of times
+				for(int tidx=0;tidx < times.Count;tidx++)
+				{
+					outValues.AddRange(LerpValue(times[tidx], chanTimes,
+						chanValues,
+						(int)mSources[srcOut].technique_common.accessor.stride));
+				}
 
 				int		slashIndex	=chan.target.IndexOf("/");
 				string	nodeID		=chan.target.Substring(0, slashIndex);

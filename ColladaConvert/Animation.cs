@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Xml;
 using Microsoft.Xna.Framework;
@@ -60,14 +61,16 @@ namespace ColladaConvert
 		}
 
 
-		internal MeshLib.SubAnim	GetAnims(MeshLib.Skeleton skel, library_visual_scenes lvs)
+		internal MeshLib.SubAnim	GetAnims(MeshLib.Skeleton skel, library_visual_scenes lvs, out KeyPartsUsed parts)
 		{
+			parts	=0;
+
 			//grab full list of bones
 			List<string>	boneNames	=new List<string>();
 
 			skel.GetBoneNames(boneNames);
 
-			//for each bone, find all keyframe times
+			//for each bone, find any keyframe times
 			foreach(string bone in boneNames)
 			{
 				List<float>	times	=new List<float>();
@@ -100,8 +103,6 @@ namespace ColladaConvert
 					keys.Add(new MeshLib.KeyFrame());
 				}
 
-				KeyPartsUsed	parts	=0;
-
 				//track axis angle style keys
 				List<MeshLib.KeyFrame>	axisAngleKeys	=new List<MeshLib.KeyFrame>();
 
@@ -125,6 +126,7 @@ namespace ColladaConvert
 				MeshLib.KeyFrame	boneKey	=skel.GetBoneKey(bone);
 
 				//patch up the keys with any missing channel data
+				/*
 				foreach(MeshLib.KeyFrame kf in keys)
 				{
 					//fill in missing parts with original bone
@@ -140,18 +142,6 @@ namespace ColladaConvert
 					{
 						kf.mPosition.Z	=boneKey.mPosition.Z;
 					}
-					if(!UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.RotateX))
-					{
-						kf.mRotation.X	=boneKey.mRotation.X;
-					}
-					if(!UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.RotateY))
-					{
-						kf.mRotation.Y	=boneKey.mRotation.Y;
-					}
-					if(!UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.RotateZ))
-					{
-						kf.mRotation.Z	=boneKey.mRotation.Z;
-					}
 					if(!UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.ScaleX))
 					{
 						kf.mScale.X	=boneKey.mScale.X;
@@ -164,7 +154,24 @@ namespace ColladaConvert
 					{
 						kf.mScale.Z	=boneKey.mScale.Z;
 					}
-				}
+
+					//rotation is trickier since these are now quaternions
+					//if any are set, I'd think all would be set
+					if(!UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.RotateX)
+						|| !UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.RotateY)
+						|| !UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.RotateZ))
+					{
+						Debug.Assert(!UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.RotateX)
+							&& !UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.RotateY)
+							&& !UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.RotateZ));
+
+						//set the whole quaternion
+						kf.mRotation.X	=boneKey.mRotation.X;
+						kf.mRotation.Y	=boneKey.mRotation.Y;
+						kf.mRotation.Z	=boneKey.mRotation.Z;
+						kf.mRotation.W	=boneKey.mRotation.W;
+					}
+				}*/
 
 				return	new MeshLib.SubAnim(bone, times, keys);
 			}
