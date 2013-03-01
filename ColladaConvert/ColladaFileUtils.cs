@@ -36,6 +36,10 @@ namespace ColladaConvert
 			COLLADA	colladaFile	=DeSerializeCOLLADA(path);
 			Skeleton	skel	=BuildSkeleton(colladaFile);
 
+			//grab visual scenes
+			IEnumerable<library_visual_scenes>	lvss	=colladaFile.Items.OfType<library_visual_scenes>();
+			library_visual_scenes	lvs	=lvss.First();
+
 			//see if animlib has a skeleton yet
 			if(alib.GetSkeleton() == null)
 			{
@@ -49,50 +53,15 @@ namespace ColladaConvert
 					return	false;
 				}
 			}
-			List<SubAnim>	subs	=GetSubAnimList(colladaFile, alib.GetSkeleton());
-			Anim	anm	=new Anim(subs);
 
-			anm.SetBoneRefs(alib.GetSkeleton());
-
-			anm.Name	=NameFromPath(path);
-			alib.AddAnim(anm);
+			alib.AddAnim(BuildAnim(colladaFile, skel, lvs, path));
 
 			return	true;
 		}
 
 
-		internal static Character LoadCharacter(string					path,
-												GraphicsDevice			gd,
-												MaterialLib.MaterialLib	matLib,
-												AnimLib					alib)
+		static void FixMultipleSkeletons(library_visual_scenes lvs, Anim anm, Skeleton skel)
 		{
-			COLLADA	colladaFile	=DeSerializeCOLLADA(path);
-
-			Character	chr	=new Character(matLib, alib);
-
-			List<MeshConverter>	chunks	=GetMeshChunks(colladaFile, true);
-
-			AddVertexWeightsToChunks(colladaFile, chunks);
-
-			//build skeleton
-			Skeleton	skel	=BuildSkeleton(colladaFile);
-
-			//bake scene node modifiers into controllers
-			BakeSceneNodesIntoVerts(colladaFile, skel, chunks);
-
-			alib.SetSkeleton(skel);
-
-			BuildFinalVerts(colladaFile, gd, chunks);
-
-			//create useful anims
-			List<SubAnim>	subs	=GetSubAnimList(colladaFile, skel);
-			Anim	anm	=new Anim(subs);
-
-			//see if there are multiple skeletons
-			IEnumerable<library_visual_scenes>	lvss	=colladaFile.Items.OfType<library_visual_scenes>();
-
-			library_visual_scenes	lvs	=lvss.First();
-
 			Debug.Assert(lvs.visual_scene.Length == 1);
 
 			foreach(node n in lvs.visual_scene[0].node)
@@ -123,10 +92,52 @@ namespace ColladaConvert
 					}
 				}
 			}
+		}
+
+
+		static Anim BuildAnim(COLLADA colladaFile, Skeleton skel, library_visual_scenes lvs, string path)
+		{
+			//create useful anims
+			List<SubAnim>	subs	=GetSubAnimList(colladaFile, skel);
+			Anim	anm	=new Anim(subs);
+
+			FixMultipleSkeletons(lvs, anm, skel);
 
 			anm.SetBoneRefs(skel);
 			anm.Name	=NameFromPath(path);
-			alib.AddAnim(anm);
+
+			return	anm;
+		}
+
+
+		internal static Character LoadCharacter(string					path,
+												GraphicsDevice			gd,
+												MaterialLib.MaterialLib	matLib,
+												AnimLib					alib)
+		{
+			COLLADA	colladaFile	=DeSerializeCOLLADA(path);
+
+			//grab visual scenes
+			IEnumerable<library_visual_scenes>	lvss	=colladaFile.Items.OfType<library_visual_scenes>();
+			library_visual_scenes	lvs	=lvss.First();
+
+			Character	chr	=new Character(matLib, alib);
+
+			List<MeshConverter>	chunks	=GetMeshChunks(colladaFile, true);
+
+			AddVertexWeightsToChunks(colladaFile, chunks);
+
+			//build skeleton
+			Skeleton	skel	=BuildSkeleton(colladaFile);
+
+			//bake scene node modifiers into controllers
+			BakeSceneNodesIntoVerts(colladaFile, skel, chunks);
+
+			alib.SetSkeleton(skel);
+
+			BuildFinalVerts(colladaFile, gd, chunks);
+
+			alib.AddAnim(BuildAnim(colladaFile, skel, lvs, path));
 
 			CreateSkins(colladaFile, chr, chunks);
 
