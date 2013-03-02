@@ -60,56 +60,6 @@ namespace ColladaConvert
 		}
 
 
-		static void FixMultipleSkeletons(library_visual_scenes lvs, Anim anm, Skeleton skel)
-		{
-			Debug.Assert(lvs.visual_scene.Length == 1);
-
-			foreach(node n in lvs.visual_scene[0].node)
-			{
-				if(n.instance_controller != null)
-				{
-					Debug.Assert(n.instance_controller.Length == 1);
-
-					string	[]skels	=n.instance_controller.First().skeleton;
-
-					if(skels != null)
-					{
-						if(skels.Length > 1)
-						{
-							for(int i=1;i < skels.Length;i++)
-							{
-								string	skelName	=skels[i].Substring(1);
-
-								node	skelNode	=LookUpNodeViaSID(lvs, skelName);
-								if(skelNode == null)
-								{
-									skelNode	=LookUpNode(lvs, skelName);
-								}
-
-								anm.FixDetatchedSkeleton(skel, skelNode.name);
-							}
-						}
-					}
-				}
-			}
-		}
-
-
-		static Anim BuildAnim(COLLADA colladaFile, Skeleton skel, library_visual_scenes lvs, string path)
-		{
-			//create useful anims
-			List<SubAnim>	subs	=GetSubAnimList(colladaFile, skel);
-			Anim	anm	=new Anim(subs);
-
-			FixMultipleSkeletons(lvs, anm, skel);
-
-			anm.SetBoneRefs(skel);
-			anm.Name	=NameFromPath(path);
-
-			return	anm;
-		}
-
-
 		internal static Character LoadCharacter(string					path,
 												GraphicsDevice			gd,
 												MaterialLib.MaterialLib	matLib,
@@ -210,28 +160,54 @@ namespace ColladaConvert
 		}
 
 
-		static List<string> GetBoneNamesViaSID(string []sids, COLLADA cfile)
+		#region Helpers
+		static void FixMultipleSkeletons(library_visual_scenes lvs, Anim anm, Skeleton skel)
 		{
-			List<string>	boneNames	=new List<string>();
+			Debug.Assert(lvs.visual_scene.Length == 1);
 
-			IEnumerable<library_visual_scenes>	lvs	=cfile.Items.OfType<library_visual_scenes>();
-
-			foreach(string sid in sids)
+			foreach(node n in lvs.visual_scene[0].node)
 			{
-				//supposed to use sids (I think, the spec is ambiguous)
-				//but if that fails use ids.  Maybe should use names I dunno
-				node	n	=LookUpNodeViaSID(lvs.First(), sid);
-
-				if(n == null)
+				if(n.instance_controller != null)
 				{
-					n	=LookUpNode(lvs.First(), sid);
-				}
-				
-				Debug.Assert(n != null);
+					Debug.Assert(n.instance_controller.Length == 1);
 
-				boneNames.Add(n.name);
+					string	[]skels	=n.instance_controller.First().skeleton;
+
+					if(skels != null)
+					{
+						if(skels.Length > 1)
+						{
+							for(int i=1;i < skels.Length;i++)
+							{
+								string	skelName	=skels[i].Substring(1);
+
+								node	skelNode	=LookUpNodeViaSID(lvs, skelName);
+								if(skelNode == null)
+								{
+									skelNode	=LookUpNode(lvs, skelName);
+								}
+
+								anm.FixDetatchedSkeleton(skel, skelNode.name);
+							}
+						}
+					}
+				}
 			}
-			return	boneNames;
+		}
+
+
+		static Anim BuildAnim(COLLADA colladaFile, Skeleton skel, library_visual_scenes lvs, string path)
+		{
+			//create useful anims
+			List<SubAnim>	subs	=CreateSubAnims(colladaFile, skel);
+			Anim	anm	=new Anim(subs);
+
+			FixMultipleSkeletons(lvs, anm, skel);
+
+			anm.SetBoneRefs(skel);
+			anm.Name	=NameFromPath(path);
+
+			return	anm;
 		}
 
 
@@ -239,84 +215,82 @@ namespace ColladaConvert
 								Character			chr,
 								List<MeshConverter>	chunks)
 		{
-			List<Skin>	skinList	=new List<Skin>();
-			foreach(object item in colladaFile.Items)
+			IEnumerable<library_controllers>	lcs	=colladaFile.Items.OfType<library_controllers>();
+			if(lcs.Count() <= 0)
 			{
-				library_controllers	conts	=item as library_controllers;
-				if(conts == null)
+				return;
+			}
+
+			List<Skin>	skinList	=new List<Skin>();
+			foreach(controller cont in lcs.First().controller)
+			{
+				skin	sk	=cont.Item as skin;
+				if(sk == null)
 				{
 					continue;
 				}
-				foreach(controller cont in conts.controller)
+				string	skinSource	=sk.source1.Substring(1);
+				if(skinSource == null || skinSource == "")
 				{
-					skin	sk	=cont.Item as skin;
-					if(sk == null)
+					continue;
+				}
+				Skin	skin	=new Skin();
+
+				Matrix	mat	=Matrix.Identity;
+
+				GetMatrixFromString(sk.bind_shape_matrix, out mat);
+
+				skin.SetBindShapeMatrix(mat);
+
+				string	jointSrc	="";
+				string	invSrc		="";
+				foreach(InputLocal inp in sk.joints.input)
+				{
+					if(inp.semantic == "JOINT")
 					{
-						continue;
+						jointSrc	=inp.source.Substring(1);
 					}
-					string	skinSource	=sk.source1.Substring(1);
-					if(skinSource == null || skinSource == "")
+					else if(inp.semantic == "INV_BIND_MATRIX")
 					{
-						continue;
+						invSrc	=inp.source.Substring(1);
 					}
-					Skin	skin	=new Skin();
+				}
 
-					Matrix	mat	=Matrix.Identity;
-
-					GetMatrixFromString(sk.bind_shape_matrix, out mat);
-
-					skin.SetBindShapeMatrix(mat);
-
-					string	jointSrc	="";
-					string	invSrc		="";
-					foreach(InputLocal inp in sk.joints.input)
+				foreach(source src in sk.source)
+				{
+					if(src.id == jointSrc)
 					{
-						if(inp.semantic == "JOINT")
-						{
-							jointSrc	=inp.source.Substring(1);
-						}
-						else if(inp.semantic == "INV_BIND_MATRIX")
-						{
-							invSrc	=inp.source.Substring(1);
-						}
+						Name_array	na	=src.Item as Name_array;
+
+						skin.SetBoneNames(GetBoneNamesViaSID(na.Values, colladaFile));
 					}
-
-					foreach(source src in sk.source)
+					else if(src.id == invSrc)
 					{
-						if(src.id == jointSrc)
-						{
-							Name_array	na	=src.Item as Name_array;
+						float_array	ma	=src.Item as float_array;
 
-							skin.SetBoneNames(GetBoneNamesViaSID(na.Values, colladaFile));
-						}
-						else if(src.id == invSrc)
-						{
-							float_array	ma	=src.Item as float_array;
+						List<Matrix>	mats	=GetMatrixListFromFA(ma);
 
-							List<Matrix>	mats	=GetMatrixListFromFA(ma);
-
-							skin.SetInverseBindPoses(mats);
-						}
+						skin.SetInverseBindPoses(mats);
 					}
-					chr.AddSkin(skin);
-					skinList.Add(skin);
+				}
+				chr.AddSkin(skin);
+				skinList.Add(skin);
 
-					//set mesh pointers
-					foreach(MeshConverter mc in chunks)
+				//set mesh pointers
+				foreach(MeshConverter mc in chunks)
+				{
+					if(mc.mGeometryID == sk.source1.Substring(1))
 					{
-						if(mc.mGeometryID == sk.source1.Substring(1))
-						{
-							SkinnedMesh	msh	=mc.GetConvertedMesh() as SkinnedMesh;
-							msh.SetSkin(skin);
-							msh.SetSkinIndex(skinList.IndexOf(skin));
-						}
+						SkinnedMesh	msh	=mc.GetConvertedMesh() as SkinnedMesh;
+						msh.SetSkin(skin);
+						msh.SetSkinIndex(skinList.IndexOf(skin));
 					}
 				}
 			}
 		}
 
 
-		static List<SubAnim> GetSubAnimList(COLLADA colladaFile, Skeleton skel)
+		static List<SubAnim> CreateSubAnims(COLLADA colladaFile, Skeleton skel)
 		{
 			//create useful anims
 			List<SubAnim>	subs	=new List<SubAnim>();
@@ -516,164 +490,109 @@ namespace ColladaConvert
 									GraphicsDevice		gd,
 									List<MeshConverter>	chunks)
 		{
-			foreach(object item in colladaFile.Items)
+			IEnumerable<library_geometries>		geoms	=colladaFile.Items.OfType<library_geometries>();
+			IEnumerable<library_controllers>	conts	=colladaFile.Items.OfType<library_controllers>();
+
+			Debug.Assert(geoms.Count() == 1);
+
+			foreach(object geomItem in geoms.First().geometry)
 			{
-				library_geometries	geoms	=item as library_geometries;
-				if(geoms == null)
+				geometry	geom	=geomItem as geometry;
+				if(geom == null)
 				{
 					continue;
 				}
-				foreach(object geomItem in geoms.geometry)
+
+				//blast any chunks with no verts (happens with max collada)
+				List<MeshConverter>	toNuke	=new List<MeshConverter>();
+
+				foreach(MeshConverter cnk in chunks)
 				{
-					geometry	geom	=geomItem as geometry;
-					if(geom == null)
+					string	name	=cnk.GetName();
+					if(cnk.mGeometryID == geom.id)
 					{
-						continue;
-					}
+						List<int>	posIdxs		=GetGeometryIndexesBySemantic(geom, "VERTEX", 0, name);
+						float_array	norms		=GetGeometryFloatArrayBySemantic(geom, "NORMAL", 0, name);
+						List<int>	normIdxs	=GetGeometryIndexesBySemantic(geom, "NORMAL", 0, name);
+						float_array	texCoords0	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 0, name);
+						float_array	texCoords1	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 1, name);
+						float_array	texCoords2	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 2, name);
+						float_array	texCoords3	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 3, name);
+						List<int>	texIdxs0	=GetGeometryIndexesBySemantic(geom, "TEXCOORD", 0, name);
+						List<int>	texIdxs1	=GetGeometryIndexesBySemantic(geom, "TEXCOORD", 1, name);
+						List<int>	texIdxs2	=GetGeometryIndexesBySemantic(geom, "TEXCOORD", 2, name);
+						List<int>	texIdxs3	=GetGeometryIndexesBySemantic(geom, "TEXCOORD", 3, name);
+						float_array	colors0		=GetGeometryFloatArrayBySemantic(geom, "COLOR", 0, name);
+						float_array	colors1		=GetGeometryFloatArrayBySemantic(geom, "COLOR", 1, name);
+						float_array	colors2		=GetGeometryFloatArrayBySemantic(geom, "COLOR", 2, name);
+						float_array	colors3		=GetGeometryFloatArrayBySemantic(geom, "COLOR", 3, name);
+						List<int>	colIdxs0	=GetGeometryIndexesBySemantic(geom, "COLOR", 0, name);
+						List<int>	colIdxs1	=GetGeometryIndexesBySemantic(geom, "COLOR", 1, name);
+						List<int>	colIdxs2	=GetGeometryIndexesBySemantic(geom, "COLOR", 2, name);
+						List<int>	colIdxs3	=GetGeometryIndexesBySemantic(geom, "COLOR", 3, name);
+						List<int>	vertCounts	=GetGeometryVertCount(geom, name);
 
-					//blast any chunks with no verts (happens with max collada)
-					List<MeshConverter>	toNuke	=new List<MeshConverter>();
-
-					foreach(MeshConverter cnk in chunks)
-					{
-						string	name	=cnk.GetName();
-						if(cnk.mGeometryID == geom.id)
+						if(vertCounts.Count == 0)
 						{
-							List<int>	posIdxs		=GetGeometryIndexesBySemantic(geom, "VERTEX", 0, name);
-							float_array	norms		=GetGeometryFloatArrayBySemantic(geom, "NORMAL", 0, name);
-							List<int>	normIdxs	=GetGeometryIndexesBySemantic(geom, "NORMAL", 0, name);
-							float_array	texCoords0	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 0, name);
-							float_array	texCoords1	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 1, name);
-							float_array	texCoords2	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 2, name);
-							float_array	texCoords3	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 3, name);
-							List<int>	texIdxs0	=GetGeometryIndexesBySemantic(geom, "TEXCOORD", 0, name);
-							List<int>	texIdxs1	=GetGeometryIndexesBySemantic(geom, "TEXCOORD", 1, name);
-							List<int>	texIdxs2	=GetGeometryIndexesBySemantic(geom, "TEXCOORD", 2, name);
-							List<int>	texIdxs3	=GetGeometryIndexesBySemantic(geom, "TEXCOORD", 3, name);
-							float_array	colors0		=GetGeometryFloatArrayBySemantic(geom, "COLOR", 0, name);
-							float_array	colors1		=GetGeometryFloatArrayBySemantic(geom, "COLOR", 1, name);
-							float_array	colors2		=GetGeometryFloatArrayBySemantic(geom, "COLOR", 2, name);
-							float_array	colors3		=GetGeometryFloatArrayBySemantic(geom, "COLOR", 3, name);
-							List<int>	colIdxs0	=GetGeometryIndexesBySemantic(geom, "COLOR", 0, name);
-							List<int>	colIdxs1	=GetGeometryIndexesBySemantic(geom, "COLOR", 1, name);
-							List<int>	colIdxs2	=GetGeometryIndexesBySemantic(geom, "COLOR", 2, name);
-							List<int>	colIdxs3	=GetGeometryIndexesBySemantic(geom, "COLOR", 3, name);
-							List<int>	vertCounts	=GetGeometryVertCount(geom, name);
-
-							if(vertCounts.Count == 0)
-							{
-								toNuke.Add(cnk);
-								continue;
-							}
-
-							cnk.AddNormTexByPoly(posIdxs, norms, normIdxs,
-								texCoords0, texIdxs0, texCoords1, texIdxs1,
-								texCoords2, texIdxs2, texCoords3, texIdxs3,
-								colors0, colIdxs0, colors1, colIdxs1,
-								colors2, colIdxs2, colors3, colIdxs3,
-								vertCounts);
-
-							bool	bPos	=(posIdxs != null && posIdxs.Count > 0);
-							bool	bNorm	=(norms != null && norms.count > 0);
-							bool	bTex0	=(texCoords0 != null && texCoords0.count > 0);
-							bool	bTex1	=(texCoords1 != null && texCoords1.count > 0);
-							bool	bTex2	=(texCoords2 != null && texCoords2.count > 0);
-							bool	bTex3	=(texCoords3 != null && texCoords3.count > 0);
-							bool	bCol0	=(colors0 != null && colors0.count > 0);
-							bool	bCol1	=(colors1 != null && colors1.count > 0);
-							bool	bCol2	=(colors2 != null && colors2.count > 0);
-							bool	bCol3	=(colors3 != null && colors3.count > 0);
-							bool	bBone	=false;
-
-							//see if any skins reference this geometry
-							foreach(object itm in colladaFile.Items)
-							{
-								library_controllers	conts	=itm as library_controllers;
-								if(conts == null)
-								{
-									continue;
-								}
-								foreach(controller cont in conts.controller)
-								{
-									skin	sk	=cont.Item as skin;
-									if(sk == null)
-									{
-										continue;
-									}
-									string	skinSource	=sk.source1.Substring(1);
-									if(skinSource == null || skinSource == "")
-									{
-										continue;
-									}
-									if(skinSource == geom.id)
-									{
-										bBone	=true;
-										break;
-									}
-								}
-							}
-
-							cnk.BuildBuffers(gd, bPos, bNorm, bBone,
-								bBone, bTex0, bTex1, bTex2, bTex3,
-								bCol0, bCol1, bCol2, bCol3);
-						}
-					}
-
-					//blast empty chunks
-					foreach(MeshConverter nuke in toNuke)
-					{
-						chunks.Remove(nuke);
-					}
-					toNuke.Clear();
-				}
-			}
-		}
-
-
-		static Matrix GetSceneNodeTransform(COLLADA colFile, MeshConverter chunk)
-		{
-			geometry	g	=GetGeometryByID(colFile, chunk.mGeometryID);
-			if(g == null)
-			{
-				return	Matrix.Identity;
-			}
-
-			foreach(object item2 in colFile.Items)
-			{
-				library_visual_scenes	lvs	=item2 as library_visual_scenes;
-				if(lvs == null)
-				{
-					continue;
-				}
-				foreach(visual_scene vs in lvs.visual_scene)
-				{
-					foreach(node n in vs.node)
-					{
-						if(n.instance_geometry == null)
-						{
+							toNuke.Add(cnk);
 							continue;
 						}
-						foreach(instance_geometry ig in n.instance_geometry)
+
+						cnk.AddNormTexByPoly(posIdxs, norms, normIdxs,
+							texCoords0, texIdxs0, texCoords1, texIdxs1,
+							texCoords2, texIdxs2, texCoords3, texIdxs3,
+							colors0, colIdxs0, colors1, colIdxs1,
+							colors2, colIdxs2, colors3, colIdxs3,
+							vertCounts);
+
+						bool	bPos	=(posIdxs != null && posIdxs.Count > 0);
+						bool	bNorm	=(norms != null && norms.count > 0);
+						bool	bTex0	=(texCoords0 != null && texCoords0.count > 0);
+						bool	bTex1	=(texCoords1 != null && texCoords1.count > 0);
+						bool	bTex2	=(texCoords2 != null && texCoords2.count > 0);
+						bool	bTex3	=(texCoords3 != null && texCoords3.count > 0);
+						bool	bCol0	=(colors0 != null && colors0.count > 0);
+						bool	bCol1	=(colors1 != null && colors1.count > 0);
+						bool	bCol2	=(colors2 != null && colors2.count > 0);
+						bool	bCol3	=(colors3 != null && colors3.count > 0);
+						bool	bBone	=false;
+
+						//see if any skins reference this geometry
+						if(conts.Count() > 0)
 						{
-							if(ig.url.Substring(1) == g.id)
+							foreach(controller cont in conts.First().controller)
 							{
-								if(!CNodeHasKeyData(n))
+								skin	sk	=cont.Item as skin;
+								if(sk == null)
 								{
 									continue;
 								}
-								KeyFrame	kf	=GetKeyFromCNode(n);
-
-								Matrix	mat	=Matrix.CreateScale(kf.mScale) *
-									Matrix.CreateFromQuaternion(kf.mRotation) *
-									Matrix.CreateTranslation(kf.mPosition);
-									
-								return	mat;
+								string	skinSource	=sk.source1.Substring(1);
+								if(skinSource == null || skinSource == "")
+								{
+									continue;
+								}
+								if(skinSource == geom.id)
+								{
+									bBone	=true;
+									break;
+								}
 							}
 						}
+
+						cnk.BuildBuffers(gd, bPos, bNorm, bBone,
+							bBone, bTex0, bTex1, bTex2, bTex3,
+							bCol0, bCol1, bCol2, bCol3);
 					}
 				}
+
+				//blast empty chunks
+				foreach(MeshConverter nuke in toNuke)
+				{
+					chunks.Remove(nuke);
+				}
+				toNuke.Clear();
 			}
-			return	Matrix.Identity;
 		}
 
 
@@ -693,57 +612,44 @@ namespace ColladaConvert
 											Skeleton			skel,
 											List<MeshConverter>	chunks)
 		{
-			//bake scene node modifiers into controllers
-			foreach(object item in colladaFile.Items)
+			if(colladaFile.Items.OfType<library_controllers>().Count() <= 0)
 			{
-				library_controllers	conts	=item as library_controllers;
-				if(conts == null)
+				return;
+			}
+
+			var	ctrlNodes	=from vss in colladaFile.Items.OfType<library_visual_scenes>().First().visual_scene
+							 from n in vss.node
+							 select n;
+
+			var	skinControllers	=from conts in colladaFile.Items.OfType<library_controllers>().First().controller
+								 where conts.Item is skin select conts;
+			
+			foreach(controller cont in skinControllers)
+			{
+				string	contID	=cont.id;
+
+				skin	sk	=cont.Item as skin;
+
+				string	skinSource	=sk.source1.Substring(1);
+
+				foreach(node n in ctrlNodes)
 				{
-					continue;
-				}
-				foreach(controller cont in conts.controller)
-				{
-					skin	sk	=cont.Item as skin;
-					if(sk == null)
+					string	nname	=GetNodeNameForInstanceController(n, cont.id);
+					if(nname == "")
 					{
 						continue;
 					}
-					string	skinSource	=sk.source1.Substring(1);
-					if(skinSource == null || skinSource == "")
+					Matrix	mat	=Matrix.Identity;
+					if(!skel.GetMatrixForBone(nname, out mat))
 					{
 						continue;
-					}					
+					}
 
-					foreach(object item2 in colladaFile.Items)
+					foreach(MeshConverter mc in chunks)
 					{
-						library_visual_scenes	lvs	=item2 as library_visual_scenes;
-						if(lvs == null)
+						if(mc.mGeometryID == skinSource)
 						{
-							continue;
-						}
-						foreach(visual_scene vs in lvs.visual_scene)
-						{
-							foreach(node n in vs.node)
-							{
-								string	nname	=GetNodeNameForInstanceController(n, cont.id);
-								if(nname == "")
-								{
-									continue;
-								}
-								Matrix	mat	=Matrix.Identity;
-								if(!skel.GetMatrixForBone(nname, out mat))
-								{
-									continue;
-								}
-
-								foreach(MeshConverter mc in chunks)
-								{
-									if(mc.mGeometryID == skinSource)
-									{
-										mc.BakeTransformIntoVerts(mat);
-									}
-								}
-							}
+							mc.BakeTransformIntoVerts(mat);
 						}
 					}
 				}
@@ -753,235 +659,26 @@ namespace ColladaConvert
 
 		static void AddVertexWeightsToChunks(COLLADA colladaFile, List<MeshConverter> chunks)
 		{
-			foreach(object item in colladaFile.Items)
+			if(colladaFile.Items.OfType<library_controllers>().Count() <= 0)
 			{
-				library_controllers	conts	=item as library_controllers;
-				if(conts == null)
-				{
-					continue;
-				}
-				foreach(controller cont in conts.controller)
-				{
-					skin	sk	=cont.Item as skin;
-					if(sk == null)
-					{
-						continue;
-					}
+				return;
+			}
 
-					string	skinSource	=sk.source1.Substring(1);
+			var	skins	=from conts in colladaFile.Items.OfType<library_controllers>().First().controller
+						 where conts.Item is skin select conts.Item as skin;
 
-					foreach(MeshConverter cnk in chunks)
+			foreach(skin sk in skins)
+			{
+				string	skinSource	=sk.source1.Substring(1);
+
+				foreach(MeshConverter cnk in chunks)
+				{
+					if(cnk.mGeometryID == skinSource)
 					{
-						if(cnk.mGeometryID == skinSource)
-						{
-							cnk.AddWeightsToBaseVerts(sk);
-						}
+						cnk.AddWeightsToBaseVerts(sk);
 					}
 				}
 			}
-		}
-
-
-		static List<MeshConverter> GetMeshChunks(COLLADA colladaFile, bool bSkinned)
-		{
-			List<MeshConverter>	chunks	=new List<MeshConverter>();
-
-			foreach(object item in colladaFile.Items)
-			{
-				library_geometries	geoms	=item as library_geometries;
-				if(geoms == null)
-				{
-					continue;
-				}
-				foreach(object geomItem in geoms.geometry)
-				{
-					geometry	geom	=geomItem as geometry;
-					if(geom == null || geom.Item == null)
-					{
-						continue;
-					}
-
-					mesh	msh	=geom.Item as mesh;
-					if(msh == null || msh.Items == null)
-					{
-						continue;
-					}
-
-					foreach(object polyObj in msh.Items)
-					{
-						polygons	polys	=polyObj as polygons;
-						polylist	plist	=polyObj as polylist;
-						triangles	tris	=polyObj as triangles;
-
-						if(polys == null && plist == null && tris == null)
-						{
-							continue;
-						}
-
-						string	mat	=null;
-						if(polys != null)
-						{
-							mat	=polys.material;
-						}
-						else if(plist != null)
-						{
-							mat	=plist.material;
-						}
-						else if(tris != null)
-						{
-							mat	=tris.material;
-						}
-
-						float_array		verts	=null;
-						MeshConverter	cnk		=null;
-
-						verts	=GetGeometryFloatArrayBySemantic(geom, "VERTEX", 0, mat);
-						if(verts == null)
-						{
-							continue;
-						}
-						
-						cnk	=new MeshConverter(mat, geom.name);
-
-						cnk.CreateBaseVerts(verts, bSkinned);
-
-						cnk.mPartIndex	=-1;
-						cnk.SetGeometryID(geom.id);
-						
-						chunks.Add(cnk);
-					}
-				}
-			}
-			return	chunks;
-		}
-
-
-		static string GetNodeNameForInstanceController(node n, string ic)
-		{
-			if(n.instance_controller != null)
-			{
-				foreach(instance_controller inst in n.instance_controller)
-				{
-					if(inst.url.Substring(1) == ic)
-					{
-						return	n.name;
-					}
-				}
-			}
-
-			if(n.node1 == null)
-			{
-				return	"";
-			}
-
-			//check kids
-			foreach(node kid in n.node1)
-			{
-				string	ret	=GetNodeNameForInstanceController(kid, ic);
-				if(ret != "")
-				{
-					return	ret;
-				}
-			}
-			return	"";
-		}
-
-
-		static List<int> GetGeometryIndexesBySemantic(geometry geom, string sem, int set, string material)
-		{
-			List<int>	ret	=new List<int>();
-
-			mesh	msh	=geom.Item as mesh;
-			if(msh == null || msh.Items == null)
-			{
-				return	null;
-			}
-
-			string	key		="";
-			int		idx		=-1;
-			int		ofs		=-1;
-			foreach(object polObj in msh.Items)
-			{
-				polygons	polys	=polObj as polygons;
-				polylist	plist	=polObj as polylist;
-				triangles	tris	=polObj as triangles;
-
-				if(polys == null && plist == null && tris == null)
-				{
-					continue;
-				}
-
-				InputLocalOffset	[]inputs	=null;
-
-				if(polys != null)
-				{
-					inputs	=polys.input;
-					if(polys.material != material)
-					{
-						continue;
-					}
-				}
-				else if(plist != null)
-				{
-					inputs	=plist.input;
-					if(plist.material != material)
-					{
-						continue;
-					}
-				}
-				else if(tris != null)
-				{
-					inputs	=tris.input;
-					if(tris.material != material)
-					{
-						continue;
-					}
-				}
-
-				for(int i=0;i < inputs.Length;i++)
-				{
-					InputLocalOffset	inp	=inputs[i];
-					if(inp.semantic == sem && set == (int)inp.set)
-					{
-						//strip #
-						key		=inp.source.Substring(1);
-						idx		=i;
-						ofs		=(int)inp.offset;
-						break;
-					}
-				}
-
-				if(key == "")
-				{
-					continue;
-				}
-
-				if(polys != null && polys.Items != null)
-				{
-					foreach(object polyObj in polys.Items)
-					{
-						string	pols	=polyObj as string;
-						Debug.Assert(pols != null);
-
-						int		numSem		=polys.input.Length;
-						string	[]tokens	=pols.Split(' ', '\n');
-						ParseIndexes(tokens, ofs, numSem, ret);
-					}
-				}
-				else if(plist != null)
-				{
-					int		numSem		=plist.input.Length;
-					string	[]tokens	=plist.p.Split(' ', '\n');
-					ParseIndexes(tokens, ofs, numSem, ret);
-				}
-				else if(tris != null)
-				{
-					int		numSem		=tris.input.Length;
-					string	[]tokens	=tris.p.Split(' ', '\n');
-					ParseIndexes(tokens, ofs, numSem, ret);
-				}
-			}
-			return	ret;
 		}
 
 
@@ -1004,6 +701,436 @@ namespace ColladaConvert
 					curIdx	=0;
 				}
 			}
+		}
+
+
+		static Skeleton BuildSkeleton(COLLADA colMesh)
+		{
+			Skeleton	ret	=new Skeleton();
+
+			var	nodes	=from lvs in colMesh.Items.OfType<library_visual_scenes>().First().visual_scene
+						 from n in lvs.node select n;
+
+			foreach(node n in nodes)
+			{
+				GSNode	gsnRoot	=new GSNode();
+
+				BuildSkeleton(n, out gsnRoot);
+
+				ret.AddRoot(gsnRoot);
+			}
+			return	ret;
+		}
+
+
+		static void BuildSkeleton(node n, out GSNode gsn)
+		{
+			gsn	=new GSNode();
+
+			gsn.SetName(n.name);
+
+			KeyFrame	kf	=GetKeyFromCNode(n);
+
+			gsn.SetKey(kf);
+
+			if(n.node1 == null)
+			{
+				return;
+			}
+
+			foreach(node child in n.node1)
+			{
+				GSNode	kid	=new GSNode();
+
+				BuildSkeleton(child, out kid);
+
+				gsn.AddChild(kid);
+			}
+		}
+
+
+		internal static List<Matrix> GetMatrixListFromFA(float_array fa)
+		{
+			List<Matrix>	ret	=new List<Matrix>();
+
+			Debug.Assert(fa.count % 16 == 0);
+
+			for(int i=0;i < (int)fa.count;i+=16)
+			{
+				Matrix	mat	=new Matrix();
+
+				mat.M11	=fa.Values[i + 0];
+				mat.M21	=fa.Values[i + 1];
+				mat.M31	=fa.Values[i + 2];
+				mat.M41	=fa.Values[i + 3];
+				mat.M12	=fa.Values[i + 4];
+				mat.M22	=fa.Values[i + 5];
+				mat.M32	=fa.Values[i + 6];
+				mat.M42	=fa.Values[i + 7];
+				mat.M13	=fa.Values[i + 8];
+				mat.M23	=fa.Values[i + 9];
+				mat.M33	=fa.Values[i + 10];
+				mat.M43	=fa.Values[i + 11];
+				mat.M14	=fa.Values[i + 12];
+				mat.M24	=fa.Values[i + 13];
+				mat.M34	=fa.Values[i + 14];
+				mat.M44	=fa.Values[i + 15];
+
+				ret.Add(mat);
+			}
+
+			return	ret;
+		}
+
+
+		internal static List<Matrix> GetMatrixListFromFloatList(List<float> fa)
+		{
+			List<Matrix>	ret	=new List<Matrix>();
+
+			Debug.Assert(fa.Count % 16 == 0);
+
+			for(int i=0;i < (int)fa.Count;i+=16)
+			{
+				Matrix	mat	=new Matrix();
+
+				mat.M11	=fa[i + 0];
+				mat.M21	=fa[i + 1];
+				mat.M31	=fa[i + 2];
+				mat.M41	=fa[i + 3];
+				mat.M12	=fa[i + 4];
+				mat.M22	=fa[i + 5];
+				mat.M32	=fa[i + 6];
+				mat.M42	=fa[i + 7];
+				mat.M13	=fa[i + 8];
+				mat.M23	=fa[i + 9];
+				mat.M33	=fa[i + 10];
+				mat.M43	=fa[i + 11];
+				mat.M14	=fa[i + 12];
+				mat.M24	=fa[i + 13];
+				mat.M34	=fa[i + 14];
+				mat.M44	=fa[i + 15];
+
+				ret.Add(mat);
+			}
+
+			return	ret;
+		}
+
+
+		internal static void GetMatrixFromString(string str, out Matrix mat)
+		{
+			string[] tokens	=str.Split(' ', '\n', '\t');
+
+			int	tokIdx	=0;
+
+			//transpose as we load
+			//this looks very unsafe / dangerous
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M11));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M21));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M31));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M41));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M12));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M22));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M32));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M42));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M13));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M23));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M33));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M43));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M14));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M24));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M34));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M44));
+		}
+		#endregion
+
+
+		#region Queries
+		static List<string> GetBoneNamesViaSID(string []sids, COLLADA cfile)
+		{
+			List<string>	boneNames	=new List<string>();
+
+			IEnumerable<library_visual_scenes>	lvs	=cfile.Items.OfType<library_visual_scenes>();
+
+			foreach(string sid in sids)
+			{
+				//supposed to use sids (I think, the spec is ambiguous)
+				//but if that fails use ids.  Maybe should use names I dunno
+				node	n	=LookUpNodeViaSID(lvs.First(), sid);
+
+				if(n == null)
+				{
+					n	=LookUpNode(lvs.First(), sid);
+				}
+				
+				Debug.Assert(n != null);
+
+				boneNames.Add(n.name);
+			}
+			return	boneNames;
+		}
+
+
+		static Matrix GetSceneNodeTransform(COLLADA colFile, MeshConverter chunk)
+		{
+			geometry	g	=GetGeometryByID(colFile, chunk.mGeometryID);
+			if(g == null)
+			{
+				return	Matrix.Identity;
+			}
+
+			var	geomNodes	=from lvs in colFile.Items.OfType<library_visual_scenes>().First().visual_scene
+							 from n in lvs.node
+							 where n.instance_geometry != null
+							 select n;
+
+			foreach(node n in geomNodes)
+			{
+				foreach(instance_geometry ig in n.instance_geometry)
+				{
+					if(ig.url.Substring(1) == g.id)
+					{
+						if(!CNodeHasKeyData(n))
+						{
+							continue;
+						}
+						KeyFrame	kf	=GetKeyFromCNode(n);
+
+						Matrix	mat	=Matrix.CreateScale(kf.mScale) *
+							Matrix.CreateFromQuaternion(kf.mRotation) *
+							Matrix.CreateTranslation(kf.mPosition);
+									
+						return	mat;
+					}
+				}
+			}
+			return	Matrix.Identity;
+		}
+
+
+		static string NameFromPath(string path)
+		{
+			int	lastSlash	=path.LastIndexOf('\\');
+			if(lastSlash == -1)
+			{
+				lastSlash	=0;
+			}
+			else
+			{
+				lastSlash++;
+			}
+
+			int	extension	=path.LastIndexOf('.');
+
+			string	name	=path.Substring(lastSlash, extension - lastSlash);
+
+			return	name;
+		}
+
+
+		internal static node LookUpNode(node n, string id)
+		{
+			if(n.id == id)
+			{
+				return	n;
+			}
+
+			if(n.node1 == null)
+			{
+				return	null;
+			}
+
+			foreach(node child in n.node1)
+			{
+				node	ret	=LookUpNode(child, id);
+				if(ret != null)
+				{
+					return	ret;
+				}
+			}
+			return	null;
+		}
+
+
+		internal static node LookUpNodeViaSID(node n, string sid)
+		{
+			if(n.sid == sid)
+			{
+				return	n;
+			}
+
+			if(n.node1 == null)
+			{
+				return	null;
+			}
+
+			foreach(node child in n.node1)
+			{
+				node	ret	=LookUpNodeViaSID(child, sid);
+				if(ret != null)
+				{
+					return	ret;
+				}
+			}
+			return	null;
+		}
+
+
+		internal static node LookUpNode(library_visual_scenes lvs, string nodeID)
+		{
+			//find the node addressed
+			node	addressed	=null;
+			foreach(visual_scene vs in lvs.visual_scene)
+			{
+				foreach(node n in vs.node)
+				{
+					addressed	=LookUpNode(n, nodeID);
+					if(addressed != null)
+					{
+						break;
+					}
+				}
+			}
+			return	addressed;
+		}
+
+
+		internal static node LookUpNodeViaSID(library_visual_scenes lvs, string SID)
+		{
+			//find the node addressed
+			node	addressed	=null;
+			foreach(visual_scene vs in lvs.visual_scene)
+			{
+				foreach(node n in vs.node)
+				{
+					addressed	=LookUpNodeViaSID(n, SID);
+					if(addressed != null)
+					{
+						break;
+					}
+				}
+			}
+			return	addressed;
+		}
+
+
+		internal static int GetNodeItemIndex(node n, string sid)
+		{
+			for(int i=0;i < n.Items.Length;i++)
+			{
+				object	item	=n.Items[i];
+				Type	t		=item.GetType();
+
+				PropertyInfo	[]pinfo	=t.GetProperties();
+
+				foreach(PropertyInfo pi in pinfo)
+				{
+					if(pi.Name == "sid")
+					{
+						string	itemSid	=pi.GetValue(item, null) as string;
+						if(itemSid == sid)
+						{
+							return	i;
+						}
+					}
+				}
+			}
+			return	-1;
+		}
+
+
+		static geometry GetGeometryByID(COLLADA colladaFile, string id)
+		{
+			return	(from geoms in colladaFile.Items.OfType<library_geometries>().First().geometry
+					where geoms.Item is geometry
+					let g = geoms.Item as geometry
+					where g.id == id select g).FirstOrDefault();
+		}
+
+
+		static bool CNodeHasKeyData(node n)
+		{
+			if(n.Items == null)
+			{
+				return	false;
+			}
+
+			Matrix	mat	=Matrix.Identity;
+			for(int i=0;i < n.Items.Length;i++)
+			{
+				if(n.ItemsElementName[i] == ItemsChoiceType2.rotate)
+				{
+					return	true;
+				}
+				else if(n.ItemsElementName[i] == ItemsChoiceType2.translate)
+				{
+					return	true;
+				}
+				else if(n.ItemsElementName[i] == ItemsChoiceType2.scale)
+				{
+					return	true;
+				}
+			}
+			return	false;
+		}
+
+
+		static KeyFrame GetKeyFromCNode(node n)
+		{
+			KeyFrame	key	=new KeyFrame();
+
+			if(n.Items == null)
+			{
+				return	key;
+			}
+
+			Matrix	mat	=Matrix.Identity;
+			for(int i=0;i < n.Items.Length;i++)
+			{
+				if(n.ItemsElementName[i] == ItemsChoiceType2.rotate)
+				{
+					rotate	rot	=n.Items[i] as rotate;
+
+					Debug.Assert(rot != null);
+
+					Vector3	axis	=Vector3.Zero;
+					axis.X			=rot.Values[0];
+					axis.Y			=rot.Values[1];
+					axis.Z			=rot.Values[2];
+					float	angle	=MathHelper.ToRadians(rot.Values[3]);
+
+					mat	=Matrix.CreateFromAxisAngle(axis, angle)
+						* mat;
+				}
+				else if(n.ItemsElementName[i] == ItemsChoiceType2.translate)
+				{
+					TargetableFloat3	trans	=n.Items[i] as TargetableFloat3;
+
+					Vector3	t	=Vector3.Zero;
+					t.X	=trans.Values[0];
+					t.Y	=trans.Values[1];
+					t.Z	=trans.Values[2];
+
+					mat	=Matrix.CreateTranslation(t)
+						* mat;
+				}
+				else if(n.ItemsElementName[i] == ItemsChoiceType2.scale)
+				{
+					TargetableFloat3	scl	=n.Items[i] as TargetableFloat3;
+
+					Vector3	t	=Vector3.Zero;
+					t.X	=scl.Values[0];
+					t.Y	=scl.Values[1];
+					t.Z	=scl.Values[2];
+
+					mat	=Matrix.CreateScale(t)
+						* mat;
+				}
+			}
+
+			mat.Decompose(out key.mScale, out key.mRotation, out key.mPosition);
+
+			return	key;
 		}
 
 
@@ -1157,394 +1284,197 @@ namespace ColladaConvert
 		}
 
 
-		static Skeleton BuildSkeleton(COLLADA colMesh)
+		static List<MeshConverter> GetMeshChunks(COLLADA colladaFile, bool bSkinned)
 		{
-			Skeleton	ret	=new Skeleton();
+			List<MeshConverter>	chunks	=new List<MeshConverter>();
 
-			foreach(object item2 in colMesh.Items)
+			var	geoms	=from g in colladaFile.Items.OfType<library_geometries>().First().geometry
+						 where g.Item is mesh select g;
+
+			var	polyObjs	=from g in geoms
+							 let m = g.Item as mesh
+							 from pols in m.Items
+							 select pols;
+
+			foreach(geometry geom in geoms)
 			{
-				library_visual_scenes	lvs	=item2 as library_visual_scenes;
-				if(lvs == null)
+				mesh	m	=geom.Item as mesh;
+
+				foreach(object polyObj in m.Items)
 				{
-					continue;
-				}
-				foreach(visual_scene vs in lvs.visual_scene)
-				{
-					foreach(node n in vs.node)
-					{
-						GSNode	gsnRoot	=new GSNode();
+					polygons	polys	=polyObj as polygons;
+					polylist	plist	=polyObj as polylist;
+					triangles	tris	=polyObj as triangles;
 
-						BuildSkeleton(n, out gsnRoot);
-
-						ret.AddRoot(gsnRoot);
-					}
-				}
-			}
-			return	ret;
-		}
-
-
-		static bool CNodeHasKeyData(node n)
-		{
-			if(n.Items == null)
-			{
-				return	false;
-			}
-
-			Matrix	mat	=Matrix.Identity;
-			for(int i=0;i < n.Items.Length;i++)
-			{
-				if(n.ItemsElementName[i] == ItemsChoiceType2.rotate)
-				{
-					return	true;
-				}
-				else if(n.ItemsElementName[i] == ItemsChoiceType2.translate)
-				{
-					return	true;
-				}
-				else if(n.ItemsElementName[i] == ItemsChoiceType2.scale)
-				{
-					return	true;
-				}
-			}
-			return	false;
-		}
-
-
-		static KeyFrame GetKeyFromCNode(node n)
-		{
-			KeyFrame	key	=new KeyFrame();
-
-			if(n.Items == null)
-			{
-				return	key;
-			}
-
-			Matrix	mat	=Matrix.Identity;
-			for(int i=0;i < n.Items.Length;i++)
-			{
-				if(n.ItemsElementName[i] == ItemsChoiceType2.rotate)
-				{
-					rotate	rot	=n.Items[i] as rotate;
-
-					Debug.Assert(rot != null);
-
-					Vector3	axis	=Vector3.Zero;
-					axis.X			=rot.Values[0];
-					axis.Y			=rot.Values[1];
-					axis.Z			=rot.Values[2];
-					float	angle	=MathHelper.ToRadians(rot.Values[3]);
-
-					mat	=Matrix.CreateFromAxisAngle(axis, angle)
-						* mat;
-				}
-				else if(n.ItemsElementName[i] == ItemsChoiceType2.translate)
-				{
-					TargetableFloat3	trans	=n.Items[i] as TargetableFloat3;
-
-					Vector3	t	=Vector3.Zero;
-					t.X	=trans.Values[0];
-					t.Y	=trans.Values[1];
-					t.Z	=trans.Values[2];
-
-					mat	=Matrix.CreateTranslation(t)
-						* mat;
-				}
-				else if(n.ItemsElementName[i] == ItemsChoiceType2.scale)
-				{
-					TargetableFloat3	scl	=n.Items[i] as TargetableFloat3;
-
-					Vector3	t	=Vector3.Zero;
-					t.X	=scl.Values[0];
-					t.Y	=scl.Values[1];
-					t.Z	=scl.Values[2];
-
-					mat	=Matrix.CreateScale(t)
-						* mat;
-				}
-			}
-
-			mat.Decompose(out key.mScale, out key.mRotation, out key.mPosition);
-
-			return	key;
-		}
-
-
-		static void BuildSkeleton(node n, out GSNode gsn)
-		{
-			gsn	=new GSNode();
-
-			gsn.SetName(n.name);
-
-			KeyFrame	kf	=GetKeyFromCNode(n);
-
-			gsn.SetKey(kf);
-
-			if(n.node1 == null)
-			{
-				return;
-			}
-
-			foreach(node child in n.node1)
-			{
-				GSNode	kid	=new GSNode();
-
-				BuildSkeleton(child, out kid);
-
-				gsn.AddChild(kid);
-			}
-		}
-
-
-		static geometry GetGeometryByID(COLLADA colladaFile, string id)
-		{
-			foreach(object item in colladaFile.Items)
-			{
-				library_geometries	geoms	=item as library_geometries;
-				if(geoms == null)
-				{
-					continue;
-				}
-				foreach(object geomItem in geoms.geometry)
-				{
-					geometry	geom	=geomItem as geometry;
-					if(geom == null)
+					if(polys == null && plist == null && tris == null)
 					{
 						continue;
 					}
-					if(geom.id == id)
+
+					string	mat	=null;
+					if(polys != null)
 					{
-						return	geom;
+						mat	=polys.material;
 					}
+					else if(plist != null)
+					{
+						mat	=plist.material;
+					}
+					else if(tris != null)
+					{
+						mat	=tris.material;
+					}
+
+					float_array		verts	=null;
+					MeshConverter	cnk		=null;
+
+					verts	=GetGeometryFloatArrayBySemantic(geom, "VERTEX", 0, mat);
+					if(verts == null)
+					{
+						continue;
+					}
+						
+					cnk	=new MeshConverter(mat, geom.name);
+
+					cnk.CreateBaseVerts(verts, bSkinned);
+
+					cnk.mPartIndex	=-1;
+					cnk.SetGeometryID(geom.id);
+						
+					chunks.Add(cnk);
 				}
 			}
-			return	null;
+			return	chunks;
 		}
 
 
-		internal static List<Matrix> GetMatrixListFromFA(float_array fa)
+		static string GetNodeNameForInstanceController(node n, string ic)
 		{
-			List<Matrix>	ret	=new List<Matrix>();
-
-			Debug.Assert(fa.count % 16 == 0);
-
-			for(int i=0;i < (int)fa.count;i+=16)
+			if(n.instance_controller != null)
 			{
-				Matrix	mat	=new Matrix();
-
-				mat.M11	=fa.Values[i + 0];
-				mat.M21	=fa.Values[i + 1];
-				mat.M31	=fa.Values[i + 2];
-				mat.M41	=fa.Values[i + 3];
-				mat.M12	=fa.Values[i + 4];
-				mat.M22	=fa.Values[i + 5];
-				mat.M32	=fa.Values[i + 6];
-				mat.M42	=fa.Values[i + 7];
-				mat.M13	=fa.Values[i + 8];
-				mat.M23	=fa.Values[i + 9];
-				mat.M33	=fa.Values[i + 10];
-				mat.M43	=fa.Values[i + 11];
-				mat.M14	=fa.Values[i + 12];
-				mat.M24	=fa.Values[i + 13];
-				mat.M34	=fa.Values[i + 14];
-				mat.M44	=fa.Values[i + 15];
-
-				ret.Add(mat);
-			}
-
-			return	ret;
-		}
-
-
-		internal static List<Matrix> GetMatrixListFromFloatList(List<float> fa)
-		{
-			List<Matrix>	ret	=new List<Matrix>();
-
-			Debug.Assert(fa.Count % 16 == 0);
-
-			for(int i=0;i < (int)fa.Count;i+=16)
-			{
-				Matrix	mat	=new Matrix();
-
-				mat.M11	=fa[i + 0];
-				mat.M21	=fa[i + 1];
-				mat.M31	=fa[i + 2];
-				mat.M41	=fa[i + 3];
-				mat.M12	=fa[i + 4];
-				mat.M22	=fa[i + 5];
-				mat.M32	=fa[i + 6];
-				mat.M42	=fa[i + 7];
-				mat.M13	=fa[i + 8];
-				mat.M23	=fa[i + 9];
-				mat.M33	=fa[i + 10];
-				mat.M43	=fa[i + 11];
-				mat.M14	=fa[i + 12];
-				mat.M24	=fa[i + 13];
-				mat.M34	=fa[i + 14];
-				mat.M44	=fa[i + 15];
-
-				ret.Add(mat);
-			}
-
-			return	ret;
-		}
-
-
-		internal static void GetMatrixFromString(string str, out Matrix mat)
-		{
-			string[] tokens	=str.Split(' ', '\n', '\t');
-
-			int	tokIdx	=0;
-
-			//transpose as we load
-			//this looks very unsafe / dangerous
-			while(!Single.TryParse(tokens[tokIdx++],out mat.M11));
-			while(!Single.TryParse(tokens[tokIdx++],out mat.M21));
-			while(!Single.TryParse(tokens[tokIdx++],out mat.M31));
-			while(!Single.TryParse(tokens[tokIdx++],out mat.M41));
-			while(!Single.TryParse(tokens[tokIdx++],out mat.M12));
-			while(!Single.TryParse(tokens[tokIdx++],out mat.M22));
-			while(!Single.TryParse(tokens[tokIdx++],out mat.M32));
-			while(!Single.TryParse(tokens[tokIdx++],out mat.M42));
-			while(!Single.TryParse(tokens[tokIdx++],out mat.M13));
-			while(!Single.TryParse(tokens[tokIdx++],out mat.M23));
-			while(!Single.TryParse(tokens[tokIdx++],out mat.M33));
-			while(!Single.TryParse(tokens[tokIdx++],out mat.M43));
-			while(!Single.TryParse(tokens[tokIdx++],out mat.M14));
-			while(!Single.TryParse(tokens[tokIdx++],out mat.M24));
-			while(!Single.TryParse(tokens[tokIdx++],out mat.M34));
-			while(!Single.TryParse(tokens[tokIdx++],out mat.M44));
-		}
-
-
-		static string NameFromPath(string path)
-		{
-			int	lastSlash	=path.LastIndexOf('\\');
-			if(lastSlash == -1)
-			{
-				lastSlash	=0;
-			}
-			else
-			{
-				lastSlash++;
-			}
-
-			int	extension	=path.LastIndexOf('.');
-
-			string	name	=path.Substring(lastSlash, extension - lastSlash);
-
-			return	name;
-		}
-
-
-		internal static node LookUpNode(node n, string id)
-		{
-			if(n.id == id)
-			{
-				return	n;
+				foreach(instance_controller inst in n.instance_controller)
+				{
+					if(inst.url.Substring(1) == ic)
+					{
+						return	n.name;
+					}
+				}
 			}
 
 			if(n.node1 == null)
 			{
-				return	null;
+				return	"";
 			}
 
-			foreach(node child in n.node1)
+			//check kids
+			foreach(node kid in n.node1)
 			{
-				node	ret	=LookUpNode(child, id);
-				if(ret != null)
+				string	ret	=GetNodeNameForInstanceController(kid, ic);
+				if(ret != "")
 				{
 					return	ret;
 				}
 			}
-			return	null;
+			return	"";
 		}
 
 
-		internal static node LookUpNodeViaSID(node n, string sid)
+		static List<int> GetGeometryIndexesBySemantic(geometry geom, string sem, int set, string material)
 		{
-			if(n.sid == sid)
-			{
-				return	n;
-			}
+			List<int>	ret	=new List<int>();
 
-			if(n.node1 == null)
+			mesh	msh	=geom.Item as mesh;
+			if(msh == null || msh.Items == null)
 			{
 				return	null;
 			}
 
-			foreach(node child in n.node1)
+			string	key		="";
+			int		idx		=-1;
+			int		ofs		=-1;
+			foreach(object polObj in msh.Items)
 			{
-				node	ret	=LookUpNodeViaSID(child, sid);
-				if(ret != null)
+				polygons	polys	=polObj as polygons;
+				polylist	plist	=polObj as polylist;
+				triangles	tris	=polObj as triangles;
+
+				if(polys == null && plist == null && tris == null)
 				{
-					return	ret;
+					continue;
 				}
-			}
-			return	null;
-		}
 
+				InputLocalOffset	[]inputs	=null;
 
-		internal static node LookUpNode(library_visual_scenes lvs, string nodeID)
-		{
-			//find the node addressed
-			node	addressed	=null;
-			foreach(visual_scene vs in lvs.visual_scene)
-			{
-				foreach(node n in vs.node)
+				if(polys != null)
 				{
-					addressed	=LookUpNode(n, nodeID);
-					if(addressed != null)
+					inputs	=polys.input;
+					if(polys.material != material)
 					{
+						continue;
+					}
+				}
+				else if(plist != null)
+				{
+					inputs	=plist.input;
+					if(plist.material != material)
+					{
+						continue;
+					}
+				}
+				else if(tris != null)
+				{
+					inputs	=tris.input;
+					if(tris.material != material)
+					{
+						continue;
+					}
+				}
+
+				for(int i=0;i < inputs.Length;i++)
+				{
+					InputLocalOffset	inp	=inputs[i];
+					if(inp.semantic == sem && set == (int)inp.set)
+					{
+						//strip #
+						key		=inp.source.Substring(1);
+						idx		=i;
+						ofs		=(int)inp.offset;
 						break;
 					}
 				}
-			}
-			return	addressed;
-		}
 
-
-		internal static node LookUpNodeViaSID(library_visual_scenes lvs, string SID)
-		{
-			//find the node addressed
-			node	addressed	=null;
-			foreach(visual_scene vs in lvs.visual_scene)
-			{
-				foreach(node n in vs.node)
+				if(key == "")
 				{
-					addressed	=LookUpNodeViaSID(n, SID);
-					if(addressed != null)
+					continue;
+				}
+
+				if(polys != null && polys.Items != null)
+				{
+					foreach(object polyObj in polys.Items)
 					{
-						break;
+						string	pols	=polyObj as string;
+						Debug.Assert(pols != null);
+
+						int		numSem		=polys.input.Length;
+						string	[]tokens	=pols.Split(' ', '\n');
+						ParseIndexes(tokens, ofs, numSem, ret);
 					}
 				}
-			}
-			return	addressed;
-		}
-
-
-		internal static int GetNodeItemIndex(node n, string sid)
-		{
-			for(int i=0;i < n.Items.Length;i++)
-			{
-				object	item	=n.Items[i];
-				Type	t		=item.GetType();
-
-				PropertyInfo	[]pinfo	=t.GetProperties();
-
-				foreach(PropertyInfo pi in pinfo)
+				else if(plist != null)
 				{
-					if(pi.Name == "sid")
-					{
-						string	itemSid	=pi.GetValue(item, null) as string;
-						if(itemSid == sid)
-						{
-							return	i;
-						}
-					}
+					int		numSem		=plist.input.Length;
+					string	[]tokens	=plist.p.Split(' ', '\n');
+					ParseIndexes(tokens, ofs, numSem, ret);
+				}
+				else if(tris != null)
+				{
+					int		numSem		=tris.input.Length;
+					string	[]tokens	=tris.p.Split(' ', '\n');
+					ParseIndexes(tokens, ofs, numSem, ret);
 				}
 			}
-			return	-1;
+			return	ret;
 		}
+		#endregion
 	}
 }
