@@ -33,8 +33,6 @@ namespace ColladaConvert
 		public event EventHandler	eLoadLibrary;
 		public event EventHandler	eSaveStatic;
 		public event EventHandler	eLoadStatic;
-		public event EventHandler	eLoadMotionDat;
-		public event EventHandler	eLoadBoneMap;
 		public event EventHandler	eBoundMesh;
 		public event EventHandler	eShowBound;
 		public event EventHandler	eShowAxis;
@@ -270,34 +268,6 @@ namespace ColladaConvert
 			{
 				eLoadStatic(fname, null);
 			}
-		}
-
-
-		void OnLoadBoneMap(object sender, EventArgs e)
-		{
-			mOFD.Multiselect	=false;
-			DialogResult	dr	=mOFD.ShowDialog();
-
-			if(dr == DialogResult.Cancel)
-			{
-				return;
-			}
-
-			Misc.SafeInvoke(eLoadBoneMap, mOFD.FileName);
-		}
-
-
-		void OnLoadMotionDat(object sender, EventArgs e)
-		{
-			mOFD.Multiselect	=false;
-			DialogResult	dr	=mOFD.ShowDialog();
-
-			if(dr == DialogResult.Cancel)
-			{
-				return;
-			}
-
-			Misc.SafeInvoke(eLoadMotionDat, mOFD.FileName);
 		}
 
 

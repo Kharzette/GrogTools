@@ -33,7 +33,7 @@ namespace ColladaConvert
 		StaticMeshObject		mStaticMesh;
 		bool					mbCharacterLoaded;	//so I know which mesh obj to use
 		bool					mbDrawAxis	=true;
-		bool					mbPaused;
+		bool					mbPaused	=true;
 		Int64					mAnimTime;
 
 		//kinect stuff
@@ -59,6 +59,7 @@ namespace ColladaConvert
 		AnimForm	mCF;
 		string		mCurrentAnimName;
 		float		mTimeScale;			//anim playback speed
+		Int64		mCurAnimTime;
 		Vector3		mLightDir;
 		Random		mRand	=new Random();
 
@@ -168,8 +169,6 @@ namespace ColladaConvert
 			mCF.eLoadLibrary			+=OnLoadLibrary;
 			mCF.eLoadStatic				+=OnLoadStatic;
 			mCF.eSaveStatic				+=OnSaveStatic;
-			mCF.eLoadMotionDat			+=OnLoadMotionDat;
-			mCF.eLoadBoneMap			+=OnLoadBoneMap;
 			mCF.eBoundMesh				+=OnBoundMesh;
 			mCF.eShowBound				+=OnShowBound;
 			mCF.eShowAxis				+=OnShowAxis;
@@ -267,24 +266,6 @@ namespace ColladaConvert
 
 			mMF.UpdateMeshPartList(mCharacter.GetMeshPartList(), null);
 			eAnimsUpdated(mAnimLib.GetAnims(), null);
-		}
-
-
-		void OnLoadMotionDat(object sender, EventArgs ea)
-		{
-			string	fileName	=sender as string;
-
-//			mAnimLib.LoadKinectMotionDat(fileName);
-
-//			Misc.SafeInvoke(eAnimsUpdated, mAnimLib.GetAnims());
-		}
-
-
-		void OnLoadBoneMap(object sender, EventArgs ea)
-		{
-//			string	fileName	=sender as string;
-
-//			mAnimLib.LoadBoneMap(fileName);
 		}
 
 
@@ -573,6 +554,9 @@ namespace ColladaConvert
 				//eventually we'll blend these animations
 				//but for now play the first
 				mCurrentAnimName	=(string)dgvr.Cells[0].FormattedValue;
+
+				float	totTime	=mAnimLib.GetAnimTime(mCurrentAnimName);
+				mCurAnimTime	=(Int64)(totTime * 1000);
 			}
 		}
 
@@ -713,11 +697,18 @@ namespace ColladaConvert
 
 			if(!mbPaused)
 			{
-				mAnimTime	+=gameTime.ElapsedGameTime.Milliseconds;
+				mAnimTime	+=(Int64)(gameTime.ElapsedGameTime.TotalMilliseconds * mTimeScale);
+
+				if(mCurrentAnimName != "")
+				{
+					if(mAnimTime > mCurAnimTime)
+					{
+						mAnimTime	%=mCurAnimTime;
+					}
+				}
 			}
 
-			mCharacter.Animate(mCurrentAnimName,
-				(mAnimTime / 1000.0f) * mTimeScale);
+			mCharacter.Animate(mCurrentAnimName, (mAnimTime / 1000.0f));
 
 			//hotkeys
 			if(mInput.Player1.WasKeyPressed(Keys.M))
@@ -778,8 +769,21 @@ namespace ColladaConvert
 			}
 
 			mSB.Begin();
+
 			mSB.DrawString(mFonts.First().Value, "Coords: " + mSteering.Position,
-					Vector2.One * 20.0f, Color.Yellow);
+				Vector2.One * 20.0f, Color.Yellow);
+
+			if(mbPaused)
+			{
+				mSB.DrawString(mFonts.First().Value, "Paused at " + mAnimTime / 1000.0f,
+					Vector2.UnitX * 20.0f + Vector2.UnitY * 60f, Color.OrangeRed);
+			}
+			else
+			{
+				mSB.DrawString(mFonts.First().Value, "AnimTime: " + mAnimTime / 1000.0f,
+					Vector2.UnitX * 20.0f + Vector2.UnitY * 60f, Color.GreenYellow);
+			}
+
 			if(mSensor != null)
 			{
 				if(mbCountingDown)
@@ -788,6 +792,7 @@ namespace ColladaConvert
 						Vector2.One * 20.0f + Vector2.UnitY * 200, Color.Yellow);
 				}
 			}
+
 			mSB.End();
 
 			base.Draw(gameTime);
