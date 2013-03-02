@@ -34,7 +34,7 @@ namespace ColladaConvert
 		bool					mbCharacterLoaded;	//so I know which mesh obj to use
 		bool					mbDrawAxis	=true;
 		bool					mbPaused	=true;
-		Int64					mAnimTime;
+		double					mAnimTime;
 
 		//kinect stuff
 		KinectSensor		mSensor;
@@ -59,7 +59,7 @@ namespace ColladaConvert
 		AnimForm	mCF;
 		string		mCurrentAnimName;
 		float		mTimeScale;			//anim playback speed
-		Int64		mCurAnimTime;
+		Int64		mCurAnimTime, mCurAnimStart;
 		Vector3		mLightDir;
 		Random		mRand	=new Random();
 
@@ -555,8 +555,10 @@ namespace ColladaConvert
 				//but for now play the first
 				mCurrentAnimName	=(string)dgvr.Cells[0].FormattedValue;
 
-				float	totTime	=mAnimLib.GetAnimTime(mCurrentAnimName);
-				mCurAnimTime	=(Int64)(totTime * 1000);
+				float	totTime		=mAnimLib.GetAnimTime(mCurrentAnimName);
+				float	startTime	=mAnimLib.GetAnimStartTime(mCurrentAnimName);
+				mCurAnimTime		=(Int64)(totTime * 1000);
+				mCurAnimStart		=(Int64)(startTime * 1000);
 			}
 		}
 
@@ -697,25 +699,23 @@ namespace ColladaConvert
 
 			if(!mbPaused)
 			{
-				mAnimTime	+=(Int64)(gameTime.ElapsedGameTime.TotalMilliseconds * mTimeScale);
+				mAnimTime	+=gameTime.ElapsedGameTime.TotalMilliseconds * mTimeScale;
 
 				if(mCurrentAnimName != "")
 				{
-					if(mAnimTime > mCurAnimTime)
+					if(mAnimTime > (mCurAnimTime + mCurAnimStart))
 					{
-						mAnimTime	%=mCurAnimTime;
+						mAnimTime	%=(mCurAnimTime + mCurAnimStart);
+					}
+
+					if(mAnimTime < mCurAnimStart)
+					{
+						mAnimTime	=mCurAnimStart;
 					}
 				}
 			}
 
-			mCharacter.Animate(mCurrentAnimName, (mAnimTime / 1000.0f));
-
-			//hotkeys
-			if(mInput.Player1.WasKeyPressed(Keys.M))
-			{
-				//this goes off when typing in text fields!
-//				mMF.ApplyMat();
-			}
+			mCharacter.Animate(mCurrentAnimName, (float)mAnimTime / 1000.0f);
 
 			if(mbCountingDown)
 			{

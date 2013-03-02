@@ -115,7 +115,7 @@ namespace ColladaConvert
 
 		public string GetGeomName()
 		{
-			return	mName;
+			return	mGeomName;
 		}
 
 
@@ -137,11 +137,11 @@ namespace ColladaConvert
 			//create a new gamemesh
 			if(bSkinned)
 			{
-				mConverted	=new SkinnedMesh(mGeomName);
+				mConverted	=new SkinnedMesh(mName);
 			}
 			else
 			{
-				mConverted	=new StaticMesh(mGeomName);
+				mConverted	=new StaticMesh(mName);
 			}
 		}
 

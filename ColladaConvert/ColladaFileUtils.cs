@@ -143,7 +143,11 @@ namespace ColladaConvert
 
 			foreach(MeshConverter mc in chunks)
 			{
-				chr.AddMeshPart(mc.GetConvertedMesh());
+				Mesh	conv	=mc.GetConvertedMesh();
+
+				conv.Name	+="Mesh";
+
+				chr.AddMeshPart(conv);
 			}
 
 			return	chr;
@@ -174,6 +178,8 @@ namespace ColladaConvert
 
 					m.SetTransform(Matrix.Identity);
 
+					m.Name	+="Mesh";
+
 					smo.AddMeshPart(m);
 				}
 			}
@@ -191,6 +197,8 @@ namespace ColladaConvert
 				{
 					Mesh	m	=mc.GetConvertedMesh();
 					Matrix	mat	=GetSceneNodeTransform(colladaFile, mc);
+
+					m.Name	+="Mesh";
 
 					//set transform of each mesh
 					m.SetTransform(mat * shiftMat);

@@ -155,8 +155,9 @@ namespace ColladaConvert
 
 			for(int i=0;i < stride;i++)
 			{
-				float value	=MathHelper.Lerp(chanValues.Values[startIndex],
-					chanValues.Values[startIndex + 1], percentage);
+				float value	=MathHelper.Lerp(
+					chanValues.Values[(startIndex * stride) + i],
+					chanValues.Values[((startIndex + 1) * stride) + i], percentage);
 
 				ret.Add(value);
 			}
