@@ -343,12 +343,7 @@ namespace ColladaConvert
 
 				for(int j=0;j < numInfluences;j++)
 				{
-					if(j >= 4)
-					{
-						//todo: fix weights to add up to 1
-						Debug.WriteLine("Too many influences on vertex, tossing influence");
-						continue;
-					}
+					Debug.Assert(j < 4);
 
 					//grab bone indices and weights
 					int		boneIdx		=indexes[j];

@@ -121,58 +121,6 @@ namespace ColladaConvert
 
 					kf.mRotation	=Quaternion.CreateFromRotationMatrix(mat);
 				}
-
-				//find and set bone key reference
-				MeshLib.KeyFrame	boneKey	=skel.GetBoneKey(bone);
-
-				//patch up the keys with any missing channel data
-				/*
-				foreach(MeshLib.KeyFrame kf in keys)
-				{
-					//fill in missing parts with original bone
-					if(!UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.TranslateX))
-					{
-						kf.mPosition.X	=boneKey.mPosition.X;
-					}
-					if(!UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.TranslateY))
-					{
-						kf.mPosition.Y	=boneKey.mPosition.Y;
-					}
-					if(!UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.TranslateZ))
-					{
-						kf.mPosition.Z	=boneKey.mPosition.Z;
-					}
-					if(!UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.ScaleX))
-					{
-						kf.mScale.X	=boneKey.mScale.X;
-					}
-					if(!UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.ScaleY))
-					{
-						kf.mScale.Y	=boneKey.mScale.Y;
-					}
-					if(!UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.ScaleZ))
-					{
-						kf.mScale.Z	=boneKey.mScale.Z;
-					}
-
-					//rotation is trickier since these are now quaternions
-					//if any are set, I'd think all would be set
-					if(!UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.RotateX)
-						|| !UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.RotateY)
-						|| !UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.RotateZ))
-					{
-						Debug.Assert(!UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.RotateX)
-							&& !UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.RotateY)
-							&& !UtilityLib.Misc.bFlagSet((UInt32)parts, (UInt32)KeyPartsUsed.RotateZ));
-
-						//set the whole quaternion
-						kf.mRotation.X	=boneKey.mRotation.X;
-						kf.mRotation.Y	=boneKey.mRotation.Y;
-						kf.mRotation.Z	=boneKey.mRotation.Z;
-						kf.mRotation.W	=boneKey.mRotation.W;
-					}
-				}*/
-
 				return	new MeshLib.SubAnim(bone, times, keys);
 			}
 
