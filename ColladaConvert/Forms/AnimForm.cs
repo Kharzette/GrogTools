@@ -76,7 +76,17 @@ namespace ColladaConvert
 
 			mAnimGrid	=new AnimGridModel(anms);
 
+			AnimGrid.DataBindingComplete	+=OnDataBindingComplete;
+
 			AnimGrid.DataSource	=mAnimGrid;
+		}
+
+
+		void OnDataBindingComplete(object sender, EventArgs ea)
+		{
+			AnimGrid.DataBindingComplete	-=OnDataBindingComplete;
+
+			AnimGrid.Columns[0].Width	=180;
 		}
 
 
