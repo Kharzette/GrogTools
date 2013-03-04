@@ -32,6 +32,9 @@
 			this.CharBones = new System.Windows.Forms.DataGridView();
 			this.AssignBone = new System.Windows.Forms.Button();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.TrimAmount = new System.Windows.Forms.NumericUpDown();
+			this.TrimEnd = new System.Windows.Forms.Button();
+			this.TrimStart = new System.Windows.Forms.Button();
 			this.LoadData = new System.Windows.Forms.Button();
 			this.SaveData = new System.Windows.Forms.Button();
 			this.ConvertToAnim = new System.Windows.Forms.Button();
@@ -42,9 +45,6 @@
 			this.label1 = new System.Windows.Forms.Label();
 			this.SaveMap = new System.Windows.Forms.Button();
 			this.LoadMap = new System.Windows.Forms.Button();
-			this.TrimStart = new System.Windows.Forms.Button();
-			this.TrimEnd = new System.Windows.Forms.Button();
-			this.TrimAmount = new System.Windows.Forms.NumericUpDown();
 			((System.ComponentModel.ISupportInitialize)(this.KinectBones)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.CharBones)).BeginInit();
 			this.groupBox1.SuspendLayout();
@@ -56,6 +56,8 @@
 			this.KinectBones.AllowUserToAddRows = false;
 			this.KinectBones.AllowUserToDeleteRows = false;
 			this.KinectBones.AllowUserToResizeRows = false;
+			this.KinectBones.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
 			this.KinectBones.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
 			this.KinectBones.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
 			this.KinectBones.Location = new System.Drawing.Point(12, 12);
@@ -68,7 +70,8 @@
 			// 
 			// CharBones
 			// 
-			this.CharBones.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.CharBones.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.CharBones.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
 			this.CharBones.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
 			this.CharBones.Location = new System.Drawing.Point(321, 12);
@@ -81,6 +84,7 @@
 			// 
 			// AssignBone
 			// 
+			this.AssignBone.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.AssignBone.Location = new System.Drawing.Point(321, 260);
 			this.AssignBone.Name = "AssignBone";
 			this.AssignBone.Size = new System.Drawing.Size(125, 23);
@@ -109,6 +113,38 @@
 			this.groupBox1.TabIndex = 3;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Captured Data";
+			// 
+			// TrimAmount
+			// 
+			this.TrimAmount.Location = new System.Drawing.Point(88, 94);
+			this.TrimAmount.Maximum = new decimal(new int[] {
+            10000,
+            0,
+            0,
+            0});
+			this.TrimAmount.Name = "TrimAmount";
+			this.TrimAmount.Size = new System.Drawing.Size(70, 20);
+			this.TrimAmount.TabIndex = 10;
+			// 
+			// TrimEnd
+			// 
+			this.TrimEnd.Location = new System.Drawing.Point(7, 108);
+			this.TrimEnd.Name = "TrimEnd";
+			this.TrimEnd.Size = new System.Drawing.Size(75, 23);
+			this.TrimEnd.TabIndex = 9;
+			this.TrimEnd.Text = "Trim End";
+			this.TrimEnd.UseVisualStyleBackColor = true;
+			this.TrimEnd.Click += new System.EventHandler(this.OnTrimEnd);
+			// 
+			// TrimStart
+			// 
+			this.TrimStart.Location = new System.Drawing.Point(7, 78);
+			this.TrimStart.Name = "TrimStart";
+			this.TrimStart.Size = new System.Drawing.Size(75, 23);
+			this.TrimStart.TabIndex = 8;
+			this.TrimStart.Text = "Trim Start";
+			this.TrimStart.UseVisualStyleBackColor = true;
+			this.TrimStart.Click += new System.EventHandler(this.OnTrimStart);
 			// 
 			// LoadData
 			// 
@@ -186,6 +222,7 @@
 			// 
 			// SaveMap
 			// 
+			this.SaveMap.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.SaveMap.Location = new System.Drawing.Point(13, 261);
 			this.SaveMap.Name = "SaveMap";
 			this.SaveMap.Size = new System.Drawing.Size(75, 23);
@@ -196,6 +233,7 @@
 			// 
 			// LoadMap
 			// 
+			this.LoadMap.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.LoadMap.Location = new System.Drawing.Point(95, 261);
 			this.LoadMap.Name = "LoadMap";
 			this.LoadMap.Size = new System.Drawing.Size(75, 23);
@@ -203,38 +241,6 @@
 			this.LoadMap.Text = "Load Map";
 			this.LoadMap.UseVisualStyleBackColor = true;
 			this.LoadMap.Click += new System.EventHandler(this.OnLoadMap);
-			// 
-			// TrimStart
-			// 
-			this.TrimStart.Location = new System.Drawing.Point(7, 78);
-			this.TrimStart.Name = "TrimStart";
-			this.TrimStart.Size = new System.Drawing.Size(75, 23);
-			this.TrimStart.TabIndex = 8;
-			this.TrimStart.Text = "Trim Start";
-			this.TrimStart.UseVisualStyleBackColor = true;
-			this.TrimStart.Click += new System.EventHandler(this.OnTrimStart);
-			// 
-			// TrimEnd
-			// 
-			this.TrimEnd.Location = new System.Drawing.Point(7, 108);
-			this.TrimEnd.Name = "TrimEnd";
-			this.TrimEnd.Size = new System.Drawing.Size(75, 23);
-			this.TrimEnd.TabIndex = 9;
-			this.TrimEnd.Text = "Trim End";
-			this.TrimEnd.UseVisualStyleBackColor = true;
-			this.TrimEnd.Click += new System.EventHandler(this.OnTrimEnd);
-			// 
-			// TrimAmount
-			// 
-			this.TrimAmount.Location = new System.Drawing.Point(88, 94);
-			this.TrimAmount.Maximum = new decimal(new int[] {
-            10000,
-            0,
-            0,
-            0});
-			this.TrimAmount.Name = "TrimAmount";
-			this.TrimAmount.Size = new System.Drawing.Size(70, 20);
-			this.TrimAmount.TabIndex = 10;
 			// 
 			// KinectForm
 			// 

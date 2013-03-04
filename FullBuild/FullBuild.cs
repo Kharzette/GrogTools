@@ -764,7 +764,14 @@ namespace FullBuild
 
 			if(mbFullBuilding)
 			{
-				OnVis(mFullBuildFileName + ".gbsp", null);
+				if(mBSPForm.BSPParameters.mbBuildAsBModel)
+				{
+					OnLight(mFullBuildFileName + ".gbsp", null);
+				}
+				else
+				{
+					OnVis(mFullBuildFileName + ".gbsp", null);
+				}
 			}
 		}
 
