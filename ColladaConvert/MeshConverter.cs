@@ -398,7 +398,11 @@ namespace ColladaConvert
 									   List<int>		colIdxs2,
 									   float_array		colors3,
 									   List<int>		colIdxs3,
-									   List<int>		vertCounts)
+									   List<int>		vertCounts,
+									   int				col0Stride,
+									   int				col1Stride,
+									   int				col2Stride,
+									   int				col3Stride)
 		{
 			//make sure there are at least positions and vertCounts
 			if(posIdxs == null || vertCounts == null)
@@ -497,31 +501,59 @@ namespace ColladaConvert
 				}
 				if(colIdxs0 != null && colors0 != null)
 				{
-					tv.Color0.X	=colors0.Values[cidx0 * 4];
-					tv.Color0.Y	=colors0.Values[1 + cidx0 * 4];
-					tv.Color0.Z	=colors0.Values[2 + cidx0 * 4];
-					tv.Color0.W	=colors0.Values[3 + cidx0 * 4];
+					tv.Color0.X	=colors0.Values[cidx0 * col0Stride];
+					tv.Color0.Y	=colors0.Values[1 + cidx0 * col0Stride];
+					tv.Color0.Z	=colors0.Values[2 + cidx0 * col0Stride];
+					if(col0Stride > 3)
+					{
+						tv.Color0.W	=colors0.Values[3 + cidx0 * col0Stride];
+					}
+					else
+					{
+						tv.Color0.W	=1.0f;
+					}
 				}
 				if(colIdxs1 != null && colors1 != null)
 				{
-					tv.Color1.X	=colors1.Values[cidx1 * 4];
-					tv.Color1.Y	=colors1.Values[1 + cidx1 * 4];
-					tv.Color1.Z	=colors1.Values[2 + cidx1 * 4];
-					tv.Color1.W	=colors1.Values[3 + cidx1 * 4];
+					tv.Color1.X	=colors1.Values[cidx1 * col1Stride];
+					tv.Color1.Y	=colors1.Values[1 + cidx1 * col1Stride];
+					tv.Color1.Z	=colors1.Values[2 + cidx1 * col1Stride];
+					if(col1Stride > 3)
+					{
+						tv.Color1.W	=colors1.Values[3 + cidx1 * col1Stride];
+					}
+					else
+					{
+						tv.Color1.W	=1.0f;
+					}
 				}
 				if(colIdxs2 != null && colors2 != null)
 				{
-					tv.Color2.X	=colors2.Values[cidx2 * 4];
-					tv.Color2.Y	=colors2.Values[1 + cidx2 * 4];
-					tv.Color2.Z	=colors2.Values[2 + cidx2 * 4];
-					tv.Color2.W	=colors2.Values[3 + cidx2 * 4];
+					tv.Color2.X	=colors2.Values[cidx2 * col2Stride];
+					tv.Color2.Y	=colors2.Values[1 + cidx2 * col2Stride];
+					tv.Color2.Z	=colors2.Values[2 + cidx2 * col2Stride];
+					if(col2Stride > 3)
+					{
+						tv.Color2.W	=colors2.Values[3 + cidx2 * col2Stride];
+					}
+					else
+					{
+						tv.Color2.W	=1.0f;
+					}
 				}
 				if(colIdxs3 != null && colors3 != null)
 				{
-					tv.Color3.X	=colors3.Values[cidx3 * 4];
-					tv.Color3.Y	=colors3.Values[1 + cidx3 * 4];
-					tv.Color3.Z	=colors3.Values[2 + cidx3 * 4];
-					tv.Color3.W	=colors3.Values[3 + cidx3 * 4];
+					tv.Color3.X	=colors3.Values[cidx3 * col3Stride];
+					tv.Color3.Y	=colors3.Values[1 + cidx3 * col3Stride];
+					tv.Color3.Z	=colors3.Values[2 + cidx3 * col3Stride];
+					if(col3Stride > 3)
+					{
+						tv.Color3.W	=colors3.Values[3 + cidx3 * col3Stride];
+					}
+					else
+					{
+						tv.Color3.W	=1.0f;
+					}
 				}
 
 				verts.Add(tv);

@@ -511,21 +511,24 @@ namespace ColladaConvert
 					string	name	=cnk.GetName();
 					if(cnk.mGeometryID == geom.id)
 					{
+						int	normStride, tex0Stride, tex1Stride, tex2Stride, tex3Stride;
+						int	col0Stride, col1Stride, col2Stride, col3Stride;
+
 						List<int>	posIdxs		=GetGeometryIndexesBySemantic(geom, "VERTEX", 0, name);
-						float_array	norms		=GetGeometryFloatArrayBySemantic(geom, "NORMAL", 0, name);
+						float_array	norms		=GetGeometryFloatArrayBySemantic(geom, "NORMAL", 0, name, out normStride);
 						List<int>	normIdxs	=GetGeometryIndexesBySemantic(geom, "NORMAL", 0, name);
-						float_array	texCoords0	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 0, name);
-						float_array	texCoords1	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 1, name);
-						float_array	texCoords2	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 2, name);
-						float_array	texCoords3	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 3, name);
+						float_array	texCoords0	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 0, name, out tex0Stride);
+						float_array	texCoords1	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 1, name, out tex1Stride);
+						float_array	texCoords2	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 2, name, out tex2Stride);
+						float_array	texCoords3	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 3, name, out tex3Stride);
 						List<int>	texIdxs0	=GetGeometryIndexesBySemantic(geom, "TEXCOORD", 0, name);
 						List<int>	texIdxs1	=GetGeometryIndexesBySemantic(geom, "TEXCOORD", 1, name);
 						List<int>	texIdxs2	=GetGeometryIndexesBySemantic(geom, "TEXCOORD", 2, name);
 						List<int>	texIdxs3	=GetGeometryIndexesBySemantic(geom, "TEXCOORD", 3, name);
-						float_array	colors0		=GetGeometryFloatArrayBySemantic(geom, "COLOR", 0, name);
-						float_array	colors1		=GetGeometryFloatArrayBySemantic(geom, "COLOR", 1, name);
-						float_array	colors2		=GetGeometryFloatArrayBySemantic(geom, "COLOR", 2, name);
-						float_array	colors3		=GetGeometryFloatArrayBySemantic(geom, "COLOR", 3, name);
+						float_array	colors0		=GetGeometryFloatArrayBySemantic(geom, "COLOR", 0, name, out col0Stride);
+						float_array	colors1		=GetGeometryFloatArrayBySemantic(geom, "COLOR", 1, name, out col1Stride);
+						float_array	colors2		=GetGeometryFloatArrayBySemantic(geom, "COLOR", 2, name, out col2Stride);
+						float_array	colors3		=GetGeometryFloatArrayBySemantic(geom, "COLOR", 3, name, out col3Stride);
 						List<int>	colIdxs0	=GetGeometryIndexesBySemantic(geom, "COLOR", 0, name);
 						List<int>	colIdxs1	=GetGeometryIndexesBySemantic(geom, "COLOR", 1, name);
 						List<int>	colIdxs2	=GetGeometryIndexesBySemantic(geom, "COLOR", 2, name);
@@ -543,7 +546,7 @@ namespace ColladaConvert
 							texCoords2, texIdxs2, texCoords3, texIdxs3,
 							colors0, colIdxs0, colors1, colIdxs1,
 							colors2, colIdxs2, colors3, colIdxs3,
-							vertCounts);
+							vertCounts, col0Stride, col1Stride, col2Stride, col3Stride);
 
 						bool	bPos	=(posIdxs != null && posIdxs.Count > 0);
 						bool	bNorm	=(norms != null && norms.count > 0);
@@ -580,6 +583,7 @@ namespace ColladaConvert
 							}
 						}
 
+						//todo obey stride on everything
 						cnk.BuildBuffers(gd, bPos, bNorm, bBone,
 							bBone, bTex0, bTex1, bTex2, bTex3,
 							bCol0, bCol1, bCol2, bCol3);
@@ -1208,8 +1212,11 @@ namespace ColladaConvert
 		}
 
 
-		static float_array GetGeometryFloatArrayBySemantic(geometry geom, string sem, int set, string material)
+		static float_array GetGeometryFloatArrayBySemantic(geometry geom,
+			string sem, int set, string material, out int stride)
 		{
+			stride	=-1;
+
 			mesh	msh	=geom.Item as mesh;
 			if(msh == null)
 			{
@@ -1232,17 +1239,27 @@ namespace ColladaConvert
 
 				InputLocalOffset	[]inputs	=null;
 
+				string	polyMat	="";
+
 				if(polys != null)
 				{
+					polyMat	=polys.material;
 					inputs	=polys.input;
 				}
 				else if(plist != null)
 				{
+					polyMat	=plist.material;
 					inputs	=plist.input;
 				}
 				else if(tris != null)
 				{
+					polyMat	=tris.material;
 					inputs	=tris.input;
+				}
+
+				if(polyMat != material)
+				{
+					continue;
 				}
 
 				for(int i=0;i < inputs.Length;i++)
@@ -1277,8 +1294,13 @@ namespace ColladaConvert
 				{
 					continue;
 				}
+
+				stride	=(int)msh.source[j].technique_common.accessor.stride;
+
 				return	verts;
 			}
+
+			stride	=-1;
 
 			return	null;
 		}
@@ -1327,8 +1349,9 @@ namespace ColladaConvert
 
 					float_array		verts	=null;
 					MeshConverter	cnk		=null;
+					int				stride	=0;
 
-					verts	=GetGeometryFloatArrayBySemantic(geom, "VERTEX", 0, mat);
+					verts	=GetGeometryFloatArrayBySemantic(geom, "VERTEX", 0, mat, out stride);
 					if(verts == null)
 					{
 						continue;
