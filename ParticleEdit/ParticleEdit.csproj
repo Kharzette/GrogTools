@@ -131,14 +131,19 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Games\OneGameAMonth\Pratformer\GameContent\GameContent.contentproj">
-      <Project>{1034B9E1-06BC-4E79-818C-B3A403A3A5CF}</Project>
+    <ProjectReference Include="..\..\Games\OneGameAMonth\CuteMagic\GameContent\GameContent.contentproj">
+      <Project>{FEEA789D-2B57-4381-A783-7660A00D6070}</Project>
       <Name>GameContent %28Content%29</Name>
       <XnaReferenceType>Content</XnaReferenceType>
     </ProjectReference>
     <ProjectReference Include="..\..\Libs\ParticleLib\ParticleLib.csproj">
       <Project>{5CDE77ED-568B-4412-BBC9-12247BF5F214}</Project>
       <Name>ParticleLib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Libs\ShaderLib\ShaderLib.contentproj">
+      <Project>{F921E3ED-B43E-4B82-B4EB-C9BC2E373B1F}</Project>
+      <Name>ShaderLib</Name>
+      <XnaReferenceType>Content</XnaReferenceType>
     </ProjectReference>
     <ProjectReference Include="..\..\Libs\SharedForms\SharedForms32.csproj">
       <Project>{29C0FFE8-5702-48A3-840D-54706748FF68}</Project>

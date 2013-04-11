@@ -136,6 +136,13 @@ namespace FullBuild
 			mMatLib		=new MaterialLib.MaterialLib(mGDM.GraphicsDevice, mGameCM, mShaderLib, true);
 			mIndoorMesh	=new MeshLib.IndoorMesh(GraphicsDevice, mMatLib);
 
+			//set up cell shading
+			mMatLib.InitCellShading(1);
+
+			//set to worldy settings
+			mMatLib.GenerateCellTexturePreset(GraphicsDevice, false, 0);
+			mMatLib.SetCellTexture(0);
+
 			mBSPForm	=new SharedForms.BSPForm();
 			mVisForm	=new SharedForms.VisForm();
 			mZoneForm	=new SharedForms.ZoneForm();
