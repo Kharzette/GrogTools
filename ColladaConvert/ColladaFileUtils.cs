@@ -54,7 +54,7 @@ namespace ColladaConvert
 				}
 			}
 
-			alib.AddAnim(BuildAnim(colladaFile, skel, lvs, path));
+			alib.AddAnim(BuildAnim(colladaFile, alib.GetSkeleton(), lvs, path));
 
 			return	true;
 		}

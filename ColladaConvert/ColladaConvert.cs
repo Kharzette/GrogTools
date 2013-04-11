@@ -139,7 +139,12 @@ namespace ColladaConvert
 			mCharacter	=new Character(mMatLib, mAnimLib);
 			mStaticMesh	=new StaticMeshObject(mMatLib);
 
-			mMatLib.SetCellTexture();
+			//set up cell shading
+			mMatLib.InitCellShading(1);
+
+			//set to character settings
+			mMatLib.GenerateCellTexturePreset(gd, true, 0);
+			mMatLib.SetCellTexture(0);
 
 			mStaticMesh.SetTransform(Matrix.Identity);
 			mCharacter.SetTransform(Matrix.Identity);
@@ -701,7 +706,7 @@ namespace ColladaConvert
 			{
 				mAnimTime	+=gameTime.ElapsedGameTime.TotalMilliseconds * mTimeScale;
 
-				if(mCurrentAnimName != "")
+				if(mCurrentAnimName != "" && ((mCurAnimStart + mCurAnimTime) > 0))
 				{
 					if(mAnimTime > (mCurAnimTime + mCurAnimStart))
 					{
