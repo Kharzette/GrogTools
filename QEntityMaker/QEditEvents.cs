@@ -165,6 +165,16 @@ namespace QEntityMaker
 				kvps.Add(kvp);
 			}
 
+			if(AutoAddAngles.Checked)
+			{
+				EntityKVP	kvp	=new EntityKVP();
+
+				kvp.Key		="angles";
+				kvp.Value	="0 0 0";
+
+				kvps.Add(kvp);
+			}
+
 			tn.Tag	=kvps;
 
 			if(AutoAddForm.Checked)

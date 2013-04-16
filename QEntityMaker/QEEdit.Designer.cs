@@ -47,6 +47,7 @@
 			this.RenameGroupBox = new System.Windows.Forms.GroupBox();
 			this.RenameBox = new System.Windows.Forms.TextBox();
 			this.UpdateForm = new System.Windows.Forms.Button();
+			this.AutoAddAngles = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this.EntityFields)).BeginInit();
 			this.AddGroupBox.SuspendLayout();
 			this.RenameGroupBox.SuspendLayout();
@@ -124,7 +125,7 @@
 			// 
 			this.DeleteEntity.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.DeleteEntity.Enabled = false;
-			this.DeleteEntity.Location = new System.Drawing.Point(511, 167);
+			this.DeleteEntity.Location = new System.Drawing.Point(511, 183);
 			this.DeleteEntity.Name = "DeleteEntity";
 			this.DeleteEntity.Size = new System.Drawing.Size(75, 23);
 			this.DeleteEntity.TabIndex = 13;
@@ -186,6 +187,7 @@
 			// AddGroupBox
 			// 
 			this.AddGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.AddGroupBox.Controls.Add(this.AutoAddAngles);
 			this.AddGroupBox.Controls.Add(this.AutoAddForm);
 			this.AddGroupBox.Controls.Add(this.AutoAddOrigin);
 			this.AddGroupBox.Controls.Add(this.AutoAddDesc);
@@ -194,7 +196,7 @@
 			this.AddGroupBox.Enabled = false;
 			this.AddGroupBox.Location = new System.Drawing.Point(386, 41);
 			this.AddGroupBox.Name = "AddGroupBox";
-			this.AddGroupBox.Size = new System.Drawing.Size(200, 120);
+			this.AddGroupBox.Size = new System.Drawing.Size(200, 136);
 			this.AddGroupBox.TabIndex = 19;
 			this.AddGroupBox.TabStop = false;
 			this.AddGroupBox.Text = "Add Entity";
@@ -219,7 +221,7 @@
 			this.RenameGroupBox.Controls.Add(this.RenameEntity);
 			this.RenameGroupBox.Controls.Add(this.RenameBox);
 			this.RenameGroupBox.Enabled = false;
-			this.RenameGroupBox.Location = new System.Drawing.Point(386, 196);
+			this.RenameGroupBox.Location = new System.Drawing.Point(386, 212);
 			this.RenameGroupBox.Name = "RenameGroupBox";
 			this.RenameGroupBox.Size = new System.Drawing.Size(200, 84);
 			this.RenameGroupBox.TabIndex = 20;
@@ -246,6 +248,19 @@
 			this.UpdateForm.Text = "Update Form";
 			this.UpdateForm.UseVisualStyleBackColor = true;
 			this.UpdateForm.Click += new System.EventHandler(this.OnUpdateForm);
+			// 
+			// AutoAddAngles
+			// 
+			this.AutoAddAngles.AutoSize = true;
+			this.AutoAddAngles.Checked = true;
+			this.AutoAddAngles.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.AutoAddAngles.Location = new System.Drawing.Point(6, 112);
+			this.AutoAddAngles.Name = "AutoAddAngles";
+			this.AutoAddAngles.Size = new System.Drawing.Size(105, 17);
+			this.AutoAddAngles.TabIndex = 20;
+			this.AutoAddAngles.Text = "Auto Add Angles";
+			this.mTips.SetToolTip(this.AutoAddAngles, "Adds the angles key for orienting in game");
+			this.AutoAddAngles.UseVisualStyleBackColor = true;
 			// 
 			// QEEdit
 			// 
@@ -293,6 +308,7 @@
 		private System.Windows.Forms.GroupBox RenameGroupBox;
 		private System.Windows.Forms.CheckBox AutoAddForm;
 		private System.Windows.Forms.Button UpdateForm;
+		private System.Windows.Forms.CheckBox AutoAddAngles;
 	}
 }
 
