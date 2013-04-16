@@ -232,9 +232,10 @@ namespace FullBuild
 			}
 			mMatLib.SetParameterOnAll("mWarpFactor", mWarpFactor);
 
-			mInput.Update();
-
-			KeyboardState	kbs	=Keyboard.GetState();
+			if(IsActive)
+			{
+				mInput.Update();
+			}
 
 			if(mInput.Player1.mKBS.IsKeyDown(Keys.L)
 				|| mInput.Player1.mGPS.IsButtonDown(Buttons.LeftShoulder))

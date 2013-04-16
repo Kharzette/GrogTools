@@ -671,7 +671,10 @@ namespace ColladaConvert
 
 			int	msDelta	=gameTime.ElapsedGameTime.Milliseconds;
 
-			mInput.Update();
+			if(IsActive)
+			{
+				mInput.Update();
+			}
 
 			Input.PlayerInput	pi	=mInput.Player1;
 
