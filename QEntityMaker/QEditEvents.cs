@@ -181,6 +181,7 @@ namespace QEntityMaker
 			AddGroupBox.Enabled		=false;
 			DeleteEntity.Enabled	=false;
 			RenameGroupBox.Enabled	=false;
+			UpdateForm.Enabled		=false;
 
 			//see if this is an entity
 			if(!IsInFolder(e.Node.Parent, EntityFolder))
@@ -206,6 +207,7 @@ namespace QEntityMaker
 				PopulateFieldGrid(e.Node);
 				DeleteEntity.Enabled	=true;
 				RenameGroupBox.Enabled	=true;
+				UpdateForm.Enabled		=true;
 			}
 			else if(e.Node.Text.Contains(":form")
 				|| e.Node.Parent.Text.Contains(":form"))
@@ -236,6 +238,32 @@ namespace QEntityMaker
 		void OnQEFTextChanged(object sender, EventArgs ea)
 		{
 			RefreshTree();
+		}
+
+
+		void OnUpdateForm(object sender, EventArgs e)
+		{
+			//grab the forms root node
+			TreeNode	forms	=FindNode(EntityTree.Nodes[0], FormsFolder);
+
+			//see if a form node already exists
+			string	entName	=EntityTree.SelectedNode.Text;
+
+			int	cIndex	=entName.LastIndexOf(':');
+
+			entName	=entName.Substring(0, cIndex);
+
+			string	formName	=entName + ":form =";
+
+			//nuke existing
+			TreeNode	existingForm	=FindNode(forms, formName);
+			if(existingForm != null)
+			{
+				existingForm.Remove();
+				existingForm	=null;
+			}
+
+			AddFormForEntity(EntityTree.SelectedNode, entName);
 		}
 	}
 }

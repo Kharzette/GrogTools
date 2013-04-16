@@ -43,9 +43,10 @@
 			this.AutoAddMeshName = new System.Windows.Forms.CheckBox();
 			this.AutoAddDesc = new System.Windows.Forms.CheckBox();
 			this.AddGroupBox = new System.Windows.Forms.GroupBox();
+			this.AutoAddForm = new System.Windows.Forms.CheckBox();
 			this.RenameGroupBox = new System.Windows.Forms.GroupBox();
 			this.RenameBox = new System.Windows.Forms.TextBox();
-			this.AutoAddForm = new System.Windows.Forms.CheckBox();
+			this.UpdateForm = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.EntityFields)).BeginInit();
 			this.AddGroupBox.SuspendLayout();
 			this.RenameGroupBox.SuspendLayout();
@@ -199,6 +200,19 @@
 			this.AddGroupBox.Text = "Add Entity";
 			this.mTips.SetToolTip(this.AddGroupBox, "Add a new entity with default values checked");
 			// 
+			// AutoAddForm
+			// 
+			this.AutoAddForm.AutoSize = true;
+			this.AutoAddForm.Checked = true;
+			this.AutoAddForm.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.AutoAddForm.Location = new System.Drawing.Point(6, 89);
+			this.AutoAddForm.Name = "AutoAddForm";
+			this.AutoAddForm.Size = new System.Drawing.Size(96, 17);
+			this.AutoAddForm.TabIndex = 19;
+			this.AutoAddForm.Text = "Auto Add Form";
+			this.mTips.SetToolTip(this.AutoAddForm, "Adds a form to the Form section, giving a bounding box and hints in QuArK");
+			this.AutoAddForm.UseVisualStyleBackColor = true;
+			// 
 			// RenameGroupBox
 			// 
 			this.RenameGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -223,24 +237,22 @@
 			this.RenameBox.TabIndex = 15;
 			this.RenameBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.OnRenameBoxKey);
 			// 
-			// AutoAddForm
+			// UpdateForm
 			// 
-			this.AutoAddForm.AutoSize = true;
-			this.AutoAddForm.Checked = true;
-			this.AutoAddForm.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.AutoAddForm.Location = new System.Drawing.Point(6, 89);
-			this.AutoAddForm.Name = "AutoAddForm";
-			this.AutoAddForm.Size = new System.Drawing.Size(96, 17);
-			this.AutoAddForm.TabIndex = 19;
-			this.AutoAddForm.Text = "Auto Add Form";
-			this.mTips.SetToolTip(this.AutoAddForm, "Adds a form to the Form section, giving a bounding box and hints in QuArK");
-			this.AutoAddForm.UseVisualStyleBackColor = true;
+			this.UpdateForm.Location = new System.Drawing.Point(415, 472);
+			this.UpdateForm.Name = "UpdateForm";
+			this.UpdateForm.Size = new System.Drawing.Size(90, 24);
+			this.UpdateForm.TabIndex = 21;
+			this.UpdateForm.Text = "Update Form";
+			this.UpdateForm.UseVisualStyleBackColor = true;
+			this.UpdateForm.Click += new System.EventHandler(this.OnUpdateForm);
 			// 
 			// QEEdit
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(598, 507);
+			this.Controls.Add(this.UpdateForm);
 			this.Controls.Add(this.RenameGroupBox);
 			this.Controls.Add(this.AddGroupBox);
 			this.Controls.Add(this.DeleteEntity);
@@ -280,6 +292,7 @@
 		private System.Windows.Forms.GroupBox AddGroupBox;
 		private System.Windows.Forms.GroupBox RenameGroupBox;
 		private System.Windows.Forms.CheckBox AutoAddForm;
+		private System.Windows.Forms.Button UpdateForm;
 	}
 }
 

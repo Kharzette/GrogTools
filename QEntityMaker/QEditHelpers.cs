@@ -19,6 +19,7 @@ namespace QEntityMaker
 		const string	TargetNameHint	="Name of this entity for targeting by others";
 		const string	MessageHint		="A string message to display";
 		const string	MeshNameHint	="Name of the mesh to render, usually something.Static";
+		const string	ColorHint		="Light color RGB, default (1 1 1)";
 
 
 		string PreviousLine(string file, int pos)
@@ -456,6 +457,38 @@ namespace QEntityMaker
 		}
 
 
+		TreeNode CreateColorFormNode(string title, string hint)
+		{
+			TreeNode	ret	=new TreeNode();
+
+			ret.Text	=title + ": =";
+
+			BindingList<EntityKVP>	stuff	=new BindingList<EntityKVP>();
+
+			EntityKVP	usual	=new EntityKVP();
+
+			usual.Key	="Typ";
+			usual.Value	="LN";
+			stuff.Add(usual);
+
+			usual	=new EntityKVP();
+
+			usual.Key	="Txt";
+			usual.Value	="&";
+			stuff.Add(usual);
+
+			usual	=new EntityKVP();
+
+			usual.Key	="Hint";
+			usual.Value	=hint;
+			stuff.Add(usual);
+
+			ret.Tag	=stuff;
+
+			return	ret;
+		}
+
+
 		void AddFormForEntity(TreeNode tn, string entName)
 		{
 			TreeNode	forms	=FindNode(EntityTree.Nodes[0], FormsFolder);
@@ -520,6 +553,11 @@ namespace QEntityMaker
 				else if(kvp.Key == ";desc")
 				{
 					form.Nodes.Add(CreateBasicFormNode(kvp.Key, kvp.Value));
+				}
+				else if(kvp.Key == "_color")
+				{
+					form.Nodes.Add(CreateBasicFormNode(kvp.Key, ColorHint));
+					form.Nodes.Add(CreateColorFormNode(kvp.Key, ColorHint));
 				}
 				else
 				{
