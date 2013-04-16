@@ -175,6 +175,16 @@ namespace QEntityMaker
 				kvps.Add(kvp);
 			}
 
+			if(AutoAddPickUp.Checked)
+			{
+				EntityKVP	kvp	=new EntityKVP();
+
+				kvp.Key		="pickup";
+				kvp.Value	="true";
+
+				kvps.Add(kvp);
+			}
+
 			tn.Tag	=kvps;
 
 			if(AutoAddForm.Checked)

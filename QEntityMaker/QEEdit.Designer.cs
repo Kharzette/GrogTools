@@ -43,11 +43,12 @@
 			this.AutoAddMeshName = new System.Windows.Forms.CheckBox();
 			this.AutoAddDesc = new System.Windows.Forms.CheckBox();
 			this.AddGroupBox = new System.Windows.Forms.GroupBox();
+			this.AutoAddAngles = new System.Windows.Forms.CheckBox();
 			this.AutoAddForm = new System.Windows.Forms.CheckBox();
 			this.RenameGroupBox = new System.Windows.Forms.GroupBox();
 			this.RenameBox = new System.Windows.Forms.TextBox();
 			this.UpdateForm = new System.Windows.Forms.Button();
-			this.AutoAddAngles = new System.Windows.Forms.CheckBox();
+			this.AutoAddPickUp = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this.EntityFields)).BeginInit();
 			this.AddGroupBox.SuspendLayout();
 			this.RenameGroupBox.SuspendLayout();
@@ -152,9 +153,9 @@
 			this.AutoAddOrigin.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.AutoAddOrigin.Location = new System.Drawing.Point(6, 19);
 			this.AutoAddOrigin.Name = "AutoAddOrigin";
-			this.AutoAddOrigin.Size = new System.Drawing.Size(100, 17);
+			this.AutoAddOrigin.Size = new System.Drawing.Size(75, 17);
 			this.AutoAddOrigin.TabIndex = 16;
-			this.AutoAddOrigin.Text = "Auto Add Origin";
+			this.AutoAddOrigin.Text = "Add Origin";
 			this.mTips.SetToolTip(this.AutoAddOrigin, "Creates an origin key with a default value of 0 0 0");
 			this.AutoAddOrigin.UseVisualStyleBackColor = true;
 			// 
@@ -165,9 +166,9 @@
 			this.AutoAddMeshName.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.AutoAddMeshName.Location = new System.Drawing.Point(6, 42);
 			this.AutoAddMeshName.Name = "AutoAddMeshName";
-			this.AutoAddMeshName.Size = new System.Drawing.Size(125, 17);
+			this.AutoAddMeshName.Size = new System.Drawing.Size(100, 17);
 			this.AutoAddMeshName.TabIndex = 17;
-			this.AutoAddMeshName.Text = "Auto Add Meshname";
+			this.AutoAddMeshName.Text = "Add Meshname";
 			this.mTips.SetToolTip(this.AutoAddMeshName, "Adds a meshname key with a default value of default.static");
 			this.AutoAddMeshName.UseVisualStyleBackColor = true;
 			// 
@@ -178,15 +179,16 @@
 			this.AutoAddDesc.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.AutoAddDesc.Location = new System.Drawing.Point(6, 66);
 			this.AutoAddDesc.Name = "AutoAddDesc";
-			this.AutoAddDesc.Size = new System.Drawing.Size(98, 17);
+			this.AutoAddDesc.Size = new System.Drawing.Size(73, 17);
 			this.AutoAddDesc.TabIndex = 18;
-			this.AutoAddDesc.Text = "Auto Add Desc";
+			this.AutoAddDesc.Text = "Add Desc";
 			this.mTips.SetToolTip(this.AutoAddDesc, "Adds a ;desc key with default value of Description");
 			this.AutoAddDesc.UseVisualStyleBackColor = true;
 			// 
 			// AddGroupBox
 			// 
 			this.AddGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.AddGroupBox.Controls.Add(this.AutoAddPickUp);
 			this.AddGroupBox.Controls.Add(this.AutoAddAngles);
 			this.AddGroupBox.Controls.Add(this.AutoAddForm);
 			this.AddGroupBox.Controls.Add(this.AutoAddOrigin);
@@ -202,16 +204,29 @@
 			this.AddGroupBox.Text = "Add Entity";
 			this.mTips.SetToolTip(this.AddGroupBox, "Add a new entity with default values checked");
 			// 
+			// AutoAddAngles
+			// 
+			this.AutoAddAngles.AutoSize = true;
+			this.AutoAddAngles.Checked = true;
+			this.AutoAddAngles.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.AutoAddAngles.Location = new System.Drawing.Point(6, 89);
+			this.AutoAddAngles.Name = "AutoAddAngles";
+			this.AutoAddAngles.Size = new System.Drawing.Size(80, 17);
+			this.AutoAddAngles.TabIndex = 20;
+			this.AutoAddAngles.Text = "Add Angles";
+			this.mTips.SetToolTip(this.AutoAddAngles, "Adds the angles key for orienting in game");
+			this.AutoAddAngles.UseVisualStyleBackColor = true;
+			// 
 			// AutoAddForm
 			// 
 			this.AutoAddForm.AutoSize = true;
 			this.AutoAddForm.Checked = true;
 			this.AutoAddForm.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.AutoAddForm.Location = new System.Drawing.Point(6, 89);
+			this.AutoAddForm.Location = new System.Drawing.Point(98, 112);
 			this.AutoAddForm.Name = "AutoAddForm";
 			this.AutoAddForm.Size = new System.Drawing.Size(96, 17);
 			this.AutoAddForm.TabIndex = 19;
-			this.AutoAddForm.Text = "Auto Add Form";
+			this.AutoAddForm.Text = "Generate Form";
 			this.mTips.SetToolTip(this.AutoAddForm, "Adds a form to the Form section, giving a bounding box and hints in QuArK");
 			this.AutoAddForm.UseVisualStyleBackColor = true;
 			// 
@@ -249,18 +264,18 @@
 			this.UpdateForm.UseVisualStyleBackColor = true;
 			this.UpdateForm.Click += new System.EventHandler(this.OnUpdateForm);
 			// 
-			// AutoAddAngles
+			// AutoAddPickUp
 			// 
-			this.AutoAddAngles.AutoSize = true;
-			this.AutoAddAngles.Checked = true;
-			this.AutoAddAngles.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.AutoAddAngles.Location = new System.Drawing.Point(6, 112);
-			this.AutoAddAngles.Name = "AutoAddAngles";
-			this.AutoAddAngles.Size = new System.Drawing.Size(105, 17);
-			this.AutoAddAngles.TabIndex = 20;
-			this.AutoAddAngles.Text = "Auto Add Angles";
-			this.mTips.SetToolTip(this.AutoAddAngles, "Adds the angles key for orienting in game");
-			this.AutoAddAngles.UseVisualStyleBackColor = true;
+			this.AutoAddPickUp.AutoSize = true;
+			this.AutoAddPickUp.Checked = true;
+			this.AutoAddPickUp.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.AutoAddPickUp.Location = new System.Drawing.Point(6, 112);
+			this.AutoAddPickUp.Name = "AutoAddPickUp";
+			this.AutoAddPickUp.Size = new System.Drawing.Size(83, 17);
+			this.AutoAddPickUp.TabIndex = 21;
+			this.AutoAddPickUp.Text = "Add PickUp";
+			this.mTips.SetToolTip(this.AutoAddPickUp, "Adds the angles key for orienting in game");
+			this.AutoAddPickUp.UseVisualStyleBackColor = true;
 			// 
 			// QEEdit
 			// 
@@ -309,6 +324,7 @@
 		private System.Windows.Forms.CheckBox AutoAddForm;
 		private System.Windows.Forms.Button UpdateForm;
 		private System.Windows.Forms.CheckBox AutoAddAngles;
+		private System.Windows.Forms.CheckBox AutoAddPickUp;
 	}
 }
 
