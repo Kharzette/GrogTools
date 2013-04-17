@@ -753,8 +753,6 @@ namespace ColladaConvert
 
 			VertexDeclaration	ret	=new VertexDeclaration(ve);
 
-			mConverted.SetVertexDeclaration(ret);
-
 			return	ret;
 		}
 

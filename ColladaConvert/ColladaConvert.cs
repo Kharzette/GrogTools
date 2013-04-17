@@ -66,6 +66,9 @@ namespace ColladaConvert
 		//kinect gui
 		KinectForm	mKF;
 
+		//vert elements gui
+		StripElements	mSE	=new StripElements();
+
 		//spinning light
 		float	mLX, mLY, mLZ;
 
@@ -214,6 +217,9 @@ namespace ColladaConvert
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
 			mMF.eNukedMeshPart	+=OnNukedMeshPart;
+			mMF.eStripElements	+=OnStripElements;
+
+			mSE.eDeleteElement	+=OnDeleteVertElement;
 
 			mSteering	=new PlayerSteering(gd.Viewport.Width,
 				mGDM.GraphicsDevice.Viewport.Height);
@@ -286,6 +292,54 @@ namespace ColladaConvert
 			{
 				mStaticMesh.NukeMesh(msh);
 			}
+		}
+
+
+		void OnDeleteVertElement(object sender, EventArgs ea)
+		{
+			List<int>	indexes	=sender as List<int>;
+			if(indexes == null)
+			{
+				return;
+			}
+
+			List<Mesh>	meshes	=mSE.GetMeshes();
+			if(meshes == null)
+			{
+				return;
+			}
+
+			Type	firstType	=meshes[0].VertexType;
+
+			foreach(Mesh m in meshes)
+			{
+				if(m.VertexType == firstType)
+				{
+					m.NukeVertexElement(indexes, GraphicsDevice);
+				}
+			}
+
+			if(mbCharacterLoaded)
+			{
+				mMF.UpdateMeshPartList(mCharacter.GetMeshPartList(), null);
+			}
+			else
+			{
+				mMF.UpdateMeshPartList(null, mStaticMesh.GetMeshPartList());
+			}
+
+			mSE.Populate(null);
+			mSE.Visible	=false;
+
+			mMF.EnableMeshPartGrid();
+		}
+
+
+		void OnStripElements(object sender, EventArgs ea)
+		{
+			List<Mesh>	meshes	=sender as List<Mesh>;
+
+			mSE.Populate(meshes);
 		}
 
 
@@ -391,6 +445,8 @@ namespace ColladaConvert
 
 			mStaticMesh.SetTransform(Matrix.Identity);
 
+			mbCharacterLoaded	=false;
+
 			mMF.UpdateMeshPartList(null, mStaticMesh.GetMeshPartList());
 		}
 
@@ -427,6 +483,8 @@ namespace ColladaConvert
 			mCharacter	=new Character(mMatLib, mAnimLib);
 			mCharacter.ReadFromFile(path, mGDM.GraphicsDevice, true);
 			mCharacter.SetTransform(Matrix.Identity);
+
+			mbCharacterLoaded	=true;
 
 			mMF.UpdateMeshPartList(mCharacter.GetMeshPartList(), null);
 		}
@@ -536,6 +594,8 @@ namespace ColladaConvert
 			string	path	=(string)sender;
 
 			mStaticMesh.ReadFromFile(path, mGDM.GraphicsDevice, true);
+
+			mbCharacterLoaded	=false;
 
 			mMF.UpdateMeshPartList(null, mStaticMesh.GetMeshPartList());
 		}

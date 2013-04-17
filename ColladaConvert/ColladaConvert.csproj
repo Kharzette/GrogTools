@@ -102,6 +102,12 @@
     <Compile Include="Forms\KinectForm.Designer.cs">
       <DependentUpon>KinectForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\StripElements.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\StripElements.Designer.cs">
+      <DependentUpon>StripElements.cs</DependentUpon>
+    </Compile>
     <Compile Include="MeshConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
@@ -171,6 +177,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\KinectForm.resx">
       <DependentUpon>KinectForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\StripElements.resx">
+      <DependentUpon>StripElements.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
