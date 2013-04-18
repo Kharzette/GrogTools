@@ -64,8 +64,6 @@
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
 			this.label19 = new System.Windows.Forms.Label();
 			this.GravityStrength = new System.Windows.Forms.NumericUpDown();
-			this.label18 = new System.Windows.Forms.Label();
-			this.GravityRoll = new System.Windows.Forms.NumericUpDown();
 			this.label17 = new System.Windows.Forms.Label();
 			this.GravityPitch = new System.Windows.Forms.NumericUpDown();
 			this.label16 = new System.Windows.Forms.Label();
@@ -95,7 +93,6 @@
 			this.groupBox2.SuspendLayout();
 			this.groupBox3.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.GravityStrength)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.GravityRoll)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.GravityPitch)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.GravityYaw)).BeginInit();
 			this.ColorGroup.SuspendLayout();
@@ -165,8 +162,7 @@
 			// Cell
 			// 
 			this.Cell.AutoSize = true;
-			this.Cell.Checked = true;
-			this.Cell.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.Cell.Enabled = false;
 			this.Cell.Location = new System.Drawing.Point(68, 175);
 			this.Cell.Name = "Cell";
 			this.Cell.Size = new System.Drawing.Size(43, 17);
@@ -631,15 +627,13 @@
 			// 
 			this.groupBox3.Controls.Add(this.label19);
 			this.groupBox3.Controls.Add(this.GravityStrength);
-			this.groupBox3.Controls.Add(this.label18);
-			this.groupBox3.Controls.Add(this.GravityRoll);
 			this.groupBox3.Controls.Add(this.label17);
 			this.groupBox3.Controls.Add(this.GravityPitch);
 			this.groupBox3.Controls.Add(this.label16);
 			this.groupBox3.Controls.Add(this.GravityYaw);
 			this.groupBox3.Location = new System.Drawing.Point(375, 12);
 			this.groupBox3.Name = "groupBox3";
-			this.groupBox3.Size = new System.Drawing.Size(156, 130);
+			this.groupBox3.Size = new System.Drawing.Size(156, 103);
 			this.groupBox3.TabIndex = 29;
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = "Forces";
@@ -647,7 +641,7 @@
 			// label19
 			// 
 			this.label19.AutoSize = true;
-			this.label19.Location = new System.Drawing.Point(70, 99);
+			this.label19.Location = new System.Drawing.Point(70, 73);
 			this.label19.Name = "label19";
 			this.label19.Size = new System.Drawing.Size(83, 13);
 			this.label19.TabIndex = 39;
@@ -661,7 +655,7 @@
             0,
             0,
             196608});
-			this.GravityStrength.Location = new System.Drawing.Point(6, 97);
+			this.GravityStrength.Location = new System.Drawing.Point(6, 71);
 			this.GravityStrength.Minimum = new decimal(new int[] {
             100,
             0,
@@ -671,33 +665,6 @@
 			this.GravityStrength.Size = new System.Drawing.Size(58, 20);
 			this.GravityStrength.TabIndex = 38;
 			this.GravityStrength.ValueChanged += new System.EventHandler(this.OnValueChanged);
-			// 
-			// label18
-			// 
-			this.label18.AutoSize = true;
-			this.label18.Location = new System.Drawing.Point(70, 73);
-			this.label18.Name = "label18";
-			this.label18.Size = new System.Drawing.Size(61, 13);
-			this.label18.TabIndex = 36;
-			this.label18.Text = "Gravity Roll";
-			// 
-			// GravityRoll
-			// 
-			this.GravityRoll.Location = new System.Drawing.Point(6, 71);
-			this.GravityRoll.Maximum = new decimal(new int[] {
-            359,
-            0,
-            0,
-            0});
-			this.GravityRoll.Minimum = new decimal(new int[] {
-            100,
-            0,
-            0,
-            -2147483648});
-			this.GravityRoll.Name = "GravityRoll";
-			this.GravityRoll.Size = new System.Drawing.Size(58, 20);
-			this.GravityRoll.TabIndex = 37;
-			this.GravityRoll.ValueChanged += new System.EventHandler(this.OnValueChanged);
 			// 
 			// label17
 			// 
@@ -881,7 +848,6 @@
 			this.groupBox3.ResumeLayout(false);
 			this.groupBox3.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.GravityStrength)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.GravityRoll)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.GravityPitch)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.GravityYaw)).EndInit();
 			this.ColorGroup.ResumeLayout(false);
@@ -925,8 +891,6 @@
 		private System.Windows.Forms.NumericUpDown AlphaVelocityMax;
 		private System.Windows.Forms.GroupBox groupBox2;
 		private System.Windows.Forms.GroupBox groupBox3;
-		private System.Windows.Forms.Label label18;
-		private System.Windows.Forms.NumericUpDown GravityRoll;
 		private System.Windows.Forms.Label label17;
 		private System.Windows.Forms.NumericUpDown GravityPitch;
 		private System.Windows.Forms.Label label16;

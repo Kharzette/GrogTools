@@ -35,6 +35,13 @@ namespace ParticleEdit
 		PlayerSteering	mPS;
 		Input			mInput;
 
+		//debug stuff
+		PrimObject	mXAxis, mYAxis, mZAxis;
+		BasicEffect	mBFX;
+
+		//constants
+		const float	AxisSize	=50f;
+
 
 		public ParticleEdit()
 		{
@@ -85,7 +92,9 @@ namespace ParticleEdit
 
 		protected override void LoadContent()
 		{
-			mSB	=new SpriteBatch(GraphicsDevice);
+			GraphicsDevice	gd	=GraphicsDevice;
+
+			mSB	=new SpriteBatch(gd);
 
 			mFX	=mSLib.Load<Effect>("Shaders/Static");
 
@@ -116,6 +125,27 @@ namespace ParticleEdit
 			mPF.eCopyEmitterToClipBoard	+=OnCopyEmitterToClipBoard;
 			mTexForm.eTexDictChanged	+=OnTexDictChanged;
 			mTexForm.eTexChanged		+=OnTexChanged;
+
+			//debug axis boxes
+			BoundingBox	xBox	=Misc.MakeBox(AxisSize, 1f, 1f);
+			BoundingBox	yBox	=Misc.MakeBox(1f, AxisSize, 1f);
+			BoundingBox	zBox	=Misc.MakeBox(1f, 1f, AxisSize);
+
+			mXAxis	=PrimFactory.CreateCube(gd, xBox, null);
+			mYAxis	=PrimFactory.CreateCube(gd, yBox, null);
+			mZAxis	=PrimFactory.CreateCube(gd, zBox, null);
+
+			mBFX	=new BasicEffect(gd);
+			Vector3	lightDir	=new Vector3(1.0f, -1.0f, 0.1f);
+			lightDir.Normalize();
+
+			mBFX.AmbientLightColor				=Vector3.One * 0.2f;
+			mBFX.LightingEnabled				=true;
+			mBFX.DirectionalLight0.Direction	=-lightDir;
+			mBFX.DirectionalLight0.Enabled		=true;
+			mBFX.DirectionalLight1.Enabled		=false;
+			mBFX.DirectionalLight2.Enabled		=false;
+			mBFX.DirectionalLight0.DiffuseColor	=new Vector3(0.9f, 0.9f, 0.9f);
 		}
 
 
@@ -150,12 +180,26 @@ namespace ParticleEdit
 
 		protected override void Draw(GameTime gameTime)
 		{
-			GraphicsDevice.Clear(Color.CornflowerBlue);
+			GraphicsDevice	gd	=GraphicsDevice;
+
+			gd.Clear(Color.CornflowerBlue);
 
 			if(mbActive && mPB != null)
 			{
 				mPB.Draw(mGCam.View, mGCam.Projection);
 			}
+
+			//X axis red
+			mBFX.AmbientLightColor	=Vector3.UnitX;
+			mXAxis.Draw(gd, mBFX, mGCam.View, mGCam.Projection);
+
+			//Y axis green
+			mBFX.AmbientLightColor	=Vector3.UnitY;
+			mYAxis.Draw(gd, mBFX, mGCam.View, mGCam.Projection);
+
+			//Z axis blue
+			mBFX.AmbientLightColor	=Vector3.UnitZ;
+			mZAxis.Draw(gd, mBFX, mGCam.View, mGCam.Projection);
 
 			mSB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
 
@@ -176,21 +220,18 @@ namespace ParticleEdit
 
 			float	yaw		=mPF.GravYaw;
 			float	pitch	=mPF.GravPitch;
-			float	roll	=mPF.GravRoll;
 			float	str		=mPF.GravStrength;
 
 			Mathery.WrapAngleDegrees(ref yaw);
 			Mathery.WrapAngleDegrees(ref pitch);
-			Mathery.WrapAngleDegrees(ref roll);
 
 			yaw		=MathHelper.ToRadians(yaw);
 			pitch	=MathHelper.ToRadians(pitch);
-			roll	=MathHelper.ToRadians(roll);
 
 			mPB.CreateEmitter(mCurTex, mPF.PartColor, mPF.IsCell,
 				mPF.EmShape, mPF.EmShapeSize,
 				mPF.MaxParts, Vector3.Zero,
-				mPF.GravYaw, mPF.GravPitch, mPF.GravRoll, mPF.GravStrength,
+				mPF.GravYaw, mPF.GravPitch, mPF.GravStrength,
 				mPF.StartingSize, mPF.StartingAlpha, mPF.EmitMS,
 				mPF.SpinMin, mPF.SpinMax, mPF.VelMin, mPF.VelMax,
 				mPF.SizeMin, mPF.SizeMax, mPF.AlphaMin,

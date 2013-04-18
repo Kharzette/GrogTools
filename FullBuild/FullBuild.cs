@@ -733,9 +733,17 @@ namespace FullBuild
 			mVisForm.EnableFileIO(true);
 			mbWorking	=false;
 
-			if(mbFullBuilding)
+			if(bSuccess)
 			{
-				OnSaveGBSP(mFullBuildFileName + ".gbsp", null);
+				if(mbFullBuilding)
+				{
+					OnSaveGBSP(mFullBuildFileName + ".gbsp", null);
+				}
+			}
+			else
+			{
+				CoreEvents.Print("Halting full build due to a bsp build failure.\n");
+				mbFullBuilding	=false;
 			}
 		}
 
@@ -749,14 +757,22 @@ namespace FullBuild
 			mVisForm.EnableFileIO(true);
 			mbWorking	=false;
 
-			if(mbFullBuilding)
+			if(bSuccess)
 			{
-				OnMaterialVis(mFullBuildFileName + ".gbsp", null);
+				if(mbFullBuilding)
+				{
+					OnMaterialVis(mFullBuildFileName + ".gbsp", null);
 
-				mbWorking	=true;
-				OnZoneGBSP(mFullBuildFileName + ".gbsp", null);
+					mbWorking	=true;
+					OnZoneGBSP(mFullBuildFileName + ".gbsp", null);
+					mbFullBuilding	=false;
+					mbWorking		=false;
+				}
+			}
+			else
+			{
+				CoreEvents.Print("Halting full build due to a light failure.\n");
 				mbFullBuilding	=false;
-				mbWorking		=false;
 			}
 		}
 
@@ -770,16 +786,24 @@ namespace FullBuild
 			mVisForm.EnableFileIO(true);
 			mbWorking	=false;
 
-			if(mbFullBuilding)
+			if(bSuccess)
 			{
-				if(mBSPForm.BSPParameters.mbBuildAsBModel)
+				if(mbFullBuilding)
 				{
-					OnLight(mFullBuildFileName + ".gbsp", null);
+					if(mBSPForm.BSPParameters.mbBuildAsBModel)
+					{
+						OnLight(mFullBuildFileName + ".gbsp", null);
+					}
+					else
+					{
+						OnVis(mFullBuildFileName + ".gbsp", null);
+					}
 				}
-				else
-				{
-					OnVis(mFullBuildFileName + ".gbsp", null);
-				}
+			}
+			else
+			{
+				CoreEvents.Print("Halting full build due to a gbsp save failure.\n");
+				mbFullBuilding	=false;
 			}
 		}
 
@@ -874,9 +898,17 @@ namespace FullBuild
 			mBSPForm.EnableFileIO(true);
 			mVisForm.EnableFileIO(true);
 
-			if(mbFullBuilding)
+			if(bSuccess)
 			{
-				OnLight(mFullBuildFileName + ".gbsp", null);
+				if(mbFullBuilding)
+				{
+					OnLight(mFullBuildFileName + ".gbsp", null);
+				}
+			}
+			else
+			{
+				CoreEvents.Print("Halting full build due to a vis failure.\n");
+				mbFullBuilding	=false;
 			}
 		}
 

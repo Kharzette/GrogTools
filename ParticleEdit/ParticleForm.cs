@@ -238,16 +238,6 @@ namespace ParticleEdit
 			}
 		}
 
-		public int GravRoll
-		{
-			get { return (int)GravityRoll.Value; }
-			set
-			{
-				Action<NumericUpDown>	upVal	=numer => numer.Value = value;
-				SharedForms.FormExtensions.Invoke(GravityRoll, upVal);
-			}
-		}
-
 		public float GravStrength
 		{
 			get { return (float)GravityStrength.Value; }
@@ -309,7 +299,6 @@ namespace ParticleEdit
 			em.mLifeMax					=LifeMax;
 			em.mGravityYaw				=GravYaw;
 			em.mGravityPitch			=GravPitch;
-			em.mGravityRoll				=GravRoll;
 			em.mGravityStrength			=GravStrength;
 			em.mbOn						=Active.Checked;
 			em.mShape					=EmShape;
@@ -344,7 +333,6 @@ namespace ParticleEdit
 			LifeMax			=em.mLifeMax;
 			GravYaw			=em.mGravityYaw;
 			GravPitch		=em.mGravityPitch;
-			GravRoll		=em.mGravityRoll;
 			GravStrength	=em.mGravityStrength;
 			PartColor		=color;
 			Active.Checked	=em.mbOn;
