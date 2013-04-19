@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Drawing;
+using System.Diagnostics;
 using System.Windows.Forms;
 using System.ComponentModel;
 using System.Collections.Generic;
@@ -299,6 +300,13 @@ namespace QEntityMaker
 
 				foreach(EntityKVP ekvp in tagged)
 				{
+					Debug.Assert(ekvp.Key != null);
+
+					if(ekvp.Value == null)
+					{
+						ekvp.Value	="";
+					}
+
 					int	width	=SpaceOver(sw, depth);
 
 					//measure width, quark has problems with wide strings
