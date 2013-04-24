@@ -39,9 +39,11 @@ namespace FullBuild
 		MaterialLib.MaterialLib	mMatLib;
 		MeshLib.IndoorMesh		mIndoorMesh;
 		List<string>			mAllTextures	=new List<string>();
-//		List<Vector3>			mPathNodes		=new List<Vector3>();
-//		PathLib.PathGrid		mPathGrid;
 		Dictionary<int, Matrix>	mModelMats;
+		Effect					mLMShader;
+
+		//white texture to feed to the shadow shaders
+		Texture2D	mWhiteTexture;
 
 		//lighting emissives
 		Dictionary<string, Microsoft.Xna.Framework.Color>	mEmissives;
@@ -120,10 +122,13 @@ namespace FullBuild
 
 		protected override void LoadContent()
 		{
-			mSB			=new SpriteBatch(GraphicsDevice);
+			GraphicsDevice	gd	=mGDM.GraphicsDevice;
+
+			mSB			=new SpriteBatch(gd);
 			mGameCM		=new ContentManager(Services, "GameContent");
 			mShaderLib	=new ContentManager(Services, "ShaderLib");
-			mBFX		=new BasicEffect(mGDM.GraphicsDevice);
+			mBFX		=new BasicEffect(gd);
+			mLMShader	=mShaderLib.Load<Effect>("Shaders/LightMap");
 
 			Dictionary<string, SpriteFont>	fonts	=UtilityLib.FileUtil.LoadAllFonts(Content);
 
@@ -133,21 +138,26 @@ namespace FullBuild
 			mBFX.LightingEnabled	=false;
 			mBFX.TextureEnabled		=false;
 
-			mMatLib		=new MaterialLib.MaterialLib(mGDM.GraphicsDevice, mGameCM, mShaderLib, true);
-			mIndoorMesh	=new MeshLib.IndoorMesh(GraphicsDevice, mMatLib);
+			mMatLib		=new MaterialLib.MaterialLib(gd, mGameCM, mShaderLib, true);
+			mIndoorMesh	=new MeshLib.IndoorMesh(gd, mMatLib);
+
+			mWhiteTexture		=new Texture2D(gd, 1, 1);
+			Color	[]whiteDat	=new Color[1];
+			whiteDat[0]			=Color.White;
+			mWhiteTexture.SetData<Color>(whiteDat);
 
 			//set up cell shading
 			mMatLib.InitCellShading(1);
 
 			//set to worldy settings
-			mMatLib.GenerateCellTexturePreset(GraphicsDevice, false, 0);
+			mMatLib.GenerateCellTexturePreset(gd, false, 0);
 			mMatLib.SetCellTexture(0);
 
 			mBSPForm	=new SharedForms.BSPForm();
 			mVisForm	=new SharedForms.VisForm();
 			mZoneForm	=new SharedForms.ZoneForm();
 			mOutputForm	=new SharedForms.Output();
-			mMatForm	=new SharedForms.MaterialForm(mGDM.GraphicsDevice, mMatLib, false);
+			mMatForm	=new SharedForms.MaterialForm(gd, mMatLib, false);
 
 			mBSPForm.Visible	=true;
 			mVisForm.Visible	=true;
@@ -269,15 +279,18 @@ namespace FullBuild
 				return;
 			}
 
-			GraphicsDevice.Clear(Color.CornflowerBlue);
+			GraphicsDevice	gd	=mGDM.GraphicsDevice;
 
-			GraphicsDevice	g	=mGDM.GraphicsDevice;
+			gd.Clear(Color.CornflowerBlue);
 
-			g.DepthStencilState	=DepthStencilState.Default;
+			gd.DepthStencilState	=DepthStencilState.Default;
 
 			if(mMap != null && mVisMap != null)
 			{
-				mIndoorMesh.Draw(g, mGameCam, mVisMap.IsMaterialVisibleFromPos, GetModelMatrix, RenderExternal);
+				//set shadows to directional (not using shadows)
+				mMatLib.SetParameterOnAll("mbDirectional", true);
+				mLMShader.Parameters["mShadowTexture"].SetValue(mWhiteTexture);
+				mIndoorMesh.Draw(gd, mGameCam, mVisMap.IsMaterialVisibleFromPos, GetModelMatrix, RenderExternal);
 			}
 
 			KeyboardState	kbstate	=Keyboard.GetState();
@@ -288,11 +301,11 @@ namespace FullBuild
 
 			if(mLineVB != null)
 			{
-				g.SetVertexBuffer(mLineVB);
+				gd.SetVertexBuffer(mLineVB);
 
 				mBFX.CurrentTechnique.Passes[0].Apply();
 
-				g.DrawPrimitives(PrimitiveType.LineList, 0, mLineVB.VertexCount / 2);
+				gd.DrawPrimitives(PrimitiveType.LineList, 0, mLineVB.VertexCount / 2);
 			}
 
 			mSB.Begin();
@@ -543,56 +556,21 @@ namespace FullBuild
 				}
 				else
 				{
-/*					List<Vector3>	lines	=mMap.GetFaceNormals();
-
-					mLineVB	=new VertexBuffer(mGDM.GraphicsDevice, typeof(VertexPositionColor), lines.Count, BufferUsage.WriteOnly);
-
-					VertexPositionColor	[]normVerts	=new VertexPositionColor[lines.Count];
-					for(int i=0;i < lines.Count;i++)
-					{
-						normVerts[i].Position	=lines[i];
-						normVerts[i].Color		=Color.Green;
-					}
-
-					mLineVB.SetData<VertexPositionColor>(normVerts);
-*/
-
-					//generate pathing information
-//					mPathNodes	=mMap.GetGoodPathPoints();
-/*
-					mLineVB	=new VertexBuffer(mGDM.GraphicsDevice, typeof(VertexPositionColor), mPathNodes.Count * 2, BufferUsage.WriteOnly);
-
-					VertexPositionColor	[]normVerts	=new VertexPositionColor[mPathNodes.Count * 2];
-					for(int i=0;i < mPathNodes.Count;i++)
-					{
-						normVerts[i * 2].Position	=mPathNodes[i];
-						normVerts[i * 2].Color		=Color.Green;
-
-						normVerts[(i * 2) + 1].Position	=mPathNodes[i] + Vector3.UnitY * 20.0f;
-						normVerts[(i * 2) + 1].Color	=Color.Green;
-					}
-
-					mLineVB.SetData<VertexPositionColor>(normVerts);
-
-					mPathGrid	=PathLib.PathGrid.CreatePathGrid(false);
-
-					mPathGrid.GenerateFromPoints(mPathNodes);
-					*/
 					mVisMap	=new VisMap();
 					mVisMap.SetMap(mMap);
 					mVisMap.LoadVisData(fileName);
-					GraphicsDevice	g	=mGDM.GraphicsDevice;
+					GraphicsDevice	gd	=mGDM.GraphicsDevice;
 
 					mMatLib.NukeAllMaterials();
 
 					List<MaterialLib.Material>	mats	=mMap.GetMaterials();
 
-					mIndoorMesh.BuildLM(g, mZoneForm.GetLightAtlasSize(), mMap.BuildLMRenderData, mMap.GetPlanes());
-					mIndoorMesh.BuildVLit(g, mMap.BuildVLitRenderData, mMap.GetPlanes());
-					mIndoorMesh.BuildAlpha(g, mMap.BuildAlphaRenderData, mMap.GetPlanes());
-					mIndoorMesh.BuildFullBright(g, mMap.BuildFullBrightRenderData, mMap.GetPlanes());
-					mIndoorMesh.BuildMirror(g, mMap.BuildMirrorRenderData, mMap.GetPlanes());
-					mIndoorMesh.BuildSky(g, mMap.BuildSkyRenderData, mMap.GetPlanes());
+					mIndoorMesh.BuildLM(gd, mZoneForm.GetLightAtlasSize(), mMap.BuildLMRenderData, mMap.GetPlanes());
+					mIndoorMesh.BuildVLit(gd, mMap.BuildVLitRenderData, mMap.GetPlanes());
+					mIndoorMesh.BuildAlpha(gd, mMap.BuildAlphaRenderData, mMap.GetPlanes());
+					mIndoorMesh.BuildFullBright(gd, mMap.BuildFullBrightRenderData, mMap.GetPlanes());
+					mIndoorMesh.BuildMirror(gd, mMap.BuildMirrorRenderData, mMap.GetPlanes());
+					mIndoorMesh.BuildSky(gd, mMap.BuildSkyRenderData, mMap.GetPlanes());
 
 					mModelMats	=mMap.GetModelTransforms();
 
