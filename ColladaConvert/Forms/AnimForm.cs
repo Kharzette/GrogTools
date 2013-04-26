@@ -66,7 +66,7 @@ namespace ColladaConvert
 				return;
 			}
 
-			eLoadModel(mOFD.FileName, null);
+			Misc.SafeInvoke(eLoadModel, mOFD.FileName);
 		}
 
 
@@ -94,15 +94,12 @@ namespace ColladaConvert
 		{
 			DataGridViewSelectedRowCollection	row	=AnimGrid.SelectedRows;
 
-			if(eAnimSelectionChanged != null)
-			{
-				eAnimSelectionChanged(row, null);
-			}
+			Misc.SafeInvoke(eAnimSelectionChanged, row);
 		}
 
 		void TimeScale_ValueChanged(object sender, EventArgs e)
 		{
-			eTimeScaleChanged(TimeScale.Value, null);
+			Misc.SafeInvoke(eTimeScaleChanged, TimeScale.Value);
 		}
 
 
@@ -117,7 +114,7 @@ namespace ColladaConvert
 				return;
 			}
 
-			eSaveLibrary(mSFD.FileName, null);
+			Misc.SafeInvoke(eSaveLibrary, mSFD.FileName);
 		}
 
 
@@ -133,7 +130,7 @@ namespace ColladaConvert
 				return;
 			}
 
-			eLoadLibrary(mOFD.FileName, null);
+			Misc.SafeInvoke(eLoadLibrary, mOFD.FileName);
 		}
 
 
@@ -148,7 +145,7 @@ namespace ColladaConvert
 				return;
 			}
 
-			eSaveCharacter(mSFD.FileName, null);
+			Misc.SafeInvoke(eSaveCharacter, mSFD.FileName);
 		}
 
 
@@ -164,7 +161,7 @@ namespace ColladaConvert
 				return;
 			}
 
-			eLoadCharacter(mOFD.FileName, null);
+			Misc.SafeInvoke(eLoadCharacter, mOFD.FileName);
 		}
 
 		void OnCellValidated(object sender, DataGridViewCellEventArgs e)
@@ -220,7 +217,7 @@ namespace ColladaConvert
 				return;
 			}
 
-			eLoadStaticModel(mOFD.FileName, null);
+			Misc.SafeInvoke(eLoadStaticModel, mOFD.FileName);
 		}
 
 
@@ -240,7 +237,7 @@ namespace ColladaConvert
 
 			foreach(string fname in fnames)
 			{
-				eLoadAnim(fname, null);
+				Misc.SafeInvoke(eLoadAnim, fname);
 			}
 		}
 
@@ -256,7 +253,7 @@ namespace ColladaConvert
 				return;
 			}
 
-			eSaveStatic(mSFD.FileName, null);
+			Misc.SafeInvoke(eSaveStatic, mSFD.FileName);
 		}
 
 

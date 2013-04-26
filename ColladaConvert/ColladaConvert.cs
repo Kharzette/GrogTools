@@ -66,6 +66,9 @@ namespace ColladaConvert
 		//kinect gui
 		KinectForm	mKF;
 
+		//cellshade tweaker form
+		CellTweakForm	mCTF;
+
 		//vert elements gui
 		StripElements	mSE	=new StripElements();
 
@@ -74,6 +77,7 @@ namespace ColladaConvert
 
 		public static event EventHandler	eAnimsUpdated;
 
+		//constants
 		const float	LightXRot	=0.003f;
 		const float	LightYRot	=0.009f;
 		const float	LightZRot	=0.006f;
@@ -163,8 +167,11 @@ namespace ColladaConvert
 
 			InitializeEffect();
 
-			mCF	=new AnimForm(mAnimLib);
-			mCF.Visible	=true;
+			mCTF			=new CellTweakForm(gd, mMatLib);
+			mCTF.Visible	=true;
+
+			mCF				=new AnimForm(mAnimLib);
+			mCF.Visible		=true;
 
 			mCF.eLoadAnim				+=OnOpenAnim;
 			mCF.eLoadModel				+=OnOpenModel;
@@ -200,20 +207,22 @@ namespace ColladaConvert
 
 			//bind matform window position
 			mMF.DataBindings.Add(new System.Windows.Forms.Binding("Location",
-				global::ColladaConvert.Settings.Default,
-				"MaterialFormPos", true,
+				Settings.Default, "MaterialFormPos", true,
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
 			//bind animform window position
 			mCF.DataBindings.Add(new System.Windows.Forms.Binding("Location",
-				global::ColladaConvert.Settings.Default,
-				"AnimFormPos", true,
+				Settings.Default, "AnimFormPos", true,
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
 			//bind kinectform window position
 			mKF.DataBindings.Add(new System.Windows.Forms.Binding("Location",
-				global::ColladaConvert.Settings.Default,
-				"KinectFormPos", true,
+				Settings.Default, "KinectFormPos", true,
+				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+
+			//bind cellTweakForm window position
+			mCTF.DataBindings.Add(new System.Windows.Forms.Binding("Location",
+				Settings.Default, "CellTweakFormPos", true,
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
 			mMF.eNukedMeshPart	+=OnNukedMeshPart;

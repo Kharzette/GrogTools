@@ -96,6 +96,12 @@
     <Compile Include="Forms\AnimForm.Designer.cs">
       <DependentUpon>AnimForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\CellTweakForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\CellTweakForm.Designer.cs">
+      <DependentUpon>CellTweakForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\KinectForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -174,6 +180,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Forms\AnimForm.resx">
       <DependentUpon>AnimForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\CellTweakForm.resx">
+      <DependentUpon>CellTweakForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\KinectForm.resx">
       <DependentUpon>KinectForm.cs</DependentUpon>
