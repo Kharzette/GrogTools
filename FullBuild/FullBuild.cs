@@ -32,6 +32,7 @@ namespace FullBuild
 		SharedForms.ZoneForm		mZoneForm;
 		SharedForms.Output			mOutputForm;
 		SharedForms.MaterialForm	mMatForm;
+		SharedForms.CellTweakForm	mCTForm;
 
 		//data
 		Map						mMap;
@@ -158,18 +159,21 @@ namespace FullBuild
 			mZoneForm	=new SharedForms.ZoneForm();
 			mOutputForm	=new SharedForms.Output();
 			mMatForm	=new SharedForms.MaterialForm(gd, mMatLib, false);
+			mCTForm		=new SharedForms.CellTweakForm(gd, mMatLib);
 
 			mBSPForm.Visible	=true;
 			mVisForm.Visible	=true;
 			mZoneForm.Visible	=true;
 			mOutputForm.Visible	=true;
 			mMatForm.Visible	=true;
+			mCTForm.Visible		=true;
 
 			SetFormPos(mBSPForm, "BSPFormPos");
 			SetFormPos(mVisForm, "VisFormPos");
 			SetFormPos(mZoneForm, "ZoneFormPos");
 			SetFormPos(mOutputForm, "OutputFormPos");
 			SetFormPos(mMatForm, "MaterialFormPos");
+			SetFormPos(mCTForm, "CellTweakFormPos");
 
 			//form events
 			mMatForm.eMaterialNuked			+=OnMaterialNuked;
