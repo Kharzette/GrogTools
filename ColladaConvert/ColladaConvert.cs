@@ -67,7 +67,7 @@ namespace ColladaConvert
 		KinectForm	mKF;
 
 		//cellshade tweaker form
-		CellTweakForm	mCTF;
+		SharedForms.CellTweakForm	mCTF;
 
 		//vert elements gui
 		StripElements	mSE	=new StripElements();
@@ -167,7 +167,7 @@ namespace ColladaConvert
 
 			InitializeEffect();
 
-			mCTF			=new CellTweakForm(gd, mMatLib);
+			mCTF			=new SharedForms.CellTweakForm(gd, mMatLib);
 			mCTF.Visible	=true;
 
 			mCF				=new AnimForm(mAnimLib);

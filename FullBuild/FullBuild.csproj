@@ -137,9 +137,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Games\OneGameAMonth\CuteMagic\GameContent\GameContent.contentproj">
-      <Project>{FEEA789D-2B57-4381-A783-7660A00D6070}</Project>
-      <Name>GameContent %28Content%29</Name>
+    <ProjectReference Include="..\..\Games\LudumDare\MinnieNMal\GameContent\GameContent.contentproj">
+      <Project>{965453FF-AEDC-42EB-BC1B-FFC055177DAE}</Project>
+      <Name>GameContent</Name>
       <XnaReferenceType>Content</XnaReferenceType>
     </ProjectReference>
     <ProjectReference Include="..\..\Libs\BSPCore\BSPCore32.csproj">
