@@ -334,7 +334,7 @@ namespace FullBuild
 		}
 
 
-		void RenderExternal(MaterialLib.AlphaPool ap, Matrix view, Matrix proj)
+		void RenderExternal(MaterialLib.AlphaPool ap, Vector3 camPos, Matrix view, Matrix proj)
 		{
 		}
 
