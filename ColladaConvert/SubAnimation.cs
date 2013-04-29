@@ -118,24 +118,21 @@ namespace ColladaConvert
 			float	totalTime	=chanTimes.Values[chanTimes.Values.Length - 1]
 				- chanTimes.Values[0];
 
-			//make sure the time is not before our start
-			Debug.Assert(time >= chanTimes.Values[0]);
-
-			//bring the passed in time value into
-			//the space of our animation
-			float	animTime	=time % totalTime;
-
-			//Bring to start
-			animTime	+=chanTimes.Values[0];
+			//make sure the time is in range
+			float	animTime	=time;
+			if(time > chanTimes.Values[chanTimes.Values.Length - 1])
+			{
+				animTime	=chanTimes.Values[chanTimes.Values.Length - 1];
+			}
 
 			//locate the key index to start with
 			int	startIndex;
 			for(startIndex = 0;startIndex < chanTimes.Values.Length;startIndex++)
 			{
-				if(animTime < chanTimes.Values[startIndex])
+				if(animTime <= chanTimes.Values[startIndex])
 				{
 					//back up one
-					startIndex--;
+					startIndex	=Math.Max(startIndex - 1, 0);
 					break;	//found
 				}
 			}

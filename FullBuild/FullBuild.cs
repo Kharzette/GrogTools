@@ -59,7 +59,6 @@ namespace FullBuild
 		//debug draw stuff
 		Vector2			mTextPos;
 		Random			mRnd	=new Random();
-		Vector3			mDynamicLightPos;
 		VertexBuffer	mLineVB;
 		BasicEffect		mBFX;
 		float			mWarpFactor;
@@ -230,15 +229,6 @@ namespace FullBuild
 
 			int	msDelta	=gameTime.ElapsedGameTime.Milliseconds;
 
-			if(mModelMats != null)
-			{
-				if(mModelMats.Count > 0)
-				{
-//					mModelMats[1]	=Matrix.CreateRotationY(mTestRot);
-//					mModelMats[1]	*=Matrix.CreateTranslation(mTestMover.GetPos());
-				}
-			}
-
 			mWarpFactor	+=msDelta / 1000.0f;
 			while(mWarpFactor > MathHelper.TwoPi)
 			{
@@ -251,21 +241,14 @@ namespace FullBuild
 				mInput.Update();
 			}
 
-			if(mInput.Player1.mKBS.IsKeyDown(Keys.L)
-				|| mInput.Player1.mGPS.IsButtonDown(Buttons.LeftShoulder))
-			{
-				mDynamicLightPos	=mPlayerControl.Position;
-				mMatLib.SetParameterOnAll("mLight0Position", mDynamicLightPos);
-				mMatLib.SetParameterOnAll("mLight0Color", Vector3.One);
-				mMatLib.SetParameterOnAll("mLightRange", 200.0f);
-				mMatLib.SetParameterOnAll("mLightFalloffRange", 100.0f);
-			}
+			Input.PlayerInput	pi	=mInput.Player1;
 
 			mIndoorMesh.Update(msDelta);
 
-			mPlayerControl.Update(msDelta, mGameCam, mInput.Player1.mKBS, mInput.Player1.mMS, mInput.Player1.mGPS);
+			mPlayerControl.Update(msDelta, mGameCam, pi.mKBS, pi.mMS, pi.mGPS);
 
-			mGameCam.Update(-mPlayerControl.Position, mPlayerControl.Pitch, mPlayerControl.Yaw, mPlayerControl.Roll);
+			mGameCam.Update(-mPlayerControl.Position, mPlayerControl.Pitch,
+				mPlayerControl.Yaw, mPlayerControl.Roll);
 
 			mBFX.World		=Matrix.Identity;
 			mBFX.View		=mGameCam.View;
@@ -293,7 +276,7 @@ namespace FullBuild
 			{
 				//set shadows to directional (not using shadows)
 				mMatLib.SetParameterOnAll("mbDirectional", true);
-				mLMShader.Parameters["mShadowTexture"].SetValue(mWhiteTexture);
+				mMatLib.SetParameterOnAll("mShadowTexture", mWhiteTexture);
 				mIndoorMesh.Draw(gd, mGameCam, mVisMap.IsMaterialVisibleFromPos, GetModelMatrix, RenderExternal);
 			}
 
@@ -346,6 +329,55 @@ namespace FullBuild
 				return	mEmissives[matName].ToVector3();
 			}
 			return	Vector3.One;
+		}
+
+
+		void HideParametersByMaterial()
+		{
+			Dictionary<string, MaterialLib.Material>	mats	=mMatLib.GetMaterials();
+
+			//hide stuff that the user doesn't care about
+			//these are for all indoormesh materials
+			foreach(KeyValuePair<string, MaterialLib.Material> m in mats)
+			{
+				MaterialLib.Material	mat	=m.Value;
+
+				mat.HideShaderParameter("mWorld");
+				mat.HideShaderParameter("mView");
+				mat.HideShaderParameter("mProjection");
+				mat.HideShaderParameter("mLightViewProj");
+				mat.HideShaderParameter("mEyePos");
+				mat.HideShaderParameter("mCellTable");
+				mat.HideShaderParameter("mShadowTexture");
+				mat.HideShaderParameter("mShadowLightPos");
+				mat.HideShaderParameter("mbDirectional");
+				mat.HideShaderParameter("mAniIntensities");
+				mat.HideShaderParameter("mWarpFactor");
+				mat.HideShaderParameter("mYRangeMax");
+				mat.HideShaderParameter("mYRangeMin");
+				mat.HideShaderParameter("mSpecColor");	//eventually want these
+				mat.HideShaderParameter("mSpecPower");	//for future
+
+				//look for material specific stuff to hide
+				if(mat.Technique == "FullBright"
+					|| mat.Technique == "VLitCell"
+					|| mat.Technique == "VertexLighting"
+					|| mat.Technique == "Alpha")
+				{
+					mat.HideShaderParameter("mLightMap");
+					mat.HideShaderParameter("mSkyGradient0");
+					mat.HideShaderParameter("mSkyGradient1");
+				}
+				else if(mat.Technique.StartsWith("LightMap"))
+				{
+					mat.HideShaderParameter("mSkyGradient0");
+					mat.HideShaderParameter("mSkyGradient1");
+				}
+				else if(mat.Technique == "Sky")
+				{
+					mat.HideShaderParameter("mLightMap");
+				}
+			}
 		}
 
 
@@ -413,6 +445,7 @@ namespace FullBuild
 				Texture2D	atlas	=mIndoorMesh.GetLightMapAtlas();
 				if(atlas != null)
 				{
+					atlas.Name	="LightMapAtlas";
 					mMatLib.AddMap("LightMapAtlas", atlas);
 				}
 			}
@@ -584,6 +617,8 @@ namespace FullBuild
 					}
 					mMatLib.RefreshShaderParameters();
 					mMatForm.UpdateMaterials();
+
+					HideParametersByMaterial();
 
 					mVisMap.SetMaterialVisBytes(mats.Count);
 				}
