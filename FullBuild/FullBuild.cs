@@ -378,6 +378,52 @@ namespace FullBuild
 					mat.HideShaderParameter("mLightMap");
 				}
 			}
+
+			//also ignore any parameter that isn't really used
+			//by the material
+			foreach(KeyValuePair<string, MaterialLib.Material> m in mats)
+			{
+				MaterialLib.Material	mat	=m.Value;
+
+				//these aren't being used right now by any indoor material
+				mat.IgnoreShaderParameter("mWarpFactor");
+				mat.IgnoreShaderParameter("mYRangeMax");
+				mat.IgnoreShaderParameter("mYRangeMin");
+				mat.IgnoreShaderParameter("mSpecColor");	//eventually want these
+				mat.IgnoreShaderParameter("mSpecPower");	//for future
+
+				if(!mat.Technique.Contains("Anim"))
+				{
+					mat.IgnoreShaderParameter("mAniIntensities");
+				}
+
+				if(!mat.Technique.Contains("Cell"))
+				{
+					mat.IgnoreShaderParameter("mCellTable");
+				}
+
+				//look for material specific stuff to hide
+				if(mat.Technique == "FullBright"
+					|| mat.Technique == "VLitCell"
+					|| mat.Technique == "VertexLighting"
+					|| mat.Technique == "Alpha")
+				{
+					mat.IgnoreShaderParameter("mEyePos");
+					mat.IgnoreShaderParameter("mLightMap");
+					mat.IgnoreShaderParameter("mSkyGradient0");
+					mat.IgnoreShaderParameter("mSkyGradient1");
+				}
+				else if(mat.Technique.StartsWith("LightMap"))
+				{
+					mat.IgnoreShaderParameter("mEyePos");
+					mat.IgnoreShaderParameter("mSkyGradient0");
+					mat.IgnoreShaderParameter("mSkyGradient1");
+				}
+				else if(mat.Technique == "Sky")
+				{
+					mat.IgnoreShaderParameter("mLightMap");
+				}
+			}
 		}
 
 
