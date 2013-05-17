@@ -664,7 +664,10 @@ namespace FullBuild
 					mMatLib.RefreshShaderParameters();
 					mMatForm.UpdateMaterials();
 
+					//this avoids altering form stuff on another thread
+					mMatForm.ReWireParameters(false);
 					HideParametersByMaterial();
+					mMatForm.ReWireParameters(true);
 
 					mVisMap.SetMaterialVisBytes(mats.Count);
 				}
