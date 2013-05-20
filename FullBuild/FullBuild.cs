@@ -114,7 +114,11 @@ namespace FullBuild
 			mPlayerControl	=new UtilityLib.PlayerSteering(mGDM.GraphicsDevice.Viewport.Width,
 				mGDM.GraphicsDevice.Viewport.Height);
 
-			mPlayerControl.Method	=UtilityLib.PlayerSteering.SteeringMethod.Fly;
+			mPlayerControl.Method	=UtilityLib.PlayerSteering.SteeringMethod.FirstPersonMMO;
+			mPlayerControl.Speed	=0.5f;
+
+			//prefer mouse
+			mPlayerControl.UseGamePadIfPossible	=false;
 
 			base.Initialize();
 		}
