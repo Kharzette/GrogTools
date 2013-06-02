@@ -249,9 +249,10 @@ namespace FullBuild
 
 			mIndoorMesh.Update(msDelta);
 
-			mPlayerControl.Update(msDelta, mGameCam, pi.mKBS, pi.mMS, pi.mGPS);
+			Vector3	pos	=mPlayerControl.Update(msDelta,
+				mGameCam.Position, mGameCam, pi.mKBS, pi.mMS, pi.mGPS);
 
-			mGameCam.Update(-mPlayerControl.Position, mPlayerControl.Pitch,
+			mGameCam.Update(-pos, mPlayerControl.Pitch,
 				mPlayerControl.Yaw, mPlayerControl.Roll);
 
 			mBFX.World		=Matrix.Identity;
@@ -300,7 +301,7 @@ namespace FullBuild
 			}
 
 			mSB.Begin();
-			mSB.DrawString(mFonts.First().Value, "Coordinates: " + mPlayerControl.Position, mTextPos, Color.Yellow);
+			mSB.DrawString(mFonts.First().Value, "Coordinates: " + -mGameCam.Position, mTextPos, Color.Yellow);
 			mSB.End();
 
 			base.Draw(gameTime);
