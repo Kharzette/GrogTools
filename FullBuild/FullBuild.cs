@@ -64,12 +64,12 @@ namespace FullBuild
 		float			mWarpFactor;
 
 		//control / view
-		UtilityLib.GameCamera		mGameCam;
-		UtilityLib.PlayerSteering	mPlayerControl;
-		UtilityLib.Input			mInput;
-		bool						mbWorking, mbFullBuilding;
-		string						mFullBuildFileName;
-		TriggerHelper				mTHelper	=new TriggerHelper();
+		GameCamera		mGameCam;
+		PlayerSteering	mPlayerControl;
+		Input			mInput;
+		bool			mbWorking, mbFullBuilding;
+		string			mFullBuildFileName;
+		TriggerHelper	mTHelper	=new TriggerHelper();
 
 
 		public FullBuild()
@@ -104,18 +104,19 @@ namespace FullBuild
 		{
 			mTextPos	=Vector2.One * 20.0f;
 
-			mInput	=new UtilityLib.Input();
+			mInput	=new Input();
 
-			mGameCam	=new UtilityLib.GameCamera(mGDM.GraphicsDevice.Viewport.Width,
+			mGameCam	=new GameCamera(mGDM.GraphicsDevice.Viewport.Width,
 				mGDM.GraphicsDevice.Viewport.Height,
 				mGDM.GraphicsDevice.Viewport.AspectRatio,
 				1.0f, 8000.0f);
 
-			mPlayerControl	=new UtilityLib.PlayerSteering(mGDM.GraphicsDevice.Viewport.Width,
+			mPlayerControl	=new PlayerSteering(mGDM.GraphicsDevice.Viewport.Width,
 				mGDM.GraphicsDevice.Viewport.Height);
 
-			mPlayerControl.Method	=UtilityLib.PlayerSteering.SteeringMethod.FirstPersonMMO;
-			mPlayerControl.Speed	=0.5f;
+			mPlayerControl.Method			=PlayerSteering.SteeringMethod.Fly;
+			mPlayerControl.Speed			=0.5f;
+			mPlayerControl.RightClickToTurn	=true;
 
 			//prefer mouse
 			mPlayerControl.UseGamePadIfPossible	=false;
@@ -134,7 +135,7 @@ namespace FullBuild
 			mBFX		=new BasicEffect(gd);
 			mLMShader	=mShaderLib.Load<Effect>("Shaders/LightMap");
 
-			Dictionary<string, SpriteFont>	fonts	=UtilityLib.FileUtil.LoadAllFonts(Content);
+			Dictionary<string, SpriteFont>	fonts	=FileUtil.LoadAllFonts(Content);
 
 			mFonts	=fonts.OrderBy(fnt => fnt.Value.LineSpacing);
 
@@ -778,7 +779,7 @@ namespace FullBuild
 			}
 
 			mbWorking	=true;
-			mEmissives	=UtilityLib.FileUtil.LoadEmissives(fileName);
+			mEmissives	=FileUtil.LoadEmissives(fileName);
 
 			mBSPForm.SetSaveEnabled(false);
 			mBSPForm.SetBuildEnabled(false);
