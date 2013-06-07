@@ -747,9 +747,9 @@ namespace ColladaConvert
 
 			Input.PlayerInput	pi	=mInput.Player1;
 
-			mSteering.Update(msDelta, mGameCam, pi.mKBS, pi.mMS, pi.mGPS);
+			Vector3	pos	=mSteering.Update(msDelta, mGameCam.Position, mGameCam, pi.mKBS, pi.mMS, pi.mGPS);
 			
-			mGameCam.Update(-mSteering.Position, mSteering.Pitch, mSteering.Yaw, mSteering.Roll);
+			mGameCam.Update(-pos, mSteering.Pitch, mSteering.Yaw, mSteering.Roll);
 
 			//rotate the light vector
 			if(GamePad.GetState(PlayerIndex.One).IsButtonDown(Buttons.LeftShoulder))
@@ -772,7 +772,7 @@ namespace ColladaConvert
 
 			mMatLib.SetParameterOnAll("mLightDirection", mLightDir);
 
-			mMatLib.UpdateWVP(Matrix.Identity, mGameCam.View, mGameCam.Projection, mSteering.Position);
+			mMatLib.UpdateWVP(Matrix.Identity, mGameCam.View, mGameCam.Projection, mGameCam.Position);
 
 			if(!mbPaused)
 			{
@@ -847,7 +847,7 @@ namespace ColladaConvert
 
 			mSB.Begin();
 
-			mSB.DrawString(mFonts.First().Value, "Coords: " + mSteering.Position,
+			mSB.DrawString(mFonts.First().Value, "Coords: " + mGameCam.Position,
 				Vector2.One * 20.0f, Color.Yellow);
 
 			if(mbPaused)
