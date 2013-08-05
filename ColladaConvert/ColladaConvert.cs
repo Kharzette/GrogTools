@@ -232,8 +232,10 @@ namespace ColladaConvert
 
 			mSteering	=new PlayerSteering(gd.Viewport.Width,
 				mGDM.GraphicsDevice.Viewport.Height);
-			mSteering.Method	=PlayerSteering.SteeringMethod.Fly;
-			mSteering.Speed		=0.2f;
+			mSteering.Method				=PlayerSteering.SteeringMethod.Fly;
+			mSteering.Speed					=0.2f;
+			mSteering.UseGamePadIfPossible	=false;
+			mSteering.RightClickToTurn		=true;
 
 			//for testing
 //			mAnimLib.ReadFromFile("C:/Users/kharz_000/Documents/3dsmax/export/MixamoGirl.AnimLib", true);
