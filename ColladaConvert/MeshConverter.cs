@@ -341,8 +341,7 @@ namespace ColladaConvert
 					}
 				}
 
-//				for(int j=0;j < numInfluences;j++)
-				for(int j=0;j < 4;j++)
+				for(int j=0;j < numInfluences;j++)
 				{
 					Debug.Assert(j < 4);
 
@@ -350,16 +349,8 @@ namespace ColladaConvert
 					int		boneIdx;
 					float	boneWeight;
 
-					if(j < indexes.Count)
-					{
-						boneIdx		=indexes[j];
-						boneWeight	=weights[j];
-					}
-					else
-					{
-						boneIdx		=-1;
-						boneWeight	=0;
-					}
+					boneIdx		=indexes[j];
+					boneWeight	=weights[j];
 
 					switch(j)
 					{
@@ -909,41 +900,20 @@ namespace ColladaConvert
 				idx.X	=keys.IndexOf(bname);
 				Debug.Assert(idx.X >= 0);
 
-				if(idx.Y < 0)
-				{
-					idx.Y	=0;
-				}
-				else
-				{
-					bname	=bnames[(int)idx.Y];
-					Debug.Assert(invBindPoses.ContainsKey(bname));
-					idx.Y	=keys.IndexOf(bname);
-					Debug.Assert(idx.Y >= 0);
-				}
+				bname	=bnames[(int)idx.Y];
+				Debug.Assert(invBindPoses.ContainsKey(bname));
+				idx.Y	=keys.IndexOf(bname);
+				Debug.Assert(idx.Y >= 0);
 
-				if(idx.Z < 0)
-				{
-					idx.Z	=0;
-				}
-				else
-				{
-					bname	=bnames[(int)idx.Z];
-					Debug.Assert(invBindPoses.ContainsKey(bname));
-					idx.Z	=keys.IndexOf(bname);
-					Debug.Assert(idx.Z >= 0);
-				}
+				bname	=bnames[(int)idx.Z];
+				Debug.Assert(invBindPoses.ContainsKey(bname));
+				idx.Z	=keys.IndexOf(bname);
+				Debug.Assert(idx.Z >= 0);
 
-				if(idx.W < 0)
-				{
-					idx.W	=0;
-				}
-				else
-				{
-					bname	=bnames[(int)idx.W];
-					Debug.Assert(invBindPoses.ContainsKey(bname));
-					idx.W	=keys.IndexOf(bname);
-					Debug.Assert(idx.W >= 0);
-				}
+				bname	=bnames[(int)idx.W];
+				Debug.Assert(invBindPoses.ContainsKey(bname));
+				idx.W	=keys.IndexOf(bname);
+				Debug.Assert(idx.W >= 0);
 
 				mBaseVerts[i].BoneIndex	=idx;
 			}
