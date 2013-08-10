@@ -11,6 +11,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 using MeshLib;
+using UtilityLib;
 
 
 namespace ColladaConvert
@@ -85,11 +86,11 @@ namespace ColladaConvert
 
 			alib.SetSkeleton(skel);
 
-			BuildFinalVerts(colladaFile, gd, chunks);
-
 			alib.AddAnim(BuildAnim(colladaFile, skel, lvs, path));
 
-			CreateSkins(colladaFile, chr, chunks);
+			CreateSkin(colladaFile, chr, chunks);
+
+			BuildFinalVerts(colladaFile, gd, chunks);
 
 			foreach(MeshConverter mc in chunks)
 			{
@@ -211,9 +212,9 @@ namespace ColladaConvert
 		}
 
 
-		static void CreateSkins(COLLADA				colladaFile,
-								Character			chr,
-								List<MeshConverter>	chunks)
+		static void CreateSkin(COLLADA				colladaFile,
+							   Character			chr,
+							   List<MeshConverter>	chunks)
 		{
 			IEnumerable<library_controllers>	lcs	=colladaFile.Items.OfType<library_controllers>();
 			if(lcs.Count() <= 0)
@@ -221,7 +222,11 @@ namespace ColladaConvert
 				return;
 			}
 
-			List<Skin>	skinList	=new List<Skin>();
+			//create a single master skin for the character's parts
+			Skin	skin	=new Skin();
+
+			Dictionary<string, Matrix>	invBindPoses	=new Dictionary<string, Matrix>();
+
 			foreach(controller cont in lcs.First().controller)
 			{
 				skin	sk	=cont.Item as skin;
@@ -234,13 +239,12 @@ namespace ColladaConvert
 				{
 					continue;
 				}
-				Skin	skin	=new Skin();
 
-				Matrix	mat	=Matrix.Identity;
+				Matrix	bindMat	=Matrix.Identity;
 
-				GetMatrixFromString(sk.bind_shape_matrix, out mat);
+				GetMatrixFromString(sk.bind_shape_matrix, out bindMat);
 
-				skin.SetBindShapeMatrix(mat);
+				Debug.Assert(Mathery.IsIdentity(bindMat, Mathery.VCompareEpsilon));
 
 				string	jointSrc	="";
 				string	invSrc		="";
@@ -256,37 +260,50 @@ namespace ColladaConvert
 					}
 				}
 
+				Name_array	na	=null;
+				float_array	ma	=null;
+
 				foreach(source src in sk.source)
 				{
 					if(src.id == jointSrc)
 					{
-						Name_array	na	=src.Item as Name_array;
-
-						skin.SetBoneNames(GetBoneNamesViaSID(na.Values, colladaFile));
+						na	=src.Item as Name_array;
 					}
 					else if(src.id == invSrc)
 					{
-						float_array	ma	=src.Item as float_array;
-
-						List<Matrix>	mats	=GetMatrixListFromFA(ma);
-
-						skin.SetInverseBindPoses(mats);
+						ma	=src.Item as float_array;
 					}
 				}
-				chr.AddSkin(skin);
-				skinList.Add(skin);
 
-				//set mesh pointers
-				foreach(MeshConverter mc in chunks)
+				List<Matrix>	mats	=GetMatrixListFromFA(ma);
+				List<string>	bnames	=GetBoneNamesViaSID(na.Values, colladaFile);
+
+				Debug.Assert(mats.Count == bnames.Count);
+
+				//add to master list
+				for(int i=0;i < mats.Count;i++)
 				{
-					if(mc.mGeometryID == sk.source1.Substring(1))
+					string	bname	=bnames[i];
+					Matrix	ibp		=mats[i];
+
+					if(invBindPoses.ContainsKey(bname))
 					{
-						SkinnedMesh	msh	=mc.GetConvertedMesh() as SkinnedMesh;
-						msh.SetSkin(skin);
-						msh.SetSkinIndex(skinList.IndexOf(skin));
+						//if bone name already added, make sure the
+						//inverse bind pose is the same for this skin
+						Debug.Assert(Mathery.CompareMatrix(ibp, invBindPoses[bname], Mathery.VCompareEpsilon));
+					}
+					else
+					{
+						invBindPoses.Add(bname, ibp);
 					}
 				}
 			}
+
+			skin.SetBoneNamesAndPoses(invBindPoses);
+
+			chr.SetSkin(skin);
+
+			FixBoneIndexes(colladaFile, chunks, invBindPoses);
 		}
 
 
@@ -401,39 +418,39 @@ namespace ColladaConvert
 
 		static void FillKeyGaps(KeyFrame key, Animation.KeyPartsUsed keyPartsUsed, KeyFrame boneKey)
 		{
-			if(!UtilityLib.Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.TranslateX))
+			if(!Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.TranslateX))
 			{
 				key.mPosition.X	=boneKey.mPosition.X;
 			}
-			if(!UtilityLib.Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.TranslateY))
+			if(!Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.TranslateY))
 			{
 				key.mPosition.Y	=boneKey.mPosition.Y;
 			}
-			if(!UtilityLib.Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.TranslateZ))
+			if(!Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.TranslateZ))
 			{
 				key.mPosition.Z	=boneKey.mPosition.Z;
 			}
-			if(!UtilityLib.Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.ScaleX))
+			if(!Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.ScaleX))
 			{
 				key.mScale.X	=boneKey.mScale.X;
 			}
-			if(!UtilityLib.Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.ScaleY))
+			if(!Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.ScaleY))
 			{
 				key.mScale.Y	=boneKey.mScale.Y;
 			}
-			if(!UtilityLib.Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.ScaleZ))
+			if(!Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.ScaleZ))
 			{
 				key.mScale.Z	=boneKey.mScale.Z;
 			}
-			if(!UtilityLib.Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.RotateX))
+			if(!Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.RotateX))
 			{
 				key.mRotation	=Quaternion.Concatenate(key.mRotation, boneKey.mRotation);
 			}
-			if(!UtilityLib.Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.RotateY))
+			if(!Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.RotateY))
 			{
 				key.mRotation	=Quaternion.Concatenate(key.mRotation, boneKey.mRotation);
 			}
-			if(!UtilityLib.Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.RotateZ))
+			if(!Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.RotateZ))
 			{
 				key.mRotation	=Quaternion.Concatenate(key.mRotation, boneKey.mRotation);
 			}
@@ -446,39 +463,39 @@ namespace ColladaConvert
 
 			for(int i=0;i < first.Length;i++)
 			{
-				if(UtilityLib.Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.TranslateX))
+				if(Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.TranslateX))
 				{
 					first[i].mPosition.X	=next[i].mPosition.X;
 				}
-				if(UtilityLib.Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.TranslateY))
+				if(Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.TranslateY))
 				{
 					first[i].mPosition.Y	=next[i].mPosition.Y;
 				}
-				if(UtilityLib.Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.TranslateZ))
+				if(Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.TranslateZ))
 				{
 					first[i].mPosition.Z	=next[i].mPosition.Z;
 				}
-				if(UtilityLib.Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.ScaleX))
+				if(Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.ScaleX))
 				{
 					first[i].mScale.X	=next[i].mScale.X;
 				}
-				if(UtilityLib.Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.ScaleY))
+				if(Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.ScaleY))
 				{
 					first[i].mScale.Y	=next[i].mScale.Y;
 				}
-				if(UtilityLib.Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.ScaleZ))
+				if(Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.ScaleZ))
 				{
 					first[i].mScale.Z	=next[i].mScale.Z;
 				}
-				if(UtilityLib.Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.RotateX))
+				if(Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.RotateX))
 				{
 					first[i].mRotation	=Quaternion.Concatenate(next[i].mRotation, first[i].mRotation);
 				}
-				if(UtilityLib.Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.RotateY))
+				if(Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.RotateY))
 				{
 					first[i].mRotation	=Quaternion.Concatenate(next[i].mRotation, first[i].mRotation);
 				}
-				if(UtilityLib.Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.RotateZ))
+				if(Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.RotateZ))
 				{
 					first[i].mRotation	=Quaternion.Concatenate(next[i].mRotation, first[i].mRotation);
 				}
@@ -680,6 +697,53 @@ namespace ColladaConvert
 					if(cnk.mGeometryID == skinSource)
 					{
 						cnk.AddWeightsToBaseVerts(sk);
+					}
+				}
+			}
+		}
+
+
+		static void FixBoneIndexes(COLLADA colladaFile,
+			List<MeshConverter> chunks,
+			Dictionary<string, Matrix> invBindPoses)
+		{
+			if(colladaFile.Items.OfType<library_controllers>().Count() <= 0)
+			{
+				return;
+			}
+
+			var	skins	=from conts in colladaFile.Items.OfType<library_controllers>().First().controller
+						 where conts.Item is skin select conts.Item as skin;
+
+			foreach(skin sk in skins)
+			{
+				string	jointSrc	="";
+				foreach(InputLocal inp in sk.joints.input)
+				{
+					if(inp.semantic == "JOINT")
+					{
+						jointSrc	=inp.source.Substring(1);
+					}
+				}
+
+				Name_array	na	=null;
+
+				foreach(source src in sk.source)
+				{
+					if(src.id == jointSrc)
+					{
+						na	=src.Item as Name_array;
+					}
+				}
+
+				List<string>	bnames	=GetBoneNamesViaSID(na.Values, colladaFile);
+				string	skinSource	=sk.source1.Substring(1);
+
+				foreach(MeshConverter cnk in chunks)
+				{
+					if(cnk.mGeometryID == skinSource)
+					{
+						cnk.FixBoneIndexes(invBindPoses, bnames);
 					}
 				}
 			}
@@ -1333,18 +1397,27 @@ namespace ColladaConvert
 						continue;
 					}
 
-					string	mat	=null;
+					string	mat		=null;
+					UInt64	count	=0;
 					if(polys != null)
 					{
-						mat	=polys.material;
+						mat		=polys.material;
+						count	=polys.count;
 					}
 					else if(plist != null)
 					{
-						mat	=plist.material;
+						mat		=plist.material;
+						count	=plist.count;
 					}
 					else if(tris != null)
 					{
-						mat	=tris.material;
+						mat		=tris.material;
+						count	=tris.count;
+					}
+
+					if(count <= 0)
+					{
+						continue;
 					}
 
 					float_array		verts	=null;

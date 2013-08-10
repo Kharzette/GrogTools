@@ -341,13 +341,25 @@ namespace ColladaConvert
 					}
 				}
 
-				for(int j=0;j < numInfluences;j++)
+//				for(int j=0;j < numInfluences;j++)
+				for(int j=0;j < 4;j++)
 				{
 					Debug.Assert(j < 4);
 
 					//grab bone indices and weights
-					int		boneIdx		=indexes[j];
-					float	boneWeight	=weights[j];
+					int		boneIdx;
+					float	boneWeight;
+
+					if(j < indexes.Count)
+					{
+						boneIdx		=indexes[j];
+						boneWeight	=weights[j];
+					}
+					else
+					{
+						boneIdx		=-1;
+						boneWeight	=0;
+					}
 
 					switch(j)
 					{
@@ -876,6 +888,65 @@ namespace ColladaConvert
 			indbuf.SetData<ushort>(idxs);
 
 			mConverted.SetIndexBuffer(indbuf);
+		}
+
+
+		//individual mesh parts index into a skin of bones
+		//that might not match the overall character...
+		//this will fix them so they do
+		internal void FixBoneIndexes(Dictionary<string, Matrix> invBindPoses, List<string> bnames)
+		{
+			List<string>	keys	=invBindPoses.Keys.ToList();
+
+			for(int i=0;i < mNumBaseVerts;i++)
+			{
+				Vector4	idx	=mBaseVerts[i].BoneIndex;
+
+				Debug.Assert(idx.X >= 0);
+
+				string	bname	=bnames[(int)idx.X];
+				Debug.Assert(invBindPoses.ContainsKey(bname));
+				idx.X	=keys.IndexOf(bname);
+				Debug.Assert(idx.X >= 0);
+
+				if(idx.Y < 0)
+				{
+					idx.Y	=0;
+				}
+				else
+				{
+					bname	=bnames[(int)idx.Y];
+					Debug.Assert(invBindPoses.ContainsKey(bname));
+					idx.Y	=keys.IndexOf(bname);
+					Debug.Assert(idx.Y >= 0);
+				}
+
+				if(idx.Z < 0)
+				{
+					idx.Z	=0;
+				}
+				else
+				{
+					bname	=bnames[(int)idx.Z];
+					Debug.Assert(invBindPoses.ContainsKey(bname));
+					idx.Z	=keys.IndexOf(bname);
+					Debug.Assert(idx.Z >= 0);
+				}
+
+				if(idx.W < 0)
+				{
+					idx.W	=0;
+				}
+				else
+				{
+					bname	=bnames[(int)idx.W];
+					Debug.Assert(invBindPoses.ContainsKey(bname));
+					idx.W	=keys.IndexOf(bname);
+					Debug.Assert(idx.W >= 0);
+				}
+
+				mBaseVerts[i].BoneIndex	=idx;
+			}
 		}
 	}
 }
