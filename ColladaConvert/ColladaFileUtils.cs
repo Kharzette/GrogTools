@@ -38,7 +38,9 @@ namespace ColladaConvert
 			Skeleton	skel	=BuildSkeleton(colladaFile);
 
 			//grab visual scenes
-			IEnumerable<library_visual_scenes>	lvss	=colladaFile.Items.OfType<library_visual_scenes>();
+			IEnumerable<library_visual_scenes>	lvss	=
+				colladaFile.Items.OfType<library_visual_scenes>();
+
 			library_visual_scenes	lvs	=lvss.First();
 
 			//see if animlib has a skeleton yet
@@ -69,7 +71,9 @@ namespace ColladaConvert
 			COLLADA	colladaFile	=DeSerializeCOLLADA(path);
 
 			//grab visual scenes
-			IEnumerable<library_visual_scenes>	lvss	=colladaFile.Items.OfType<library_visual_scenes>();
+			IEnumerable<library_visual_scenes>	lvss	=
+				colladaFile.Items.OfType<library_visual_scenes>();
+
 			library_visual_scenes	lvs	=lvss.First();
 
 			Character	chr	=new Character(matLib, alib);

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Xml;
 using System.Linq;
+using System.Diagnostics;
 using System.ComponentModel;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
@@ -227,6 +228,7 @@ namespace ColladaConvert
 
 			mMF.eNukedMeshPart	+=OnNukedMeshPart;
 			mMF.eStripElements	+=OnStripElements;
+			mMF.eWeldWeights	+=OnWeldWeights;
 
 			mSE.eDeleteElement	+=OnDeleteVertElement;
 
@@ -351,6 +353,16 @@ namespace ColladaConvert
 			List<Mesh>	meshes	=sender as List<Mesh>;
 
 			mSE.Populate(meshes);
+		}
+
+
+		void OnWeldWeights(object sender, EventArgs ea)
+		{
+			List<Mesh>	meshes	=sender as List<Mesh>;
+
+			Debug.Assert(meshes.Count == 2);
+
+			meshes[0].WeldWeights(GraphicsDevice, meshes[1]);
 		}
 
 
