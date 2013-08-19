@@ -652,13 +652,15 @@ namespace FullBuild
 
 					mMatLib.NukeAllMaterials();
 
-					List<MaterialLib.Material>	mats	=mMap.GetMaterials();
+					bool	bDyn	=mBSPForm.LightParameters.mbDynamicLighting;
 
-					mIndoorMesh.BuildLM(gd, mZoneForm.GetLightAtlasSize(), mMap.BuildLMRenderData, mMap.GetPlanes());
-					mIndoorMesh.BuildVLit(gd, mMap.BuildVLitRenderData, mMap.GetPlanes());
-					mIndoorMesh.BuildAlpha(gd, mMap.BuildAlphaRenderData, mMap.GetPlanes());
+					List<MaterialLib.Material>	mats	=mMap.GetMaterials(bDyn);
+
+					mIndoorMesh.BuildLM(gd, mZoneForm.GetLightAtlasSize(), mMap.BuildLMRenderData, mMap.GetPlanes(), bDyn);
+					mIndoorMesh.BuildVLit(gd, mMap.BuildVLitRenderData, mMap.GetPlanes(), bDyn);
+					mIndoorMesh.BuildAlpha(gd, mMap.BuildAlphaRenderData, mMap.GetPlanes(), bDyn);
 					mIndoorMesh.BuildFullBright(gd, mMap.BuildFullBrightRenderData, mMap.GetPlanes());
-					mIndoorMesh.BuildMirror(gd, mMap.BuildMirrorRenderData, mMap.GetPlanes());
+					mIndoorMesh.BuildMirror(gd, mMap.BuildMirrorRenderData, mMap.GetPlanes(), bDyn);
 					mIndoorMesh.BuildSky(gd, mMap.BuildSkyRenderData, mMap.GetPlanes());
 
 					mModelMats	=mMap.GetModelTransforms();
