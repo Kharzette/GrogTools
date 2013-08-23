@@ -165,9 +165,9 @@ namespace ParticleEdit
 
 			Input.PlayerInput	pi	=mInput.Player1;
 
-			mPS.Update(msDelta, mGCam, pi.mKBS, pi.mMS, pi.mGPS);
+			Vector3	newPos	=mPS.Update(msDelta, mGCam.Position, mGCam, pi.mKBS, pi.mMS, pi.mGPS);
 
-			mGCam.Update(-mPS.Position, mPS.Pitch, mPS.Yaw, mPS.Roll);
+			mGCam.Update(-newPos, mPS.Pitch, mPS.Yaw, mPS.Roll);
 
 			if(mbActive && mPB != null)
 			{
@@ -203,7 +203,7 @@ namespace ParticleEdit
 
 			mSB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
 
-			mSB.DrawString(mFonts.Values.First(), "Coords: " + mPS.Position, Vector2.One * 20.0f, Color.Yellow);
+			mSB.DrawString(mFonts.Values.First(), "Coords: " + mGCam.Position, Vector2.One * 20.0f, Color.Yellow);
 
 			mSB.End();
 

@@ -137,8 +137,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Games\LudumDare\MinnieNMal\GameContent\GameContent.contentproj">
-      <Project>{965453FF-AEDC-42EB-BC1B-FFC055177DAE}</Project>
+    <ProjectReference Include="..\..\Games\LudumDare\Warmup27\GameContent\GameContent.contentproj">
+      <Project>{45D31835-2C47-41AF-A8D8-724034737E05}</Project>
       <Name>GameContent</Name>
       <XnaReferenceType>Content</XnaReferenceType>
     </ProjectReference>
