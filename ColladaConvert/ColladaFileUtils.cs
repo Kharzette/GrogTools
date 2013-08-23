@@ -1114,9 +1114,8 @@ namespace ColladaConvert
 		static geometry GetGeometryByID(COLLADA colladaFile, string id)
 		{
 			return	(from geoms in colladaFile.Items.OfType<library_geometries>().First().geometry
-					where geoms.Item is geometry
-					let g = geoms.Item as geometry
-					where g.id == id select g).FirstOrDefault();
+					where geoms is geometry
+					where geoms.id == id select geoms).FirstOrDefault();
 		}
 
 
