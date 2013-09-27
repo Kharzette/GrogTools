@@ -96,12 +96,6 @@
     <Compile Include="Forms\AnimForm.Designer.cs">
       <DependentUpon>AnimForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\KinectForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\KinectForm.Designer.cs">
-      <DependentUpon>KinectForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="Forms\StripElements.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -175,9 +169,6 @@
     <EmbeddedResource Include="Forms\AnimForm.resx">
       <DependentUpon>AnimForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\KinectForm.resx">
-      <DependentUpon>KinectForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Forms\StripElements.resx">
       <DependentUpon>StripElements.cs</DependentUpon>
     </EmbeddedResource>
@@ -190,8 +181,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Games\LudumDare\Warmup27\GameContent\GameContent.contentproj">
-      <Project>{45D31835-2C47-41AF-A8D8-724034737E05}</Project>
+    <ProjectReference Include="..\..\Games\LudumDare\Ludum27\GameContent\GameContent.contentproj">
+      <Project>{E643CB73-9F9E-49C5-8E7D-682DEAC1B7A1}</Project>
       <Name>GameContent</Name>
       <XnaReferenceType>Content</XnaReferenceType>
     </ProjectReference>

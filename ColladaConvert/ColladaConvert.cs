@@ -46,7 +46,7 @@ namespace ColladaConvert
 		Int64				mTimeStampAdjust;
 
 		//recorded data from the sensor
-		CaptureData	mSkelFrames	=new CaptureData();
+//		CaptureData	mSkelFrames	=new CaptureData();
 		
 		//control
 		PlayerSteering	mSteering;
@@ -65,7 +65,7 @@ namespace ColladaConvert
 		Random		mRand	=new Random();
 
 		//kinect gui
-		KinectForm	mKF;
+//		KinectForm	mKF;
 
 		//cellshade tweaker form
 		SharedForms.CellTweakForm	mCTF;
@@ -125,7 +125,7 @@ namespace ColladaConvert
 			if(KinectSensor.KinectSensors.Count > 0)
 			{
 				mSensor	=KinectSensor.KinectSensors[0];
-				mSensor.SkeletonFrameReady	+=OnSkeletonFrameReady;
+//				mSensor.SkeletonFrameReady	+=OnSkeletonFrameReady;
 			}
 
 			base.Initialize();
@@ -188,11 +188,12 @@ namespace ColladaConvert
 			mCF.eBoundMesh				+=OnBoundMesh;
 			mCF.eShowBound				+=OnShowBound;
 			mCF.eShowAxis				+=OnShowAxis;
-			mCF.ePause					+=OnPause;
+//			mCF.ePause					+=OnPause;
 
 			mMF	=new SharedForms.MaterialForm(gd, mMatLib, true);
 			mMF.Visible	=true;
 
+			/*
 			if(mSensor != null)
 			{
 				mKF	=new KinectForm(mAnimLib);
@@ -204,7 +205,7 @@ namespace ColladaConvert
 			mKF.eSaveRawData	+=OnSaveRawData;
 			mKF.eConvertToAnim	+=OnConvertToAnim;
 			mKF.eTrimStart		+=OnTrimStart;
-			mKF.eTrimEnd		+=OnTrimEnd;
+			mKF.eTrimEnd		+=OnTrimEnd;*/
 
 			//bind matform window position
 			mMF.DataBindings.Add(new System.Windows.Forms.Binding("Location",
@@ -217,9 +218,9 @@ namespace ColladaConvert
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
 			//bind kinectform window position
-			mKF.DataBindings.Add(new System.Windows.Forms.Binding("Location",
-				Settings.Default, "KinectFormPos", true,
-				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+//			mKF.DataBindings.Add(new System.Windows.Forms.Binding("Location",
+//				Settings.Default, "KinectFormPos", true,
+//				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
 			//bind cellTweakForm window position
 			mCTF.DataBindings.Add(new System.Windows.Forms.Binding("Location",
@@ -513,6 +514,7 @@ namespace ColladaConvert
 		}
 
 
+		/*
 		void OnTrimStart(object sender, EventArgs ea)
 		{
 			Nullable<Int32>	amount	=sender as Nullable<Int32>;
@@ -596,7 +598,7 @@ namespace ColladaConvert
 			fs.Close();
 		}
 
-
+		
 		void OnConvertToAnim(object sender, EventArgs ea)
 		{
 			BindingList<KinectMap>	mapping	=sender as BindingList<KinectMap>;
@@ -609,7 +611,7 @@ namespace ColladaConvert
 				"KinectAnim" + mAnimNameCounter++);
 
 			eAnimsUpdated(mAnimLib.GetAnims(), null);
-		}
+		}*/
 
 
 		void OnLoadStatic(object sender, EventArgs ea)
@@ -659,6 +661,7 @@ namespace ColladaConvert
 		}
 
 
+		/*
 		void StartRecording()
 		{
 			mSkelFrames.Clear();
@@ -741,7 +744,7 @@ namespace ColladaConvert
 
 				mSkelFrames.Add(data, (sf.Timestamp - mTimeStampAdjust) / 1000.0f);
 			}
-		}
+		}*/
 
 
 		protected override void Update(GameTime gameTime)
@@ -814,7 +817,7 @@ namespace ColladaConvert
 				if(mCountDown <= 0)
 				{
 					mbCountingDown	=false;
-					StartRecording();
+//					StartRecording();
 				}
 			}
 
