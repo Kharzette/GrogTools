@@ -153,7 +153,7 @@ namespace ColladaConvert
 					Mesh	m	=mc.GetConvertedMesh();
 					Matrix	mat	=GetSceneNodeTransform(colladaFile, mc);
 
-					m.Name	+="Mesh";
+					m.Name	=mc.GetGeomName();
 
 					//set transform of each mesh
 					m.SetTransform(mat * shiftMat);
@@ -1432,7 +1432,15 @@ namespace ColladaConvert
 					{
 						continue;
 					}
-						
+
+					Debug.Assert(mat != null);
+
+					if(mat == null)
+					{
+						//return an empty list
+						return	new List<MeshConverter>();
+					}
+
 					cnk	=new MeshConverter(mat, geom.name);
 
 					cnk.CreateBaseVerts(verts, bSkinned);
