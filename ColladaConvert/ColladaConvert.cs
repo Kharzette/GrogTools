@@ -188,7 +188,7 @@ namespace ColladaConvert
 			mCF.eBoundMesh				+=OnBoundMesh;
 			mCF.eShowBound				+=OnShowBound;
 			mCF.eShowAxis				+=OnShowAxis;
-//			mCF.ePause					+=OnPause;
+			mCF.ePause					+=OnPause;
 
 			mMF	=new SharedForms.MaterialForm(gd, mMatLib, true);
 			mMF.Visible	=true;
@@ -634,6 +634,12 @@ namespace ColladaConvert
 		}
 
 
+		void OnPause(object sender, EventArgs ea)
+		{
+			mbPaused	=!mbPaused;
+		}
+
+
 		void OnAnimSelChanged(object sender, EventArgs ea)
 		{
 			System.Windows.Forms.DataGridViewSelectedRowCollection
@@ -677,12 +683,6 @@ namespace ColladaConvert
 			tsp.Smoothing			=0.7f;
 
 			mSkelStream.Enable(tsp);
-		}
-
-
-		void OnPause(object sender, EventArgs ea)
-		{
-			mbPaused	=!mbPaused;
 		}
 
 
