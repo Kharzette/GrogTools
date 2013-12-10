@@ -31,7 +31,7 @@
 			this.MaxParticles = new System.Windows.Forms.NumericUpDown();
 			this.label1 = new System.Windows.Forms.Label();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
-			this.Cell = new System.Windows.Forms.CheckBox();
+			this.Cel = new System.Windows.Forms.CheckBox();
 			this.Active = new System.Windows.Forms.CheckBox();
 			this.label15 = new System.Windows.Forms.Label();
 			this.StartAlpha = new System.Windows.Forms.NumericUpDown();
@@ -138,7 +138,7 @@
 			// 
 			// groupBox1
 			// 
-			this.groupBox1.Controls.Add(this.Cell);
+			this.groupBox1.Controls.Add(this.Cel);
 			this.groupBox1.Controls.Add(this.Active);
 			this.groupBox1.Controls.Add(this.label15);
 			this.groupBox1.Controls.Add(this.StartAlpha);
@@ -159,17 +159,17 @@
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Emitter Details";
 			// 
-			// Cell
+			// Cel
 			// 
-			this.Cell.AutoSize = true;
-			this.Cell.Enabled = false;
-			this.Cell.Location = new System.Drawing.Point(68, 175);
-			this.Cell.Name = "Cell";
-			this.Cell.Size = new System.Drawing.Size(43, 17);
-			this.Cell.TabIndex = 39;
-			this.Cell.Text = "Cell";
-			this.Cell.UseVisualStyleBackColor = true;
-			this.Cell.CheckedChanged += new System.EventHandler(this.OnCellChanged);
+			this.Cel.AutoSize = true;
+			this.Cel.Enabled = false;
+			this.Cel.Location = new System.Drawing.Point(68, 175);
+			this.Cel.Name = "Cel";
+			this.Cel.Size = new System.Drawing.Size(41, 17);
+			this.Cel.TabIndex = 39;
+			this.Cel.Text = "Cel";
+			this.Cel.UseVisualStyleBackColor = true;
+			this.Cel.CheckedChanged += new System.EventHandler(this.OnCelChanged);
 			// 
 			// Active
 			// 
@@ -902,7 +902,7 @@
 		private System.Windows.Forms.Panel ColorPanel;
 		private System.Windows.Forms.ListView EmitterListView;
 		private System.Windows.Forms.CheckBox Active;
-		private System.Windows.Forms.CheckBox Cell;
+		private System.Windows.Forms.CheckBox Cel;
 		private System.Windows.Forms.ComboBox Shape;
 		private System.Windows.Forms.Label label4;
 		private System.Windows.Forms.NumericUpDown ShapeSize;

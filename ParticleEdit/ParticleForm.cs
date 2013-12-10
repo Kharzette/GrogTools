@@ -20,7 +20,7 @@ namespace ParticleEdit
 
 		internal event EventHandler	eCreate;
 		internal event EventHandler	eItemNuked;
-		internal event EventHandler	eCellChanged;
+		internal event EventHandler	eCelChanged;
 		internal event EventHandler	eValueChanged;
 		internal event EventHandler	eSelectionChanged;
 		internal event EventHandler	eCopyEmitterToClipBoard;
@@ -44,13 +44,13 @@ namespace ParticleEdit
 			Shape.SelectedIndex	=0;
 		}
 
-		public bool IsCell
+		public bool IsCel
 		{
-			get { return Cell.Checked; }
+			get { return Cel.Checked; }
 			set
 			{
 				Action<CheckBox>	upVal	=numer => numer.Checked = value;
-				SharedForms.FormExtensions.Invoke(Cell, upVal);
+				SharedForms.FormExtensions.Invoke(Cel, upVal);
 			}
 		}
 
@@ -309,7 +309,7 @@ namespace ParticleEdit
 
 
 		internal void UpdateControls(ParticleLib.Emitter em,
-			Microsoft.Xna.Framework.Vector4 color, bool bCell)
+			Microsoft.Xna.Framework.Vector4 color, bool bCel)
 		{
 			if(mbUpdating)
 			{
@@ -338,7 +338,7 @@ namespace ParticleEdit
 			Active.Checked	=em.mbOn;
 			EmShape			=em.mShape;
 			EmShapeSize		=em.mShapeSize;
-			IsCell			=bCell;
+			IsCel			=bCel;
 
 			mbUpdating	=false;
 		}
@@ -418,14 +418,14 @@ namespace ParticleEdit
 		}
 
 
-		void OnCellChanged(object sender, EventArgs e)
+		void OnCelChanged(object sender, EventArgs e)
 		{
 			if(mbUpdating)
 			{
 				return;
 			}
 
-			Misc.SafeInvoke(eCellChanged, new Nullable<bool>(Cell.Checked));
+			Misc.SafeInvoke(eCelChanged, new Nullable<bool>(Cel.Checked));
 		}
 	}
 }

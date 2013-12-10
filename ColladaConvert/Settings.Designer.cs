@@ -110,12 +110,12 @@ namespace ColladaConvert {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
-        public global::System.Drawing.Point CellTweakFormPos {
+        public global::System.Drawing.Point CelTweakFormPos {
             get {
-                return ((global::System.Drawing.Point)(this["CellTweakFormPos"]));
+                return ((global::System.Drawing.Point)(this["CelTweakFormPos"]));
             }
             set {
-                this["CellTweakFormPos"] = value;
+                this["CelTweakFormPos"] = value;
             }
         }
     }

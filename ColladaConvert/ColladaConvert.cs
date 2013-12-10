@@ -67,8 +67,8 @@ namespace ColladaConvert
 		//kinect gui
 //		KinectForm	mKF;
 
-		//cellshade tweaker form
-		SharedForms.CellTweakForm	mCTF;
+		//celshade tweaker form
+		SharedForms.CelTweakForm	mCTF;
 
 		//vert elements gui
 		StripElements	mSE	=new StripElements();
@@ -147,12 +147,12 @@ namespace ColladaConvert
 			mCharacter	=new Character(mMatLib, mAnimLib);
 			mStaticMesh	=new StaticMeshObject(mMatLib);
 
-			//set up cell shading
-			mMatLib.InitCellShading(1);
+			//set up cel shading
+			mMatLib.InitCelShading(1);
 
 			//set to character settings
-			mMatLib.GenerateCellTexturePreset(gd, true, 0);
-			mMatLib.SetCellTexture(0);
+			mMatLib.GenerateCelTexturePreset(gd, true, 0);
+			mMatLib.SetCelTexture(0);
 
 			mStaticMesh.SetTransform(Matrix.Identity);
 			mCharacter.SetTransform(Matrix.Identity);
@@ -168,7 +168,7 @@ namespace ColladaConvert
 
 			InitializeEffect();
 
-			mCTF			=new SharedForms.CellTweakForm(gd, mMatLib);
+			mCTF			=new SharedForms.CelTweakForm(gd, mMatLib);
 			mCTF.Visible	=true;
 
 			mCF				=new AnimForm(mAnimLib);
@@ -222,9 +222,9 @@ namespace ColladaConvert
 //				Settings.Default, "KinectFormPos", true,
 //				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
-			//bind cellTweakForm window position
+			//bind celTweakForm window position
 			mCTF.DataBindings.Add(new System.Windows.Forms.Binding("Location",
-				Settings.Default, "CellTweakFormPos", true,
+				Settings.Default, "CelTweakFormPos", true,
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
 			mMF.eNukedMeshPart	+=OnNukedMeshPart;

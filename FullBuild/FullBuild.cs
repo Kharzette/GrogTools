@@ -32,7 +32,7 @@ namespace FullBuild
 		SharedForms.ZoneForm		mZoneForm;
 		SharedForms.Output			mOutputForm;
 		SharedForms.MaterialForm	mMatForm;
-		SharedForms.CellTweakForm	mCTForm;
+		SharedForms.CelTweakForm	mCTForm;
 
 		//data
 		Map						mMap;
@@ -151,19 +151,19 @@ namespace FullBuild
 			whiteDat[0]			=Color.White;
 			mWhiteTexture.SetData<Color>(whiteDat);
 
-			//set up cell shading
-			mMatLib.InitCellShading(1);
+			//set up cel shading
+			mMatLib.InitCelShading(1);
 
 			//set to worldy settings
-			mMatLib.GenerateCellTexturePreset(gd, false, 0);
-			mMatLib.SetCellTexture(0);
+			mMatLib.GenerateCelTexturePreset(gd, false, 0);
+			mMatLib.SetCelTexture(0);
 
 			mBSPForm	=new SharedForms.BSPForm();
 			mVisForm	=new SharedForms.VisForm();
 			mZoneForm	=new SharedForms.ZoneForm();
 			mOutputForm	=new SharedForms.Output();
 			mMatForm	=new SharedForms.MaterialForm(gd, mMatLib, false);
-			mCTForm		=new SharedForms.CellTweakForm(gd, mMatLib);
+			mCTForm		=new SharedForms.CelTweakForm(gd, mMatLib);
 
 			mBSPForm.Visible	=true;
 			mVisForm.Visible	=true;
@@ -177,7 +177,7 @@ namespace FullBuild
 			SetFormPos(mZoneForm, "ZoneFormPos");
 			SetFormPos(mOutputForm, "OutputFormPos");
 			SetFormPos(mMatForm, "MaterialFormPos");
-			SetFormPos(mCTForm, "CellTweakFormPos");
+			SetFormPos(mCTForm, "CelTweakFormPos");
 
 			//form events
 			mMatForm.eMaterialNuked			+=OnMaterialNuked;
@@ -283,7 +283,8 @@ namespace FullBuild
 				//set shadows to directional (not using shadows)
 				mMatLib.SetParameterOnAll("mbDirectional", true);
 				mMatLib.SetParameterOnAll("mShadowTexture", mWhiteTexture);
-				mIndoorMesh.Draw(gd, mGameCam, mVisMap.IsMaterialVisibleFromPos, GetModelMatrix, RenderExternal);
+				mIndoorMesh.Draw(gd, mGameCam, 0, mVisMap.IsMaterialVisibleFromPos,
+					GetModelMatrix, RenderExternal, RenderShadows);
 			}
 
 			KeyboardState	kbstate	=Keyboard.GetState();
@@ -328,6 +329,11 @@ namespace FullBuild
 		}
 
 
+		void RenderShadows(int shadIndex, Vector3 camPos, Matrix view, Matrix proj)
+		{
+		}
+
+
 		Vector3 EmissiveForMaterial(string matName)
 		{
 			if(mEmissives != null && mEmissives.ContainsKey(matName))
@@ -353,7 +359,7 @@ namespace FullBuild
 				mat.HideShaderParameter("mProjection");
 				mat.HideShaderParameter("mLightViewProj");
 				mat.HideShaderParameter("mEyePos");
-				mat.HideShaderParameter("mCellTable");
+				mat.HideShaderParameter("mCelTable");
 				mat.HideShaderParameter("mShadowTexture");
 				mat.HideShaderParameter("mShadowLightPos");
 				mat.HideShaderParameter("mbDirectional");
@@ -366,7 +372,7 @@ namespace FullBuild
 
 				//look for material specific stuff to hide
 				if(mat.Technique == "FullBright"
-					|| mat.Technique == "VLitCell"
+					|| mat.Technique == "VertexLightingCel"
 					|| mat.Technique == "VertexLighting"
 					|| mat.Technique == "Alpha")
 				{
@@ -403,14 +409,14 @@ namespace FullBuild
 					mat.IgnoreShaderParameter("mAniIntensities");
 				}
 
-				if(!mat.Technique.Contains("Cell"))
+				if(!mat.Technique.Contains("Cel"))
 				{
-					mat.IgnoreShaderParameter("mCellTable");
+					mat.IgnoreShaderParameter("mCelTable");
 				}
 
 				//look for material specific stuff to hide
 				if(mat.Technique == "FullBright"
-					|| mat.Technique == "VLitCell"
+					|| mat.Technique == "VertexLightingCel"
 					|| mat.Technique == "VertexLighting"
 					|| mat.Technique == "Alpha")
 				{

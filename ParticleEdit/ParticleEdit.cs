@@ -119,7 +119,7 @@ namespace ParticleEdit
 
 			mPF.eCreate					+=OnCreate;
 			mPF.eItemNuked				+=OnEmitterNuked;
-			mPF.eCellChanged			+=OnCellChanged;
+			mPF.eCelChanged				+=OnCelChanged;
 			mPF.eValueChanged			+=OnValueChanged;
 			mPF.eSelectionChanged		+=OnEmitterSelChanged;
 			mPF.eCopyEmitterToClipBoard	+=OnCopyEmitterToClipBoard;
@@ -228,7 +228,7 @@ namespace ParticleEdit
 			yaw		=MathHelper.ToRadians(yaw);
 			pitch	=MathHelper.ToRadians(pitch);
 
-			mPB.CreateEmitter(mCurTex, mPF.PartColor, mPF.IsCell,
+			mPB.CreateEmitter(mCurTex, mPF.PartColor, mPF.IsCel,
 				mPF.EmShape, mPF.EmShapeSize,
 				mPF.MaxParts, Vector3.Zero,
 				mPF.GravYaw, mPF.GravPitch, mPF.GravStrength,
@@ -241,7 +241,7 @@ namespace ParticleEdit
 		}
 
 
-		void OnCellChanged(object sender, EventArgs ea)
+		void OnCelChanged(object sender, EventArgs ea)
 		{
 			Nullable<bool>	bOn	=sender as Nullable<bool>;
 			if(bOn == null || mCurSelection < 0)
@@ -249,7 +249,7 @@ namespace ParticleEdit
 				return;
 			}
 
-			mPB.SetCellByIndex(mCurSelection, bOn.Value);
+			mPB.SetCelByIndex(mCurSelection, bOn.Value);
 		}
 
 
@@ -405,7 +405,7 @@ namespace ParticleEdit
 			}
 
 			mPF.UpdateControls(mPB.GetEmitterByIndex(index),
-				mPB.GetColorByIndex(index), mPB.GetCellByIndex(index));
+				mPB.GetColorByIndex(index), mPB.GetCelByIndex(index));
 		}
 	}
 }
