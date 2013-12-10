@@ -329,7 +329,7 @@ namespace FullBuild
 		}
 
 
-		void RenderShadows(int shadIndex, Vector3 camPos, Matrix view, Matrix proj)
+		void RenderShadows(int shadIndex)
 		{
 		}
 
@@ -354,6 +354,12 @@ namespace FullBuild
 			{
 				MaterialLib.Material	mat	=m.Value;
 
+				mat.IgnoreShaderParameter("mYRangeMax");
+				mat.IgnoreShaderParameter("mYRangeMin");
+				mat.IgnoreShaderParameter("mSpecColor");
+				mat.IgnoreShaderParameter("mSpecPower");
+				mat.IgnoreShaderParameter("mDanglyForce");
+
 				mat.HideShaderParameter("mWorld");
 				mat.HideShaderParameter("mView");
 				mat.HideShaderParameter("mProjection");
@@ -365,6 +371,9 @@ namespace FullBuild
 				mat.HideShaderParameter("mbDirectional");
 				mat.HideShaderParameter("mAniIntensities");
 				mat.HideShaderParameter("mWarpFactor");
+				mat.HideShaderParameter("mDanglyForce");
+				mat.HideShaderParameter("mDynLights");
+				mat.HideShaderParameter("mShadowAtten");
 				mat.HideShaderParameter("mYRangeMax");
 				mat.HideShaderParameter("mYRangeMin");
 				mat.HideShaderParameter("mSpecColor");	//eventually want these
@@ -376,17 +385,23 @@ namespace FullBuild
 					|| mat.Technique == "VertexLighting"
 					|| mat.Technique == "Alpha")
 				{
+					mat.IgnoreShaderParameter("mLightMap");
+					mat.IgnoreShaderParameter("mSkyGradient0");
+					mat.IgnoreShaderParameter("mSkyGradient1");
 					mat.HideShaderParameter("mLightMap");
 					mat.HideShaderParameter("mSkyGradient0");
 					mat.HideShaderParameter("mSkyGradient1");
 				}
 				else if(mat.Technique.StartsWith("LightMap"))
 				{
+					mat.IgnoreShaderParameter("mSkyGradient0");
+					mat.IgnoreShaderParameter("mSkyGradient1");
 					mat.HideShaderParameter("mSkyGradient0");
 					mat.HideShaderParameter("mSkyGradient1");
 				}
 				else if(mat.Technique == "Sky")
 				{
+					mat.IgnoreShaderParameter("mLightMap");
 					mat.HideShaderParameter("mLightMap");
 				}
 			}
