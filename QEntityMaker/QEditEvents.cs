@@ -127,9 +127,16 @@ namespace QEntityMaker
 			cat	=cat.ToLower();
 
 			int	catIndex	=cat.IndexOf("_");
+			if(catIndex == -1)
+			{
+				cat	="point_new";
+			}
+			else
+			{
+				cat	=cat.Substring(0, catIndex);
+				cat	+="_new";
+			}
 
-			cat	=cat.Substring(0, catIndex);
-			cat	+="_new";
 
 			tn.Text	=cat + ":e =";
 
@@ -214,7 +221,8 @@ namespace QEntityMaker
 			}
 
 			//make sure not a foldery thing
-			if(e.Node.Text.Contains("*"))
+			if(e.Node.Text.Contains("*")
+				|| e.Node.Text == "Path & Combat entities.qtxfolder =")
 			{
 				AddGroupBox.Enabled		=true;
 				return;

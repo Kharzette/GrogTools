@@ -22,6 +22,13 @@ namespace QEntityMaker
 		const string	MeshNameHint	="Name of the mesh to render, usually something.Static";
 		const string	ColorHint		="Light color RGB, default (1 1 1)";
 
+		//common bounding box types
+		const string	SmallGroundBBox		="-16 -16 0 16 16 32";
+		const string	TinyGroundBBox		="-8 -8 0 8 8 16";
+		const string	BipedGroundBBox		="-16 -16 0 16 16 72";
+		const string	SmallCenteredBBox	="-16 -16 -16 16 16 16";
+		const string	TinyCenteredBBox	="-8 -8 -8 8 8 8";
+
 
 		string PreviousLine(string file, int pos)
 		{
@@ -497,6 +504,61 @@ namespace QEntityMaker
 		}
 
 
+		EntityKVP BBoxForEnt(string entName)
+		{
+			EntityKVP	ret	=new EntityKVP();
+
+			ret.mbUsesSingleQuotes	=true;
+			ret.Key					="bbox";
+
+			if(entName.StartsWith("misc_"))
+			{
+				ret.Value	=SmallGroundBBox;
+			}
+			else if(entName.StartsWith("info_player_"))
+			{
+				ret.Value	=BipedGroundBBox;
+			}
+			else if(entName.StartsWith("light_"))
+			{
+				ret.Value	=SmallCenteredBBox;
+			}
+			else if(entName.StartsWith("weapon_"))
+			{
+				ret.Value	=SmallGroundBBox;
+			}
+			else if(entName.StartsWith("ammo_"))
+			{
+				ret.Value	=SmallGroundBBox;
+			}
+			else if(entName.StartsWith("monster_"))
+			{
+				ret.Value	=BipedGroundBBox;
+			}
+			else if(entName.StartsWith("point_"))
+			{
+				ret.Value	=TinyCenteredBBox;
+			}
+			else if(entName.StartsWith("key_"))
+			{
+				ret.Value	=TinyGroundBBox;
+			}
+			else if(entName.StartsWith("item_"))
+			{
+				ret.Value	=SmallGroundBBox;
+			}
+			else if(entName.StartsWith("target_"))
+			{
+				ret.Value	=TinyCenteredBBox;
+			}
+			else
+			{
+				ret.Value	=SmallCenteredBBox;
+			}
+			return	ret;
+		}
+
+
 		void AddFormForEntity(TreeNode tn, string entName)
 		{
 			TreeNode	forms	=FindNode(EntityTree.Nodes[0], FormsFolder);
@@ -513,12 +575,8 @@ namespace QEntityMaker
 			usual.Key	="Help";
 			usual.Value	="A newly created Entity type.";
 			formStuff.Add(usual);
-
-			usual	=new EntityKVP();
-
-			usual.mbUsesSingleQuotes	=true;
-			usual.Key					="bbox";
-			usual.Value					="-16 -16 -16 16 16 16";
+			
+			usual	=BBoxForEnt(entName);
 			formStuff.Add(usual);
 
 			form.Tag	=formStuff;
