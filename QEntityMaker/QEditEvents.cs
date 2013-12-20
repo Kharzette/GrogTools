@@ -137,7 +137,6 @@ namespace QEntityMaker
 				cat	+="_new";
 			}
 
-
 			tn.Text	=cat + ":e =";
 
 			BindingList<EntityKVP>	kvps	=new BindingList<EntityKVP>();
@@ -221,8 +220,10 @@ namespace QEntityMaker
 			}
 
 			//make sure not a foldery thing
-			if(e.Node.Text.Contains("*")
-				|| e.Node.Text == "Path & Combat entities.qtxfolder =")
+			//skip func and trigger as we don't have the poly stuff done yet
+			if((e.Node.Text.Contains("*") || e.Node.Text == "Path & Combat entities.qtxfolder =")
+				&& !e.Node.Text.StartsWith("Func")
+				&& !e.Node.Text.StartsWith("Trigger"))
 			{
 				AddGroupBox.Enabled		=true;
 				return;
