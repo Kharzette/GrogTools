@@ -38,11 +38,6 @@ namespace ColladaConvert
 		public event EventHandler	eShowAxis;
 		public event EventHandler	ePause;
 
-		public bool BakeTransforms
-		{
-			get { return BakeVerts.Checked; }
-		}
-
 
 		public AnimForm(MeshLib.AnimLib anlib)
 		{
@@ -51,6 +46,12 @@ namespace ColladaConvert
 			mAnimLib	=anlib;
 
 			ColladaConvert.eAnimsUpdated	+=OnAnimsUpdated;
+		}
+
+
+		public bool GetCheckSkeleton()
+		{
+			return	CheckSkeleton.Checked;
 		}
 
 

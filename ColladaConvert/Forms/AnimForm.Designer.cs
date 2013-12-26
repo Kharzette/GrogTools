@@ -46,10 +46,11 @@
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
-			this.BakeVerts = new System.Windows.Forms.CheckBox();
+			this.CheckSkeleton = new System.Windows.Forms.CheckBox();
 			this.groupBox4 = new System.Windows.Forms.GroupBox();
 			this.label2 = new System.Windows.Forms.Label();
 			this.groupBox6 = new System.Windows.Forms.GroupBox();
+			this.Pause = new System.Windows.Forms.Button();
 			this.BoundGroup = new System.Windows.Forms.GroupBox();
 			this.ShowBox = new System.Windows.Forms.CheckBox();
 			this.ShowSphere = new System.Windows.Forms.CheckBox();
@@ -58,7 +59,6 @@
 			this.Optimize = new System.Windows.Forms.Button();
 			this.Shadowize = new System.Windows.Forms.Button();
 			this.DrawAxis = new System.Windows.Forms.CheckBox();
-			this.Pause = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.AnimGrid)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.TimeScale)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.MaxError)).BeginInit();
@@ -285,7 +285,7 @@
 			// groupBox3
 			// 
 			this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.groupBox3.Controls.Add(this.BakeVerts);
+			this.groupBox3.Controls.Add(this.CheckSkeleton);
 			this.groupBox3.Controls.Add(this.LoadModel);
 			this.groupBox3.Controls.Add(this.LoadStaticModel);
 			this.groupBox3.Controls.Add(this.LoadAnim);
@@ -296,15 +296,15 @@
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = "Collada Files";
 			// 
-			// BakeVerts
+			// CheckSkeleton
 			// 
-			this.BakeVerts.AutoSize = true;
-			this.BakeVerts.Location = new System.Drawing.Point(6, 112);
-			this.BakeVerts.Name = "BakeVerts";
-			this.BakeVerts.Size = new System.Drawing.Size(106, 17);
-			this.BakeVerts.TabIndex = 24;
-			this.BakeVerts.Text = "Bake Transforms";
-			this.BakeVerts.UseVisualStyleBackColor = true;
+			this.CheckSkeleton.AutoSize = true;
+			this.CheckSkeleton.Location = new System.Drawing.Point(6, 112);
+			this.CheckSkeleton.Name = "CheckSkeleton";
+			this.CheckSkeleton.Size = new System.Drawing.Size(102, 17);
+			this.CheckSkeleton.TabIndex = 24;
+			this.CheckSkeleton.Text = "Check Skeleton";
+			this.CheckSkeleton.UseVisualStyleBackColor = true;
 			// 
 			// groupBox4
 			// 
@@ -340,6 +340,16 @@
 			this.groupBox6.TabIndex = 21;
 			this.groupBox6.TabStop = false;
 			this.groupBox6.Text = "Playback";
+			// 
+			// Pause
+			// 
+			this.Pause.Location = new System.Drawing.Point(129, 19);
+			this.Pause.Name = "Pause";
+			this.Pause.Size = new System.Drawing.Size(55, 22);
+			this.Pause.TabIndex = 5;
+			this.Pause.Text = "Pause";
+			this.Pause.UseVisualStyleBackColor = true;
+			this.Pause.Click += new System.EventHandler(this.OnPause);
 			// 
 			// BoundGroup
 			// 
@@ -431,16 +441,6 @@
 			this.DrawAxis.UseVisualStyleBackColor = true;
 			this.DrawAxis.CheckedChanged += new System.EventHandler(this.OnAxisDrawChanged);
 			// 
-			// Pause
-			// 
-			this.Pause.Location = new System.Drawing.Point(129, 19);
-			this.Pause.Name = "Pause";
-			this.Pause.Size = new System.Drawing.Size(55, 22);
-			this.Pause.TabIndex = 5;
-			this.Pause.Text = "Pause";
-			this.Pause.UseVisualStyleBackColor = true;
-			this.Pause.Click += new System.EventHandler(this.OnPause);
-			// 
 			// AnimForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -510,7 +510,7 @@
 		private System.Windows.Forms.GroupBox groupBox7;
 		private System.Windows.Forms.Button Optimize;
 		private System.Windows.Forms.Button Shadowize;
-		private System.Windows.Forms.CheckBox BakeVerts;
+		private System.Windows.Forms.CheckBox CheckSkeleton;
 		private System.Windows.Forms.CheckBox DrawAxis;
 		private System.Windows.Forms.Button Pause;
 	}

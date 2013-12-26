@@ -9,7 +9,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Kinect;
 using UtilityLib;
 using MeshLib;
 
@@ -37,17 +36,6 @@ namespace ColladaConvert
 		bool					mbPaused	=true;
 		double					mAnimTime;
 
-		//kinect stuff
-		KinectSensor		mSensor;
-		SkeletonStream		mSkelStream;
-		bool				mbCountingDown;
-		int					mCountDown, mAnimNameCounter;
-		bool				mbFirstTimeStamp;
-		Int64				mTimeStampAdjust;
-
-		//recorded data from the sensor
-//		CaptureData	mSkelFrames	=new CaptureData();
-		
 		//control
 		PlayerSteering	mSteering;
 		GameCamera		mGameCam;
@@ -57,12 +45,15 @@ namespace ColladaConvert
 		SharedForms.MaterialForm	mMF;
 
 		//animation gui
-		AnimForm	mCF;
+		AnimForm	mAnimForm;
 		string		mCurrentAnimName;
 		float		mTimeScale;			//anim playback speed
 		Int64		mCurAnimTime, mCurAnimStart;
 		Vector3		mLightDir;
 		Random		mRand	=new Random();
+
+		//skeleton editor
+		SkeletonEditor	mSkelEditor	=new SkeletonEditor();
 
 		//kinect gui
 //		KinectForm	mKF;
@@ -122,12 +113,6 @@ namespace ColladaConvert
 
 			mInput	=new Input();
 
-			if(KinectSensor.KinectSensors.Count > 0)
-			{
-				mSensor	=KinectSensor.KinectSensors[0];
-//				mSensor.SkeletonFrameReady	+=OnSkeletonFrameReady;
-			}
-
 			base.Initialize();
 		}
 
@@ -171,27 +156,29 @@ namespace ColladaConvert
 			mCTF			=new SharedForms.CelTweakForm(gd, mMatLib);
 			mCTF.Visible	=true;
 
-			mCF				=new AnimForm(mAnimLib);
-			mCF.Visible		=true;
+			mAnimForm				=new AnimForm(mAnimLib);
+			mAnimForm.Visible		=true;
 
-			mCF.eLoadAnim				+=OnOpenAnim;
-			mCF.eLoadModel				+=OnOpenModel;
-			mCF.eLoadStaticModel		+=OnOpenStaticModel;
-			mCF.eAnimSelectionChanged	+=OnAnimSelChanged;
-			mCF.eTimeScaleChanged		+=OnTimeScaleChanged;
-			mCF.eSaveLibrary			+=OnSaveLibrary;
-			mCF.eSaveCharacter			+=OnSaveCharacter;
-			mCF.eLoadCharacter			+=OnLoadCharacter;
-			mCF.eLoadLibrary			+=OnLoadLibrary;
-			mCF.eLoadStatic				+=OnLoadStatic;
-			mCF.eSaveStatic				+=OnSaveStatic;
-			mCF.eBoundMesh				+=OnBoundMesh;
-			mCF.eShowBound				+=OnShowBound;
-			mCF.eShowAxis				+=OnShowAxis;
-			mCF.ePause					+=OnPause;
+			mAnimForm.eLoadAnim				+=OnOpenAnim;
+			mAnimForm.eLoadModel				+=OnOpenModel;
+			mAnimForm.eLoadStaticModel		+=OnOpenStaticModel;
+			mAnimForm.eAnimSelectionChanged	+=OnAnimSelChanged;
+			mAnimForm.eTimeScaleChanged		+=OnTimeScaleChanged;
+			mAnimForm.eSaveLibrary			+=OnSaveLibrary;
+			mAnimForm.eSaveCharacter			+=OnSaveCharacter;
+			mAnimForm.eLoadCharacter			+=OnLoadCharacter;
+			mAnimForm.eLoadLibrary			+=OnLoadLibrary;
+			mAnimForm.eLoadStatic				+=OnLoadStatic;
+			mAnimForm.eSaveStatic				+=OnSaveStatic;
+			mAnimForm.eBoundMesh				+=OnBoundMesh;
+			mAnimForm.eShowBound				+=OnShowBound;
+			mAnimForm.eShowAxis				+=OnShowAxis;
+			mAnimForm.ePause					+=OnPause;
 
 			mMF	=new SharedForms.MaterialForm(gd, mMatLib, true);
 			mMF.Visible	=true;
+
+			mSkelEditor.Visible	=true;
 
 			/*
 			if(mSensor != null)
@@ -213,14 +200,17 @@ namespace ColladaConvert
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
 			//bind animform window position
-			mCF.DataBindings.Add(new System.Windows.Forms.Binding("Location",
+			mAnimForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
 				Settings.Default, "AnimFormPos", true,
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
-			//bind kinectform window position
-//			mKF.DataBindings.Add(new System.Windows.Forms.Binding("Location",
-//				Settings.Default, "KinectFormPos", true,
-//				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+			mSkelEditor.DataBindings.Add(new System.Windows.Forms.Binding("Location",
+				Settings.Default, "SkeletonEditorFormPos", true,
+				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+
+			mSkelEditor.DataBindings.Add(new System.Windows.Forms.Binding("Size",
+				Settings.Default, "SkeletonEditorFormSize", true,
+				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
 			//bind celTweakForm window position
 			mCTF.DataBindings.Add(new System.Windows.Forms.Binding("Location",
@@ -274,9 +264,10 @@ namespace ColladaConvert
 		{
 			string	path	=(string)sender;
 
-			if(ColladaFileUtils.LoadAnim(path, mAnimLib))
+			if(ColladaFileUtils.LoadAnim(path, mAnimLib, mAnimForm.GetCheckSkeleton()))
 			{
 				eAnimsUpdated(mAnimLib.GetAnims(), null);
+				mSkelEditor.Initialize(mAnimLib.GetSkeleton());
 			}
 		}
 
@@ -464,8 +455,7 @@ namespace ColladaConvert
 		{
 			string	path	=(string)sender;
 
-			mStaticMesh	=ColladaFileUtils.LoadStatic(path, mGDM.GraphicsDevice,
-				mMatLib, mCF.BakeTransforms);
+			mStaticMesh	=ColladaFileUtils.LoadStatic(path, mGDM.GraphicsDevice,	mMatLib);
 
 			mStaticMesh.SetTransform(Matrix.Identity);
 
@@ -489,6 +479,7 @@ namespace ColladaConvert
 
 			mAnimLib.ReadFromFile(path, true);
 			eAnimsUpdated(mAnimLib.GetAnims(), null);
+			mSkelEditor.Initialize(mAnimLib.GetSkeleton());
 		}
 
 
@@ -512,106 +503,6 @@ namespace ColladaConvert
 
 			mMF.UpdateMeshPartList(mCharacter.GetMeshPartList(), null);
 		}
-
-
-		/*
-		void OnTrimStart(object sender, EventArgs ea)
-		{
-			Nullable<Int32>	amount	=sender as Nullable<Int32>;
-			if(amount == null || !amount.HasValue)
-			{
-				return;
-			}
-
-			mSkelFrames.TrimStart(amount.Value);
-		}
-
-
-		void OnTrimEnd(object sender, EventArgs ea)
-		{
-			Nullable<Int32>	amount	=sender as Nullable<Int32>;
-			if(amount == null || !amount.HasValue)
-			{
-				return;
-			}
-
-			mSkelFrames.TrimEnd(amount.Value);
-		}
-
-
-		void OnLoadRawData(object sender, EventArgs ea)
-		{
-			string	path	=(string)sender;
-			if(path == null)
-			{
-				return;
-			}
-
-			FileStream	fs	=new FileStream(path, FileMode.Open, FileAccess.Read);
-			if(fs == null)
-			{
-				return;
-			}
-
-			BinaryReader	br	=new BinaryReader(fs);
-
-			UInt32	magic	=br.ReadUInt32();
-			if(magic != 0x9A1FDA7A)
-			{
-				br.Close();
-				fs.Close();
-				return;
-			}
-
-			mSkelFrames.Read(br);
-
-			br.Close();
-			fs.Close();
-
-			mKF.UpdateCapturedDataStats(mSkelFrames.mFrames.Count, mSkelFrames.mTimes.Last());
-		}
-
-
-		void OnSaveRawData(object sender, EventArgs ea)
-		{
-			string	path	=(string)sender;
-			if(path == null || mSkelFrames.mFrames.Count <= 0)
-			{
-				return;
-			}
-
-			FileStream	fs	=new FileStream(path, FileMode.Create, FileAccess.Write);
-			if(fs == null)
-			{
-				return;
-			}
-
-			BinaryWriter	bw	=new BinaryWriter(fs);
-
-			UInt32	magic	=0x9A1FDA7A;
-
-			bw.Write(magic);
-
-			mSkelFrames.Write(bw);
-
-			bw.Close();
-			fs.Close();
-		}
-
-		
-		void OnConvertToAnim(object sender, EventArgs ea)
-		{
-			BindingList<KinectMap>	mapping	=sender as BindingList<KinectMap>;
-			if(mapping == null)
-			{
-				return;
-			}
-
-			mAnimLib.CreateKinectAnimation(mapping, mSkelFrames,
-				"KinectAnim" + mAnimNameCounter++);
-
-			eAnimsUpdated(mAnimLib.GetAnims(), null);
-		}*/
 
 
 		void OnLoadStatic(object sender, EventArgs ea)
@@ -665,86 +556,6 @@ namespace ColladaConvert
 
 			mTimeScale	=Convert.ToSingle(val);
 		}
-
-
-		/*
-		void StartRecording()
-		{
-			mSkelFrames.Clear();
-			mSensor.Start();
-			mSkelStream	=KinectSensor.KinectSensors[0].SkeletonStream;				
-
-			TransformSmoothParameters	tsp	=new TransformSmoothParameters();
-
-			tsp.Correction			=0.5f;
-			tsp.JitterRadius		=0.9f;
-			tsp.MaxDeviationRadius	=0.15f;
-			tsp.Prediction			=0.5f;
-			tsp.Smoothing			=0.7f;
-
-			mSkelStream.Enable(tsp);
-		}
-
-
-		void OnToggleRecord(object sender, EventArgs ea)
-		{
-			Nullable<bool>	useInferred	=sender as Nullable<bool>;
-			if(mSensor == null)
-			{
-				return;
-			}
-
-			if(mSensor.IsRunning)
-			{
-				mSensor.Stop();
-				mSkelStream.Disable();
-				mSkelStream	=null;
-				float	len	=0;
-
-				if(mSkelFrames.mTimes.Count <= 0)
-				{
-					len	=0f;
-				}
-				else
-				{
-					len	=mSkelFrames.mTimes.Last();
-				}
-
-				mKF.UpdateCapturedDataStats(mSkelFrames.mFrames.Count, len);
-			}
-			else if(mbCountingDown)
-			{
-				mbCountingDown	=false;
-			}
-			else
-			{
-				mbCountingDown		=true;
-				mCountDown			=5000;
-				mbFirstTimeStamp	=true;
-			}
-		}
-
-
-		void OnSkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs sfrea)
-		{
-			SkeletonFrame	sf	=sfrea.OpenSkeletonFrame();
-
-			if(sf != null)
-			{
-				Microsoft.Kinect.Skeleton	[]data	=new Microsoft.Kinect.Skeleton[sf.SkeletonArrayLength];
-				sf.CopySkeletonDataTo(data);
-
-				Int64	timeStamp	=sf.Timestamp;
-
-				if(mbFirstTimeStamp)
-				{
-					mbFirstTimeStamp	=!mbFirstTimeStamp;
-					mTimeStampAdjust	=timeStamp;
-				}
-
-				mSkelFrames.Add(data, (sf.Timestamp - mTimeStampAdjust) / 1000.0f);
-			}
-		}*/
 
 
 		protected override void Update(GameTime gameTime)
@@ -811,16 +622,6 @@ namespace ColladaConvert
 
 			mCharacter.Animate(mCurrentAnimName, (float)mAnimTime / 1000.0f);
 
-			if(mbCountingDown)
-			{
-				mCountDown	-=msDelta;
-				if(mCountDown <= 0)
-				{
-					mbCountingDown	=false;
-//					StartRecording();
-				}
-			}
-
 			base.Update(gameTime);
 		}
 
@@ -876,15 +677,6 @@ namespace ColladaConvert
 			{
 				mSB.DrawString(mFonts.First().Value, "AnimTime: " + mAnimTime / 1000.0f,
 					Vector2.UnitX * 20.0f + Vector2.UnitY * 60f, Color.GreenYellow);
-			}
-
-			if(mSensor != null)
-			{
-				if(mbCountingDown)
-				{
-					mSB.DrawString(mFonts.ElementAt(1).Value, "" + mCountDown,
-						Vector2.One * 20.0f + Vector2.UnitY * 200, Color.Yellow);
-				}
 			}
 
 			mSB.End();

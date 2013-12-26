@@ -23,7 +23,13 @@
     <Setting Name="KinectFormPos" Type="System.Drawing.Point" Scope="User">
       <Value Profile="(Default)">0, 0</Value>
     </Setting>
-    <Setting Name="CellTweakFormPos" Type="System.Drawing.Point" Scope="User">
+    <Setting Name="CelTweakFormPos" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="SkeletonEditorFormPos" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="SkeletonEditorFormSize" Type="System.Drawing.Size" Scope="User">
       <Value Profile="(Default)">0, 0</Value>
     </Setting>
   </Settings>

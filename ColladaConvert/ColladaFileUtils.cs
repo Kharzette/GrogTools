@@ -32,7 +32,7 @@ namespace ColladaConvert
 
 
 		//loads an animation into an existing anim lib
-		internal static bool LoadAnim(string path, AnimLib alib)
+		internal static bool LoadAnim(string path, AnimLib alib, bool bCheckSkeleton)
 		{
 			COLLADA	colladaFile	=DeSerializeCOLLADA(path);
 			Skeleton	skel	=BuildSkeleton(colladaFile);
@@ -48,7 +48,7 @@ namespace ColladaConvert
 			{
 				alib.SetSkeleton(skel);
 			}
-			else
+			else if(bCheckSkeleton)
 			{
 				//make sure they match
 				if(!alib.CheckSkeleton(skel))
@@ -111,8 +111,7 @@ namespace ColladaConvert
 
 		internal static StaticMeshObject LoadStatic(string					path,
 													GraphicsDevice			gd,
-													MaterialLib.MaterialLib	matLib,
-													bool					bBake)
+													MaterialLib.MaterialLib	matLib)
 		{
 			COLLADA	colladaFile	=DeSerializeCOLLADA(path);
 
@@ -122,43 +121,24 @@ namespace ColladaConvert
 			StaticMeshObject	smo		=new StaticMeshObject(matLib);
 			List<MeshConverter>	chunks	=GetMeshChunks(colladaFile, false);
 
-			if(bBake)
+			//adjust coordinate system
+			Matrix	shiftMat	=Matrix.Identity;
+			if(colladaFile.asset.up_axis == UpAxisType.Z_UP)
 			{
-				BakeSceneNodesIntoVerts(colladaFile, chunks);
-				BuildFinalVerts(colladaFile, gd, chunks);
-
-				foreach(MeshConverter mc in chunks)
-				{
-					Mesh	m	=mc.GetConvertedMesh();
-
-					m.SetTransform(Matrix.Identity);
-
-					m.Name	+="Mesh";
-
-					smo.AddMeshPart(m);
-				}
+				shiftMat	=Matrix.CreateRotationX(-MathHelper.PiOver2);
 			}
-			else
+
+			BuildFinalVerts(colladaFile, gd, chunks);
+			foreach(MeshConverter mc in chunks)
 			{
-				//adjust coordinate system
-				Matrix	shiftMat	=Matrix.Identity;
-				if(colladaFile.asset.up_axis == UpAxisType.Z_UP)
-				{
-					shiftMat	=Matrix.CreateRotationX(-MathHelper.PiOver2);
-				}
+				Mesh	m	=mc.GetConvertedMesh();
+				Matrix	mat	=GetSceneNodeTransform(colladaFile, mc);
 
-				BuildFinalVerts(colladaFile, gd, chunks);
-				foreach(MeshConverter mc in chunks)
-				{
-					Mesh	m	=mc.GetConvertedMesh();
-					Matrix	mat	=GetSceneNodeTransform(colladaFile, mc);
+				m.Name	=mc.GetGeomName();
 
-					m.Name	=mc.GetGeomName();
-
-					//set transform of each mesh
-					m.SetTransform(mat * shiftMat);
-					smo.AddMeshPart(m);
-				}
+				//set transform of each mesh
+				m.SetTransform(mat * shiftMat);
+				smo.AddMeshPart(m);
 			}
 
 			return	smo;
