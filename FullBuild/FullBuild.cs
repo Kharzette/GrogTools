@@ -133,7 +133,7 @@ namespace FullBuild
 			mGameCM		=new ContentManager(Services, "GameContent");
 			mShaderLib	=new ContentManager(Services, "ShaderLib");
 			mBFX		=new BasicEffect(gd);
-			mLMShader	=mShaderLib.Load<Effect>("Shaders/LightMap");
+			mLMShader	=mShaderLib.Load<Effect>("Shaders/BSP");
 
 			Dictionary<string, SpriteFont>	fonts	=FileUtil.LoadAllFonts(Content);
 

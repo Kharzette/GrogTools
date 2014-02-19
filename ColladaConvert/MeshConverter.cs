@@ -6,25 +6,26 @@ using System.Diagnostics;
 using System.Reflection;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Graphics.PackedVector;
 using MeshLib;
 
 namespace ColladaConvert
 {
 	//keeps track of original pos index
-	public struct TrackedVert
+	struct TrackedVert
 	{
-		public Vector3	Position0;
-		public Vector3	Normal0;
-		public Vector4	BoneIndex;
-		public Vector4	BoneWeights;
-		public Vector2	TexCoord0;
-		public Vector2	TexCoord1;
-		public Vector2	TexCoord2;
-		public Vector2	TexCoord3;
-		public Vector4	Color0;
-		public Vector4	Color1;
-		public Vector4	Color2;
-		public Vector4	Color3;
+		public Vector3		Position0;
+		public Vector3		Normal0;
+		public HalfVector4	BoneIndex;
+		public HalfVector4	BoneWeights;
+		public Vector2		TexCoord0;
+		public Vector2		TexCoord1;
+		public Vector2		TexCoord2;
+		public Vector2		TexCoord3;
+		public Vector4		Color0;
+		public Vector4		Color1;
+		public Vector4		Color2;
+		public Vector4		Color3;
 
 		public int		mOriginalIndex;
 
@@ -341,6 +342,8 @@ namespace ColladaConvert
 					}
 				}
 
+				Vector4	index	=Vector4.Zero;
+				Vector4	weight	=Vector4.Zero;
 				for(int j=0;j < numInfluences;j++)
 				{
 					Debug.Assert(j < 4);
@@ -355,23 +358,26 @@ namespace ColladaConvert
 					switch(j)
 					{
 						case	0:
-							mBaseVerts[i].BoneIndex.X	=boneIdx;
-							mBaseVerts[i].BoneWeights.X	=boneWeight;
+							index.X		=boneIdx;
+							weight.X	=boneWeight;
 							break;
 						case	1:
-							mBaseVerts[i].BoneIndex.Y	=boneIdx;
-							mBaseVerts[i].BoneWeights.Y	=boneWeight;
+							index.Y		=boneIdx;
+							weight.Y	=boneWeight;
 							break;
 						case	2:
-							mBaseVerts[i].BoneIndex.Z	=boneIdx;
-							mBaseVerts[i].BoneWeights.Z	=boneWeight;
+							index.Z		=boneIdx;
+							weight.Z	=boneWeight;
 							break;
 						case	3:
-							mBaseVerts[i].BoneIndex.W	=boneIdx;
-							mBaseVerts[i].BoneWeights.W	=boneWeight;
+							index.W		=boneIdx;
+							weight.W	=boneWeight;
 							break;
 					}
 				}
+
+				mBaseVerts[i].BoneIndex		=new HalfVector4(index);
+				mBaseVerts[i].BoneWeights	=new HalfVector4(weight);
 			}
 		}
 
@@ -685,17 +691,17 @@ namespace ColladaConvert
 			}
 			if(bBoneIndices)
 			{
-				ve[index]	=new VertexElement(offset, VertexElementFormat.Vector4,
+				ve[index]	=new VertexElement(offset, VertexElementFormat.HalfVector4,
 					VertexElementUsage.BlendIndices, 0);
 				index++;
-				offset	+=16;
+				offset	+=8;
 			}
 			if(bBoneWeights)
 			{
-				ve[index]	=new VertexElement(offset, VertexElementFormat.Vector4,
+				ve[index]	=new VertexElement(offset, VertexElementFormat.HalfVector4,
 					VertexElementUsage.BlendWeight, 0);
 				index++;
-				offset	+=16;
+				offset	+=8;
 			}
 			if(bTexCoord0)
 			{
@@ -891,31 +897,35 @@ namespace ColladaConvert
 
 			for(int i=0;i < mNumBaseVerts;i++)
 			{
-				Vector4	idx	=mBaseVerts[i].BoneIndex;
+				Vector4	inds	=mBaseVerts[i].BoneIndex.ToVector4();
+				int	idx0	=(int)inds.X;
+				int	idx1	=(int)inds.Y;
+				int	idx2	=(int)inds.Z;
+				int	idx3	=(int)inds.W;
 
-				Debug.Assert(idx.X >= 0);
+				Debug.Assert(idx0 >= 0);
 
-				string	bname	=bnames[(int)idx.X];
+				string	bname	=bnames[idx0];
 				Debug.Assert(invBindPoses.ContainsKey(bname));
-				idx.X	=keys.IndexOf(bname);
-				Debug.Assert(idx.X >= 0);
+				idx0	=keys.IndexOf(bname);
+				Debug.Assert(idx0 >= 0);
 
-				bname	=bnames[(int)idx.Y];
+				bname	=bnames[idx1];
 				Debug.Assert(invBindPoses.ContainsKey(bname));
-				idx.Y	=keys.IndexOf(bname);
-				Debug.Assert(idx.Y >= 0);
+				idx1	=keys.IndexOf(bname);
+				Debug.Assert(idx1 >= 0);
 
-				bname	=bnames[(int)idx.Z];
+				bname	=bnames[idx2];
 				Debug.Assert(invBindPoses.ContainsKey(bname));
-				idx.Z	=keys.IndexOf(bname);
-				Debug.Assert(idx.Z >= 0);
+				idx2	=keys.IndexOf(bname);
+				Debug.Assert(idx2 >= 0);
 
-				bname	=bnames[(int)idx.W];
+				bname	=bnames[idx3];
 				Debug.Assert(invBindPoses.ContainsKey(bname));
-				idx.W	=keys.IndexOf(bname);
-				Debug.Assert(idx.W >= 0);
+				idx3	=keys.IndexOf(bname);
+				Debug.Assert(idx3 >= 0);
 
-				mBaseVerts[i].BoneIndex	=idx;
+				mBaseVerts[i].BoneIndex	=new HalfVector4(idx0, idx1, idx2, idx3);
 			}
 		}
 	}

@@ -96,7 +96,7 @@ namespace ParticleEdit
 
 			mSB	=new SpriteBatch(gd);
 
-			mFX	=mSLib.Load<Effect>("Shaders/Static");
+			mFX	=mSLib.Load<Effect>("Shaders/2D");
 
 			mFonts	=FileUtil.LoadAllFonts(Content);
 
