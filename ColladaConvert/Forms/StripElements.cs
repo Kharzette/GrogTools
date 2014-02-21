@@ -18,6 +18,7 @@ namespace ColladaConvert
 		List<Mesh>	mMeshes;
 
 		public event EventHandler	eDeleteElement;
+		public event EventHandler	eEscape;
 
 
 		public StripElements()
@@ -86,6 +87,10 @@ namespace ColladaConvert
 				}
 
 				Misc.SafeInvoke(eDeleteElement, sels);
+			}
+			else if(e.KeyCode == Keys.Escape)
+			{
+				Misc.SafeInvoke(eEscape, null);
 			}
 		}
 	}

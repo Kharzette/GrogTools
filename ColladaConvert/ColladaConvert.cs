@@ -160,20 +160,20 @@ namespace ColladaConvert
 			mAnimForm.Visible		=true;
 
 			mAnimForm.eLoadAnim				+=OnOpenAnim;
-			mAnimForm.eLoadModel				+=OnOpenModel;
+			mAnimForm.eLoadModel			+=OnOpenModel;
 			mAnimForm.eLoadStaticModel		+=OnOpenStaticModel;
 			mAnimForm.eAnimSelectionChanged	+=OnAnimSelChanged;
 			mAnimForm.eTimeScaleChanged		+=OnTimeScaleChanged;
 			mAnimForm.eSaveLibrary			+=OnSaveLibrary;
-			mAnimForm.eSaveCharacter			+=OnSaveCharacter;
-			mAnimForm.eLoadCharacter			+=OnLoadCharacter;
+			mAnimForm.eSaveCharacter		+=OnSaveCharacter;
+			mAnimForm.eLoadCharacter		+=OnLoadCharacter;
 			mAnimForm.eLoadLibrary			+=OnLoadLibrary;
-			mAnimForm.eLoadStatic				+=OnLoadStatic;
-			mAnimForm.eSaveStatic				+=OnSaveStatic;
-			mAnimForm.eBoundMesh				+=OnBoundMesh;
-			mAnimForm.eShowBound				+=OnShowBound;
+			mAnimForm.eLoadStatic			+=OnLoadStatic;
+			mAnimForm.eSaveStatic			+=OnSaveStatic;
+			mAnimForm.eBoundMesh			+=OnBoundMesh;
+			mAnimForm.eShowBound			+=OnShowBound;
 			mAnimForm.eShowAxis				+=OnShowAxis;
-			mAnimForm.ePause					+=OnPause;
+			mAnimForm.ePause				+=OnPause;
 
 			mMF	=new SharedForms.MaterialForm(gd, mMatLib, true);
 			mMF.Visible	=true;
@@ -222,6 +222,7 @@ namespace ColladaConvert
 			mMF.eWeldWeights	+=OnWeldWeights;
 
 			mSE.eDeleteElement	+=OnDeleteVertElement;
+			mSE.eEscape			+=OnEscapeStripElements;
 
 			mSteering	=new PlayerSteering(gd.Viewport.Width,
 				mGDM.GraphicsDevice.Viewport.Height);
@@ -300,6 +301,15 @@ namespace ColladaConvert
 		}
 
 
+		void OnEscapeStripElements(object sender, EventArgs ea)
+		{
+			mSE.Populate(null);
+			mSE.Visible	=false;
+
+			mMF.EnableMeshPartGrid();
+		}
+
+
 		void OnDeleteVertElement(object sender, EventArgs ea)
 		{
 			List<int>	indexes	=sender as List<int>;
@@ -342,6 +352,11 @@ namespace ColladaConvert
 
 		void OnStripElements(object sender, EventArgs ea)
 		{
+			if(mSE.Visible)
+			{
+				return;	//avoid populating twice
+			}
+
 			List<Mesh>	meshes	=sender as List<Mesh>;
 
 			mSE.Populate(meshes);
