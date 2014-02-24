@@ -517,6 +517,8 @@ namespace ColladaConvert
 			mbCharacterLoaded	=true;
 
 			mMF.UpdateMeshPartList(mCharacter.GetMeshPartList(), null);
+
+			mAnimLib.UpdateBoneRefs();
 		}
 
 
