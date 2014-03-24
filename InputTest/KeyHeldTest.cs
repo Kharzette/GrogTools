@@ -6,32 +6,64 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using SharpDX;
+using InputLib;
+using SharpDXStuff;
+
 
 namespace InputTest
 {
 	public partial class Form1 : Form
 	{
-		InputLib.Input	mInput	=new InputLib.Input();
+		Input	mInput	=new Input();
+
+		PlayerSteering	mPS;
+		GameCamera		mCam	=new GameCamera(69, 69, 1f, 1f, 5000f);
+
+		Vector3	mPosition	=Vector3.Zero;
+
+		enum MyActions
+		{
+			MoveForward, MoveBack, MoveLeft, MoveRight
+		};
 
 
 		public Form1()
 		{
 			InitializeComponent();
+
+			mInput.MapAction(MyActions.MoveForward, 17);
+			mInput.MapAction(MyActions.MoveLeft, 30);
+			mInput.MapAction(MyActions.MoveBack, 31);
+			mInput.MapAction(MyActions.MoveRight, 32);
+
+			mPS			=new PlayerSteering(69, 69);
+			mPS.Method	=PlayerSteering.SteeringMethod.FirstPerson;
+
+			mPS.SetMoveEnums(MyActions.MoveLeft, MyActions.MoveRight,
+				MyActions.MoveForward, MyActions.MoveBack);
 		}
 
 		void OnUpdate(object sender, EventArgs e)
 		{
 			mInput.Update();
 
-			Dictionary<int, InputLib.Input.HeldKeyInfo>	stuff	=
-				mInput.GetHeldKeyInfo();
+			List<Input.InputAction>	actions	=mInput.GetAction();
 
 			string	toPrint	="";
-			foreach(KeyValuePair<int, InputLib.Input.HeldKeyInfo> key in stuff)
+			foreach(Input.InputAction act in actions)
 			{
-				toPrint	+=key.Value.mKey + " : " + key.Value.mTimeHeld + "\r\n";
+				toPrint	+=act.mAction + " : " + act.mTimeHeld + "\r\n";
 			}
 			Action<TextBox>	ta	=con => con.AppendText(toPrint);
+			FormExtensions.Invoke(InfoConsole, ta);
+
+			mPosition	=mPS.Update(mPosition, mCam.Forward, mCam.Left, mCam.Up, actions);
+
+			mCam.Update(mPosition, mPS.Pitch, mPS.Yaw, mPS.Roll);
+
+			toPrint	="CamPos: " + mPosition;
+			ta	=con => con.AppendText(toPrint);
 			FormExtensions.Invoke(InfoConsole, ta);
 		}
 	}

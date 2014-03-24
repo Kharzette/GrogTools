@@ -28,20 +28,20 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this.Update = new System.Windows.Forms.Button();
+			this.UpdateButton = new System.Windows.Forms.Button();
 			this.InfoConsole = new System.Windows.Forms.TextBox();
 			this.SuspendLayout();
 			// 
 			// Update
 			// 
-			this.Update.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.Update.Location = new System.Drawing.Point(12, 226);
-			this.Update.Name = "Update";
-			this.Update.Size = new System.Drawing.Size(75, 23);
-			this.Update.TabIndex = 0;
-			this.Update.Text = "Update";
-			this.Update.UseVisualStyleBackColor = true;
-			this.Update.Click += new System.EventHandler(this.OnUpdate);
+			this.UpdateButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.UpdateButton.Location = new System.Drawing.Point(12, 226);
+			this.UpdateButton.Name = "Update";
+			this.UpdateButton.Size = new System.Drawing.Size(75, 23);
+			this.UpdateButton.TabIndex = 0;
+			this.UpdateButton.Text = "Update";
+			this.UpdateButton.UseVisualStyleBackColor = true;
+			this.UpdateButton.Click += new System.EventHandler(this.OnUpdate);
 			// 
 			// InfoConsole
 			// 
@@ -61,7 +61,7 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(284, 261);
 			this.Controls.Add(this.InfoConsole);
-			this.Controls.Add(this.Update);
+			this.Controls.Add(this.UpdateButton);
 			this.Name = "Form1";
 			this.Text = "Form1";
 			this.ResumeLayout(false);
@@ -71,7 +71,7 @@
 
 		#endregion
 
-		private System.Windows.Forms.Button Update;
+		private System.Windows.Forms.Button UpdateButton;
 		private System.Windows.Forms.TextBox InfoConsole;
 	}
 }
