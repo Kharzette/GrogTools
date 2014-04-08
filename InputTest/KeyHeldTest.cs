@@ -46,8 +46,6 @@ namespace InputTest
 
 		void OnUpdate(object sender, EventArgs e)
 		{
-			mInput.Update();
-
 			List<Input.InputAction>	actions	=mInput.GetAction();
 
 			string	toPrint	="";
