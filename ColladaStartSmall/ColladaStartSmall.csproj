@@ -103,6 +103,10 @@
       <Project>{7B4F8D4A-3506-47EE-87A7-047F5AEA90BF}</Project>
       <Name>InputLib</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Libs\MaterialLibSharpDX\MaterialLibSharpDX.csproj">
+      <Project>{CABCC4D8-8F21-4728-B317-28D5B500BEFB}</Project>
+      <Name>MaterialLibSharpDX</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Libs\MeshLibSharpDX\MeshLibSharpDX.csproj">
       <Project>{D28619D5-2D2D-40A1-AC3C-3509B7B89033}</Project>
       <Name>MeshLibSharpDX</Name>

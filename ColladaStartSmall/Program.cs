@@ -153,56 +153,6 @@ namespace ColladaStartSmall
 
 			MaterialLib.MaterialLib	matLib	=new MaterialLib.MaterialLib(device, MaterialLib.MaterialLib.ShaderModel.SM5);
 
-			ShaderMacro	[]defs	=new ShaderMacro[1];
-
-			defs[0]	=new ShaderMacro("SM4", 1);
-
-			//farting around with shaderlib
-			IncludeFX	incFX	=new IncludeFX();
-			CompilationResult	cr2D	=ShaderBytecode.CompileFromFile("Static.fx",
-				"fx_5_0", ShaderFlags.None, EffectFlags.None, defs, incFX);
-			
-			//Compile Vertex and Pixel shaders
-			CompilationResult	fxRes	=ShaderBytecode.CompileFromFile("Junx.fx",
-				"fx_5_0", ShaderFlags.None, EffectFlags.None);
-
-//			Effect			fx		=new Effect(device, fxRes);
-			Effect			fx		=new Effect(device, cr2D);
-			EffectTechnique	tech	=fx.GetTechniqueByName("TriSolidSpec");
-			EffectPass		pass	=tech.GetPassByIndex(0);
-
-			Debug.WriteLine("Technique:  " + tech.Description.Name);
-
-			for(int i=0;;i++)
-			{
-				EffectVariable	ev	=fx.GetVariableByIndex(i);
-				if(ev == null)
-				{
-					break;
-				}
-				if(!ev.IsValid)
-				{
-					break;
-				}
-				Debug.WriteLine("EffectVar:  " + ev.Description.Name +
-					", is: " + ev.TypeInfo.Description.TypeName +
-					" with size " + ev.TypeInfo.Description.UnpackedSize);
-			}
-
-			//grab shader variables
-			EffectMatrixVariable	fxWorld				=fx.GetVariableByName("mWorld").AsMatrix();
-			EffectMatrixVariable	fxView				=fx.GetVariableByName("mView").AsMatrix();
-			EffectMatrixVariable	fxProj				=fx.GetVariableByName("mProjection").AsMatrix();
-			EffectMatrixVariable	fxLightViewProj		=fx.GetVariableByName("mLightViewWorld").AsMatrix();
-			EffectVectorVariable	fxSolidColour		=fx.GetVariableByName("mSolidColour").AsVector();
-			EffectVectorVariable	fxSpecColor			=fx.GetVariableByName("mSpecColor").AsVector();
-			EffectVectorVariable	fxLightColor0		=fx.GetVariableByName("mLightColor0").AsVector();
-			EffectVectorVariable	fxLightColor1		=fx.GetVariableByName("mLightColor1").AsVector();
-			EffectVectorVariable	fxLightColor2		=fx.GetVariableByName("mLightColor2").AsVector();
-			EffectVectorVariable	fxLightDirection	=fx.GetVariableByName("mLightDirection").AsVector();
-			EffectVectorVariable	fxEyePos			=fx.GetVariableByName("mEyePos").AsVector();
-			EffectScalarVariable	fxSpecPower			=fx.GetVariableByName("mSpecPower").AsScalar();
-
 			Random	rand	=new Random();
 
 			Vector4	col0	=Vector4.UnitY * 0.8f;
@@ -211,27 +161,21 @@ namespace ColladaStartSmall
 
 			col0.W	=col1.W	=col2.W	=1f;
 
-			fxSolidColour.Set(col0);
-			fxSpecColor.Set(Vector4.One);
-			fxLightColor0.Set(Vector4.One);
-			fxLightColor1.Set(col1);
-			fxLightColor2.Set(col2);
-			fxLightDirection.Set(UtilityLib.Mathery.RandomDirection(rand));
-			fxSpecPower.Set(15f);
+			matLib.CreateMaterial("TestMat");
 
-/*
-			CompilationResult	vsRes	=ShaderBytecode.CompileFromFile("Junx.fx",
-				"WNormWPosVS", "vs_4_0", ShaderFlags.Debug | ShaderFlags.AvoidFlowControl | ShaderFlags.SkipOptimization, EffectFlags.None);
-			VertexShader		vs		=new VertexShader(device, vsRes);
-			
-			CompilationResult	psRes	=ShaderBytecode.CompileFromFile("Junx.fx",
-				"TriSolidSpecPhysPS", "ps_4_0", ShaderFlags.Debug | ShaderFlags.AvoidFlowControl | ShaderFlags.SkipOptimization, EffectFlags.None);
-			PixelShader			ps		=new PixelShader(device, psRes);
-			
-			ShaderSignature	sig	=ShaderSignature.GetInputSignature(vsRes);
-*/			
+			matLib.SetMaterialEffect("TestMat", "Static.fx");
+			matLib.SetMaterialTechnique("TestMat", "TriSolidSpec");
+
+			matLib.SetMaterialParameter("TestMat", "mSolidColour", col0);
+			matLib.SetMaterialParameter("TestMat", "mSpecColor", Vector4.One);
+			matLib.SetMaterialParameter("TestMat", "mLightColor0", Vector4.One);
+			matLib.SetMaterialParameter("TestMat", "mLightColor1", col1);
+			matLib.SetMaterialParameter("TestMat", "mLightColor2", col2);
+			matLib.SetMaterialParameter("TestMat", "mLightDirection", UtilityLib.Mathery.RandomDirection(rand));
+			matLib.SetMaterialParameter("TestMat", "mSpecPower", 15);
+
 			//Layout from VertexShader input signature
-			InputLayout	layout	=new InputLayout(device, pass.Description.Signature, new[]
+			InputLayout	layout	=new InputLayout(device, matLib.GetMaterialSignature("TestMat", 0), new[]
 			{
 				new InputElement("POSITION", 0, Format.R32G32B32_Float, InputElement.AppendAligned, 0),
 				new InputElement("NORMAL", 0, Format.R32G32B32_Float, InputElement.AppendAligned, 0),
@@ -310,7 +254,7 @@ namespace ColladaStartSmall
 			inp.MapAction(MyActions.MoveBack, 31);
 			inp.MapAction(MyActions.TurnRight, 32);
 
-			StartSmall	ss	=new StartSmall(device);
+			StartSmall	ss	=new StartSmall(device, matLib);
 
 			ss.Visible	=true;
 
@@ -370,6 +314,7 @@ namespace ColladaStartSmall
 			dc.OutputMerger.BlendState			=bs;
 			dc.OutputMerger.DepthStencilState	=dss;
 
+			matLib.SetMaterialParameter("TestMat", "mProjection", gcam.Projection);
 
 			RenderLoop.Run(renderForm, () =>
 			{
@@ -378,6 +323,7 @@ namespace ColladaStartSmall
 					HandleResize(renderForm.ClientSize.Width, renderForm.ClientSize.Height,
 						device, dc, ref gcam, ref swapChain, scDesc,
 						ref backBuffer, ref renderView, ref depthBuffer, ref depthView);
+					matLib.SetMaterialParameter("TestMat", "mView", view);
 				}
 
 				List<Input.InputAction>	actions	=inp.GetAction();
@@ -389,9 +335,8 @@ namespace ColladaStartSmall
 				view	=gcam.View;
 				proj	=gcam.Projection;
 
-				fxView.SetMatrix(view);
-				fxProj.SetMatrix(proj);
-				fxEyePos.Set(pos);
+				matLib.SetMaterialParameter("TestMat", "mView", gcam.View);
+				matLib.SetMaterialParameter("TestMat", "mEyePos", gcam.Position);
 
 				//Clear views
 				dc.ClearDepthStencilView(depthView, DepthStencilClearFlags.Depth, 1f, 0);
@@ -399,7 +344,7 @@ namespace ColladaStartSmall
 
 				dc.InputAssembler.InputLayout		=layout;
 
-				ss.Render(dc, pass, fxWorld);
+				ss.Render(dc);
 
 //				fxWorld.SetMatrix(world);
 				
@@ -409,10 +354,6 @@ namespace ColladaStartSmall
 
 			
 			//Release all resources
-			fx.Dispose();
-			tech.Dispose();
-			pass.Dispose();
-			fxRes.Dispose();
 			layout.Dispose();
 			renderView.Dispose();
 			backBuffer.Dispose();

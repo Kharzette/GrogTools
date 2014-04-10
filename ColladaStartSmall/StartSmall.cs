@@ -33,14 +33,18 @@ namespace ColladaStartSmall
 		//graphics device
 		Device	mGD;
 
+		//matlib
+		MaterialLib.MaterialLib	mMatLib;
+
 		StaticMesh	mStatic;
 
 
-		public StartSmall(Device gd)
+		public StartSmall(Device gd, MaterialLib.MaterialLib mats)
 		{
 			InitializeComponent();
 
-			mGD	=gd;
+			mGD		=gd;
+			mMatLib	=mats;
 		}
 
 		internal COLLADA DeSerializeCOLLADA(string path)
@@ -103,7 +107,8 @@ namespace ColladaStartSmall
 				smo.AddMeshPart(m);
 
 				//temp
-				m.Visible	=true;
+				m.Visible		=true;
+				m.MaterialName	="TestMat";
 			}
 			return	smo;
 		}
@@ -722,14 +727,14 @@ namespace ColladaStartSmall
 		}
 
 
-		internal void Render(DeviceContext dc, EffectPass pass, EffectMatrixVariable fxWorld)
+		internal void Render(DeviceContext dc)
 		{
 			if(mStatic == null)
 			{
 				return;
 			}
 
-			mStatic.TempDraw(dc, pass, fxWorld);
+			mStatic.TempDraw(dc, mMatLib);
 		}
 	}
 }
