@@ -62,6 +62,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="collada_schema_1_4.cs" />
+    <Compile Include="Forms\MaterialForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MaterialForm.Designer.cs">
+      <DependentUpon>MaterialForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\TabbyPropertyGrid.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="MeshConverter.cs" />
     <Compile Include="PlayerSteering.cs" />
     <Compile Include="StartSmall.cs">
@@ -72,6 +81,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Forms\MaterialForm.resx">
+      <DependentUpon>MaterialForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -95,9 +107,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Forms\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\..\Libs\InputLib\InputLib.csproj">
       <Project>{7B4F8D4A-3506-47EE-87A7-047F5AEA90BF}</Project>

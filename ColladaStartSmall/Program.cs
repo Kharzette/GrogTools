@@ -254,9 +254,11 @@ namespace ColladaStartSmall
 			inp.MapAction(MyActions.MoveBack, 31);
 			inp.MapAction(MyActions.TurnRight, 32);
 
-			StartSmall	ss	=new StartSmall(device, matLib);
+			StartSmall		ss		=new StartSmall(device, matLib);
+			MaterialForm	matForm	=new MaterialForm(matLib);
 
-			ss.Visible	=true;
+			ss.Visible		=true;
+			matForm.Visible	=true;
 
 			Vector3	pos		=Vector3.Zero;
 			Matrix	world	=Matrix.Identity;
