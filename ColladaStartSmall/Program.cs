@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
@@ -17,6 +19,21 @@ using MapFlags = SharpDX.Direct3D11.MapFlags;
 
 namespace ColladaStartSmall
 {
+	public class IncludeFX : CallbackBase, Include
+	{
+		static string includeDirectory = "";
+		public void Close(Stream stream)
+		{
+			stream.Close();
+			stream.Dispose();
+		}
+
+		public Stream Open(IncludeType type, string fileName, Stream parentStream)
+		{
+			return	new FileStream(includeDirectory + fileName, FileMode.Open);
+		}
+	}
+
 	internal static class Program
 	{
 		static bool	mbResized;
@@ -115,17 +132,59 @@ namespace ColladaStartSmall
 			scDesc.SwapEffect			=SwapEffect.Discard;
 			scDesc.Usage				=Usage.RenderTargetOutput;
 
-			Device.CreateWithSwapChain(DriverType.Hardware, DeviceCreationFlags.None, scDesc, out device, out swapChain);
+			
+
+			SharpDX.DXGI.Factory	fact	=new Factory();
+
+			Adapter	adpt	=fact.GetAdapter(0);
+
+			FeatureLevel	[]features	=new FeatureLevel[1];
+
+			features[0]	=new FeatureLevel();
+
+//			features[0]	=FeatureLevel.Level_9_3;
+			features[0]	=FeatureLevel.Level_11_0;
+
+			Device.CreateWithSwapChain(adpt, DeviceCreationFlags.Debug, features,
+				scDesc, out device, out swapChain);
 
 			DeviceContext	dc	=device.ImmediateContext;
+
+			ShaderMacro	[]defs	=new ShaderMacro[1];
+
+			defs[0]	=new ShaderMacro("SM4", 1);
+
+			//farting around with shaderlib
+			IncludeFX	incFX	=new IncludeFX();
+			CompilationResult	cr2D	=ShaderBytecode.CompileFromFile("Static.fx",
+				"fx_5_0", ShaderFlags.None, EffectFlags.None, defs, incFX);
 			
 			//Compile Vertex and Pixel shaders
 			CompilationResult	fxRes	=ShaderBytecode.CompileFromFile("Junx.fx",
 				"fx_5_0", ShaderFlags.None, EffectFlags.None);
 
-			Effect			fx		=new Effect(device, fxRes);
-			EffectTechnique	tech	=fx.GetTechniqueByIndex(0);
+//			Effect			fx		=new Effect(device, fxRes);
+			Effect			fx		=new Effect(device, cr2D);
+			EffectTechnique	tech	=fx.GetTechniqueByName("TriSolidSpec");
 			EffectPass		pass	=tech.GetPassByIndex(0);
+
+			Debug.WriteLine("Technique:  " + tech.Description.Name);
+
+			for(int i=0;;i++)
+			{
+				EffectVariable	ev	=fx.GetVariableByIndex(i);
+				if(ev == null)
+				{
+					break;
+				}
+				if(!ev.IsValid)
+				{
+					break;
+				}
+				Debug.WriteLine("EffectVar:  " + ev.Description.Name +
+					", is: " + ev.TypeInfo.Description.TypeName +
+					" with size " + ev.TypeInfo.Description.UnpackedSize);
+			}
 
 			//grab shader variables
 			EffectMatrixVariable	fxWorld				=fx.GetVariableByName("mWorld").AsMatrix();
@@ -143,18 +202,19 @@ namespace ColladaStartSmall
 
 			Random	rand	=new Random();
 
+			Vector4	col0	=Vector4.UnitY * 0.8f;
 			Vector4	col1	=Vector4.One * 0.3f;
 			Vector4	col2	=Vector4.One * 0.4f;
 
-			col1.W	=col2.W	=1f;
+			col0.W	=col1.W	=col2.W	=1f;
 
-			fxSolidColour.Set(Vector4.One);
+			fxSolidColour.Set(col0);
 			fxSpecColor.Set(Vector4.One);
 			fxLightColor0.Set(Vector4.One);
 			fxLightColor1.Set(col1);
 			fxLightColor2.Set(col2);
 			fxLightDirection.Set(UtilityLib.Mathery.RandomDirection(rand));
-			fxSpecPower.Set(5f);
+			fxSpecPower.Set(15f);
 
 /*
 			CompilationResult	vsRes	=ShaderBytecode.CompileFromFile("Junx.fx",
@@ -199,7 +259,8 @@ namespace ColladaStartSmall
 			//Create the depth buffer
 			Texture2DDescription	depthDesc	=new Texture2DDescription()
 			{
-				Format				=Format.D32_Float_S8X24_UInt,
+//				Format				=Format.D32_Float_S8X24_UInt,
+				Format				=Format.D16_UNorm,
 				ArraySize			=1,
 				MipLevels			=1,
 //				Width				=ResX,
@@ -306,64 +367,6 @@ namespace ColladaStartSmall
 			dc.OutputMerger.BlendState			=bs;
 			dc.OutputMerger.DepthStencilState	=dss;
 
-			EffectTechnique	tech2	=fx.GetTechniqueByIndex(1);
-			EffectPass		pass2	=tech2.GetPassByIndex(0);
-
-			//Layout from VertexShader input signature
-			var layout2 = new InputLayout(device, pass2.Description.Signature, new[]
-			{
-				new InputElement("POSITION", 0, Format.R32G32B32A32_Float, 0, 0),
-				new InputElement("COLOR", 0, Format.R32G32B32A32_Float, 16, 0)
-			});
-			
-			// Instantiate Vertex buiffer from vertex data
-			var vertices = Buffer.Create(device, BindFlags.VertexBuffer, new[]
-			{
-				new Vector4(-1.0f, -1.0f, -1.0f, 1.0f), new Vector4(1.0f, 0.0f, 0.0f, 1.0f), // Front
-				new Vector4(-1.0f,  1.0f, -1.0f, 1.0f), new Vector4(1.0f, 0.0f, 0.0f, 1.0f),
-				new Vector4( 1.0f,  1.0f, -1.0f, 1.0f), new Vector4(1.0f, 0.0f, 0.0f, 1.0f),
-				new Vector4(-1.0f, -1.0f, -1.0f, 1.0f), new Vector4(1.0f, 0.0f, 0.0f, 1.0f),
-				new Vector4( 1.0f,  1.0f, -1.0f, 1.0f), new Vector4(1.0f, 0.0f, 0.0f, 1.0f),
-				new Vector4( 1.0f, -1.0f, -1.0f, 1.0f), new Vector4(1.0f, 0.0f, 0.0f, 1.0f),
-				
-				new Vector4(-1.0f, -1.0f,  1.0f, 1.0f), new Vector4(0.0f, 1.0f, 0.0f, 1.0f), // BACK
-				new Vector4( 1.0f,  1.0f,  1.0f, 1.0f), new Vector4(0.0f, 1.0f, 0.0f, 1.0f),
-				new Vector4(-1.0f,  1.0f,  1.0f, 1.0f), new Vector4(0.0f, 1.0f, 0.0f, 1.0f),
-				new Vector4(-1.0f, -1.0f,  1.0f, 1.0f), new Vector4(0.0f, 1.0f, 0.0f, 1.0f),
-				new Vector4( 1.0f, -1.0f,  1.0f, 1.0f), new Vector4(0.0f, 1.0f, 0.0f, 1.0f),
-				new Vector4( 1.0f,  1.0f,  1.0f, 1.0f), new Vector4(0.0f, 1.0f, 0.0f, 1.0f),
-
-				new Vector4(-1.0f, 1.0f, -1.0f,  1.0f), new Vector4(0.0f, 0.0f, 1.0f, 1.0f), // Top
-				new Vector4(-1.0f, 1.0f,  1.0f,  1.0f), new Vector4(0.0f, 0.0f, 1.0f, 1.0f),
-				new Vector4( 1.0f, 1.0f,  1.0f,  1.0f), new Vector4(0.0f, 0.0f, 1.0f, 1.0f),
-				new Vector4(-1.0f, 1.0f, -1.0f,  1.0f), new Vector4(0.0f, 0.0f, 1.0f, 1.0f),
-				new Vector4( 1.0f, 1.0f,  1.0f,  1.0f), new Vector4(0.0f, 0.0f, 1.0f, 1.0f),
-				new Vector4( 1.0f, 1.0f, -1.0f,  1.0f), new Vector4(0.0f, 0.0f, 1.0f, 1.0f),
-
-				new Vector4(-1.0f,-1.0f, -1.0f,  1.0f), new Vector4(1.0f, 1.0f, 0.0f, 1.0f), // Bottom
-				new Vector4( 1.0f,-1.0f,  1.0f,  1.0f), new Vector4(1.0f, 1.0f, 0.0f, 1.0f),
-				new Vector4(-1.0f,-1.0f,  1.0f,  1.0f), new Vector4(1.0f, 1.0f, 0.0f, 1.0f),
-				new Vector4(-1.0f,-1.0f, -1.0f,  1.0f), new Vector4(1.0f, 1.0f, 0.0f, 1.0f),
-				new Vector4( 1.0f,-1.0f, -1.0f,  1.0f), new Vector4(1.0f, 1.0f, 0.0f, 1.0f),
-				new Vector4( 1.0f,-1.0f,  1.0f,  1.0f), new Vector4(1.0f, 1.0f, 0.0f, 1.0f),
-
-				new Vector4(-1.0f, -1.0f, -1.0f, 1.0f), new Vector4(1.0f, 0.0f, 1.0f, 1.0f), // Left
-				new Vector4(-1.0f, -1.0f,  1.0f, 1.0f), new Vector4(1.0f, 0.0f, 1.0f, 1.0f),
-
-				new Vector4(-1.0f,  1.0f,  1.0f, 1.0f), new Vector4(1.0f, 0.0f, 1.0f, 1.0f),
-				new Vector4(-1.0f, -1.0f, -1.0f, 1.0f), new Vector4(1.0f, 0.0f, 1.0f, 1.0f),
-				new Vector4(-1.0f,  1.0f,  1.0f, 1.0f), new Vector4(1.0f, 0.0f, 1.0f, 1.0f),
-				new Vector4(-1.0f,  1.0f, -1.0f, 1.0f), new Vector4(1.0f, 0.0f, 1.0f, 1.0f),
-
-				new Vector4( 1.0f, -1.0f, -1.0f, 1.0f), new Vector4(0.0f, 1.0f, 1.0f, 1.0f), // Right
-				new Vector4( 1.0f,  1.0f,  1.0f, 1.0f), new Vector4(0.0f, 1.0f, 1.0f, 1.0f),
-				new Vector4( 1.0f, -1.0f,  1.0f, 1.0f), new Vector4(0.0f, 1.0f, 1.0f, 1.0f),
-				new Vector4( 1.0f, -1.0f, -1.0f, 1.0f), new Vector4(0.0f, 1.0f, 1.0f, 1.0f),
-				new Vector4( 1.0f,  1.0f, -1.0f, 1.0f), new Vector4(0.0f, 1.0f, 1.0f, 1.0f),
-				new Vector4( 1.0f,  1.0f,  1.0f, 1.0f), new Vector4(0.0f, 1.0f, 1.0f, 1.0f),
-			});
-
-			VertexBufferBinding	vbb	=new VertexBufferBinding(vertices, Utilities.SizeOf<Vector4>() * 2, 0);
 
 			RenderLoop.Run(renderForm, () =>
 			{
@@ -395,17 +398,12 @@ namespace ColladaStartSmall
 
 				ss.Render(dc, pass, fxWorld);
 
-				fxWorld.SetMatrix(world);
-				dc.InputAssembler.InputLayout	=layout2;
-				dc.InputAssembler.SetVertexBuffers(0, vbb);
-
-				pass2.Apply(dc);
-
-				dc.Draw(36, 0);
+//				fxWorld.SetMatrix(world);
 				
 				// Present!
 				swapChain.Present(0, PresentFlags.None);
 			});
+
 			
 			//Release all resources
 			fx.Dispose();

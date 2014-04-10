@@ -107,6 +107,10 @@
       <Project>{D28619D5-2D2D-40A1-AC3C-3509B7B89033}</Project>
       <Name>MeshLibSharpDX</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Libs\ShaderLibSharpDX\ShaderLibSharpDX.csproj">
+      <Project>{837BD265-79BF-48F1-AE02-C63850048D6C}</Project>
+      <Name>ShaderLibSharpDX</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Libs\UtilityLibSharpDX\UtilityLibSharpDX.csproj">
       <Project>{C2A1DDD2-0237-4CF3-8CBD-C77388FCC54D}</Project>
       <Name>UtilityLibSharpDX</Name>

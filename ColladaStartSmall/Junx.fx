@@ -141,8 +141,8 @@ technique10 SolidSpecPhys
 	pass P0
 	{
 		SetGeometryShader(0);
-		SetVertexShader(CompileShader(vs_4_0, WNormWPosVS()));
-		SetPixelShader(CompileShader(ps_4_0, TriSolidSpecPhysPS()));
+		SetVertexShader(CompileShader(vs_4_0_level_9_3, WNormWPosVS()));
+		SetPixelShader(CompileShader(ps_4_0_level_9_3, TriSolidSpecPhysPS()));
 	}
 }
 
@@ -206,8 +206,8 @@ technique10 Render
 	pass P0
 	{
 		SetGeometryShader( 0 );
-		SetVertexShader( CompileShader( vs_4_0, VS() ) );
-		SetPixelShader( CompileShader( ps_4_0, PS() ) );
+		SetVertexShader( CompileShader( vs_4_0_level_9_3, VS() ) );
+		SetPixelShader( CompileShader( ps_4_0_level_9_3, PS() ) );
 	}
 }
 
@@ -216,7 +216,7 @@ technique10 Render2
 	pass P0
 	{
 		SetGeometryShader( 0 );
-		SetVertexShader( CompileShader( vs_4_0, VS2() ) );
-		SetPixelShader( CompileShader( ps_4_0, PS2() ) );
+		SetVertexShader( CompileShader( vs_4_0_level_9_3, VS2() ) );
+		SetPixelShader( CompileShader( ps_4_0_level_9_3, PS2() ) );
 	}
 }
