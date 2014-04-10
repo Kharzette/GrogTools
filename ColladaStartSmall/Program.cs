@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using InputLib;
+using MaterialLib;
 
 using SharpDX;
 using SharpDX.D3DCompiler;
@@ -149,6 +150,8 @@ namespace ColladaStartSmall
 				scDesc, out device, out swapChain);
 
 			DeviceContext	dc	=device.ImmediateContext;
+
+			MaterialLib.MaterialLib	matLib	=new MaterialLib.MaterialLib(device, MaterialLib.MaterialLib.ShaderModel.SM5);
 
 			ShaderMacro	[]defs	=new ShaderMacro[1];
 
