@@ -38,6 +38,8 @@ namespace ColladaStartSmall
 
 		StaticMesh	mStatic;
 
+		public event EventHandler	eMeshChanged;
+
 
 		public StartSmall(Device gd, MaterialLib.MaterialLib mats)
 		{
@@ -46,6 +48,7 @@ namespace ColladaStartSmall
 			mGD		=gd;
 			mMatLib	=mats;
 		}
+
 
 		internal COLLADA DeSerializeCOLLADA(string path)
 		{
@@ -58,6 +61,7 @@ namespace ColladaStartSmall
 
 			return	ret;
 		}
+
 
 		void OnOpenStaticDAE(object sender, EventArgs e)
 		{
@@ -72,6 +76,8 @@ namespace ColladaStartSmall
 			}
 
 			mStatic	=LoadStatic(mOFD.FileName);
+
+			Misc.SafeInvoke(eMeshChanged, mStatic);
 		}
 
 
@@ -735,6 +741,16 @@ namespace ColladaStartSmall
 			}
 
 			mStatic.TempDraw(dc, mMatLib);
+		}
+
+
+		internal void NukeMeshPart(Mesh mesh)
+		{
+			if(mStatic == null)
+			{
+				return;
+			}
+			mStatic.NukeMesh(mesh);
 		}
 	}
 }

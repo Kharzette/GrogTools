@@ -123,7 +123,12 @@ namespace ColladaStartSmall
 
 		public string GetGeomName()
 		{
-			return	mGeomName;
+			//strip off mesh, add name put mesh back on end
+			string	ret	=mGeomName.Substring(0, mGeomName.Length - 4);
+
+			ret	+=mName + "Mesh";
+
+			return	ret;
 		}
 
 

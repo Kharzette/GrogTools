@@ -172,7 +172,7 @@ namespace ColladaStartSmall
 			matLib.SetMaterialParameter("TestMat", "mLightColor1", col1);
 			matLib.SetMaterialParameter("TestMat", "mLightColor2", col2);
 			matLib.SetMaterialParameter("TestMat", "mLightDirection", UtilityLib.Mathery.RandomDirection(rand));
-			matLib.SetMaterialParameter("TestMat", "mSpecPower", 15);
+			matLib.SetMaterialParameter("TestMat", "mSpecPower", 15f);
 
 			//Layout from VertexShader input signature
 			InputLayout	layout	=new InputLayout(device, matLib.GetMaterialSignature("TestMat", 0), new[]
@@ -256,6 +256,9 @@ namespace ColladaStartSmall
 
 			StartSmall		ss		=new StartSmall(device, matLib);
 			MaterialForm	matForm	=new MaterialForm(matLib);
+
+			ss.eMeshChanged			+=(sender, args) => matForm.SetMesh(sender);
+			matForm.eNukedMeshPart	+=(sender, args) => ss.NukeMeshPart(sender as MeshLib.Mesh);
 
 			ss.Visible		=true;
 			matForm.Visible	=true;
