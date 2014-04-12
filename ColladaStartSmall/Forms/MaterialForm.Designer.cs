@@ -68,7 +68,7 @@
 			this.MaterialList.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
 			this.MaterialList.HideSelection = false;
 			this.MaterialList.LabelEdit = true;
-			this.MaterialList.Location = new System.Drawing.Point(12, 416);
+			this.MaterialList.Location = new System.Drawing.Point(12, 476);
 			this.MaterialList.MultiSelect = false;
 			this.MaterialList.Name = "MaterialList";
 			this.MaterialList.Size = new System.Drawing.Size(418, 159);
@@ -101,7 +101,7 @@
 			this.FileGroup.Controls.Add(this.NewMaterial);
 			this.FileGroup.Controls.Add(this.LoadButton);
 			this.FileGroup.Controls.Add(this.SaveButton);
-			this.FileGroup.Location = new System.Drawing.Point(436, 416);
+			this.FileGroup.Location = new System.Drawing.Point(436, 476);
 			this.FileGroup.Name = "FileGroup";
 			this.FileGroup.Size = new System.Drawing.Size(77, 159);
 			this.FileGroup.TabIndex = 18;
@@ -155,9 +155,9 @@
 			this.groupBox1.Controls.Add(this.GuessTextures);
 			this.groupBox1.Controls.Add(this.TexSizeUp);
 			this.groupBox1.Controls.Add(this.TexSizeDown);
-			this.groupBox1.Location = new System.Drawing.Point(12, 581);
+			this.groupBox1.Location = new System.Drawing.Point(12, 185);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(504, 54);
+			this.groupBox1.Size = new System.Drawing.Size(501, 54);
 			this.groupBox1.TabIndex = 19;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Shader Shtuff";
@@ -170,6 +170,7 @@
 			this.GuessShaderParameterVisibility.TabIndex = 20;
 			this.GuessShaderParameterVisibility.Text = "GuessSP";
 			this.GuessShaderParameterVisibility.UseVisualStyleBackColor = true;
+			this.GuessShaderParameterVisibility.Click += new System.EventHandler(this.OnGuessVisibility);
 			// 
 			// UnHideAll
 			// 
@@ -179,6 +180,7 @@
 			this.UnHideAll.TabIndex = 19;
 			this.UnHideAll.Text = "ResetSP";
 			this.UnHideAll.UseVisualStyleBackColor = true;
+			this.UnHideAll.Click += new System.EventHandler(this.OnResetVisibility);
 			// 
 			// IgnoreParameter
 			// 
@@ -188,6 +190,7 @@
 			this.IgnoreParameter.TabIndex = 18;
 			this.IgnoreParameter.Text = "Ignore SP";
 			this.IgnoreParameter.UseVisualStyleBackColor = true;
+			this.IgnoreParameter.Click += new System.EventHandler(this.OnIgnoreVariables);
 			// 
 			// HideSelected
 			// 
@@ -197,6 +200,7 @@
 			this.HideSelected.TabIndex = 17;
 			this.HideSelected.Text = "Hide SP";
 			this.HideSelected.UseVisualStyleBackColor = true;
+			this.HideSelected.Click += new System.EventHandler(this.OnHideVariables);
 			// 
 			// GuessTextures
 			// 
@@ -235,7 +239,7 @@
 			this.MeshPartGroup.Controls.Add(this.TexCoordSet);
 			this.MeshPartGroup.Controls.Add(this.GenBiNormalTangent);
 			this.MeshPartGroup.Controls.Add(this.ApplyMaterial);
-			this.MeshPartGroup.Location = new System.Drawing.Point(12, 357);
+			this.MeshPartGroup.Location = new System.Drawing.Point(12, 417);
 			this.MeshPartGroup.Name = "MeshPartGroup";
 			this.MeshPartGroup.Size = new System.Drawing.Size(497, 53);
 			this.MeshPartGroup.TabIndex = 22;
@@ -323,7 +327,7 @@
 			this.MeshPartList.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
 			this.MeshPartList.HideSelection = false;
 			this.MeshPartList.LabelEdit = true;
-			this.MeshPartList.Location = new System.Drawing.Point(12, 185);
+			this.MeshPartList.Location = new System.Drawing.Point(12, 245);
 			this.MeshPartList.Name = "MeshPartList";
 			this.MeshPartList.Size = new System.Drawing.Size(501, 166);
 			this.MeshPartList.TabIndex = 23;

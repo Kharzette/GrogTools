@@ -333,7 +333,7 @@ namespace ColladaStartSmall
 			string	matName	=MaterialList.Items[MaterialList.SelectedIndices[0]].Text;
 
 			BindingList<MaterialLib.EffectVariableValue>	vars	=
-				mMatLib.GetMaterialVariables(matName);
+				mMatLib.GetMaterialGUIVariables(matName);
 
 			if(vars.Count > 0)
 			{
@@ -515,6 +515,82 @@ namespace ColladaStartSmall
 
 				m.MaterialName			=matName;
 				lvi.SubItems[1].Text	=matName;
+			}
+		}
+
+
+		void OnHideVariables(object sender, EventArgs e)
+		{
+			if(MaterialList.SelectedItems.Count != 1)
+			{
+				return;	//nothing to do
+			}
+
+			string	matName	=MaterialList.SelectedItems[0].Text;
+
+			List<string>	selected	=new List<string>();
+			foreach(DataGridViewRow dgvr in VariableList.SelectedRows)
+			{
+				selected.Add(dgvr.Cells[0].Value as string);
+			}
+
+			mMatLib.HideMaterialVariables(matName, selected);
+
+			VariableList.DataSource	=mMatLib.GetMaterialGUIVariables(matName);
+		}
+
+
+		void OnIgnoreVariables(object sender, EventArgs e)
+		{
+			if(MaterialList.SelectedItems.Count != 1)
+			{
+				return;	//nothing to do
+			}
+
+			string	matName	=MaterialList.SelectedItems[0].Text;
+
+			List<string>	selected	=new List<string>();
+			foreach(DataGridViewRow dgvr in VariableList.SelectedRows)
+			{
+				selected.Add(dgvr.Cells[0].Value as string);
+			}
+
+			mMatLib.IgnoreMaterialVariables(matName, selected);
+
+			VariableList.DataSource	=mMatLib.GetMaterialGUIVariables(matName);
+		}
+
+
+		void OnGuessVisibility(object sender, EventArgs e)
+		{
+			ListView.SelectedListViewItemCollection	matSel	=MaterialList.SelectedItems;
+			foreach(ListViewItem lvi in matSel)
+			{
+				mMatLib.GuessParameterVisibility(lvi.Text);
+			}
+
+			//if there's a single set selected, refresh
+			if(MaterialList.SelectedItems.Count == 1)
+			{
+				string	matName	=MaterialList.SelectedItems[0].Text;
+				VariableList.DataSource	=mMatLib.GetMaterialGUIVariables(matName);
+			}
+		}
+
+
+		void OnResetVisibility(object sender, EventArgs e)
+		{
+			ListView.SelectedListViewItemCollection	matSel	=MaterialList.SelectedItems;
+			foreach(ListViewItem lvi in matSel)
+			{
+				mMatLib.ResetParameterVisibility(lvi.Text);
+			}
+
+			//if there's a single set selected, refresh
+			if(MaterialList.SelectedItems.Count == 1)
+			{
+				string	matName	=MaterialList.SelectedItems[0].Text;
+				VariableList.DataSource	=mMatLib.GetMaterialGUIVariables(matName);
 			}
 		}
 	}
