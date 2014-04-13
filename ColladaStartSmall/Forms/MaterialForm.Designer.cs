@@ -135,6 +135,7 @@
 			this.LoadButton.TabIndex = 9;
 			this.LoadButton.Text = "Load";
 			this.LoadButton.UseVisualStyleBackColor = true;
+			this.LoadButton.Click += new System.EventHandler(this.OnLoadMaterialLib);
 			// 
 			// SaveButton
 			// 
@@ -144,6 +145,7 @@
 			this.SaveButton.TabIndex = 8;
 			this.SaveButton.Text = "Save";
 			this.SaveButton.UseVisualStyleBackColor = true;
+			this.SaveButton.Click += new System.EventHandler(this.OnSaveMaterialLib);
 			// 
 			// groupBox1
 			// 

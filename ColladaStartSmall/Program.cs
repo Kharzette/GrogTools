@@ -332,6 +332,10 @@ namespace ColladaStartSmall
 				}
 
 				List<Input.InputAction>	actions	=inp.GetAction();
+				if(!renderForm.Focused)
+				{
+					actions.Clear();
+				}
 				
 				pos	=pSteering.Update(pos, gcam.Forward, gcam.Left, gcam.Up, actions);
 				
@@ -340,8 +344,8 @@ namespace ColladaStartSmall
 				view	=gcam.View;
 				proj	=gcam.Projection;
 
-				matLib.SetMaterialParameter("TestMat", "mView", gcam.View);
-				matLib.SetMaterialParameter("TestMat", "mEyePos", gcam.Position);
+				matLib.SetParameterForAll("mView", gcam.View);
+				matLib.SetParameterForAll("mEyePos", gcam.Position);
 
 				//Clear views
 				dc.ClearDepthStencilView(depthView, DepthStencilClearFlags.Depth, 1f, 0);

@@ -14,6 +14,9 @@ namespace ColladaStartSmall
 {
 	public partial class MaterialForm : Form
 	{
+		OpenFileDialog			mOFD	=new OpenFileDialog();
+		SaveFileDialog			mSFD	=new SaveFileDialog();
+
 		MaterialLib.MaterialLib	mMatLib;
 
 		public event EventHandler	eNukedMeshPart;
@@ -327,8 +330,10 @@ namespace ColladaStartSmall
 				|| MaterialList.SelectedIndices.Count > 1)
 			{
 				VariableList.DataSource	=null;
+				NewMaterial.Text		="New Mat";
 				return;
 			}
+			NewMaterial.Text		="Clone Mat";
 
 			string	matName	=MaterialList.Items[MaterialList.SelectedIndices[0]].Text;
 
@@ -383,11 +388,21 @@ namespace ColladaStartSmall
 			}
 		}
 
+
+		//the new button becomes a clone button with a mat selected
 		void OnNewMaterial(object sender, EventArgs e)
 		{
+			string	baseName	="default";
+			bool	bClone		=false;
+			if(MaterialList.SelectedIndices.Count == 1)
+			{
+				baseName	=MaterialList.Items[MaterialList.SelectedIndices[0]].Text;
+				bClone		=true;
+			}
+
 			List<string>	names	=mMatLib.GetMaterialNames();
 
-			string	tryName	="default";
+			string	tryName	=baseName;
 			bool	bFirst	=true;
 			int		cnt		=1;
 			while(names.Contains(tryName))
@@ -399,12 +414,19 @@ namespace ColladaStartSmall
 				}
 				else
 				{
-					tryName	="default" + String.Format("{0:000}", cnt);
+					tryName	=baseName + String.Format("{0:000}", cnt);
 					cnt++;
 				}
 			}
 
-			mMatLib.CreateMaterial(tryName);
+			if(bClone)
+			{
+				mMatLib.CloneMaterial(baseName, tryName);
+			}
+			else
+			{
+				mMatLib.CreateMaterial(tryName);
+			}
 
 			RefreshMaterials();
 		}
@@ -592,6 +614,39 @@ namespace ColladaStartSmall
 				string	matName	=MaterialList.SelectedItems[0].Text;
 				VariableList.DataSource	=mMatLib.GetMaterialGUIVariables(matName);
 			}
+		}
+
+
+		void OnSaveMaterialLib(object sender, EventArgs e)
+		{
+			mSFD.DefaultExt	="*.MatLib";
+			mSFD.Filter		="Material lib files (*.MatLib)|*.MatLib|All files (*.*)|*.*";
+
+			DialogResult	dr	=mSFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			mMatLib.SaveToFile(mSFD.FileName);
+		}
+
+		
+		void OnLoadMaterialLib(object sender, EventArgs e)
+		{
+			mOFD.DefaultExt	="*.MatLib";
+			mOFD.Filter		="Material lib files (*.MatLib)|*.MatLib|All files (*.*)|*.*";
+
+			DialogResult	dr	=mOFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			mMatLib.ReadFromFile(mOFD.FileName);
+			RefreshMaterials();
 		}
 	}
 }
