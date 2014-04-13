@@ -339,6 +339,7 @@
 			this.MeshPartList.UseCompatibleStateImageBehavior = false;
 			this.MeshPartList.View = System.Windows.Forms.View.Details;
 			this.MeshPartList.KeyUp += new System.Windows.Forms.KeyEventHandler(this.OnMeshPartListKeyUp);
+			this.MeshPartList.MouseUp += new System.Windows.Forms.MouseEventHandler(this.OnMeshPartMouseUp);
 			// 
 			// MaterialForm
 			// 

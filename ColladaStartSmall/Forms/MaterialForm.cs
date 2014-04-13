@@ -90,7 +90,10 @@ namespace ColladaStartSmall
 
 				lvi.SubItems.Add(m.MaterialName);
 				lvi.SubItems.Add(m.VertexType.ToString());
-				lvi.SubItems.Add(m.Visible.ToString());
+
+				//set the tag on this one for click detection help
+				ListViewItem.ListViewSubItem	vis	=lvi.SubItems.Add(m.Visible.ToString());
+				vis.Tag	=69;
 			}
 
 			SizeColumns(MeshPartList);
@@ -391,6 +394,38 @@ namespace ColladaStartSmall
 			else
 			{
 				SizeColumns(MaterialList);	//this doesn't work, still has the old value
+			}
+		}
+
+
+		void OnMeshPartMouseUp(object sender, MouseEventArgs mea)
+		{
+			foreach(ListViewItem lvi in MeshPartList.Items)
+			{
+				if(lvi.Bounds.Contains(mea.Location))
+				{
+					Mesh	m	=lvi.Tag as Mesh;
+
+					foreach(ListViewItem.ListViewSubItem sub in lvi.SubItems)
+					{
+						if(sub.Bounds.Contains(mea.Location))
+						{
+							if(sub.Tag != null && (int)sub.Tag == 69)
+							{
+								if((string)sub.Text == "True")
+								{
+									sub.Text	="False";
+									m.Visible	=false;
+								}
+								else
+								{
+									sub.Text	="True";
+									m.Visible	=true;
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 
