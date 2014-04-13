@@ -54,6 +54,21 @@ namespace ColladaStartSmall
 			mbResized	=true;
 		}
 
+		static void DeleteVertElement(Device gd, List<int> inds, List<MeshLib.Mesh> meshes)
+		{
+			Type	firstType	=meshes[0].VertexType;
+
+			foreach(MeshLib.Mesh m in meshes)
+			{
+				if(m.VertexType == firstType)
+				{
+					MeshLib.EditorMesh	em	=m as MeshLib.EditorMesh;
+
+					em.NukeVertexElement(inds, gd);
+				}
+			}
+		}
+
 		static void HandleResize(int width, int height,
 			Device dev, DeviceContext dctx,
 			ref UtilityLib.GameCamera gcam,
@@ -256,9 +271,19 @@ namespace ColladaStartSmall
 
 			StartSmall		ss		=new StartSmall(device, matLib);
 			MaterialForm	matForm	=new MaterialForm(matLib);
+			StripElements	se		=new StripElements();
 
 			ss.eMeshChanged			+=(sender, args) => matForm.SetMesh(sender);
 			matForm.eNukedMeshPart	+=(sender, args) => ss.NukeMeshPart(sender as MeshLib.Mesh);
+			matForm.eStripElements	+=(sender, args) =>
+				{	if(se.Visible){	return;	}
+					se.Populate(sender as List<MeshLib.Mesh>);	};
+			se.eDeleteElement		+=(sender, args) =>
+				{	DeleteVertElement(device, sender as List<int>, se.GetMeshes());
+					se.Populate(null);	se.Visible	=false;
+					matForm.RefreshMeshPartList();	};
+			se.eEscape				+=(sender, args) =>
+				{	se.Populate(null);	se.Visible	=false;	};
 
 			ss.Visible		=true;
 			matForm.Visible	=true;

@@ -20,6 +20,7 @@ namespace ColladaStartSmall
 		MaterialLib.MaterialLib	mMatLib;
 
 		public event EventHandler	eNukedMeshPart;
+		public event EventHandler	eStripElements;
 
 
 		public MaterialForm(MaterialLib.MaterialLib matLib)
@@ -647,6 +648,45 @@ namespace ColladaStartSmall
 
 			mMatLib.ReadFromFile(mOFD.FileName);
 			RefreshMaterials();
+		}
+
+
+		void OnMatchAndVisible(object sender, EventArgs e)
+		{
+			foreach(ListViewItem lvi in MaterialList.Items)
+			{
+				string	matName	=lvi.Text;
+
+				foreach(ListViewItem lviMesh in MeshPartList.Items)
+				{
+					string	meshName	=lviMesh.Text;
+
+					if(meshName.Contains(matName))
+					{
+						Mesh	m	=lviMesh.Tag as Mesh;
+
+						m.MaterialName				=matName;
+						lviMesh.SubItems[1].Text	=matName;
+					}
+				}
+			}
+		}
+
+
+		void OnStripElements(object sender, EventArgs e)
+		{
+			if(MeshPartList.SelectedItems.Count < 1)
+			{
+				return;
+			}
+
+			List<Mesh>	parts	=new List<Mesh>();
+			foreach(ListViewItem lviMesh in MeshPartList.SelectedItems)
+			{
+				parts.Add(lviMesh.Tag as Mesh);
+			}
+
+			Misc.SafeInvoke(eStripElements, parts);
 		}
 	}
 }

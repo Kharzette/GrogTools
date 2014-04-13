@@ -68,6 +68,12 @@
     <Compile Include="Forms\MaterialForm.Designer.cs">
       <DependentUpon>MaterialForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\StripElements.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\StripElements.designer.cs">
+      <DependentUpon>StripElements.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\TabbyPropertyGrid.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -83,6 +89,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Forms\MaterialForm.resx">
       <DependentUpon>MaterialForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\StripElements.resx">
+      <DependentUpon>StripElements.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
