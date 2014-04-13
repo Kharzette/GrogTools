@@ -118,8 +118,24 @@ namespace ColladaStartSmall
 				}
 			}
 		}
-
-
+		
+		
+		//from a stacko question
+		int DropDownWidth(ListBox myBox)
+		{
+			int maxWidth = 0, temp = 0;
+			foreach(var obj in myBox.Items)
+			{
+				temp	=TextRenderer.MeasureText(obj.ToString(), myBox.Font).Width;
+				if(temp > maxWidth)
+				{
+					maxWidth = temp;
+				}
+			}
+			return maxWidth;
+		}
+		
+		
 		void SpawnEffectComboBox(string matName, ListViewItem.ListViewSubItem sub)
 		{
 			List<string>	effects	=mMatLib.GetEffects();
@@ -145,6 +161,13 @@ namespace ColladaStartSmall
 			{
 				lbox.SelectedItem	=current;
 			}
+
+			int	width	=DropDownWidth(lbox);
+
+			width	+=SystemInformation.VerticalScrollBarWidth;
+
+			Size	fit	=new System.Drawing.Size(width, lbox.Size.Height);
+			lbox.Size	=fit;
 
 			lbox.Visible		=true;
 
@@ -179,6 +202,13 @@ namespace ColladaStartSmall
 			{
 				lbox.SelectedItem	=current;
 			}
+
+			int	width	=DropDownWidth(lbox);
+
+			width	+=SystemInformation.VerticalScrollBarWidth;
+
+			Size	fit	=new System.Drawing.Size(width, lbox.Size.Height);
+			lbox.Size	=fit;
 
 			lbox.Visible		=true;
 

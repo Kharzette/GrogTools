@@ -170,47 +170,17 @@ namespace ColladaStartSmall
 
 			Random	rand	=new Random();
 
-			Vector4	col0	=Vector4.UnitY * 0.8f;
-			Vector4	col1	=Vector4.One * 0.3f;
-			Vector4	col2	=Vector4.One * 0.4f;
-
-			col0.W	=col1.W	=col2.W	=1f;
-
-			matLib.CreateMaterial("TestMat");
-
-			matLib.SetMaterialEffect("TestMat", "Static.fx");
-			matLib.SetMaterialTechnique("TestMat", "TriSolidSpec");
-
-			matLib.SetMaterialParameter("TestMat", "mSolidColour", col0);
-			matLib.SetMaterialParameter("TestMat", "mSpecColor", Vector4.One);
-			matLib.SetMaterialParameter("TestMat", "mLightColor0", Vector4.One);
-			matLib.SetMaterialParameter("TestMat", "mLightColor1", col1);
-			matLib.SetMaterialParameter("TestMat", "mLightColor2", col2);
-			matLib.SetMaterialParameter("TestMat", "mLightDirection", UtilityLib.Mathery.RandomDirection(rand));
-			matLib.SetMaterialParameter("TestMat", "mSpecPower", 15f);
-
 			//Layout from VertexShader input signature
-			InputLayout	layout	=new InputLayout(device, matLib.GetMaterialSignature("TestMat", 0), new[]
+/*			InputLayout	layout	=new InputLayout(device, matLib.GetMaterialSignature("TestMat", 0), new[]
 			{
 				new InputElement("POSITION", 0, Format.R32G32B32_Float, InputElement.AppendAligned, 0),
 				new InputElement("NORMAL", 0, Format.R32G32B32_Float, InputElement.AppendAligned, 0),
 				new InputElement("TEXCOORD", 0, Format.R32G32_Float, InputElement.AppendAligned, 0)
-			});
+			});*/
 			
-			//Create Constant Buffer
-/*			Buffer	constBuffer	=new Buffer(device,
-				(64 * 4) + (16 * 8),
-				ResourceUsage.Default,
-				BindFlags.ConstantBuffer,
-				CpuAccessFlags.None,
-				ResourceOptionFlags.None, 0);
-*/			
 			//Prepare All the stages
-			dc.InputAssembler.InputLayout		=layout;
+//			dc.InputAssembler.InputLayout		=layout;
 			dc.InputAssembler.PrimitiveTopology	=PrimitiveTopology.TriangleList;
-//			dc.VertexShader.SetConstantBuffer(0, constBuffer);
-//			dc.VertexShader.Set(vs);
-//			dc.PixelShader.Set(ps);
 			
 			//Get the backbuffer from the swapchain
 			Texture2D	backBuffer	=Texture2D.FromSwapChain<Texture2D>(swapChain, 0);
@@ -221,8 +191,8 @@ namespace ColladaStartSmall
 			//Create the depth buffer
 			Texture2DDescription	depthDesc	=new Texture2DDescription()
 			{
-//				Format				=Format.D32_Float_S8X24_UInt,
-				Format				=Format.D16_UNorm,
+				Format				=Format.D32_Float_S8X24_UInt,
+//				Format				=Format.D16_UNorm,
 				ArraySize			=1,
 				MipLevels			=1,
 //				Width				=ResX,
@@ -242,12 +212,9 @@ namespace ColladaStartSmall
 			DepthStencilView	depthView	=new DepthStencilView(device, depthBuffer);
 			
 			//Setup targets and viewport for rendering
-//			dc.Rasterizer.SetViewport(new Viewport(0, 0, ResX, ResY, 0.1f, 2000.0f));
-//			dc.Rasterizer.SetViewport(new Viewport(0, 0, renderForm.ClientSize.Width, renderForm.ClientSize.Height, 0.1f, 2000.0f));
 			dc.Rasterizer.SetViewport(new Viewport(0, 0, renderForm.ClientSize.Width, renderForm.ClientSize.Height, 0.0f, 1.0f));
 			dc.OutputMerger.SetTargets(depthView, renderView);
 
-//			UtilityLib.GameCamera	gcam	=new UtilityLib.GameCamera(ResX, ResY, 16f/9f, 0.1f, 2000f);
 			UtilityLib.GameCamera	gcam	=new UtilityLib.GameCamera(renderForm.ClientSize.Width, renderForm.ClientSize.Height, 16f/9f, 0.1f, 2000f);
 
 			Input	inp	=new InputLib.Input();
@@ -273,6 +240,22 @@ namespace ColladaStartSmall
 			MaterialForm	matForm	=new MaterialForm(matLib);
 			StripElements	se		=new StripElements();
 
+			//save positions
+			matForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
+				Settings.Default, "MaterialFormPos", true,
+				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+
+			ss.DataBindings.Add(new System.Windows.Forms.Binding("Location",
+				Settings.Default, "AnimFormPos", true,
+				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+
+			renderForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
+					Settings.Default,
+					"MainWindowPos", true,
+					System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+
+			renderForm.Location	=Settings.Default.MainWindowPos;
+
 			ss.eMeshChanged			+=(sender, args) => matForm.SetMesh(sender);
 			matForm.eNukedMeshPart	+=(sender, args) => ss.NukeMeshPart(sender as MeshLib.Mesh);
 			matForm.eStripElements	+=(sender, args) =>
@@ -289,9 +272,6 @@ namespace ColladaStartSmall
 			matForm.Visible	=true;
 
 			Vector3	pos		=Vector3.Zero;
-			Matrix	world	=Matrix.Identity;
-			Matrix	view	=Matrix.Identity;
-			Matrix	proj	=Matrix.Identity;
 
 			RasterizerStateDescription	rsd	=new RasterizerStateDescription();
 			rsd.CullMode					=CullMode.Back;
@@ -353,7 +333,6 @@ namespace ColladaStartSmall
 					HandleResize(renderForm.ClientSize.Width, renderForm.ClientSize.Height,
 						device, dc, ref gcam, ref swapChain, scDesc,
 						ref backBuffer, ref renderView, ref depthBuffer, ref depthView);
-					matLib.SetMaterialParameter("TestMat", "mView", view);
 				}
 
 				List<Input.InputAction>	actions	=inp.GetAction();
@@ -366,29 +345,24 @@ namespace ColladaStartSmall
 				
 				gcam.Update(pos, pSteering.Pitch, pSteering.Yaw, pSteering.Roll);
 
-				view	=gcam.View;
-				proj	=gcam.Projection;
-
 				matLib.SetParameterForAll("mView", gcam.View);
 				matLib.SetParameterForAll("mEyePos", gcam.Position);
+				matLib.SetParameterForAll("mProjection", gcam.Projection);
 
 				//Clear views
 				dc.ClearDepthStencilView(depthView, DepthStencilClearFlags.Depth, 1f, 0);
 				dc.ClearRenderTargetView(renderView, Color.CornflowerBlue);
 
-				dc.InputAssembler.InputLayout		=layout;
-
 				ss.Render(dc);
-
-//				fxWorld.SetMatrix(world);
 				
 				// Present!
 				swapChain.Present(0, PresentFlags.None);
 			});
 
+			Settings.Default.Save();
 			
 			//Release all resources
-			layout.Dispose();
+//			layout.Dispose();
 			renderView.Dispose();
 			backBuffer.Dispose();
 			device.Dispose();
