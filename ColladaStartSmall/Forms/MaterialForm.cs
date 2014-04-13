@@ -17,6 +17,8 @@ namespace ColladaStartSmall
 		OpenFileDialog			mOFD	=new OpenFileDialog();
 		SaveFileDialog			mSFD	=new SaveFileDialog();
 
+//		ListBoxContainer	mLBC	=new ListBoxContainer();
+
 		MaterialLib.MaterialLib	mMatLib;
 
 		public event EventHandler	eNukedMeshPart;
@@ -147,10 +149,15 @@ namespace ColladaStartSmall
 				return;
 			}
 
-			ListBox	lbox	=new ListBox();
+			ListBox				lbox	=new ListBox();
+			ListBoxContainer	lbc		=new ListBoxContainer();
 
-			lbox.Parent		=MaterialList;
-			lbox.Location	=sub.Bounds.Location;
+			Point	loc	=sub.Bounds.Location;
+
+			lbc.Location	=MaterialList.PointToScreen(loc);
+
+			lbox.Parent		=lbc;
+			lbox.Location	=new Point(0, 0);
 			lbox.Tag		=matName;
 
 			string	current	=mMatLib.GetMaterialEffect(matName);
@@ -170,13 +177,17 @@ namespace ColladaStartSmall
 			width	+=SystemInformation.VerticalScrollBarWidth;
 
 			Size	fit	=new System.Drawing.Size(width, lbox.Size.Height);
-			lbox.Size	=fit;
 
-			lbox.Visible		=true;
+			lbox.Size	=fit;
+			lbc.Size	=fit;
+
+			lbc.Visible	=true;
+			lbox.Visible	=true;
 
 			lbox.MouseClick	+=OnEffectListBoxClick;
 			lbox.Leave		+=OnEffectListBoxEscaped;
 			lbox.KeyPress	+=OnEffectListBoxKey;
+			lbox.LostFocus	+=OnEffectLostFocus;
 			lbox.Focus();
 		}
 
@@ -189,10 +200,14 @@ namespace ColladaStartSmall
 				return;
 			}
 
-			ListBox	lbox	=new ListBox();
+			ListBox				lbox	=new ListBox();
+			ListBoxContainer	lbc		=new ListBoxContainer();
 
-			lbox.Parent		=MaterialList;
-			lbox.Location	=sub.Bounds.Location;
+			Point	loc	=sub.Bounds.Location;
+
+			lbc.Location	=MaterialList.PointToScreen(loc);
+			lbox.Parent		=lbc;
+			lbox.Location	=new Point(0, 0);
 			lbox.Tag		=matName;
 
 			foreach(string tn in techs)
@@ -211,13 +226,17 @@ namespace ColladaStartSmall
 			width	+=SystemInformation.VerticalScrollBarWidth;
 
 			Size	fit	=new System.Drawing.Size(width, lbox.Size.Height);
-			lbox.Size	=fit;
 
-			lbox.Visible		=true;
+			lbox.Size	=fit;
+			lbc.Size	=fit;
+
+			lbox.Visible	=true;
+			lbc.Visible	=true;
 
 			lbox.Leave		+=OnTechListBoxEscaped;
 			lbox.KeyPress	+=OnTechListBoxKey;
 			lbox.MouseClick	+=OnTechListBoxClick;
+			lbox.LostFocus	+=OnTechLostFocus;
 			lbox.Focus();
 		}
 
@@ -254,10 +273,7 @@ namespace ColladaStartSmall
 
 			if(kpea.KeyChar == 27)	//escape
 			{
-				lb.Leave		-=OnTechListBoxEscaped;
-				lb.KeyPress		-=OnTechListBoxKey;
-				lb.MouseClick	-=OnTechListBoxClick;
-				lb.Dispose();
+				DisposeTechBox(lb);
 			}
 			else if(kpea.KeyChar == '\r')
 			{
@@ -267,11 +283,20 @@ namespace ColladaStartSmall
 					SetListTechnique(lb.Tag as string, lb.SelectedItem as string);
 					OnMaterialSelectionChanged(null, null);
 				}
-				lb.Leave		-=OnTechListBoxEscaped;
-				lb.KeyPress		-=OnTechListBoxKey;
-				lb.MouseClick	-=OnTechListBoxClick;
-				lb.Dispose();
+				DisposeTechBox(lb);
 			}
+		}
+
+
+		void OnEffectLostFocus(object sender, EventArgs ea)
+		{
+			DisposeEffectBox(sender as ListBox);
+		}
+
+
+		void OnTechLostFocus(object sender, EventArgs ea)
+		{
+			DisposeEffectBox(sender as ListBox);
 		}
 
 
@@ -281,10 +306,7 @@ namespace ColladaStartSmall
 
 			if(kpea.KeyChar == 27)	//escape
 			{
-				lb.Leave		-=OnEffectListBoxEscaped;
-				lb.KeyPress		-=OnEffectListBoxKey;
-				lb.MouseClick	-=OnEffectListBoxClick;
-				lb.Dispose();
+				DisposeEffectBox(lb);
 			}
 			else if(kpea.KeyChar == '\r')
 			{
@@ -294,10 +316,7 @@ namespace ColladaStartSmall
 					SetListEffect(lb.Tag as string, lb.SelectedItem as string);
 					OnMaterialSelectionChanged(null, null);
 				}
-				lb.Leave		-=OnEffectListBoxEscaped;
-				lb.KeyPress		-=OnEffectListBoxKey;
-				lb.MouseClick	-=OnEffectListBoxClick;
-				lb.Dispose();
+				DisposeEffectBox(lb);
 			}
 		}
 
@@ -312,10 +331,7 @@ namespace ColladaStartSmall
 				SetListTechnique(lb.Tag as string, lb.SelectedItem as string);
 				OnMaterialSelectionChanged(null, null);
 			}
-			lb.Leave		-=OnTechListBoxEscaped;
-			lb.KeyPress		-=OnTechListBoxKey;
-			lb.MouseClick	-=OnTechListBoxClick;
-			lb.Dispose();
+			DisposeTechBox(lb);
 		}
 
 
@@ -329,10 +345,7 @@ namespace ColladaStartSmall
 				SetListEffect(lb.Tag as string, lb.SelectedItem as string);
 				OnMaterialSelectionChanged(null, null);
 			}
-			lb.Leave		-=OnEffectListBoxEscaped;
-			lb.KeyPress		-=OnEffectListBoxKey;
-			lb.MouseClick	-=OnEffectListBoxClick;
-			lb.Dispose();
+			DisposeEffectBox(lb);
 		}
 
 
@@ -340,10 +353,7 @@ namespace ColladaStartSmall
 		{
 			ListBox	lb	=sender as ListBox;
 
-			lb.Leave		-=OnTechListBoxEscaped;
-			lb.KeyPress		-=OnTechListBoxKey;
-			lb.MouseClick	-=OnTechListBoxClick;
-			lb.Dispose();
+			DisposeTechBox(lb);
 		}
 
 
@@ -351,10 +361,7 @@ namespace ColladaStartSmall
 		{
 			ListBox	lb	=sender as ListBox;
 
-			lb.Leave		-=OnEffectListBoxEscaped;
-			lb.KeyPress		-=OnEffectListBoxKey;
-			lb.MouseClick	-=OnEffectListBoxClick;
-			lb.Dispose();
+			DisposeEffectBox(lb);
 		}
 
 
@@ -752,6 +759,26 @@ namespace ColladaStartSmall
 			}
 
 			Misc.SafeInvoke(eStripElements, parts);
+		}
+
+
+		void DisposeEffectBox(ListBox lb)
+		{
+			lb.Leave		-=OnEffectListBoxEscaped;
+			lb.KeyPress		-=OnEffectListBoxKey;
+			lb.MouseClick	-=OnEffectListBoxClick;
+			lb.LostFocus	-=OnEffectLostFocus;
+			lb.Parent.Dispose();
+		}
+
+
+		void DisposeTechBox(ListBox lb)
+		{
+			lb.Leave		-=OnTechListBoxEscaped;
+			lb.KeyPress		-=OnTechListBoxKey;
+			lb.MouseClick	-=OnTechListBoxClick;
+			lb.LostFocus	-=OnTechLostFocus;
+			lb.Parent.Dispose();
 		}
 	}
 }

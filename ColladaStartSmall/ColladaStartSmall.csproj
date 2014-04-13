@@ -62,6 +62,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="collada_schema_1_4.cs" />
+    <Compile Include="Forms\ListBoxContainer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ListBoxContainer.Designer.cs">
+      <DependentUpon>ListBoxContainer.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\MaterialForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -92,6 +98,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Forms\ListBoxContainer.resx">
+      <DependentUpon>ListBoxContainer.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\MaterialForm.resx">
       <DependentUpon>MaterialForm.cs</DependentUpon>
     </EmbeddedResource>
