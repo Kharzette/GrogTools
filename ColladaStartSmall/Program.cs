@@ -168,6 +168,9 @@ namespace ColladaStartSmall
 
 			MaterialLib.MaterialLib	matLib	=new MaterialLib.MaterialLib(device, MaterialLib.MaterialLib.ShaderModel.SM5);
 
+			matLib.InitCelShading(1);
+			matLib.GenerateCelTexturePreset(device, false, 0);
+
 			Random	rand	=new Random();
 
 			//Layout from VertexShader input signature
@@ -348,6 +351,7 @@ namespace ColladaStartSmall
 				matLib.SetParameterForAll("mView", gcam.View);
 				matLib.SetParameterForAll("mEyePos", gcam.Position);
 				matLib.SetParameterForAll("mProjection", gcam.Projection);
+				matLib.SetCelTexture(0);
 
 				//Clear views
 				dc.ClearDepthStencilView(depthView, DepthStencilClearFlags.Depth, 1f, 0);
