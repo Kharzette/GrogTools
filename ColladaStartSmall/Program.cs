@@ -119,7 +119,7 @@ namespace ColladaStartSmall
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 
-			RenderForm	renderForm	=new RenderForm("Goblins");
+			RenderForm	renderForm	=new RenderForm("Collada Conversion Tool");
 
 			renderForm.UserResized	+=OnRenderFormResize;
 
@@ -158,31 +158,48 @@ namespace ColladaStartSmall
 
 			features[0]	=new FeatureLevel();
 
-//			features[0]	=FeatureLevel.Level_9_3;
 			features[0]	=FeatureLevel.Level_11_0;
+//			features[0]	=FeatureLevel.Level_10_1;
+//			features[0]	=FeatureLevel.Level_10_0;
+//			features[0]	=FeatureLevel.Level_9_3;
 
 			Device.CreateWithSwapChain(adpt, DeviceCreationFlags.Debug, features,
 				scDesc, out device, out swapChain);
 
 			DeviceContext	dc	=device.ImmediateContext;
 
-			MaterialLib.MaterialLib	matLib	=new MaterialLib.MaterialLib(device, MaterialLib.MaterialLib.ShaderModel.SM5);
+			MaterialLib.MaterialLib.ShaderModel	shaderModel;
+
+			switch(features[0])
+			{
+				case	FeatureLevel.Level_11_0:
+					shaderModel	=MaterialLib.MaterialLib.ShaderModel.SM5;
+					break;
+				case	FeatureLevel.Level_10_1:
+					shaderModel	=MaterialLib.MaterialLib.ShaderModel.SM41;
+					break;
+				case	FeatureLevel.Level_10_0:
+					shaderModel	=MaterialLib.MaterialLib.ShaderModel.SM4;
+					break;
+				case	FeatureLevel.Level_9_3:
+					shaderModel	=MaterialLib.MaterialLib.ShaderModel.SM2;
+					break;
+				default:
+					Debug.Assert(false);	//only support the above
+					shaderModel	=MaterialLib.MaterialLib.ShaderModel.SM2;
+					break;
+			}
+
+			MaterialLib.MaterialLib	matLib	=new MaterialLib.MaterialLib(
+				device,	shaderModel);
 
 			matLib.InitCelShading(1);
-			matLib.GenerateCelTexturePreset(device, false, 0);
+			matLib.GenerateCelTexturePreset(device,
+				features[0] == FeatureLevel.Level_9_3, false, 0);
 
 			Random	rand	=new Random();
 
-			//Layout from VertexShader input signature
-/*			InputLayout	layout	=new InputLayout(device, matLib.GetMaterialSignature("TestMat", 0), new[]
-			{
-				new InputElement("POSITION", 0, Format.R32G32B32_Float, InputElement.AppendAligned, 0),
-				new InputElement("NORMAL", 0, Format.R32G32B32_Float, InputElement.AppendAligned, 0),
-				new InputElement("TEXCOORD", 0, Format.R32G32_Float, InputElement.AppendAligned, 0)
-			});*/
-			
-			//Prepare All the stages
-//			dc.InputAssembler.InputLayout		=layout;
+			//I always use this, hope it doesn't change somehow
 			dc.InputAssembler.PrimitiveTopology	=PrimitiveTopology.TriangleList;
 			
 			//Get the backbuffer from the swapchain
@@ -194,8 +211,9 @@ namespace ColladaStartSmall
 			//Create the depth buffer
 			Texture2DDescription	depthDesc	=new Texture2DDescription()
 			{
-				Format				=Format.D32_Float_S8X24_UInt,
-//				Format				=Format.D16_UNorm,
+				//pick depth format based on feature level
+				Format				=(shaderModel != MaterialLib.MaterialLib.ShaderModel.SM2)?
+										Format.D32_Float_S8X24_UInt : Format.D24_UNorm_S8_UInt,
 				ArraySize			=1,
 				MipLevels			=1,
 //				Width				=ResX,
