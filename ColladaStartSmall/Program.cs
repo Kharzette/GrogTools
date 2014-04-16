@@ -46,12 +46,38 @@ namespace ColladaStartSmall
 		{
 			MoveForward, MoveBack, MoveLeft, MoveRight,
 			TurnLeft, TurnRight,
-			PitchUp, PitchDown
+			PitchUp, PitchDown,
+			LightX, LightY, LightZ
 		};
 
 		static void OnRenderFormResize(object sender, EventArgs ea)
 		{
 			mbResized	=true;
+		}
+
+		static void ChangeLight(List<Input.InputAction> acts, ref Vector3 lightDir)
+		{
+			foreach(Input.InputAction act in acts)
+			{
+				if(act.mAction.Equals(MyActions.LightX))
+				{
+					Matrix	rot	=Matrix.RotationX(act.mTimeHeld * 0.001f);
+					lightDir	=Vector3.TransformCoordinate(lightDir, rot);
+					lightDir.Normalize();
+				}
+				else if(act.mAction.Equals(MyActions.LightY))
+				{
+					Matrix	rot	=Matrix.RotationY(act.mTimeHeld * 0.001f);
+					lightDir	=Vector3.TransformCoordinate(lightDir, rot);
+					lightDir.Normalize();
+				}
+				else if(act.mAction.Equals(MyActions.LightZ))
+				{
+					Matrix	rot	=Matrix.RotationZ(act.mTimeHeld * 0.001f);
+					lightDir	=Vector3.TransformCoordinate(lightDir, rot);
+					lightDir.Normalize();
+				}
+			}
 		}
 
 		static void DeleteVertElement(Device gd, List<int> inds, List<MeshLib.Mesh> meshes)
@@ -256,6 +282,9 @@ namespace ColladaStartSmall
 			inp.MapAction(MyActions.TurnLeft, 30);
 			inp.MapAction(MyActions.MoveBack, 31);
 			inp.MapAction(MyActions.TurnRight, 32);
+			inp.MapAction(MyActions.LightX, 36);
+			inp.MapAction(MyActions.LightY, 37);
+			inp.MapAction(MyActions.LightZ, 38);
 
 			StartSmall		ss		=new StartSmall(device, matLib);
 			MaterialForm	matForm	=new MaterialForm(matLib);
@@ -347,6 +376,8 @@ namespace ColladaStartSmall
 
 			matLib.SetMaterialParameter("TestMat", "mProjection", gcam.Projection);
 
+			Vector3	lightDir	=-Vector3.UnitY;
+
 			RenderLoop.Run(renderForm, () =>
 			{
 				if(mbResized)
@@ -361,6 +392,11 @@ namespace ColladaStartSmall
 				{
 					actions.Clear();
 				}
+
+				ChangeLight(actions, ref lightDir);
+
+				//light direction is backwards now for some strange reason
+				matLib.SetParameterForAll("mLightDirection", -lightDir);
 				
 				pos	=pSteering.Update(pos, gcam.Forward, gcam.Left, gcam.Up, actions);
 				
