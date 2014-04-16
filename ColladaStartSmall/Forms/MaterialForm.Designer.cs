@@ -115,6 +115,7 @@
 			this.MergeMaterialLib.TabIndex = 10;
 			this.MergeMaterialLib.Text = "Merge";
 			this.MergeMaterialLib.UseVisualStyleBackColor = true;
+			this.MergeMaterialLib.Click += new System.EventHandler(this.OnMergeMatLib);
 			// 
 			// NewMaterial
 			// 

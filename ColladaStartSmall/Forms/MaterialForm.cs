@@ -559,6 +559,7 @@ namespace ColladaStartSmall
 				}
 
 				RefreshMaterials();
+				NewMaterial.Text	="New Mat";
 			}
 		}
 
@@ -779,6 +780,24 @@ namespace ColladaStartSmall
 			lb.MouseClick	-=OnTechListBoxClick;
 			lb.LostFocus	-=OnTechLostFocus;
 			lb.Parent.Dispose();
+		}
+
+
+		void OnMergeMatLib(object sender, EventArgs e)
+		{
+			mOFD.DefaultExt	="*.MatLib";
+			mOFD.Filter		="Material lib files (*.MatLib)|*.MatLib|All files (*.*)|*.*";
+
+			DialogResult	dr	=mOFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			mMatLib.MergeFromFile(mOFD.FileName);
+
+			RefreshMaterials();
 		}
 	}
 }
