@@ -51,7 +51,7 @@ namespace InputTest
 			string	toPrint	="";
 			foreach(Input.InputAction act in actions)
 			{
-				toPrint	+=act.mAction + " : " + act.mTimeHeld + "\r\n";
+				toPrint	+=act.mAction + " : " + act.mMultiplier + "\r\n";
 			}
 			Action<TextBox>	ta	=con => con.AppendText(toPrint);
 			FormExtensions.Invoke(InfoConsole, ta);

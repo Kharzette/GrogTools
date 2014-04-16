@@ -50,31 +50,37 @@ namespace ColladaStartSmall
 
 		//mapped actions from the game
 		Enum	mZoomIn, mZoomOut;
-		Enum	mMoveLeft, mMoveRight, mMoveForward, mMoveBack;
-		Enum	mTurnLeft, mTurnRight;
-		Enum	mPitchUp, mPitchDown;
+		Enum	mMoveLeftRight, mMoveLeft, mMoveRight;
+		Enum	mMoveForwardBack, mMoveForward, mMoveBack;
+		Enum	mTurnBoth, mTurnLeft, mTurnRight;
+		Enum	mPitchBoth, mPitchUp, mPitchDown;
 
 
 		public PlayerSteering()
 		{
 		}
 
-		public void SetMoveEnums(Enum moveLeft, Enum moveRight, Enum moveForward, Enum moveBack)
+		public void SetMoveEnums(Enum moveLeftRight,	Enum moveLeft, Enum moveRight,
+			Enum moveForwardBack, Enum moveForward, Enum moveBack)
 		{
-			mMoveLeft		=moveLeft;
-			mMoveRight		=moveRight;
-			mMoveForward	=moveForward;
-			mMoveBack		=moveBack;
+			mMoveLeftRight		=moveLeftRight;
+			mMoveLeft			=moveLeft;
+			mMoveRight			=moveRight;
+			mMoveForwardBack	=moveForwardBack;
+			mMoveForward		=moveForward;
+			mMoveBack			=moveBack;
 		}
 
-		public void SetTurnEnums(Enum turnLeft, Enum turnRight)
+		public void SetTurnEnums(Enum turn, Enum turnLeft, Enum turnRight)
 		{
+			mTurnBoth		=turn;
 			mTurnLeft		=turnLeft;
 			mTurnRight		=turnRight;
 		}
 
-		public void SetPitchEnums(Enum pitchUp, Enum pitchDown)
+		public void SetPitchEnums(Enum pitch, Enum pitchUp, Enum pitchDown)
 		{
+			mPitchBoth	=pitch;
 			mPitchUp	=pitchUp;
 			mPitchDown	=pitchDown;
 		}
@@ -186,12 +192,12 @@ namespace ColladaStartSmall
 			{
 				if(act.mAction.CompareTo(mZoomIn) == 0)
 				{
-					mZoom	-=act.mTimeHeld * 0.04f;
+					mZoom	-=act.mMultiplier * 0.04f;
 					mZoom	=MathUtil.Clamp(mZoom, 5f, 500f);
 				}
 				else if(act.mAction.CompareTo(mZoomOut) == 0)
 				{
-					mZoom	+=act.mTimeHeld * 0.04f;
+					mZoom	+=act.mMultiplier * 0.04f;
 					mZoom	=MathUtil.Clamp(mZoom, 5f, 500f);
 				}
 			}
@@ -261,25 +267,35 @@ namespace ColladaStartSmall
 
 			foreach(Input.InputAction act in actions)
 			{
-				if(act.mAction.CompareTo(mMoveLeft) == 0)
+				if(act.mAction.Equals(mMoveLeftRight))
 				{
 					mbMovedThisFrame	=true;
-					moveVec				-=camLeft * act.mTimeHeld * mGroundSpeed;
+					moveVec				-=camLeft * act.mMultiplier * mGroundSpeed;
+				}
+				else if(act.mAction.CompareTo(mMoveLeft) == 0)
+				{
+					mbMovedThisFrame	=true;
+					moveVec				+=camLeft * act.mMultiplier * mGroundSpeed;
 				}
 				else if(act.mAction.CompareTo(mMoveRight) == 0)
 				{
 					mbMovedThisFrame	=true;
-					moveVec				+=camLeft * act.mTimeHeld * mGroundSpeed;
+					moveVec				-=camLeft * act.mMultiplier * mGroundSpeed;
+				}
+				else if(act.mAction.Equals(mMoveForwardBack))
+				{
+					mbMovedThisFrame	=true;
+					moveVec				-=camForward * act.mMultiplier * mGroundSpeed;
 				}
 				else if(act.mAction.CompareTo(mMoveForward) == 0)
 				{
 					mbMovedThisFrame	=true;
-					moveVec				+=camForward * act.mTimeHeld * mGroundSpeed;
+					moveVec				+=camForward * act.mMultiplier * mGroundSpeed;
 				}
 				else if(act.mAction.CompareTo(mMoveBack) == 0)
 				{
 					mbMovedThisFrame	=true;
-					moveVec				-=camForward * act.mTimeHeld * mGroundSpeed;
+					moveVec				-=camForward * act.mMultiplier * mGroundSpeed;
 				}
 			}
 		}
@@ -289,9 +305,22 @@ namespace ColladaStartSmall
 		{
 			foreach(Input.InputAction act in actions)
 			{
-				if(act.mAction.CompareTo(mPitchUp) == 0)
+				if(act.mAction.CompareTo(mPitchBoth) == 0)
 				{
-					float	pitchAmount	=act.mTimeHeld * 0.2f;
+					float	pitchAmount	=act.mMultiplier * 0.4f;
+
+					if(mbInvertYAxis)
+					{
+						mPitch	+=pitchAmount;
+					}
+					else
+					{
+						mPitch	-=pitchAmount;
+					}
+				}
+				else if(act.mAction.CompareTo(mPitchUp) == 0)
+				{
+					float	pitchAmount	=act.mMultiplier * 0.4f;
 
 					if(mbInvertYAxis)
 					{
@@ -304,7 +333,7 @@ namespace ColladaStartSmall
 				}
 				else if(act.mAction.CompareTo(mPitchDown) == 0)
 				{
-					float	pitchAmount	=act.mTimeHeld * 0.2f;
+					float	pitchAmount	=act.mMultiplier * 0.4f;
 
 					if(!mbInvertYAxis)
 					{
@@ -315,14 +344,19 @@ namespace ColladaStartSmall
 						mPitch	-=pitchAmount;
 					}
 				}
+				else if(act.mAction.CompareTo(mTurnBoth) == 0)
+				{
+					float	delta	=act.mMultiplier * 0.4f;
+					mYaw	-=delta;
+				}
 				else if(act.mAction.CompareTo(mTurnLeft) == 0)
 				{
-					float	delta	=act.mTimeHeld * 0.4f;
+					float	delta	=act.mMultiplier * 0.4f;
 					mYaw	+=delta;
 				}
 				else if(act.mAction.CompareTo(mTurnRight) == 0)
 				{
-					float	delta	=act.mTimeHeld * 0.4f;
+					float	delta	=act.mMultiplier * 0.4f;
 					mYaw	-=delta;
 				}
 			}

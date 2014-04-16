@@ -44,10 +44,12 @@ namespace ColladaStartSmall
 
 		enum MyActions
 		{
-			MoveForward, MoveBack, MoveLeft, MoveRight,
-			TurnLeft, TurnRight,
-			PitchUp, PitchDown,
-			LightX, LightY, LightZ
+			MoveForwardBack, MoveForward, MoveBack,
+			MoveLeftRight, MoveLeft, MoveRight,
+			Turn, TurnLeft, TurnRight,
+			Pitch, PitchUp, PitchDown,
+			LightX, LightY, LightZ,
+			ToggleMouseLook
 		};
 
 		static void OnRenderFormResize(object sender, EventArgs ea)
@@ -61,19 +63,19 @@ namespace ColladaStartSmall
 			{
 				if(act.mAction.Equals(MyActions.LightX))
 				{
-					Matrix	rot	=Matrix.RotationX(act.mTimeHeld * 0.001f);
+					Matrix	rot	=Matrix.RotationX(act.mMultiplier * 0.001f);
 					lightDir	=Vector3.TransformCoordinate(lightDir, rot);
 					lightDir.Normalize();
 				}
 				else if(act.mAction.Equals(MyActions.LightY))
 				{
-					Matrix	rot	=Matrix.RotationY(act.mTimeHeld * 0.001f);
+					Matrix	rot	=Matrix.RotationY(act.mMultiplier * 0.001f);
 					lightDir	=Vector3.TransformCoordinate(lightDir, rot);
 					lightDir.Normalize();
 				}
 				else if(act.mAction.Equals(MyActions.LightZ))
 				{
-					Matrix	rot	=Matrix.RotationZ(act.mTimeHeld * 0.001f);
+					Matrix	rot	=Matrix.RotationZ(act.mMultiplier * 0.001f);
 					lightDir	=Vector3.TransformCoordinate(lightDir, rot);
 					lightDir.Normalize();
 				}
@@ -269,22 +271,33 @@ namespace ColladaStartSmall
 			PlayerSteering	pSteering	=new PlayerSteering();
 			pSteering.Method			=PlayerSteering.SteeringMethod.Fly;
 
-			pSteering.SetMoveEnums(MyActions.MoveLeft, MyActions.MoveRight,
-				MyActions.MoveForward, MyActions.MoveBack);
+			pSteering.SetMoveEnums(MyActions.MoveLeftRight, MyActions.MoveLeft, MyActions.MoveRight,
+				MyActions.MoveForwardBack, MyActions.MoveForward, MyActions.MoveBack);
 
-			pSteering.SetTurnEnums(MyActions.TurnLeft, MyActions.TurnRight);
+			pSteering.SetTurnEnums(MyActions.Turn, MyActions.TurnLeft, MyActions.TurnRight);
 
-			pSteering.SetPitchEnums(MyActions.PitchUp, MyActions.PitchDown);
+			pSteering.SetPitchEnums(MyActions.Pitch, MyActions.PitchUp, MyActions.PitchDown);
 			
 			inp.MapAction(MyActions.PitchUp, 16);
 			inp.MapAction(MyActions.MoveForward, 17);
 			inp.MapAction(MyActions.PitchDown, 18);
-			inp.MapAction(MyActions.TurnLeft, 30);
+			inp.MapAction(MyActions.MoveLeft, 30);
 			inp.MapAction(MyActions.MoveBack, 31);
-			inp.MapAction(MyActions.TurnRight, 32);
+			inp.MapAction(MyActions.MoveRight, 32);
 			inp.MapAction(MyActions.LightX, 36);
 			inp.MapAction(MyActions.LightY, 37);
 			inp.MapAction(MyActions.LightZ, 38);
+
+			inp.MapToggleAction(MyActions.ToggleMouseLook, Input.VariousButtons.RightMouseButton);
+
+			inp.MapAxisAction(MyActions.Pitch, Input.MoveAxis.GamePadRightYAxis);
+			inp.MapAxisAction(MyActions.Turn, Input.MoveAxis.GamePadRightXAxis);
+			inp.MapAxisAction(MyActions.MoveLeftRight, Input.MoveAxis.GamePadLeftXAxis);
+			inp.MapAxisAction(MyActions.MoveForwardBack, Input.MoveAxis.GamePadLeftYAxis);
+
+			inp.MapAction(MyActions.LightX, Input.VariousButtons.GamePadDPadLeft);
+			inp.MapAction(MyActions.LightY, Input.VariousButtons.GamePadDPadDown);
+			inp.MapAction(MyActions.LightZ, Input.VariousButtons.GamePadDPadRight);
 
 			StartSmall		ss		=new StartSmall(device, matLib);
 			MaterialForm	matForm	=new MaterialForm(matLib);
@@ -376,7 +389,12 @@ namespace ColladaStartSmall
 
 			matLib.SetMaterialParameter("TestMat", "mProjection", gcam.Projection);
 
-			Vector3	lightDir	=-Vector3.UnitY;
+			Vector3	lightDir		=-Vector3.UnitY;
+			bool	bMouseLookOn	=false;
+
+			//keep track of mouse pos during mouse look
+			System.Drawing.Point		StoredMousePos	=System.Drawing.Point.Empty;
+			System.Drawing.Rectangle	StoredClipRect	=Cursor.Clip;
 
 			RenderLoop.Run(renderForm, () =>
 			{
@@ -387,10 +405,47 @@ namespace ColladaStartSmall
 						ref backBuffer, ref renderView, ref depthBuffer, ref depthView);
 				}
 
+				if(bMouseLookOn)
+				{
+					Cursor.Position	=StoredMousePos;
+				}
+
 				List<Input.InputAction>	actions	=inp.GetAction();
 				if(!renderForm.Focused)
 				{
 					actions.Clear();
+				}
+				else
+				{
+					foreach(Input.InputAction act in actions)
+					{
+						if(act.mAction.Equals(MyActions.ToggleMouseLook))
+						{
+							bMouseLookOn	=!bMouseLookOn;
+							Debug.WriteLine("Mouse look: " + bMouseLookOn);
+
+							renderForm.Capture	=bMouseLookOn;
+
+							//find a way to hide cursor
+							if(bMouseLookOn)
+							{
+								inp.MapAxisAction(MyActions.Pitch, Input.MoveAxis.MouseYAxis);
+								inp.MapAxisAction(MyActions.Turn, Input.MoveAxis.MouseXAxis);
+								Cursor.Hide();
+
+								StoredMousePos	=Cursor.Position;
+
+								Cursor.Clip	=renderForm.RectangleToScreen(renderForm.ClientRectangle);
+							}
+							else
+							{
+								inp.UnMapAxisAction(MyActions.Pitch, Input.MoveAxis.MouseYAxis);
+								inp.UnMapAxisAction(MyActions.Turn, Input.MoveAxis.MouseXAxis);
+								Cursor.Show();
+								Cursor.Clip	=StoredClipRect;
+							}
+						}
+					}
 				}
 
 				ChangeLight(actions, ref lightDir);
