@@ -61,6 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Animation.cs" />
     <Compile Include="collada_schema_1_4.cs" />
     <Compile Include="Forms\ListBoxContainer.cs">
       <SubType>Form</SubType>
@@ -98,6 +99,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SubAnimation.cs" />
     <EmbeddedResource Include="Forms\ListBoxContainer.resx">
       <DependentUpon>ListBoxContainer.cs</DependentUpon>
     </EmbeddedResource>
