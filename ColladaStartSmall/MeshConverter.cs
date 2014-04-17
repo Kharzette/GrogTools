@@ -25,7 +25,7 @@ namespace ColladaStartSmall
 		{
 			public Vector3		Position0;
 			public Vector3		Normal0;
-			public Half4		BoneIndex;
+			public Int4			BoneIndex;
 			public Half4		BoneWeights;
 			public Vector2		TexCoord0;
 			public Vector2		TexCoord1;
@@ -348,7 +348,7 @@ namespace ColladaStartSmall
 					}
 				}
 
-				Half4	index	=Vector4.Zero;
+				Int4	index	=Int4.Zero;
 				Half4	weight	=Vector4.Zero;
 				for(int j=0;j < numInfluences;j++)
 				{
@@ -776,11 +776,11 @@ namespace ColladaStartSmall
 
 			for(int i=0;i < mNumBaseVerts;i++)
 			{
-				Vector4	inds	=mBaseVerts[i].BoneIndex;
-				int	idx0	=(int)inds.X;
-				int	idx1	=(int)inds.Y;
-				int	idx2	=(int)inds.Z;
-				int	idx3	=(int)inds.W;
+				Int4	inds	=mBaseVerts[i].BoneIndex;
+				int	idx0	=inds.X;
+				int	idx1	=inds.Y;
+				int	idx2	=inds.Z;
+				int	idx3	=inds.W;
 
 				Debug.Assert(idx0 >= 0);
 
@@ -804,7 +804,7 @@ namespace ColladaStartSmall
 				idx3	=keys.IndexOf(bname);
 				Debug.Assert(idx3 >= 0);
 
-				mBaseVerts[i].BoneIndex	=new Half4(idx0, idx1, idx2, idx3);
+				mBaseVerts[i].BoneIndex	=new Int4(idx0, idx1, idx2, idx3);
 			}
 		}
 	}

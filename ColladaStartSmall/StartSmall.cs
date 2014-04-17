@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Reflection;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Xml.Serialization;
@@ -36,17 +37,22 @@ namespace ColladaStartSmall
 		//matlib
 		MaterialLib.MaterialLib	mMatLib;
 
+		//anim lib
+		AnimLib	mAnimLib;
+
 		StaticMesh	mStatic;
+		Character	mChar;
 
 		public event EventHandler	eMeshChanged;
 
 
-		public StartSmall(Device gd, MaterialLib.MaterialLib mats)
+		public StartSmall(Device gd, MaterialLib.MaterialLib mats, AnimLib alib)
 		{
 			InitializeComponent();
 
-			mGD		=gd;
-			mMatLib	=mats;
+			mGD			=gd;
+			mMatLib		=mats;
+			mAnimLib	=alib;
 		}
 
 
@@ -78,6 +84,84 @@ namespace ColladaStartSmall
 			mStatic	=LoadStatic(mOFD.FileName);
 
 			Misc.SafeInvoke(eMeshChanged, mStatic);
+		}
+
+
+		void OnLoadCharacterDAE(object sender, EventArgs e)
+		{
+			mOFD.DefaultExt		="*.dae";
+			mOFD.Filter			="DAE Collada files (*.dae)|*.dae|All files (*.*)|*.*";
+			mOFD.Multiselect	=false;
+			DialogResult	dr	=mOFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			mChar	=LoadCharacterDAE(mOFD.FileName, mAnimLib);
+
+			Misc.SafeInvoke(eMeshChanged, mChar);
+		}
+
+
+		internal Character LoadCharacterDAE(string	path, AnimLib alib)
+		{
+			COLLADA	colladaFile	=DeSerializeCOLLADA(path);
+
+			//grab visual scenes
+			IEnumerable<library_visual_scenes>	lvss	=
+				colladaFile.Items.OfType<library_visual_scenes>();
+
+			library_visual_scenes	lvs	=lvss.First();
+
+			Character	chr	=new Character(alib);
+
+			//adjust coordinate system
+			Matrix	shiftMat	=Matrix.Identity;
+			if(colladaFile.asset.up_axis == UpAxisType.Z_UP)
+			{
+				shiftMat	=Matrix.RotationX(-MathUtil.PiOverTwo);
+			}
+
+			chr.SetTransform(shiftMat);
+
+			List<MeshConverter>	chunks	=GetMeshChunks(colladaFile, true);
+
+			AddVertexWeightsToChunks(colladaFile, chunks);
+
+			//build skeleton
+			Skeleton	skel	=BuildSkeleton(colladaFile);
+
+			//bake scene node modifiers into controllers
+			BakeSceneNodesIntoVerts(colladaFile, skel, chunks);
+
+			alib.SetSkeleton(skel);
+
+			alib.AddAnim(BuildAnim(colladaFile, skel, lvs, path));
+
+			CreateSkin(colladaFile, chr, chunks);
+
+			BuildFinalVerts(mGD, colladaFile, chunks);
+
+			foreach(MeshConverter mc in chunks)
+			{
+				Mesh	conv	=mc.GetConvertedMesh();
+				Matrix	mat		=GetSceneNodeTransform(colladaFile, mc);
+
+				conv.Name	=mc.GetGeomName();
+
+				//set transform of each mesh
+				conv.SetTransform(mat);
+				chr.AddMeshPart(conv);
+
+				//temp
+				conv.Visible		=true;
+				conv.MaterialName	="TestMat";
+				conv.Name			+="Mesh";
+			}
+
+			return	chr;
 		}
 
 
@@ -228,6 +312,758 @@ namespace ColladaStartSmall
 					chunks.Remove(nuke);
 				}
 				toNuke.Clear();
+			}
+		}
+
+
+		static void BakeSceneNodesIntoVerts(COLLADA				colladaFile,
+											Skeleton			skel,
+											List<MeshConverter>	chunks)
+		{
+			if(colladaFile.Items.OfType<library_controllers>().Count() <= 0)
+			{
+				return;
+			}
+
+			var	ctrlNodes	=from vss in colladaFile.Items.OfType<library_visual_scenes>().First().visual_scene
+							 from n in vss.node
+							 select n;
+
+			var	skinControllers	=from conts in colladaFile.Items.OfType<library_controllers>().First().controller
+								 where conts.Item is skin select conts;
+			
+			foreach(controller cont in skinControllers)
+			{
+				string	contID	=cont.id;
+
+				skin	sk	=cont.Item as skin;
+
+				string	skinSource	=sk.source1.Substring(1);
+
+				foreach(node n in ctrlNodes)
+				{
+					string	nname	=GetNodeNameForInstanceController(n, cont.id);
+					if(nname == "")
+					{
+						continue;
+					}
+					Matrix	mat	=Matrix.Identity;
+					if(!skel.GetMatrixForBone(nname, out mat))
+					{
+						continue;
+					}
+
+					foreach(MeshConverter mc in chunks)
+					{
+						if(mc.mGeometryID == skinSource)
+						{
+							mc.BakeTransformIntoVerts(mat);
+						}
+					}
+				}
+			}
+		}
+
+
+		static Anim BuildAnim(COLLADA colladaFile, Skeleton skel, library_visual_scenes lvs, string path)
+		{
+			//create useful anims
+			List<SubAnim>	subs	=CreateSubAnims(colladaFile, skel);
+			Anim	anm	=new Anim(subs);
+
+			FixMultipleSkeletons(lvs, anm, skel);
+
+			anm.SetBoneRefs(skel);
+			anm.Name	=NameFromPath(path);
+
+			return	anm;
+		}
+
+
+		static void CreateSkin(COLLADA				colladaFile,
+							   Character			chr,
+							   List<MeshConverter>	chunks)
+		{
+			IEnumerable<library_controllers>	lcs	=colladaFile.Items.OfType<library_controllers>();
+			if(lcs.Count() <= 0)
+			{
+				return;
+			}
+
+			//create a single master skin for the character's parts
+			Skin	skin	=new Skin();
+
+			Dictionary<string, Matrix>	invBindPoses	=new Dictionary<string, Matrix>();
+
+			foreach(controller cont in lcs.First().controller)
+			{
+				skin	sk	=cont.Item as skin;
+				if(sk == null)
+				{
+					continue;
+				}
+				string	skinSource	=sk.source1.Substring(1);
+				if(skinSource == null || skinSource == "")
+				{
+					continue;
+				}
+
+				Matrix	bindMat	=Matrix.Identity;
+
+				GetMatrixFromString(sk.bind_shape_matrix, out bindMat);
+
+				Debug.Assert(Mathery.IsIdentity(bindMat, Mathery.VCompareEpsilon));
+
+				string	jointSrc	="";
+				string	invSrc		="";
+				foreach(InputLocal inp in sk.joints.input)
+				{
+					if(inp.semantic == "JOINT")
+					{
+						jointSrc	=inp.source.Substring(1);
+					}
+					else if(inp.semantic == "INV_BIND_MATRIX")
+					{
+						invSrc	=inp.source.Substring(1);
+					}
+				}
+
+				Name_array	na	=null;
+				float_array	ma	=null;
+
+				foreach(source src in sk.source)
+				{
+					if(src.id == jointSrc)
+					{
+						na	=src.Item as Name_array;
+					}
+					else if(src.id == invSrc)
+					{
+						ma	=src.Item as float_array;
+					}
+				}
+
+				List<Matrix>	mats	=GetMatrixListFromFA(ma);
+				List<string>	bnames	=GetBoneNamesViaSID(na.Values, colladaFile);
+
+				Debug.Assert(mats.Count == bnames.Count);
+
+				//add to master list
+				for(int i=0;i < mats.Count;i++)
+				{
+					string	bname	=bnames[i];
+					Matrix	ibp		=mats[i];
+
+					if(invBindPoses.ContainsKey(bname))
+					{
+						//if bone name already added, make sure the
+						//inverse bind pose is the same for this skin
+						Debug.Assert(Mathery.CompareMatrix(ibp, invBindPoses[bname], Mathery.VCompareEpsilon));
+					}
+					else
+					{
+						invBindPoses.Add(bname, ibp);
+					}
+				}
+			}
+
+			skin.SetBoneNamesAndPoses(invBindPoses);
+
+			chr.SetSkin(skin);
+
+			FixBoneIndexes(colladaFile, chunks, invBindPoses);
+		}
+
+
+		static List<SubAnim> CreateSubAnims(COLLADA colladaFile, Skeleton skel)
+		{
+			//create useful anims
+			List<SubAnim>	subs	=new List<SubAnim>();
+
+			IEnumerable<library_visual_scenes>	lvs	=colladaFile.Items.OfType<library_visual_scenes>();
+			if(lvs.Count() <= 0)
+			{
+				return	subs;
+			}
+
+			IEnumerable<library_animations>	anims	=colladaFile.Items.OfType<library_animations>();
+			if(anims.Count() <= 0)
+			{
+				return	subs;
+			}
+
+			List<Animation.KeyPartsUsed>	partsUsed	=new List<Animation.KeyPartsUsed>();
+			foreach(animation anim in anims.First().animation)
+			{
+				Animation	an	=new Animation(anim);
+
+				Animation.KeyPartsUsed	parts;
+
+				SubAnim	sa	=an.GetAnims(skel, lvs.First(), out parts);
+				if(sa != null)
+				{
+					subs.Add(sa);
+					partsUsed.Add(parts);
+				}
+			}
+
+			//merge animations affecting a single bone
+			List<SubAnim>					merged		=new List<SubAnim>();
+			List<Animation.KeyPartsUsed>	mergedParts	=new List<Animation.KeyPartsUsed>();
+
+			//grab full list of bones
+			List<string>	boneNames	=new List<string>();
+
+			skel.GetBoneNames(boneNames);
+			foreach(string bone in boneNames)
+			{
+				List<SubAnim>					combine			=new List<SubAnim>();
+				List<Animation.KeyPartsUsed>	combineParts	=new List<Animation.KeyPartsUsed>();
+
+				for(int i=0;i < subs.Count;i++)
+				{
+					SubAnim	sa	=subs[i];
+
+					if(sa.GetBoneName() == bone)
+					{
+						combine.Add(sa);
+						combineParts.Add(partsUsed[i]);
+					}
+				}
+
+				if(combine.Count == 1)
+				{
+					merged.Add(combine[0]);
+					mergedParts.Add(combineParts[0]);
+					continue;
+				}
+				else if(combine.Count <= 0)
+				{
+					continue;
+				}
+
+				//merge together
+				SubAnim		first		=combine.First();
+				KeyFrame	[]firstKeys	=first.GetKeys();
+				for(int i=1;i < combine.Count;i++)
+				{
+					KeyFrame	[]next	=combine[i].GetKeys();
+
+					Debug.Assert(firstKeys.Length == next.Length);
+
+					Animation.KeyPartsUsed	nextParts	=combineParts[i];
+
+					//ensure no overlap (shouldn't be)
+					Debug.Assert(((UInt32)nextParts & (UInt32)combineParts[0]) == 0);
+
+					MergeKeys(firstKeys, next, nextParts);
+
+					combineParts[0]	|=nextParts;
+				}
+
+				merged.Add(first);
+				mergedParts.Add(combineParts[0]);
+			}
+
+			//post merge, fill in any gaps in the keyframes with
+			//data from the nodes themselves
+			for(int i=0;i < merged.Count;i++)
+			{
+				SubAnim		sub			=merged[i];
+				string		boneName	=sub.GetBoneName();
+				KeyFrame	boneKey		=skel.GetBoneKey(boneName);
+				KeyFrame	[]keys		=sub.GetKeys();
+
+				foreach(KeyFrame key in keys)
+				{
+					FillKeyGaps(key, mergedParts[i], boneKey);
+				}
+			}
+
+			return	merged;
+		}
+
+
+		static void FillKeyGaps(KeyFrame key, Animation.KeyPartsUsed keyPartsUsed, KeyFrame boneKey)
+		{
+			if(!Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.TranslateX))
+			{
+				key.mPosition.X	=boneKey.mPosition.X;
+			}
+			if(!Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.TranslateY))
+			{
+				key.mPosition.Y	=boneKey.mPosition.Y;
+			}
+			if(!Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.TranslateZ))
+			{
+				key.mPosition.Z	=boneKey.mPosition.Z;
+			}
+			if(!Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.ScaleX))
+			{
+				key.mScale.X	=boneKey.mScale.X;
+			}
+			if(!Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.ScaleY))
+			{
+				key.mScale.Y	=boneKey.mScale.Y;
+			}
+			if(!Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.ScaleZ))
+			{
+				key.mScale.Z	=boneKey.mScale.Z;
+			}
+			if(!Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.RotateX))
+			{
+				key.mRotation	=Quaternion.Multiply(key.mRotation, boneKey.mRotation);
+				key.mRotation	=Quaternion.Multiply(boneKey.mRotation, key.mRotation);
+			}
+			if(!Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.RotateY))
+			{
+				key.mRotation	=Quaternion.Multiply(key.mRotation, boneKey.mRotation);
+				key.mRotation	=Quaternion.Multiply(boneKey.mRotation, key.mRotation);
+			}
+			if(!Misc.bFlagSet((UInt32)keyPartsUsed, (UInt32)Animation.KeyPartsUsed.RotateZ))
+			{
+				key.mRotation	=Quaternion.Multiply(key.mRotation, boneKey.mRotation);
+				key.mRotation	=Quaternion.Multiply(boneKey.mRotation, key.mRotation);
+			}
+		}
+
+
+		static void MergeKeys(KeyFrame []first, KeyFrame []next, Animation.KeyPartsUsed nextParts)
+		{
+			Debug.Assert(first.Length == next.Length);
+
+			for(int i=0;i < first.Length;i++)
+			{
+				if(Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.TranslateX))
+				{
+					first[i].mPosition.X	=next[i].mPosition.X;
+				}
+				if(Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.TranslateY))
+				{
+					first[i].mPosition.Y	=next[i].mPosition.Y;
+				}
+				if(Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.TranslateZ))
+				{
+					first[i].mPosition.Z	=next[i].mPosition.Z;
+				}
+				if(Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.ScaleX))
+				{
+					first[i].mScale.X	=next[i].mScale.X;
+				}
+				if(Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.ScaleY))
+				{
+					first[i].mScale.Y	=next[i].mScale.Y;
+				}
+				if(Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.ScaleZ))
+				{
+					first[i].mScale.Z	=next[i].mScale.Z;
+				}
+				if(Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.RotateX))
+				{
+					first[i].mRotation	=Quaternion.Multiply(next[i].mRotation, first[i].mRotation);
+					first[i].mRotation	=Quaternion.Multiply(first[i].mRotation, next[i].mRotation);
+				}
+				if(Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.RotateY))
+				{
+					first[i].mRotation	=Quaternion.Multiply(next[i].mRotation, first[i].mRotation);
+					first[i].mRotation	=Quaternion.Multiply(first[i].mRotation, next[i].mRotation);
+				}
+				if(Misc.bFlagSet((UInt32)nextParts, (UInt32)Animation.KeyPartsUsed.RotateZ))
+				{
+					first[i].mRotation	=Quaternion.Multiply(next[i].mRotation, first[i].mRotation);
+					first[i].mRotation	=Quaternion.Multiply(first[i].mRotation, next[i].mRotation);
+				}
+			}
+		}
+
+
+		internal static List<Matrix> GetMatrixListFromFloatList(List<float> fa)
+		{
+			List<Matrix>	ret	=new List<Matrix>();
+
+			Debug.Assert(fa.Count % 16 == 0);
+
+			for(int i=0;i < (int)fa.Count;i+=16)
+			{
+				Matrix	mat	=new Matrix();
+
+				mat.M11	=fa[i + 0];
+				mat.M21	=fa[i + 1];
+				mat.M31	=fa[i + 2];
+				mat.M41	=fa[i + 3];
+				mat.M12	=fa[i + 4];
+				mat.M22	=fa[i + 5];
+				mat.M32	=fa[i + 6];
+				mat.M42	=fa[i + 7];
+				mat.M13	=fa[i + 8];
+				mat.M23	=fa[i + 9];
+				mat.M33	=fa[i + 10];
+				mat.M43	=fa[i + 11];
+				mat.M14	=fa[i + 12];
+				mat.M24	=fa[i + 13];
+				mat.M34	=fa[i + 14];
+				mat.M44	=fa[i + 15];
+
+				ret.Add(mat);
+			}
+
+			return	ret;
+		}
+
+
+		internal static int GetNodeItemIndex(node n, string sid)
+		{
+			for(int i=0;i < n.Items.Length;i++)
+			{
+				object	item	=n.Items[i];
+				Type	t		=item.GetType();
+
+				PropertyInfo	[]pinfo	=t.GetProperties();
+
+				foreach(PropertyInfo pi in pinfo)
+				{
+					if(pi.Name == "sid")
+					{
+						string	itemSid	=pi.GetValue(item, null) as string;
+						if(itemSid == sid)
+						{
+							return	i;
+						}
+					}
+				}
+			}
+			return	-1;
+		}
+
+
+		static string NameFromPath(string path)
+		{
+			int	lastSlash	=path.LastIndexOf('\\');
+			if(lastSlash == -1)
+			{
+				lastSlash	=0;
+			}
+			else
+			{
+				lastSlash++;
+			}
+
+			int	extension	=path.LastIndexOf('.');
+
+			string	name	=path.Substring(lastSlash, extension - lastSlash);
+
+			return	name;
+		}
+
+
+		static void FixBoneIndexes(COLLADA colladaFile,
+			List<MeshConverter> chunks,
+			Dictionary<string, Matrix> invBindPoses)
+		{
+			if(colladaFile.Items.OfType<library_controllers>().Count() <= 0)
+			{
+				return;
+			}
+
+			var	skins	=from conts in colladaFile.Items.OfType<library_controllers>().First().controller
+						 where conts.Item is skin select conts.Item as skin;
+
+			foreach(skin sk in skins)
+			{
+				string	jointSrc	="";
+				foreach(InputLocal inp in sk.joints.input)
+				{
+					if(inp.semantic == "JOINT")
+					{
+						jointSrc	=inp.source.Substring(1);
+					}
+				}
+
+				Name_array	na	=null;
+
+				foreach(source src in sk.source)
+				{
+					if(src.id == jointSrc)
+					{
+						na	=src.Item as Name_array;
+					}
+				}
+
+				List<string>	bnames	=GetBoneNamesViaSID(na.Values, colladaFile);
+				string	skinSource	=sk.source1.Substring(1);
+
+				foreach(MeshConverter cnk in chunks)
+				{
+					if(cnk.mGeometryID == skinSource)
+					{
+						cnk.FixBoneIndexes(invBindPoses, bnames);
+					}
+				}
+			}
+		}
+
+
+		static List<string> GetBoneNamesViaSID(string []sids, COLLADA cfile)
+		{
+			List<string>	boneNames	=new List<string>();
+
+			IEnumerable<library_visual_scenes>	lvs	=cfile.Items.OfType<library_visual_scenes>();
+
+			foreach(string sid in sids)
+			{
+				//supposed to use sids (I think, the spec is ambiguous)
+				//but if that fails use ids.  Maybe should use names I dunno
+				node	n	=LookUpNodeViaSID(lvs.First(), sid);
+
+				if(n == null)
+				{
+					n	=LookUpNode(lvs.First(), sid);
+				}
+				
+				Debug.Assert(n != null);
+
+				boneNames.Add(n.name);
+			}
+			return	boneNames;
+		}
+
+
+		internal static node LookUpNodeViaSID(library_visual_scenes lvs, string SID)
+		{
+			//find the node addressed
+			node	addressed	=null;
+			foreach(visual_scene vs in lvs.visual_scene)
+			{
+				foreach(node n in vs.node)
+				{
+					addressed	=LookUpNodeViaSID(n, SID);
+					if(addressed != null)
+					{
+						break;
+					}
+				}
+			}
+			return	addressed;
+		}
+
+
+		internal static node LookUpNodeViaSID(node n, string sid)
+		{
+			if(n.sid == sid)
+			{
+				return	n;
+			}
+
+			if(n.node1 == null)
+			{
+				return	null;
+			}
+
+			foreach(node child in n.node1)
+			{
+				node	ret	=LookUpNodeViaSID(child, sid);
+				if(ret != null)
+				{
+					return	ret;
+				}
+			}
+			return	null;
+		}
+
+
+		internal static void GetMatrixFromString(string str, out Matrix mat)
+		{
+			string[] tokens	=str.Split(' ', '\n', '\t');
+
+			int	tokIdx	=0;
+
+			//transpose as we load
+			//this looks very unsafe / dangerous
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M11));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M21));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M31));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M41));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M12));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M22));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M32));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M42));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M13));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M23));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M33));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M43));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M14));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M24));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M34));
+			while(!Single.TryParse(tokens[tokIdx++],out mat.M44));
+		}
+
+
+		internal static List<Matrix> GetMatrixListFromFA(float_array fa)
+		{
+			List<Matrix>	ret	=new List<Matrix>();
+
+			Debug.Assert(fa.count % 16 == 0);
+
+			for(int i=0;i < (int)fa.count;i+=16)
+			{
+				Matrix	mat	=new Matrix();
+
+				mat.M11	=fa.Values[i + 0];
+				mat.M21	=fa.Values[i + 1];
+				mat.M31	=fa.Values[i + 2];
+				mat.M41	=fa.Values[i + 3];
+				mat.M12	=fa.Values[i + 4];
+				mat.M22	=fa.Values[i + 5];
+				mat.M32	=fa.Values[i + 6];
+				mat.M42	=fa.Values[i + 7];
+				mat.M13	=fa.Values[i + 8];
+				mat.M23	=fa.Values[i + 9];
+				mat.M33	=fa.Values[i + 10];
+				mat.M43	=fa.Values[i + 11];
+				mat.M14	=fa.Values[i + 12];
+				mat.M24	=fa.Values[i + 13];
+				mat.M34	=fa.Values[i + 14];
+				mat.M44	=fa.Values[i + 15];
+
+				ret.Add(mat);
+			}
+
+			return	ret;
+		}
+
+
+		static void FixMultipleSkeletons(library_visual_scenes lvs, Anim anm, Skeleton skel)
+		{
+			Debug.Assert(lvs.visual_scene.Length == 1);
+
+			foreach(node n in lvs.visual_scene[0].node)
+			{
+				if(n.instance_controller != null)
+				{
+					Debug.Assert(n.instance_controller.Length == 1);
+
+					string	[]skels	=n.instance_controller.First().skeleton;
+
+					if(skels != null)
+					{
+						if(skels.Length > 1)
+						{
+							for(int i=1;i < skels.Length;i++)
+							{
+								string	skelName	=skels[i].Substring(1);
+
+								node	skelNode	=LookUpNodeViaSID(lvs, skelName);
+								if(skelNode == null)
+								{
+									skelNode	=LookUpNode(lvs, skelName);
+								}
+
+								anm.FixDetatchedSkeleton(skel, skelNode.name);
+							}
+						}
+					}
+				}
+			}
+		}
+
+
+		static string GetNodeNameForInstanceController(node n, string ic)
+		{
+			if(n.instance_controller != null)
+			{
+				foreach(instance_controller inst in n.instance_controller)
+				{
+					if(inst.url.Substring(1) == ic)
+					{
+						return	n.name;
+					}
+				}
+			}
+
+			if(n.node1 == null)
+			{
+				return	"";
+			}
+
+			//check kids
+			foreach(node kid in n.node1)
+			{
+				string	ret	=GetNodeNameForInstanceController(kid, ic);
+				if(ret != "")
+				{
+					return	ret;
+				}
+			}
+			return	"";
+		}
+
+
+		static void BuildSkeleton(node n, out GSNode gsn)
+		{
+			gsn	=new GSNode();
+
+			gsn.SetName(n.name);
+
+			KeyFrame	kf	=GetKeyFromCNode(n);
+
+			gsn.SetKey(kf);
+
+			if(n.node1 == null)
+			{
+				return;
+			}
+
+			foreach(node child in n.node1)
+			{
+				GSNode	kid	=new GSNode();
+
+				BuildSkeleton(child, out kid);
+
+				gsn.AddChild(kid);
+			}
+		}
+
+
+		static Skeleton BuildSkeleton(COLLADA colMesh)
+		{
+			Skeleton	ret	=new Skeleton();
+
+			var	nodes	=from lvs in colMesh.Items.OfType<library_visual_scenes>().First().visual_scene
+						 from n in lvs.node select n;
+
+			foreach(node n in nodes)
+			{
+				GSNode	gsnRoot	=new GSNode();
+
+				BuildSkeleton(n, out gsnRoot);
+
+				ret.AddRoot(gsnRoot);
+			}
+			return	ret;
+		}
+
+
+		static void AddVertexWeightsToChunks(COLLADA colladaFile, List<MeshConverter> chunks)
+		{
+			if(colladaFile.Items.OfType<library_controllers>().Count() <= 0)
+			{
+				return;
+			}
+
+			var	skins	=from conts in colladaFile.Items.OfType<library_controllers>().First().controller
+						 where conts.Item is skin select conts.Item as skin;
+
+			foreach(skin sk in skins)
+			{
+				string	skinSource	=sk.source1.Substring(1);
+
+				foreach(MeshConverter cnk in chunks)
+				{
+					if(cnk.mGeometryID == skinSource)
+					{
+						cnk.AddWeightsToBaseVerts(sk);
+					}
+				}
 			}
 		}
 
@@ -669,6 +1505,49 @@ namespace ColladaStartSmall
 		}
 
 
+		internal static node LookUpNode(library_visual_scenes lvs, string nodeID)
+		{
+			//find the node addressed
+			node	addressed	=null;
+			foreach(visual_scene vs in lvs.visual_scene)
+			{
+				foreach(node n in vs.node)
+				{
+					addressed	=LookUpNode(n, nodeID);
+					if(addressed != null)
+					{
+						break;
+					}
+				}
+			}
+			return	addressed;
+		}
+
+
+		internal static node LookUpNode(node n, string id)
+		{
+			if(n.id == id)
+			{
+				return	n;
+			}
+
+			if(n.node1 == null)
+			{
+				return	null;
+			}
+
+			foreach(node child in n.node1)
+			{
+				node	ret	=LookUpNode(child, id);
+				if(ret != null)
+				{
+					return	ret;
+				}
+			}
+			return	null;
+		}
+
+
 		bool CNodeHasKeyData(node n)
 		{
 			if(n.Items == null)
@@ -735,22 +1614,33 @@ namespace ColladaStartSmall
 
 		internal void Render(DeviceContext dc)
 		{
-			if(mStatic == null)
+			if(mStatic == null && mChar == null)
 			{
 				return;
 			}
 
-			mStatic.TempDraw(dc, mMatLib);
+			if(mStatic != null)
+			{
+				mStatic.Draw(dc, mMatLib);
+			}
+			if(mChar != null)
+			{
+				mChar.Animate("FemaleUnitWalk", 0.1f);
+				mChar.Draw(dc, mMatLib);
+			}
 		}
 
 
 		internal void NukeMeshPart(Mesh mesh)
 		{
-			if(mStatic == null)
+			if(mStatic != null)
 			{
-				return;
+				mStatic.NukeMesh(mesh);
 			}
-			mStatic.NukeMesh(mesh);
+			if(mChar != null)
+			{
+				mChar.NukeMesh(mesh);
+			}
 		}
 	}
 }

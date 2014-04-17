@@ -75,12 +75,13 @@ namespace ColladaStartSmall
 		internal void RefreshMeshPartList()
 		{
 			StaticMesh	sm	=MeshPartList.Tag as StaticMesh;
-			if(sm == null)
+			Character	chr	=MeshPartList.Tag as Character;
+			if(sm == null && chr == null)
 			{
 				return;
 			}
 
-			List<Mesh>	partList	=sm.GetMeshPartList();
+			List<Mesh>	partList	=(sm == null)? chr.GetMeshPartList() : sm.GetMeshPartList();
 
 			MeshPartList.Items.Clear();
 
@@ -508,12 +509,20 @@ namespace ColladaStartSmall
 		internal void SetMesh(object sender)
 		{
 			StaticMesh	sm	=sender as StaticMesh;
-			if(sm == null)
+			Character	chr	=sender as Character;
+			if(sm == null && chr == null)
 			{
 				return;
 			}
 
-			MeshPartList.Tag	=sm;
+			if(sm != null)
+			{
+				MeshPartList.Tag	=sm;
+			}
+			else
+			{
+				MeshPartList.Tag	=chr;
+			}
 
 			RefreshMeshPartList();
 		}

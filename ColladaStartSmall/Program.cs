@@ -299,7 +299,9 @@ namespace ColladaStartSmall
 			inp.MapAction(MyActions.LightY, Input.VariousButtons.GamePadDPadDown);
 			inp.MapAction(MyActions.LightZ, Input.VariousButtons.GamePadDPadRight);
 
-			StartSmall		ss		=new StartSmall(device, matLib);
+			MeshLib.AnimLib	animLib	=new MeshLib.AnimLib();
+
+			StartSmall		ss		=new StartSmall(device, matLib, animLib);
 			MaterialForm	matForm	=new MaterialForm(matLib);
 			StripElements	se		=new StripElements();
 
