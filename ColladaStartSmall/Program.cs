@@ -393,6 +393,7 @@ namespace ColladaStartSmall
 
 			Vector3	lightDir		=-Vector3.UnitY;
 			bool	bMouseLookOn	=false;
+			long	lastTime		=Stopwatch.GetTimestamp();
 
 			//keep track of mouse pos during mouse look
 			System.Drawing.Point		StoredMousePos	=System.Drawing.Point.Empty;
@@ -468,10 +469,15 @@ namespace ColladaStartSmall
 				dc.ClearDepthStencilView(depthView, DepthStencilClearFlags.Depth, 1f, 0);
 				dc.ClearRenderTargetView(renderView, Color.CornflowerBlue);
 
-				ss.Render(dc);
+				long	timeNow	=Stopwatch.GetTimestamp();
+				long	delta	=timeNow - lastTime;
+
+				ss.Render(dc, (float)delta / (float)Stopwatch.Frequency);
 				
 				// Present!
 				swapChain.Present(0, PresentFlags.None);
+
+				lastTime	=timeNow;
 			});
 
 			Settings.Default.Save();

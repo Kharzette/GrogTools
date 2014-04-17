@@ -40,6 +40,12 @@ namespace ColladaStartSmall
 		//anim lib
 		AnimLib	mAnimLib;
 
+		//selected anim info
+		string	mSelectedAnim;
+		float	mAnimStartTime, mAnimEndTime;
+		float	mCurAnimTime;
+		bool	mbPaused;
+
 		StaticMesh	mStatic;
 		Character	mChar;
 
@@ -100,6 +106,8 @@ namespace ColladaStartSmall
 			}
 
 			mChar	=LoadCharacterDAE(mOFD.FileName, mAnimLib);
+
+			AnimGrid.DataSource	=mAnimLib.GetAnims();
 
 			Misc.SafeInvoke(eMeshChanged, mChar);
 		}
@@ -1612,7 +1620,7 @@ namespace ColladaStartSmall
 		}
 
 
-		internal void Render(DeviceContext dc)
+		internal void Render(DeviceContext dc, float msDelta)
 		{
 			if(mStatic == null && mChar == null)
 			{
@@ -1625,7 +1633,25 @@ namespace ColladaStartSmall
 			}
 			if(mChar != null)
 			{
-				mChar.Animate("FemaleUnitWalk", 0.1f);
+				if(mSelectedAnim != null && mSelectedAnim != "")
+				{
+					if(!mbPaused)
+					{
+						mCurAnimTime	+=msDelta * (float)AnimTimeScale.Value;
+					}
+
+					if(mCurAnimTime > mAnimEndTime)
+					{
+						mCurAnimTime	%=mAnimEndTime;
+					}
+
+					if(mCurAnimTime < mAnimStartTime)
+					{
+						mCurAnimTime	=mAnimStartTime;
+					}
+
+					mChar.Animate(mSelectedAnim, mCurAnimTime);
+				}
 				mChar.Draw(dc, mMatLib);
 			}
 		}
@@ -1640,6 +1666,36 @@ namespace ColladaStartSmall
 			if(mChar != null)
 			{
 				mChar.NukeMesh(mesh);
+			}
+		}
+
+
+		void OnAnimFormSelectionChanged(object sender, EventArgs e)
+		{
+			if(AnimGrid.SelectedRows.Count == 1)
+			{
+				Anim	anm	=AnimGrid.SelectedRows[0].DataBoundItem	as Anim;
+				if(anm != null)
+				{
+					mSelectedAnim	=anm.Name;
+					mAnimStartTime	=anm.StartTime;
+					mAnimEndTime	=anm.TotalTime + anm.StartTime;
+				}
+			}
+		}
+
+
+		void OnPauseAnim(object sender, EventArgs e)
+		{
+			mbPaused	=!mbPaused;
+
+			if(mbPaused)
+			{
+				PauseButton.Text	="Paused";
+			}
+			else
+			{
+				PauseButton.Text	="Pause";
 			}
 		}
 	}

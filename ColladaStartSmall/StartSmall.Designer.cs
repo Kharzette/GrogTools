@@ -32,11 +32,12 @@
 			this.button2 = new System.Windows.Forms.Button();
 			this.SaveAnimLib = new System.Windows.Forms.Button();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this.button1 = new System.Windows.Forms.Button();
 			this.LoadCharacter = new System.Windows.Forms.Button();
 			this.SaveCharacter = new System.Windows.Forms.Button();
 			this.SaveStatic = new System.Windows.Forms.Button();
-			this.button1 = new System.Windows.Forms.Button();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
+			this.DrawAxis = new System.Windows.Forms.CheckBox();
 			this.CheckSkeleton = new System.Windows.Forms.CheckBox();
 			this.LoadModel = new System.Windows.Forms.Button();
 			this.LoadStaticModel = new System.Windows.Forms.Button();
@@ -45,16 +46,16 @@
 			this.ShowBox = new System.Windows.Forms.CheckBox();
 			this.ShowSphere = new System.Windows.Forms.CheckBox();
 			this.BoundMesh = new System.Windows.Forms.Button();
-			this.button3 = new System.Windows.Forms.Button();
-			this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+			this.PauseButton = new System.Windows.Forms.Button();
+			this.AnimTimeScale = new System.Windows.Forms.NumericUpDown();
 			this.label1 = new System.Windows.Forms.Label();
 			this.groupBox4 = new System.Windows.Forms.GroupBox();
-			this.DrawAxis = new System.Windows.Forms.CheckBox();
 			this.AnimGrid = new System.Windows.Forms.DataGridView();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.groupBox3.SuspendLayout();
 			this.BoundGroup.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.AnimTimeScale)).BeginInit();
 			this.groupBox4.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.AnimGrid)).BeginInit();
 			this.SuspendLayout();
@@ -103,6 +104,15 @@
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Converted Meshes";
 			// 
+			// button1
+			// 
+			this.button1.Location = new System.Drawing.Point(6, 50);
+			this.button1.Name = "button1";
+			this.button1.Size = new System.Drawing.Size(97, 25);
+			this.button1.TabIndex = 14;
+			this.button1.Text = "Load Static";
+			this.button1.UseVisualStyleBackColor = true;
+			// 
 			// LoadCharacter
 			// 
 			this.LoadCharacter.Location = new System.Drawing.Point(6, 19);
@@ -130,15 +140,6 @@
 			this.SaveStatic.Text = "Save Static";
 			this.SaveStatic.UseVisualStyleBackColor = true;
 			// 
-			// button1
-			// 
-			this.button1.Location = new System.Drawing.Point(6, 50);
-			this.button1.Name = "button1";
-			this.button1.Size = new System.Drawing.Size(97, 25);
-			this.button1.TabIndex = 14;
-			this.button1.Text = "Load Static";
-			this.button1.UseVisualStyleBackColor = true;
-			// 
 			// groupBox3
 			// 
 			this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
@@ -153,6 +154,18 @@
 			this.groupBox3.TabIndex = 19;
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = "Collada Files";
+			// 
+			// DrawAxis
+			// 
+			this.DrawAxis.AutoSize = true;
+			this.DrawAxis.Checked = true;
+			this.DrawAxis.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.DrawAxis.Location = new System.Drawing.Point(6, 135);
+			this.DrawAxis.Name = "DrawAxis";
+			this.DrawAxis.Size = new System.Drawing.Size(73, 17);
+			this.DrawAxis.TabIndex = 25;
+			this.DrawAxis.Text = "Draw Axis";
+			this.DrawAxis.UseVisualStyleBackColor = true;
 			// 
 			// CheckSkeleton
 			// 
@@ -235,33 +248,34 @@
 			this.BoundMesh.Text = "Calc Bound";
 			this.BoundMesh.UseVisualStyleBackColor = true;
 			// 
-			// button3
+			// PauseButton
 			// 
-			this.button3.Location = new System.Drawing.Point(129, 19);
-			this.button3.Name = "button3";
-			this.button3.Size = new System.Drawing.Size(55, 22);
-			this.button3.TabIndex = 5;
-			this.button3.Text = "Pause";
-			this.button3.UseVisualStyleBackColor = true;
+			this.PauseButton.Location = new System.Drawing.Point(129, 19);
+			this.PauseButton.Name = "PauseButton";
+			this.PauseButton.Size = new System.Drawing.Size(55, 22);
+			this.PauseButton.TabIndex = 5;
+			this.PauseButton.Text = "Pause";
+			this.PauseButton.UseVisualStyleBackColor = true;
+			this.PauseButton.Click += new System.EventHandler(this.OnPauseAnim);
 			// 
-			// numericUpDown1
+			// AnimTimeScale
 			// 
-			this.numericUpDown1.DecimalPlaces = 2;
-			this.numericUpDown1.Increment = new decimal(new int[] {
+			this.AnimTimeScale.DecimalPlaces = 2;
+			this.AnimTimeScale.Increment = new decimal(new int[] {
             1,
             0,
             0,
             131072});
-			this.numericUpDown1.Location = new System.Drawing.Point(6, 19);
-			this.numericUpDown1.Minimum = new decimal(new int[] {
+			this.AnimTimeScale.Location = new System.Drawing.Point(6, 19);
+			this.AnimTimeScale.Minimum = new decimal(new int[] {
             1,
             0,
             0,
             131072});
-			this.numericUpDown1.Name = "numericUpDown1";
-			this.numericUpDown1.Size = new System.Drawing.Size(51, 20);
-			this.numericUpDown1.TabIndex = 3;
-			this.numericUpDown1.Value = new decimal(new int[] {
+			this.AnimTimeScale.Name = "AnimTimeScale";
+			this.AnimTimeScale.Size = new System.Drawing.Size(51, 20);
+			this.AnimTimeScale.TabIndex = 3;
+			this.AnimTimeScale.Value = new decimal(new int[] {
             10,
             0,
             0,
@@ -279,8 +293,8 @@
 			// groupBox4
 			// 
 			this.groupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.groupBox4.Controls.Add(this.button3);
-			this.groupBox4.Controls.Add(this.numericUpDown1);
+			this.groupBox4.Controls.Add(this.PauseButton);
+			this.groupBox4.Controls.Add(this.AnimTimeScale);
 			this.groupBox4.Controls.Add(this.label1);
 			this.groupBox4.Location = new System.Drawing.Point(276, 213);
 			this.groupBox4.Name = "groupBox4";
@@ -288,18 +302,6 @@
 			this.groupBox4.TabIndex = 21;
 			this.groupBox4.TabStop = false;
 			this.groupBox4.Text = "Playback";
-			// 
-			// DrawAxis
-			// 
-			this.DrawAxis.AutoSize = true;
-			this.DrawAxis.Checked = true;
-			this.DrawAxis.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.DrawAxis.Location = new System.Drawing.Point(6, 135);
-			this.DrawAxis.Name = "DrawAxis";
-			this.DrawAxis.Size = new System.Drawing.Size(73, 17);
-			this.DrawAxis.TabIndex = 25;
-			this.DrawAxis.Text = "Draw Axis";
-			this.DrawAxis.UseVisualStyleBackColor = true;
 			// 
 			// AnimGrid
 			// 
@@ -315,6 +317,7 @@
 			this.AnimGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
 			this.AnimGrid.Size = new System.Drawing.Size(469, 183);
 			this.AnimGrid.TabIndex = 24;
+			this.AnimGrid.SelectionChanged += new System.EventHandler(this.OnAnimFormSelectionChanged);
 			// 
 			// StartSmall
 			// 
@@ -339,6 +342,7 @@
 			this.groupBox3.PerformLayout();
 			this.BoundGroup.ResumeLayout(false);
 			this.BoundGroup.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.AnimTimeScale)).EndInit();
 			this.groupBox4.ResumeLayout(false);
 			this.groupBox4.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.AnimGrid)).EndInit();
@@ -365,8 +369,8 @@
 		private System.Windows.Forms.CheckBox ShowBox;
 		private System.Windows.Forms.CheckBox ShowSphere;
 		private System.Windows.Forms.Button BoundMesh;
-		private System.Windows.Forms.Button button3;
-		private System.Windows.Forms.NumericUpDown numericUpDown1;
+		private System.Windows.Forms.Button PauseButton;
+		private System.Windows.Forms.NumericUpDown AnimTimeScale;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.GroupBox groupBox4;
 		private System.Windows.Forms.CheckBox DrawAxis;
