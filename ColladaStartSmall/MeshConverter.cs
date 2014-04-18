@@ -25,7 +25,7 @@ namespace ColladaStartSmall
 		{
 			public Vector3		Position0;
 			public Vector3		Normal0;
-			public Half4		BoneIndex;
+			public Color		BoneIndex;
 			public Half4		BoneWeights;
 			public Vector2		TexCoord0;
 			public Vector2		TexCoord1;
@@ -382,7 +382,7 @@ namespace ColladaStartSmall
 					}
 				}
 
-				mBaseVerts[i].BoneIndex		=new Half4(index.X, index.Y, index.Z, index.W);
+				mBaseVerts[i].BoneIndex		=new Color((byte)index.X, (byte)index.Y, (byte)index.Z, (byte)index.W);
 				mBaseVerts[i].BoneWeights	=weight;
 			}
 		}
@@ -776,12 +776,12 @@ namespace ColladaStartSmall
 
 			for(int i=0;i < mNumBaseVerts;i++)
 			{
-				Half4	inds	=mBaseVerts[i].BoneIndex;
+				Color	inds	=mBaseVerts[i].BoneIndex;
 
-				int	idx0	=(int)inds.X;
-				int	idx1	=(int)inds.Y;
-				int	idx2	=(int)inds.Z;
-				int	idx3	=(int)inds.W;
+				int	idx0	=(int)inds.R;
+				int	idx1	=(int)inds.G;
+				int	idx2	=(int)inds.B;
+				int	idx3	=(int)inds.A;
 
 				Debug.Assert(idx0 >= 0);
 
@@ -805,7 +805,7 @@ namespace ColladaStartSmall
 				idx3	=keys.IndexOf(bname);
 				Debug.Assert(idx3 >= 0);
 
-				mBaseVerts[i].BoneIndex	=new Half4(idx0, idx1, idx2, idx3);
+				mBaseVerts[i].BoneIndex	=new Color((byte)idx0, (byte)idx1, (byte)idx2, (byte)idx3);
 			}
 		}
 	}
