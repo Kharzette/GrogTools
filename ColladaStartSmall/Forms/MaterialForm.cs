@@ -182,7 +182,7 @@ namespace ColladaStartSmall
 			lbox.Size	=fit;
 			lbc.Size	=fit;
 
-			lbc.Visible	=true;
+			lbc.Visible		=true;
 			lbox.Visible	=true;
 
 			lbox.MouseClick	+=OnEffectListBoxClick;
