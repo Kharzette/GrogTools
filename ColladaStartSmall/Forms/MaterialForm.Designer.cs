@@ -347,13 +347,17 @@
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(525, 585);
+			this.ControlBox = false;
 			this.Controls.Add(this.MeshPartList);
 			this.Controls.Add(this.MeshPartGroup);
 			this.Controls.Add(this.groupBox1);
 			this.Controls.Add(this.FileGroup);
 			this.Controls.Add(this.VariableList);
 			this.Controls.Add(this.MaterialList);
+			this.MaximizeBox = false;
+			this.MinimizeBox = false;
 			this.Name = "MaterialForm";
+			this.ShowInTaskbar = false;
 			this.Text = "MaterialForm";
 			this.SizeChanged += new System.EventHandler(this.OnFormSizeChanged);
 			((System.ComponentModel.ISupportInitialize)(this.VariableList)).EndInit();

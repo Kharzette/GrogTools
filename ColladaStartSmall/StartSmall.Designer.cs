@@ -317,6 +317,7 @@
 			this.AnimGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
 			this.AnimGrid.Size = new System.Drawing.Size(469, 183);
 			this.AnimGrid.TabIndex = 24;
+			this.AnimGrid.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.OnAnimCellValueChanged);
 			this.AnimGrid.SelectionChanged += new System.EventHandler(this.OnAnimFormSelectionChanged);
 			// 
 			// StartSmall

@@ -107,7 +107,7 @@ namespace ColladaStartSmall
 
 			mChar	=LoadCharacterDAE(mOFD.FileName, mAnimLib);
 
-			AnimGrid.DataSource	=mAnimLib.GetAnims();
+			AnimGrid.DataSource	=new BindingList<Anim>(mAnimLib.GetAnims());
 
 			Misc.SafeInvoke(eMeshChanged, mChar);
 		}
@@ -1696,6 +1696,15 @@ namespace ColladaStartSmall
 			else
 			{
 				PauseButton.Text	="Pause";
+			}
+		}
+
+
+		void OnAnimCellValueChanged(object sender, DataGridViewCellEventArgs e)
+		{
+			if(e.ColumnIndex == 0)
+			{
+				mAnimLib.FixRename();
 			}
 		}
 	}
