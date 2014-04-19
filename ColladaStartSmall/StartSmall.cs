@@ -75,6 +75,39 @@ namespace ColladaStartSmall
 		}
 
 
+		void OnLoadStatic(object sender, EventArgs e)
+		{
+			mOFD.DefaultExt		="*.Static";
+			mOFD.Filter			="Static mesh files (*.Static)|*.Static|All files (*.*)|*.*";
+			DialogResult	dr	=mOFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			mStatic	=new StaticMesh();
+			mStatic.ReadFromFile(mOFD.FileName, mGD, true);
+
+			Misc.SafeInvoke(eMeshChanged, mStatic);
+		}
+
+
+		void OnSaveStatic(object sender, EventArgs e)
+		{
+			mSFD.DefaultExt		="*.Static";
+			mSFD.Filter			="Static mesh files (*.Static)|*.Static|All files (*.*)|*.*";
+			DialogResult	dr	=mSFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			mStatic.SaveToFile(mSFD.FileName);
+		}
+
+
 		void OnOpenStaticDAE(object sender, EventArgs e)
 		{
 			mOFD.DefaultExt		="*.dae";
@@ -113,6 +146,56 @@ namespace ColladaStartSmall
 		}
 
 
+		void OnLoadAnimDAE(object sender, EventArgs e)
+		{
+			mOFD.DefaultExt		="*.dae";
+			mOFD.Filter			="DAE Collada files (*.dae)|*.dae|All files (*.*)|*.*";
+			mOFD.Multiselect	=false;
+			DialogResult	dr	=mOFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			LoadAnimDAE(mOFD.FileName, mAnimLib, CheckSkeleton.Checked);
+
+			AnimGrid.DataSource	=new BindingList<Anim>(mAnimLib.GetAnims());
+		}
+
+
+		//loads an animation into an existing anim lib
+		internal bool LoadAnimDAE(string path, AnimLib alib, bool bCheckSkeleton)
+		{
+			COLLADA	colladaFile	=DeSerializeCOLLADA(path);
+			Skeleton	skel	=BuildSkeleton(colladaFile);
+
+			//grab visual scenes
+			IEnumerable<library_visual_scenes>	lvss	=
+				colladaFile.Items.OfType<library_visual_scenes>();
+
+			library_visual_scenes	lvs	=lvss.First();
+
+			//see if animlib has a skeleton yet
+			if(alib.GetSkeleton() == null)
+			{
+				alib.SetSkeleton(skel);
+			}
+			else if(bCheckSkeleton)
+			{
+				//make sure they match
+				if(!alib.CheckSkeleton(skel))
+				{
+					return	false;
+				}
+			}
+
+			alib.AddAnim(BuildAnim(colladaFile, alib.GetSkeleton(), lvs, path));
+
+			return	true;
+		}
+
+
 		internal Character LoadCharacterDAE(string	path, AnimLib alib)
 		{
 			COLLADA	colladaFile	=DeSerializeCOLLADA(path);
@@ -132,7 +215,7 @@ namespace ColladaStartSmall
 				shiftMat	=Matrix.RotationX(-MathUtil.PiOverTwo);
 			}
 
-			chr.SetTransform(shiftMat);
+			chr.SetTransform(Matrix.Identity);
 
 			List<MeshConverter>	chunks	=GetMeshChunks(colladaFile, true);
 
@@ -160,7 +243,7 @@ namespace ColladaStartSmall
 				conv.Name	=mc.GetGeomName();
 
 				//set transform of each mesh
-				conv.SetTransform(mat);
+				conv.SetTransform(mat * shiftMat);
 				chr.AddMeshPart(conv);
 
 				//temp
@@ -190,7 +273,9 @@ namespace ColladaStartSmall
 				shiftMat	=Matrix.RotationX(-MathUtil.PiOverTwo);
 			}
 
-			smo.SetTransform(shiftMat);
+			//this needs to be identity so the game
+			//can mess with it without needing the axis info
+			smo.SetTransform(Matrix.Identity);
 
 			BuildFinalVerts(mGD, colladaFile, chunks);
 			foreach(MeshConverter mc in chunks)
@@ -201,7 +286,7 @@ namespace ColladaStartSmall
 				m.Name	=mc.GetGeomName();
 
 				//set transform of each mesh
-				m.SetTransform(mat);
+				m.SetTransform(mat * shiftMat);
 				smo.AddMeshPart(m);
 
 				//temp

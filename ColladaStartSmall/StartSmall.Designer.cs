@@ -112,6 +112,7 @@
 			this.button1.TabIndex = 14;
 			this.button1.Text = "Load Static";
 			this.button1.UseVisualStyleBackColor = true;
+			this.button1.Click += new System.EventHandler(this.OnLoadStatic);
 			// 
 			// LoadCharacter
 			// 
@@ -139,6 +140,7 @@
 			this.SaveStatic.TabIndex = 13;
 			this.SaveStatic.Text = "Save Static";
 			this.SaveStatic.UseVisualStyleBackColor = true;
+			this.SaveStatic.Click += new System.EventHandler(this.OnSaveStatic);
 			// 
 			// groupBox3
 			// 
@@ -205,6 +207,7 @@
 			this.LoadAnim.TabIndex = 0;
 			this.LoadAnim.Text = "Load Anim DAE";
 			this.LoadAnim.UseVisualStyleBackColor = true;
+			this.LoadAnim.Click += new System.EventHandler(this.OnLoadAnimDAE);
 			// 
 			// BoundGroup
 			// 
