@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows.Forms;
 using InputLib;
 using MaterialLib;
+using UtilityLib;
 
 using SharpDX;
 using SharpDX.D3DCompiler;
@@ -25,8 +26,9 @@ namespace ColladaStartSmall
 	{
 		static bool	mbResized;
 
-		const int	ResX	=1280;
-		const int	ResY	=720;
+		const int	ResX		=1280;
+		const int	ResY		=720;
+		const float	AxisSize	=50f;
 
 		enum MyActions
 		{
@@ -161,7 +163,6 @@ namespace ColladaStartSmall
 			scDesc.SampleDescription	=new SampleDescription(1, 0);
 			scDesc.SwapEffect			=SwapEffect.Discard;
 			scDesc.Usage				=Usage.RenderTargetOutput;
-
 			
 
 			SharpDX.DXGI.Factory	fact	=new Factory();
@@ -204,7 +205,8 @@ namespace ColladaStartSmall
 					break;
 			}
 
-			MatLib	matLib	=new MatLib(device,	shaderModel, true);
+			MatLib	matLib		=new MatLib(device,	shaderModel, true);
+			MatLib	axisMatLib	=new MatLib(device,	shaderModel, true);
 
 			matLib.InitCelShading(1);
 			matLib.GenerateCelTexturePreset(device,
@@ -374,8 +376,6 @@ namespace ColladaStartSmall
 			dc.OutputMerger.BlendState			=bs;
 			dc.OutputMerger.DepthStencilState	=dss;
 
-			matLib.SetMaterialParameter("TestMat", "mProjection", gcam.Projection);
-
 			Vector3	lightDir		=-Vector3.UnitY;
 			bool	bMouseLookOn	=false;
 			long	lastTime		=Stopwatch.GetTimestamp();
@@ -383,6 +383,43 @@ namespace ColladaStartSmall
 			//keep track of mouse pos during mouse look
 			System.Drawing.Point		StoredMousePos	=System.Drawing.Point.Empty;
 			System.Drawing.Rectangle	StoredClipRect	=Cursor.Clip;
+
+			//axis boxes
+			BoundingBox	xBox	=Misc.MakeBox(AxisSize, 1f, 1f);
+			BoundingBox	yBox	=Misc.MakeBox(1f, AxisSize, 1f);
+			BoundingBox	zBox	=Misc.MakeBox(1f, 1f, AxisSize);
+
+			PrimObject	mXAxis	=PrimFactory.CreateCube(device, xBox);
+			PrimObject	mYAxis	=PrimFactory.CreateCube(device, yBox);
+			PrimObject	mZAxis	=PrimFactory.CreateCube(device, zBox);
+
+			Vector4	redColor	=Vector4.One;
+			Vector4	greenColor	=Vector4.One;
+			Vector4	blueColor	=Vector4.One;
+			Vector4	lightColor2	=Vector4.One * 0.8f;
+			Vector4	lightColor3	=Vector4.One * 0.6f;
+
+			lightColor2.W	=lightColor3.W	=1f;
+
+			redColor.Y	=redColor.Z	=greenColor.X	=greenColor.Z	=blueColor.X	=blueColor.Y	=0f;
+
+			axisMatLib.CreateMaterial("RedAxis");
+			axisMatLib.SetMaterialEffect("RedAxis", "Static.fx");
+			axisMatLib.SetMaterialTechnique("RedAxis", "TriSolidSpec");
+			axisMatLib.SetMaterialParameter("RedAxis", "mLightColor0", Vector4.One);
+			axisMatLib.SetMaterialParameter("RedAxis", "mLightColor1", lightColor2);
+			axisMatLib.SetMaterialParameter("RedAxis", "mLightColor2", lightColor3);
+			axisMatLib.SetMaterialParameter("RedAxis", "mSolidColour", redColor);
+			axisMatLib.SetMaterialParameter("RedAxis", "mSpecPower", 1);
+			axisMatLib.SetMaterialParameter("RedAxis", "mSpecColor", Vector4.One);
+
+			axisMatLib.CloneMaterial("RedAxis", "GreenAxis");
+			axisMatLib.CloneMaterial("RedAxis", "BlueAxis");
+
+			axisMatLib.SetMaterialParameter("GreenAxis", "mSolidColour", blueColor);
+			axisMatLib.SetMaterialParameter("BlueAxis", "mSolidColour", greenColor);
+
+			axisMatLib.SetParameterForAll("mWorld", Matrix.Identity);
 
 			RenderLoop.Run(renderForm, () =>
 			{
@@ -440,6 +477,7 @@ namespace ColladaStartSmall
 
 				//light direction is backwards now for some strange reason
 				matLib.SetParameterForAll("mLightDirection", -lightDir);
+				axisMatLib.SetParameterForAll("mLightDirection", -lightDir);
 				
 				pos	=pSteering.Update(pos, gcam.Forward, gcam.Left, gcam.Up, actions);
 				
@@ -448,6 +486,11 @@ namespace ColladaStartSmall
 				matLib.SetParameterForAll("mView", gcam.View);
 				matLib.SetParameterForAll("mEyePos", gcam.Position);
 				matLib.SetParameterForAll("mProjection", gcam.Projection);
+
+				axisMatLib.SetParameterForAll("mView", gcam.View);
+				axisMatLib.SetParameterForAll("mEyePos", gcam.Position);
+				axisMatLib.SetParameterForAll("mProjection", gcam.Projection);
+
 				matLib.SetCelTexture(0);
 
 				//Clear views
@@ -459,6 +502,20 @@ namespace ColladaStartSmall
 
 				ss.Render(dc, (float)delta / (float)Stopwatch.Frequency);
 				
+				if(true)//mbDrawAxis)
+				{
+					//X axis red
+					axisMatLib.ApplyMaterialPass("RedAxis", dc, 0);
+					mXAxis.Draw(dc);
+
+					//Y axis green
+					axisMatLib.ApplyMaterialPass("GreenAxis", dc, 0);
+					mYAxis.Draw(dc);
+
+					//Z axis blue
+					axisMatLib.ApplyMaterialPass("BlueAxis", dc, 0);
+					mZAxis.Draw(dc);
+				}
 				// Present!
 				swapChain.Present(0, PresentFlags.None);
 
