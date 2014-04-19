@@ -16,25 +16,11 @@ using SharpDX.Windows;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using Device = SharpDX.Direct3D11.Device;
 using MapFlags = SharpDX.Direct3D11.MapFlags;
+using MatLib = MaterialLib.MaterialLib;
 
 
 namespace ColladaStartSmall
 {
-	public class IncludeFX : CallbackBase, Include
-	{
-		static string includeDirectory = "";
-		public void Close(Stream stream)
-		{
-			stream.Close();
-			stream.Dispose();
-		}
-
-		public Stream Open(IncludeType type, string fileName, Stream parentStream)
-		{
-			return	new FileStream(includeDirectory + fileName, FileMode.Open);
-		}
-	}
-
 	internal static class Program
 	{
 		static bool	mbResized;
@@ -196,30 +182,29 @@ namespace ColladaStartSmall
 
 			DeviceContext	dc	=device.ImmediateContext;
 
-			MaterialLib.MaterialLib.ShaderModel	shaderModel;
+			MatLib.ShaderModel	shaderModel;
 
 			switch(features[0])
 			{
 				case	FeatureLevel.Level_11_0:
-					shaderModel	=MaterialLib.MaterialLib.ShaderModel.SM5;
+					shaderModel	=MatLib.ShaderModel.SM5;
 					break;
 				case	FeatureLevel.Level_10_1:
-					shaderModel	=MaterialLib.MaterialLib.ShaderModel.SM41;
+					shaderModel	=MatLib.ShaderModel.SM41;
 					break;
 				case	FeatureLevel.Level_10_0:
-					shaderModel	=MaterialLib.MaterialLib.ShaderModel.SM4;
+					shaderModel	=MatLib.ShaderModel.SM4;
 					break;
 				case	FeatureLevel.Level_9_3:
-					shaderModel	=MaterialLib.MaterialLib.ShaderModel.SM2;
+					shaderModel	=MatLib.ShaderModel.SM2;
 					break;
 				default:
 					Debug.Assert(false);	//only support the above
-					shaderModel	=MaterialLib.MaterialLib.ShaderModel.SM2;
+					shaderModel	=MatLib.ShaderModel.SM2;
 					break;
 			}
 
-			MaterialLib.MaterialLib	matLib	=new MaterialLib.MaterialLib(
-				device,	shaderModel);
+			MatLib	matLib	=new MatLib(device,	shaderModel, true);
 
 			matLib.InitCelShading(1);
 			matLib.GenerateCelTexturePreset(device,
@@ -240,7 +225,7 @@ namespace ColladaStartSmall
 			Texture2DDescription	depthDesc	=new Texture2DDescription()
 			{
 				//pick depth format based on feature level
-				Format				=(shaderModel != MaterialLib.MaterialLib.ShaderModel.SM2)?
+				Format				=(shaderModel != MatLib.ShaderModel.SM2)?
 										Format.D32_Float_S8X24_UInt : Format.D24_UNorm_S8_UInt,
 				ArraySize			=1,
 				MipLevels			=1,
