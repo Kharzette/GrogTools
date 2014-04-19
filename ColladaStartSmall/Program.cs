@@ -37,7 +37,7 @@ namespace ColladaStartSmall
 			Turn, TurnLeft, TurnRight,
 			Pitch, PitchUp, PitchDown,
 			LightX, LightY, LightZ,
-			ToggleMouseLook
+			ToggleMouseLookOn, ToggleMouseLookOff
 		};
 
 		static void OnRenderFormResize(object sender, EventArgs ea)
@@ -275,7 +275,9 @@ namespace ColladaStartSmall
 			inp.MapAction(MyActions.LightY, 37);
 			inp.MapAction(MyActions.LightZ, 38);
 
-			inp.MapToggleAction(MyActions.ToggleMouseLook, Input.VariousButtons.RightMouseButton);
+			inp.MapToggleAction(MyActions.ToggleMouseLookOn,
+				MyActions.ToggleMouseLookOff,
+				Input.VariousButtons.RightMouseButton);
 
 			inp.MapAxisAction(MyActions.Pitch, Input.MoveAxis.GamePadRightYAxis);
 			inp.MapAxisAction(MyActions.Turn, Input.MoveAxis.GamePadRightXAxis);
@@ -455,31 +457,32 @@ namespace ColladaStartSmall
 				{
 					foreach(Input.InputAction act in actions)
 					{
-						if(act.mAction.Equals(MyActions.ToggleMouseLook))
+						if(act.mAction.Equals(MyActions.ToggleMouseLookOn))
 						{
-							bMouseLookOn	=!bMouseLookOn;
+							bMouseLookOn	=true;
 							Debug.WriteLine("Mouse look: " + bMouseLookOn);
 
 							renderForm.Capture	=bMouseLookOn;
 
-							//find a way to hide cursor
-							if(bMouseLookOn)
-							{
-								inp.MapAxisAction(MyActions.Pitch, Input.MoveAxis.MouseYAxis);
-								inp.MapAxisAction(MyActions.Turn, Input.MoveAxis.MouseXAxis);
-								Cursor.Hide();
+							inp.MapAxisAction(MyActions.Pitch, Input.MoveAxis.MouseYAxis);
+							inp.MapAxisAction(MyActions.Turn, Input.MoveAxis.MouseXAxis);
+							Cursor.Hide();
 
-								StoredMousePos	=Cursor.Position;
+							StoredMousePos	=Cursor.Position;
 
-								Cursor.Clip	=renderForm.RectangleToScreen(renderForm.ClientRectangle);
-							}
-							else
-							{
-								inp.UnMapAxisAction(MyActions.Pitch, Input.MoveAxis.MouseYAxis);
-								inp.UnMapAxisAction(MyActions.Turn, Input.MoveAxis.MouseXAxis);
-								Cursor.Show();
-								Cursor.Clip	=StoredClipRect;
-							}
+							Cursor.Clip	=renderForm.RectangleToScreen(renderForm.ClientRectangle);
+						}
+						else if(act.mAction.Equals(MyActions.ToggleMouseLookOff))
+						{
+							bMouseLookOn	=false;
+							Debug.WriteLine("Mouse look: " + bMouseLookOn);
+
+							renderForm.Capture	=bMouseLookOn;
+
+							inp.UnMapAxisAction(MyActions.Pitch, Input.MoveAxis.MouseYAxis);
+							inp.UnMapAxisAction(MyActions.Turn, Input.MoveAxis.MouseXAxis);
+							Cursor.Show();
+							Cursor.Clip	=StoredClipRect;
 						}
 					}
 				}
