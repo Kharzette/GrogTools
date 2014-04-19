@@ -80,6 +80,7 @@
 			this.button2.TabIndex = 6;
 			this.button2.Text = "Load AnimLib";
 			this.button2.UseVisualStyleBackColor = true;
+			this.button2.Click += new System.EventHandler(this.OnLoadAnimLib);
 			// 
 			// SaveAnimLib
 			// 
@@ -89,6 +90,7 @@
 			this.SaveAnimLib.TabIndex = 5;
 			this.SaveAnimLib.Text = "Save AnimLib";
 			this.SaveAnimLib.UseVisualStyleBackColor = true;
+			this.SaveAnimLib.Click += new System.EventHandler(this.OnSaveAnimLib);
 			// 
 			// groupBox2
 			// 

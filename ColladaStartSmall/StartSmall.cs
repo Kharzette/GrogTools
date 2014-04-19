@@ -75,6 +75,39 @@ namespace ColladaStartSmall
 		}
 
 
+		void OnSaveAnimLib(object sender, EventArgs e)
+		{
+			mSFD.DefaultExt		="*.AnimLib";
+			mSFD.Filter			="Animation library files (*.AnimLib)|*.AnimLib|All files (*.*)|*.*";
+			DialogResult	dr	=mSFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			mAnimLib.SaveToFile(mSFD.FileName);
+		}
+
+
+		void OnLoadAnimLib(object sender, EventArgs e)
+		{
+			mOFD.DefaultExt		="*.AnimLib";
+			mOFD.Filter			="Animation library files (*.AnimLib)|*.AnimLib|All files (*.*)|*.*";
+			mOFD.Multiselect	=false;
+			DialogResult	dr	=mOFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			mAnimLib.ReadFromFile(mOFD.FileName, true);
+
+			AnimGrid.DataSource	=new BindingList<Anim>(mAnimLib.GetAnims());
+		}
+
+
 		void OnLoadCharacter(object sender, EventArgs e)
 		{
 			mOFD.DefaultExt		="*.Character";
