@@ -75,6 +75,12 @@
     <Compile Include="Forms\MaterialForm.Designer.cs">
       <DependentUpon>MaterialForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\SkeletonEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SkeletonEditor.designer.cs">
+      <DependentUpon>SkeletonEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\StripElements.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -105,6 +111,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\MaterialForm.resx">
       <DependentUpon>MaterialForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\SkeletonEditor.resx">
+      <DependentUpon>SkeletonEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\StripElements.resx">
       <DependentUpon>StripElements.cs</DependentUpon>

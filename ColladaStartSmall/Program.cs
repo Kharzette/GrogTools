@@ -291,6 +291,7 @@ namespace ColladaStartSmall
 			StartSmall		ss		=new StartSmall(device, matLib, animLib);
 			MaterialForm	matForm	=new MaterialForm(matLib);
 			StripElements	se		=new StripElements();
+			SkeletonEditor	skel	=new SkeletonEditor();
 
 			//save positions
 			matForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
@@ -299,6 +300,14 @@ namespace ColladaStartSmall
 
 			ss.DataBindings.Add(new System.Windows.Forms.Binding("Location",
 				Settings.Default, "AnimFormPos", true,
+				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+
+			skel.DataBindings.Add(new System.Windows.Forms.Binding("Location",
+				Settings.Default, "SkeletonEditorFormPos", true,
+				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+
+			skel.DataBindings.Add(new System.Windows.Forms.Binding("Size",
+				Settings.Default, "SkeletonEditorFormSize", true,
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
 			renderForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
@@ -319,9 +328,11 @@ namespace ColladaStartSmall
 					matForm.RefreshMeshPartList();	};
 			se.eEscape				+=(sender, args) =>
 				{	se.Populate(null);	se.Visible	=false;	};
+			ss.eSkeletonChanged		+=(sender, args) => skel.Initialize(sender as MeshLib.Skeleton);
 
 			ss.Visible		=true;
 			matForm.Visible	=true;
+			skel.Visible	=true;
 
 			Vector3	pos		=Vector3.One * 5f;
 

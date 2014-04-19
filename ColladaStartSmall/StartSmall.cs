@@ -50,6 +50,7 @@ namespace ColladaStartSmall
 		Character	mChar;
 
 		public event EventHandler	eMeshChanged;
+		public event EventHandler	eSkeletonChanged;
 
 
 		public StartSmall(Device gd, MaterialLib.MaterialLib mats, AnimLib alib)
@@ -109,6 +110,8 @@ namespace ColladaStartSmall
 			}
 
 			mAnimLib.ReadFromFile(mOFD.FileName, true);
+
+			Misc.SafeInvoke(eSkeletonChanged, mAnimLib.GetSkeleton());
 
 			AnimGrid.DataSource	=new BindingList<Anim>(mAnimLib.GetAnims());
 		}
@@ -252,6 +255,7 @@ namespace ColladaStartSmall
 			if(alib.GetSkeleton() == null)
 			{
 				alib.SetSkeleton(skel);
+				Misc.SafeInvoke(eSkeletonChanged, skel);
 			}
 			else if(bCheckSkeleton)
 			{
@@ -300,6 +304,7 @@ namespace ColladaStartSmall
 			BakeSceneNodesIntoVerts(colladaFile, skel, chunks);
 
 			alib.SetSkeleton(skel);
+			Misc.SafeInvoke(eSkeletonChanged, skel);
 
 			alib.AddAnim(BuildAnim(colladaFile, skel, lvs, path));
 
