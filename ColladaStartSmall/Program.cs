@@ -323,7 +323,7 @@ namespace ColladaStartSmall
 			ss.Visible		=true;
 			matForm.Visible	=true;
 
-			Vector3	pos		=Vector3.Zero;
+			Vector3	pos		=Vector3.One * 5f;
 
 			RasterizerStateDescription	rsd	=new RasterizerStateDescription();
 			rsd.CullMode					=CullMode.Back;
@@ -502,7 +502,7 @@ namespace ColladaStartSmall
 
 				ss.Render(dc, (float)delta / (float)Stopwatch.Frequency);
 				
-				if(true)//mbDrawAxis)
+				if(ss.GetDrawAxis())
 				{
 					//X axis red
 					axisMatLib.ApplyMaterialPass("RedAxis", dc, 0);

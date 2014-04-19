@@ -62,6 +62,12 @@ namespace ColladaStartSmall
 		}
 
 
+		internal bool GetDrawAxis()
+		{
+			return	DrawAxis.Checked;
+		}
+
+
 		internal COLLADA DeSerializeCOLLADA(string path)
 		{
 			FileStream		fs	=new FileStream(path, FileMode.Open, FileAccess.Read);
