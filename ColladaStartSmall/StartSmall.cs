@@ -75,6 +75,39 @@ namespace ColladaStartSmall
 		}
 
 
+		void OnLoadCharacter(object sender, EventArgs e)
+		{
+			mOFD.DefaultExt		="*.Character";
+			mOFD.Filter			="Character files (*.Character)|*.Character|All files (*.*)|*.*";
+			DialogResult	dr	=mOFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			mChar	=new Character(mAnimLib);
+			mChar.ReadFromFile(mOFD.FileName, mGD, true);
+
+			Misc.SafeInvoke(eMeshChanged, mChar);
+		}
+
+
+		void OnSaveCharacter(object sender, EventArgs e)
+		{
+			mSFD.DefaultExt		="*.Character";
+			mSFD.Filter			="Character files (*.Character)|*.Character|All files (*.*)|*.*";
+			DialogResult	dr	=mSFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			mChar.SaveToFile(mSFD.FileName);
+		}
+
+
 		void OnLoadStatic(object sender, EventArgs e)
 		{
 			mOFD.DefaultExt		="*.Static";

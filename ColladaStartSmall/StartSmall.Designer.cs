@@ -122,6 +122,7 @@
 			this.LoadCharacter.TabIndex = 8;
 			this.LoadCharacter.Text = "Load Character";
 			this.LoadCharacter.UseVisualStyleBackColor = true;
+			this.LoadCharacter.Click += new System.EventHandler(this.OnLoadCharacter);
 			// 
 			// SaveCharacter
 			// 
@@ -131,6 +132,7 @@
 			this.SaveCharacter.TabIndex = 7;
 			this.SaveCharacter.Text = "Save Character";
 			this.SaveCharacter.UseVisualStyleBackColor = true;
+			this.SaveCharacter.Click += new System.EventHandler(this.OnSaveCharacter);
 			// 
 			// SaveStatic
 			// 
