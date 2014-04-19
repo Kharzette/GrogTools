@@ -27,10 +27,6 @@ namespace ColladaStartSmall
 	{
 		static bool	mbResized;
 
-		const int	ResX		=1280;
-		const int	ResY		=720;
-		const float	AxisSize	=50f;
-
 		enum MyActions
 		{
 			MoveForwardBack, MoveForward, MoveBack,
@@ -86,79 +82,6 @@ namespace ColladaStartSmall
 			}
 		}
 
-		static void ReBuildBoundsDrawData(Device gd, object mesh,
-			out PrimObject cubeObj, out PrimObject sphereObj)
-		{
-			BoundingBox		box;
-			BoundingSphere	sphere;
-
-			box.Minimum		=Vector3.Zero;
-			box.Maximum		=Vector3.Zero;
-			sphere.Center	=Vector3.Zero;
-			sphere.Radius	=0.0f;
-
-			if(mesh is Character)
-			{
-				Character	chr	=mesh as Character;
-
-				box		=chr.GetBoxBound();
-				sphere	=chr.GetSphereBound();
-			}
-			else
-			{
-				StaticMesh	sm	=mesh as StaticMesh;
-
-				box		=sm.GetBoxBound();
-				sphere	=sm.GetSphereBound();
-			}
-
-			cubeObj		=PrimFactory.CreateCube(gd, box);
-			sphereObj	=PrimFactory.CreateSphere(gd, sphere.Center, sphere.Radius);
-		}
-
-		static void HandleResize(int width, int height,
-			Device dev, DeviceContext dctx,
-			ref UtilityLib.GameCamera gcam,
-			ref SwapChain swChain, SwapChainDescription scDesc,
-			ref Texture2D backBuf, ref RenderTargetView rtView,
-			ref Texture2D depthBuf, ref DepthStencilView dsView)
-		{
-			Utilities.Dispose(ref backBuf);
-			Utilities.Dispose(ref rtView);
-			Utilities.Dispose(ref depthBuf);
-			Utilities.Dispose(ref dsView);
-
-			swChain.ResizeBuffers(scDesc.BufferCount, width, height, Format.Unknown, SwapChainFlags.None);
-
-			backBuf	=Texture2D.FromSwapChain<Texture2D>(swChain, 0);
-			rtView	=new RenderTargetView(dev, backBuf);
-
-			Texture2DDescription	depthDesc	=new Texture2DDescription()
-			{
-				Format				=Format.D32_Float_S8X24_UInt,
-				ArraySize			=1,
-				MipLevels			=1,
-				Width				=width,
-				Height				=height,
-				SampleDescription	=new SampleDescription(1, 0),
-				Usage				=ResourceUsage.Default,
-				BindFlags			=BindFlags.DepthStencil,
-				CpuAccessFlags		=CpuAccessFlags.None,
-				OptionFlags			=ResourceOptionFlags.None
-			};
-
-			depthBuf	=new Texture2D(dev, depthDesc);
-			dsView		=new DepthStencilView(dev, depthBuf);
-
-			Viewport	vp	=new Viewport(0, 0, width, height, 0.1f, 2000f);
-
-			dctx.Rasterizer.SetViewport(vp);
-			dctx.OutputMerger.SetTargets(dsView, rtView);
-
-			gcam	=new UtilityLib.GameCamera(width, height, 16f/9f, 0.1f, 2000f);
-
-			mbResized	=false;
-		}
 
 		[STAThread]
 		static void Main()
@@ -168,55 +91,13 @@ namespace ColladaStartSmall
 
 			RenderForm	renderForm	=new RenderForm("Collada Conversion Tool");
 
+			GraphicsDevice	gd	=new GraphicsDevice(renderForm, FeatureLevel.Level_11_0);
+
 			renderForm.UserResized	+=OnRenderFormResize;
-
-			//figure out the client size stuff
-			int	curWidth	=renderForm.ClientRectangle.Width;
-			int	curHeight	=renderForm.ClientRectangle.Height;
-
-			int	adjustX	=curWidth - renderForm.Size.Width;
-			int	adjustY	=curHeight - renderForm.Size.Height;
-
-			System.Drawing.Size	rfSize	=new System.Drawing.Size(ResX + adjustX, ResY + adjustY);
-
-//			renderForm.Size	=rfSize;
-
-			Device					device;
-			SwapChain				swapChain;
-			SwapChainDescription	scDesc	=new SwapChainDescription();
-
-			scDesc.BufferCount			=1;
-			scDesc.Flags				=SwapChainFlags.None;
-			scDesc.IsWindowed			=true;
-//			scDesc.ModeDescription		=new ModeDescription(ResX, ResY, new Rational(60, 1), Format.R8G8B8A8_UNorm);
-			scDesc.ModeDescription		=new ModeDescription(renderForm.ClientSize.Width, renderForm.ClientSize.Height, new Rational(60, 1), Format.R8G8B8A8_UNorm);
-			scDesc.OutputHandle			=renderForm.Handle;
-			scDesc.SampleDescription	=new SampleDescription(1, 0);
-			scDesc.SwapEffect			=SwapEffect.Discard;
-			scDesc.Usage				=Usage.RenderTargetOutput;
-			
-
-			SharpDX.DXGI.Factory	fact	=new Factory();
-
-			Adapter	adpt	=fact.GetAdapter(0);
-
-			FeatureLevel	[]features	=new FeatureLevel[1];
-
-			features[0]	=new FeatureLevel();
-
-			features[0]	=FeatureLevel.Level_11_0;
-//			features[0]	=FeatureLevel.Level_10_1;
-//			features[0]	=FeatureLevel.Level_10_0;
-//			features[0]	=FeatureLevel.Level_9_3;
-
-			Device.CreateWithSwapChain(adpt, DeviceCreationFlags.Debug, features,
-				scDesc, out device, out swapChain);
-
-			DeviceContext	dc	=device.ImmediateContext;
 
 			MatLib.ShaderModel	shaderModel;
 
-			switch(features[0])
+			switch(gd.GD.FeatureLevel)
 			{
 				case	FeatureLevel.Level_11_0:
 					shaderModel	=MatLib.ShaderModel.SM5;
@@ -236,51 +117,13 @@ namespace ColladaStartSmall
 					break;
 			}
 
-			MatLib	matLib		=new MatLib(device,	shaderModel, true);
-			MatLib	axisMatLib	=new MatLib(device,	shaderModel, true);
+			MatLib	matLib		=new MatLib(gd.GD, shaderModel, true);
 
 			matLib.InitCelShading(1);
-			matLib.GenerateCelTexturePreset(device,
-				features[0] == FeatureLevel.Level_9_3, false, 0);
+			matLib.GenerateCelTexturePreset(gd.GD,
+				gd.GD.FeatureLevel == FeatureLevel.Level_9_3, false, 0);
 
 			Random	rand	=new Random();
-
-			//I always use this, hope it doesn't change somehow
-			dc.InputAssembler.PrimitiveTopology	=PrimitiveTopology.TriangleList;
-			
-			//Get the backbuffer from the swapchain
-			Texture2D	backBuffer	=Texture2D.FromSwapChain<Texture2D>(swapChain, 0);
-
-			//Renderview on the backbuffer
-			RenderTargetView	renderView	=new RenderTargetView(device, backBuffer);
-			
-			//Create the depth buffer
-			Texture2DDescription	depthDesc	=new Texture2DDescription()
-			{
-				//pick depth format based on feature level
-				Format				=(shaderModel != MatLib.ShaderModel.SM2)?
-										Format.D32_Float_S8X24_UInt : Format.D24_UNorm_S8_UInt,
-				ArraySize			=1,
-				MipLevels			=1,
-//				Width				=ResX,
-//				Height				=ResY,
-				Width				=renderForm.ClientSize.Width,
-				Height				=renderForm.ClientSize.Height,
-				SampleDescription	=new SampleDescription(1, 0),
-				Usage				=ResourceUsage.Default,
-				BindFlags			=BindFlags.DepthStencil,
-				CpuAccessFlags		=CpuAccessFlags.None,
-				OptionFlags			=ResourceOptionFlags.None
-			};
-
-			Texture2D	depthBuffer	=new Texture2D(device, depthDesc);
-			
-			//Create the depth buffer view
-			DepthStencilView	depthView	=new DepthStencilView(device, depthBuffer);
-			
-			//Setup targets and viewport for rendering
-			dc.Rasterizer.SetViewport(new Viewport(0, 0, renderForm.ClientSize.Width, renderForm.ClientSize.Height, 0.0f, 1.0f));
-			dc.OutputMerger.SetTargets(depthView, renderView);
 
 			UtilityLib.GameCamera	gcam	=new UtilityLib.GameCamera(renderForm.ClientSize.Width, renderForm.ClientSize.Height, 16f/9f, 0.1f, 2000f);
 
@@ -321,11 +164,13 @@ namespace ColladaStartSmall
 
 			MeshLib.AnimLib	animLib	=new MeshLib.AnimLib();
 
-			StartSmall		ss		=new StartSmall(device, matLib, animLib);
+			ExtraPrims	extraPrims	=new ExtraPrims(gd.GD, shaderModel);
+
+			StartSmall		ss		=new StartSmall(gd.GD, matLib, animLib);
 			MaterialForm	matForm	=new MaterialForm(matLib);
 			StripElements	se		=new StripElements();
 			SkeletonEditor	skel	=new SkeletonEditor();
-			CelTweakForm	celForm	=new CelTweakForm(device, matLib);
+			CelTweakForm	celForm	=new CelTweakForm(gd.GD, matLib);
 
 			//save positions
 			matForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
@@ -355,24 +200,19 @@ namespace ColladaStartSmall
 
 			renderForm.Location	=Settings.Default.MainWindowPos;
 
-			//bounding prim for drawing box or sphere
-			PrimObject	boundBox	=null;
-			PrimObject	boundSphere	=null;
-
 			ss.eMeshChanged			+=(sender, args) => matForm.SetMesh(sender);
 			matForm.eNukedMeshPart	+=(sender, args) => ss.NukeMeshPart(sender as MeshLib.Mesh);
 			matForm.eStripElements	+=(sender, args) =>
 				{	if(se.Visible){	return;	}
 					se.Populate(sender as List<MeshLib.Mesh>);	};
 			se.eDeleteElement		+=(sender, args) =>
-				{	DeleteVertElement(device, sender as List<int>, se.GetMeshes());
+				{	DeleteVertElement(gd.GD, sender as List<int>, se.GetMeshes());
 					se.Populate(null);	se.Visible	=false;
 					matForm.RefreshMeshPartList();	};
 			se.eEscape				+=(sender, args) =>
 				{	se.Populate(null);	se.Visible	=false;	};
 			ss.eSkeletonChanged		+=(sender, args) => skel.Initialize(sender as MeshLib.Skeleton);
-			ss.eBoundsChanged		+=(sender, args) => ReBuildBoundsDrawData(device, sender,
-				out boundBox, out boundSphere);
+			ss.eBoundsChanged		+=(sender, args) => extraPrims.ReBuildBoundsDrawData(gd.GD, sender);
 
 			ss.Visible		=true;
 			matForm.Visible	=true;
@@ -388,62 +228,14 @@ namespace ColladaStartSmall
 			System.Drawing.Point		StoredMousePos	=System.Drawing.Point.Empty;
 			System.Drawing.Rectangle	StoredClipRect	=Cursor.Clip;
 
-			//axis boxes
-			BoundingBox	xBox	=Misc.MakeBox(AxisSize, 1f, 1f);
-			BoundingBox	yBox	=Misc.MakeBox(1f, AxisSize, 1f);
-			BoundingBox	zBox	=Misc.MakeBox(1f, 1f, AxisSize);
-
-			PrimObject	mXAxis	=PrimFactory.CreateCube(device, xBox);
-			PrimObject	mYAxis	=PrimFactory.CreateCube(device, yBox);
-			PrimObject	mZAxis	=PrimFactory.CreateCube(device, zBox);
-
-			Vector4	redColor	=Vector4.One;
-			Vector4	greenColor	=Vector4.One;
-			Vector4	blueColor	=Vector4.One;
-			Vector4	lightColor2	=Vector4.One * 0.8f;
-			Vector4	lightColor3	=Vector4.One * 0.6f;
-
-			lightColor2.W	=lightColor3.W	=1f;
-
-			redColor.Y	=redColor.Z	=greenColor.X	=greenColor.Z	=blueColor.X	=blueColor.Y	=0f;
-
-			//materials for axis
-			axisMatLib.CreateMaterial("RedAxis");
-			axisMatLib.SetMaterialEffect("RedAxis", "Static.fx");
-			axisMatLib.SetMaterialTechnique("RedAxis", "TriSolidSpec");
-			axisMatLib.SetMaterialParameter("RedAxis", "mLightColor0", Vector4.One);
-			axisMatLib.SetMaterialParameter("RedAxis", "mLightColor1", lightColor2);
-			axisMatLib.SetMaterialParameter("RedAxis", "mLightColor2", lightColor3);
-			axisMatLib.SetMaterialParameter("RedAxis", "mSolidColour", redColor);
-			axisMatLib.SetMaterialParameter("RedAxis", "mSpecPower", 1);
-			axisMatLib.SetMaterialParameter("RedAxis", "mSpecColor", Vector4.One);
-
-			axisMatLib.CloneMaterial("RedAxis", "GreenAxis");
-			axisMatLib.CloneMaterial("RedAxis", "BlueAxis");
-
-			axisMatLib.SetMaterialParameter("GreenAxis", "mSolidColour", blueColor);
-			axisMatLib.SetMaterialParameter("BlueAxis", "mSolidColour", greenColor);
-
-			axisMatLib.SetParameterForAll("mWorld", Matrix.Identity);
-
-			//material for bound primitives
-			axisMatLib.CreateMaterial("BoundMat");
-			axisMatLib.SetMaterialEffect("BoundMat", "Static.fx");
-			axisMatLib.SetMaterialTechnique("BoundMat", "TriSolidSpecAlpha");
-			axisMatLib.SetMaterialParameter("BoundMat", "mLightColor0", Vector4.One);
-			axisMatLib.SetMaterialParameter("BoundMat", "mLightColor1", lightColor2);
-			axisMatLib.SetMaterialParameter("BoundMat", "mLightColor2", lightColor3);
-			axisMatLib.SetMaterialParameter("BoundMat", "mSolidColour", Vector4.One * 0.5f);
-			axisMatLib.SetMaterialParameter("BoundMat", "mSpecPower", 4);
-			axisMatLib.SetMaterialParameter("BoundMat", "mSpecColor", Vector4.One);
 
 			RenderLoop.Run(renderForm, () =>
 			{
 				if(mbResized)
 				{
-					HandleResize(renderForm.ClientSize.Width, renderForm.ClientSize.Height,
-						device, dc, ref gcam, ref swapChain, scDesc,
-						ref backBuffer, ref renderView, ref depthBuffer, ref depthView);
+					gd.HandleResize(renderForm.ClientSize.Width,
+						renderForm.ClientSize.Height, ref gcam);
+					mbResized	=false;
 				}
 
 				if(bMouseLookOn)
@@ -494,7 +286,6 @@ namespace ColladaStartSmall
 
 				//light direction is backwards now for some strange reason
 				matLib.SetParameterForAll("mLightDirection", -lightDir);
-				axisMatLib.SetParameterForAll("mLightDirection", -lightDir);
 				
 				pos	=pSteering.Update(pos, gcam.Forward, gcam.Left, gcam.Up, actions);
 				
@@ -504,50 +295,34 @@ namespace ColladaStartSmall
 				matLib.SetParameterForAll("mEyePos", gcam.Position);
 				matLib.SetParameterForAll("mProjection", gcam.Projection);
 
-				axisMatLib.SetParameterForAll("mView", gcam.View);
-				axisMatLib.SetParameterForAll("mEyePos", gcam.Position);
-				axisMatLib.SetParameterForAll("mProjection", gcam.Projection);
+				extraPrims.Update(gcam, lightDir);
 
 				matLib.SetCelTexture(0);
 
 				//Clear views
-				dc.ClearDepthStencilView(depthView, DepthStencilClearFlags.Depth, 1f, 0);
-				dc.ClearRenderTargetView(renderView, Color.CornflowerBlue);
+				gd.ClearViews();
 
 				long	timeNow	=Stopwatch.GetTimestamp();
 				long	delta	=timeNow - lastTime;
 
-				ss.Render(dc, (float)delta / (float)Stopwatch.Frequency);
+				ss.Render(gd.DC, (float)delta / (float)Stopwatch.Frequency);
 				
 				if(ss.GetDrawAxis())
 				{
-					//X axis red
-					axisMatLib.ApplyMaterialPass("RedAxis", dc, 0);
-					mXAxis.Draw(dc);
-
-					//Y axis green
-					axisMatLib.ApplyMaterialPass("GreenAxis", dc, 0);
-					mYAxis.Draw(dc);
-
-					//Z axis blue
-					axisMatLib.ApplyMaterialPass("BlueAxis", dc, 0);
-					mZAxis.Draw(dc);
+					extraPrims.DrawAxis(gd.DC);
 				}
 
 				if(ss.GetDrawBox())
 				{
-					axisMatLib.ApplyMaterialPass("BoundMat", dc, 0);
-					boundBox.Draw(dc);
+					extraPrims.DrawBox(gd.DC);
 				}
 
 				if(ss.GetDrawSphere())
 				{
-					axisMatLib.ApplyMaterialPass("BoundMat", dc, 0);
-					boundSphere.Draw(dc);
+					extraPrims.DrawSphere(gd.DC);
 				}
 
-				// Present!
-				swapChain.Present(0, PresentFlags.None);
+				gd.Present();
 
 				lastTime	=timeNow;
 			});
@@ -555,11 +330,7 @@ namespace ColladaStartSmall
 			Settings.Default.Save();
 			
 			//Release all resources
-//			layout.Dispose();
-			renderView.Dispose();
-			backBuffer.Dispose();
-			device.Dispose();
-			swapChain.Dispose();
+			gd.ReleaseAll();
 		}
 	}
 }

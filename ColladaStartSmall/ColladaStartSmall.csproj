@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="Animation.cs" />
     <Compile Include="collada_schema_1_4.cs" />
+    <Compile Include="ExtraPrims.cs" />
     <Compile Include="Forms\CelTweakForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -96,6 +97,7 @@
     <Compile Include="Forms\TabbyPropertyGrid.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="GraphicsDevice.cs" />
     <Compile Include="MeshConverter.cs" />
     <Compile Include="PlayerSteering.cs" />
     <Compile Include="Settings.Designer.cs">
