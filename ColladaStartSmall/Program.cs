@@ -325,6 +325,7 @@ namespace ColladaStartSmall
 			MaterialForm	matForm	=new MaterialForm(matLib);
 			StripElements	se		=new StripElements();
 			SkeletonEditor	skel	=new SkeletonEditor();
+			CelTweakForm	celForm	=new CelTweakForm(device, matLib);
 
 			//save positions
 			matForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
@@ -341,6 +342,10 @@ namespace ColladaStartSmall
 
 			skel.DataBindings.Add(new System.Windows.Forms.Binding("Size",
 				Settings.Default, "SkeletonEditorFormSize", true,
+				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+
+			celForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
+				Settings.Default, "CelTweakFormPos", true,
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
 			renderForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
@@ -372,60 +377,9 @@ namespace ColladaStartSmall
 			ss.Visible		=true;
 			matForm.Visible	=true;
 			skel.Visible	=true;
+			celForm.Visible	=true;
 
-			Vector3	pos		=Vector3.One * 5f;
-			/*
-			RasterizerStateDescription	rsd	=new RasterizerStateDescription();
-			rsd.CullMode					=CullMode.Back;
-			rsd.DepthBias					=0;
-			rsd.DepthBiasClamp				=0f;
-			rsd.FillMode					=FillMode.Solid;
-			rsd.IsAntialiasedLineEnabled	=false;
-			rsd.IsDepthClipEnabled			=true;
-			rsd.IsFrontCounterClockwise		=false;
-			rsd.IsMultisampleEnabled		=false;
-			rsd.IsScissorEnabled			=false;
-			rsd.SlopeScaledDepthBias		=0f;
-
-			RasterizerState	rs	=new RasterizerState(device, rsd);
-
-			dc.Rasterizer.State	=rs;
-
-			BlendStateDescription	bsd	=new BlendStateDescription();
-			bsd.AlphaToCoverageEnable					=false;
-			bsd.IndependentBlendEnable					=false;
-			bsd.RenderTarget[0].IsBlendEnabled			=true;
-			bsd.RenderTarget[0].SourceBlend				=BlendOption.SourceAlpha;
-			bsd.RenderTarget[0].DestinationBlend		=BlendOption.InverseSourceAlpha;
-			bsd.RenderTarget[0].BlendOperation			=BlendOperation.Add;
-			bsd.RenderTarget[0].SourceAlphaBlend		=BlendOption.One;
-			bsd.RenderTarget[0].DestinationAlphaBlend	=BlendOption.Zero;
-			bsd.RenderTarget[0].AlphaBlendOperation		=BlendOperation.Add;
-			bsd.RenderTarget[0].RenderTargetWriteMask	=ColorWriteMaskFlags.All;
-
-			BlendState	bs	=new BlendState(device, bsd);
-
-			DepthStencilOperationDescription	dsod	=new DepthStencilOperationDescription();
-			dsod.Comparison			=Comparison.Less;
-			dsod.DepthFailOperation	=StencilOperation.Keep;
-			dsod.FailOperation		=StencilOperation.Keep;
-			dsod.PassOperation		=StencilOperation.Replace;
-
-			DepthStencilStateDescription	dssd	=new DepthStencilStateDescription();
-			dssd.BackFace			=dsod;
-			dssd.DepthComparison	=Comparison.Less;
-			dssd.DepthWriteMask		=DepthWriteMask.All;
-			dssd.FrontFace			=dsod;
-			dssd.IsDepthEnabled		=true;
-			dssd.IsStencilEnabled	=false;
-			dssd.StencilReadMask	=0;
-			dssd.StencilWriteMask	=0;
-
-			DepthStencilState	dss	=new DepthStencilState(device, dssd);
-
-			dc.OutputMerger.BlendState			=bs;
-			dc.OutputMerger.DepthStencilState	=dss;
-			*/
+			Vector3	pos				=Vector3.One * 5f;
 			Vector3	lightDir		=-Vector3.UnitY;
 			bool	bMouseLookOn	=false;
 			long	lastTime		=Stopwatch.GetTimestamp();
