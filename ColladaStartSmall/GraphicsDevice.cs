@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UtilityLib;
 
 using SharpDX;
 using SharpDX.D3DCompiler;
@@ -11,14 +12,16 @@ using SharpDX.DXGI;
 using SharpDX.Windows;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using Device = SharpDX.Direct3D11.Device;
-using MapFlags = SharpDX.Direct3D11.MapFlags;
 using MatLib = MaterialLib.MaterialLib;
+using Cursor = System.Windows.Forms.Cursor;
 
 
 namespace ColladaStartSmall
 {
 	internal class GraphicsDevice
 	{
+		RenderForm	mRForm;
+
 		Device			mGD;
 		DeviceContext	mDC;
 
@@ -27,6 +30,15 @@ namespace ColladaStartSmall
 		Texture2D			mBackBuffer, mDepthBuffer;
 		RenderTargetView	mBBView;
 		DepthStencilView	mDSView;
+
+		GameCamera	mGCam;
+
+		bool	mbResized;
+
+		//keep track of mouse pos during mouse look
+		System.Drawing.Point		mStoredMousePos	=System.Drawing.Point.Empty;
+		System.Drawing.Rectangle	mStoredClipRect	=Cursor.Clip;
+
 
 		internal Device GD
 		{
@@ -38,16 +50,28 @@ namespace ColladaStartSmall
 			get { return mDC; }
 		}
 
-
-		internal GraphicsDevice(RenderForm renderForm, FeatureLevel flevel)
+		internal RenderForm RendForm
 		{
+			get { return mRForm; }
+		}
+
+		internal GameCamera GCam
+		{
+			get { return mGCam; }
+		}
+
+
+		internal GraphicsDevice(string formTitle, FeatureLevel flevel)
+		{
+			mRForm	=new RenderForm(formTitle);
+
 			SwapChainDescription	scDesc	=new SwapChainDescription();
 
 			scDesc.BufferCount			=1;
 			scDesc.Flags				=SwapChainFlags.None;
 			scDesc.IsWindowed			=true;
-			scDesc.ModeDescription		=new ModeDescription(renderForm.ClientSize.Width, renderForm.ClientSize.Height, new Rational(60, 1), Format.R8G8B8A8_UNorm);
-			scDesc.OutputHandle			=renderForm.Handle;
+			scDesc.ModeDescription		=new ModeDescription(mRForm.ClientSize.Width, mRForm.ClientSize.Height, new Rational(60, 1), Format.R8G8B8A8_UNorm);
+			scDesc.OutputHandle			=mRForm.Handle;
 			scDesc.SampleDescription	=new SampleDescription(1, 0);
 			scDesc.SwapEffect			=SwapEffect.Discard;
 			scDesc.Usage				=Usage.RenderTargetOutput;
@@ -84,8 +108,8 @@ namespace ColladaStartSmall
 										Format.D32_Float_S8X24_UInt : Format.D24_UNorm_S8_UInt,
 				ArraySize			=1,
 				MipLevels			=1,
-				Width				=renderForm.ClientSize.Width,
-				Height				=renderForm.ClientSize.Height,
+				Width				=mRForm.ClientSize.Width,
+				Height				=mRForm.ClientSize.Height,
 				SampleDescription	=new SampleDescription(1, 0),
 				Usage				=ResourceUsage.Default,
 				BindFlags			=BindFlags.DepthStencil,
@@ -100,21 +124,32 @@ namespace ColladaStartSmall
 			
 			//Setup targets and viewport for rendering
 			mDC.Rasterizer.SetViewport(new Viewport(0, 0,
-				renderForm.ClientSize.Width, renderForm.ClientSize.Height, 0.0f, 1.0f));
+				mRForm.ClientSize.Width, mRForm.ClientSize.Height, 0.0f, 1.0f));
 
 			mDC.OutputMerger.SetTargets(mDSView, mBBView);
+
+			mRForm.UserResized	+=OnRenderFormResize;
+
+			mGCam	=new UtilityLib.GameCamera(mRForm.ClientSize.Width,
+				mRForm.ClientSize.Height, 16f/9f, 0.1f, 2000f);
+
+			mRForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
+					Settings.Default,
+					"MainWindowPos", true,
+					System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+
+			mRForm.Location	=Settings.Default.MainWindowPos;
 		}
 
 
-		internal void HandleResize(int width, int height,
-			ref UtilityLib.GameCamera gcam)
+		internal void HandleResize()
 		{
 			Utilities.Dispose(ref mBackBuffer);
 			Utilities.Dispose(ref mBBView);
 			Utilities.Dispose(ref mDepthBuffer);
 			Utilities.Dispose(ref mDSView);
 
-			mSChain.ResizeBuffers(1, width, height, Format.Unknown, SwapChainFlags.None);
+			mSChain.ResizeBuffers(1, mRForm.Width, mRForm.Height, Format.Unknown, SwapChainFlags.None);
 
 			mBackBuffer	=Texture2D.FromSwapChain<Texture2D>(mSChain, 0);
 			mBBView		=new RenderTargetView(mGD, mBackBuffer);
@@ -126,8 +161,8 @@ namespace ColladaStartSmall
 										Format.D32_Float_S8X24_UInt : Format.D24_UNorm_S8_UInt,
 				ArraySize			=1,
 				MipLevels			=1,
-				Width				=width,
-				Height				=height,
+				Width				=mRForm.Width,
+				Height				=mRForm.Height,
 				SampleDescription	=new SampleDescription(1, 0),
 				Usage				=ResourceUsage.Default,
 				BindFlags			=BindFlags.DepthStencil,
@@ -138,12 +173,12 @@ namespace ColladaStartSmall
 			mDepthBuffer	=new Texture2D(mGD, depthDesc);
 			mDSView			=new DepthStencilView(mGD, mDepthBuffer);
 
-			Viewport	vp	=new Viewport(0, 0, width, height, 0f, 1f);
+			Viewport	vp	=new Viewport(0, 0, mRForm.Width, mRForm.Height, 0f, 1f);
 
 			mDC.Rasterizer.SetViewport(vp);
 			mDC.OutputMerger.SetTargets(mDSView, mBBView);
 
-			gcam	=new UtilityLib.GameCamera(width, height, 16f/9f, 0.1f, 2000f);
+			mGCam	=new UtilityLib.GameCamera(mRForm.Width, mRForm.Height, 16f/9f, 0.1f, 2000f);
 		}
 
 
@@ -169,6 +204,53 @@ namespace ColladaStartSmall
 			mDC.Dispose();
 			mSChain.Dispose();
 			mGD.Dispose();
+		}
+
+
+		internal void ResetCursorPos()
+		{
+			Cursor.Position	=mStoredMousePos;
+		}
+
+
+		internal void ToggleCapture(bool bOn)
+		{
+			if(bOn)
+			{
+				mRForm.Capture	=true;
+
+				Cursor.Hide();
+
+				mStoredMousePos	=Cursor.Position;
+
+				Cursor.Clip	=mRForm.RectangleToScreen(mRForm.ClientRectangle);
+			}
+			else
+			{
+				mRForm.Capture	=false;
+
+				Cursor.Show();
+				Cursor.Clip	=mStoredClipRect;
+			}
+		}
+
+
+		internal void CheckResize()
+		{
+			if(!mbResized)
+			{
+				return;
+			}
+
+			HandleResize();
+
+			mbResized	=false;
+		}
+
+
+		void OnRenderFormResize(object sender, EventArgs ea)
+		{
+			mbResized	=true;
 		}
 	}
 }
