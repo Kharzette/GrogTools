@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using SharpDX;
 
 
-namespace ColladaStartSmall
+namespace ColladaConvert
 {
 	//animations on individual controllers
 	public class SubAnimation

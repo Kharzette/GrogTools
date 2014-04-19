@@ -11,7 +11,7 @@ using Device = SharpDX.Direct3D11.Device;
 using MatLib = MaterialLib.MaterialLib;
 
 
-namespace ColladaStartSmall
+namespace ColladaConvert
 {
 	internal class ExtraPrims
 	{

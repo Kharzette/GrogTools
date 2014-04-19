@@ -11,7 +11,7 @@ using MatLib = MaterialLib.MaterialLib;
 using Device = SharpDX.Direct3D11.Device;
 
 
-namespace ColladaStartSmall
+namespace ColladaConvert
 {
 	public partial class CelTweakForm : Form
 	{

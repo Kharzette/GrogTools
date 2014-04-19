@@ -16,7 +16,7 @@ using MatLib = MaterialLib.MaterialLib;
 using Cursor = System.Windows.Forms.Cursor;
 
 
-namespace ColladaStartSmall
+namespace ColladaConvert
 {
 	internal class GraphicsDevice
 	{

@@ -7,7 +7,7 @@ using SharpDX;
 using InputLib;
 
 
-namespace ColladaStartSmall
+namespace ColladaConvert
 {
 	//common methods of moving a player around
 	public class PlayerSteering

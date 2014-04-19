@@ -6,7 +6,7 @@ using System.Xml;
 using SharpDX;
 
 
-namespace ColladaStartSmall
+namespace ColladaConvert
 {
 	public class Animation
 	{

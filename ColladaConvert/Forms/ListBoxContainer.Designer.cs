@@ -1,4 +1,4 @@
-﻿namespace ColladaStartSmall
+﻿namespace ColladaConvert
 {
 	partial class ListBoxContainer
 	{

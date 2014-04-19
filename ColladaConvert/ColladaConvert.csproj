@@ -8,8 +8,8 @@
     <ProjectGuid>{6221B3B5-8E59-4B77-AA62-71D742D904F7}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ColladaStartSmall</RootNamespace>
-    <AssemblyName>ColladaStartSmall</AssemblyName>
+    <RootNamespace>ColladaConvert</RootNamespace>
+    <AssemblyName>ColladaConvert</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -35,36 +35,34 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="SharpDX">
-      <HintPath>..\..\Games\OneGameAMonth\packages\SharpDX.2.5.0\lib\net40\SharpDX.dll</HintPath>
+      <HintPath>..\..\Games\packages\SharpDX.2.5.0\lib\net40\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.D3DCompiler">
-      <HintPath>..\..\Games\OneGameAMonth\packages\SharpDX.D3DCompiler.2.5.0\lib\net40\SharpDX.D3DCompiler.dll</HintPath>
+      <HintPath>..\..\Games\packages\SharpDX.D3DCompiler.2.5.0\lib\net40\SharpDX.D3DCompiler.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Direct3D11">
-      <HintPath>..\..\Games\OneGameAMonth\packages\SharpDX.Direct3D11.2.5.0\lib\net40\SharpDX.Direct3D11.dll</HintPath>
+      <HintPath>..\..\Games\packages\SharpDX.Direct3D11.2.5.0\lib\net40\SharpDX.Direct3D11.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Direct3D11.Effects">
-      <HintPath>..\..\Games\OneGameAMonth\packages\SharpDX.Direct3D11.Effects.2.5.0\lib\net40\SharpDX.Direct3D11.Effects.dll</HintPath>
+      <HintPath>..\..\Games\packages\SharpDX.Direct3D11.Effects.2.5.0\lib\net40\SharpDX.Direct3D11.Effects.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.DXGI">
-      <HintPath>..\..\Games\OneGameAMonth\packages\SharpDX.DXGI.2.5.0\lib\net40\SharpDX.DXGI.dll</HintPath>
+      <HintPath>..\..\Games\packages\SharpDX.DXGI.2.5.0\lib\net40\SharpDX.DXGI.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
+    <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Animation.cs" />
     <Compile Include="collada_schema_1_4.cs" />
     <Compile Include="ExtraPrims.cs" />
-    <Compile Include="Forms\AnimForm.cs" />
+    <Compile Include="Forms\AnimForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Forms\AnimForm.Designer.cs">
       <DependentUpon>AnimForm.cs</DependentUpon>
     </Compile>
@@ -138,6 +136,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="app.config" />
     <None Include="packages.config" />
@@ -155,27 +154,34 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="sharpdx_direct3d11_effects_x64.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="sharpdx_direct3d11_effects_x86.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Libs\InputLib\InputLib.csproj">
       <Project>{7B4F8D4A-3506-47EE-87A7-047F5AEA90BF}</Project>
       <Name>InputLib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Libs\MaterialLibSharpDX\MaterialLibSharpDX.csproj">
+    <ProjectReference Include="..\..\Libs\MaterialLib\MaterialLib.csproj">
       <Project>{CABCC4D8-8F21-4728-B317-28D5B500BEFB}</Project>
-      <Name>MaterialLibSharpDX</Name>
+      <Name>MaterialLib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Libs\MeshLibSharpDX\MeshLibSharpDX.csproj">
+    <ProjectReference Include="..\..\Libs\MeshLib\MeshLib.csproj">
       <Project>{D28619D5-2D2D-40A1-AC3C-3509B7B89033}</Project>
-      <Name>MeshLibSharpDX</Name>
+      <Name>MeshLib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Libs\ShaderLibSharpDX\ShaderLibSharpDX.csproj">
+    <ProjectReference Include="..\..\Libs\ShaderLib\ShaderLib.csproj">
       <Project>{837BD265-79BF-48F1-AE02-C63850048D6C}</Project>
-      <Name>ShaderLibSharpDX</Name>
+      <Name>ShaderLib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Libs\UtilityLibSharpDX\UtilityLibSharpDX.csproj">
+    <ProjectReference Include="..\..\Libs\UtilityLib\UtilityLib.csproj">
       <Project>{C2A1DDD2-0237-4CF3-8CBD-C77388FCC54D}</Project>
-      <Name>UtilityLibSharpDX</Name>
+      <Name>UtilityLib</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

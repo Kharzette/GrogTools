@@ -21,12 +21,10 @@ using MapFlags = SharpDX.Direct3D11.MapFlags;
 using MatLib = MaterialLib.MaterialLib;
 
 
-namespace ColladaStartSmall
+namespace ColladaConvert
 {
 	internal static class Program
 	{
-		static bool	mbResized;
-
 		enum MyActions
 		{
 			MoveForwardBack, MoveForward, MoveBack,

@@ -16,7 +16,7 @@ using Color = SharpDX.Color;
 using Device = SharpDX.Direct3D11.Device;
 
 
-namespace ColladaStartSmall
+namespace ColladaConvert
 {
 	public class MeshConverter
 	{

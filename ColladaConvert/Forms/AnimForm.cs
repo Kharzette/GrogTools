@@ -4,7 +4,6 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Xml.Serialization;
-using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -23,7 +22,7 @@ using Color = SharpDX.Color;
 using Device = SharpDX.Direct3D11.Device;
 
 
-namespace ColladaStartSmall
+namespace ColladaConvert
 {
 	public partial class StartSmall : Form
 	{
