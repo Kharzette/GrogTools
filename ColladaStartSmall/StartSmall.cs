@@ -51,6 +51,7 @@ namespace ColladaStartSmall
 
 		public event EventHandler	eMeshChanged;
 		public event EventHandler	eSkeletonChanged;
+		public event EventHandler	eBoundsChanged;
 
 
 		public StartSmall(Device gd, MaterialLib.MaterialLib mats, AnimLib alib)
@@ -66,6 +67,16 @@ namespace ColladaStartSmall
 		internal bool GetDrawAxis()
 		{
 			return	DrawAxis.Checked;
+		}
+
+		internal bool GetDrawBox()
+		{
+			return	ShowBox.Checked;
+		}
+
+		internal bool GetDrawSphere()
+		{
+			return	ShowSphere.Checked;
 		}
 
 
@@ -1867,6 +1878,39 @@ namespace ColladaStartSmall
 			if(e.ColumnIndex == 0)
 			{
 				mAnimLib.FixRename();
+			}
+		}
+
+
+		void OnCalcBounds(object sender, EventArgs e)
+		{
+			if(mStatic != null)
+			{
+				mStatic.UpdateBounds();
+				Misc.SafeInvoke(eBoundsChanged, mStatic);
+			}
+			if(mChar != null)
+			{
+				mChar.UpdateBounds();
+				Misc.SafeInvoke(eBoundsChanged, mChar);
+			}
+		}
+
+
+		void OnShowSphereChanged(object sender, EventArgs e)
+		{
+			if(ShowSphere.Checked)
+			{
+				ShowBox.Checked	=false;
+			}
+		}
+
+
+		void OnShowBoxChanged(object sender, EventArgs e)
+		{
+			if(ShowBox.Checked)
+			{
+				ShowSphere.Checked	=false;
 			}
 		}
 	}

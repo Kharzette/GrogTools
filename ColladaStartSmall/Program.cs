@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using InputLib;
 using MaterialLib;
 using UtilityLib;
+using MeshLib;
 
 using SharpDX;
 using SharpDX.D3DCompiler;
@@ -70,19 +71,49 @@ namespace ColladaStartSmall
 			}
 		}
 
-		static void DeleteVertElement(Device gd, List<int> inds, List<MeshLib.Mesh> meshes)
+		static void DeleteVertElement(Device gd, List<int> inds, List<Mesh> meshes)
 		{
 			Type	firstType	=meshes[0].VertexType;
 
-			foreach(MeshLib.Mesh m in meshes)
+			foreach(Mesh m in meshes)
 			{
 				if(m.VertexType == firstType)
 				{
-					MeshLib.EditorMesh	em	=m as MeshLib.EditorMesh;
+					EditorMesh	em	=m as EditorMesh;
 
 					em.NukeVertexElement(inds, gd);
 				}
 			}
+		}
+
+		static void ReBuildBoundsDrawData(Device gd, object mesh,
+			out PrimObject cubeObj, out PrimObject sphereObj)
+		{
+			BoundingBox		box;
+			BoundingSphere	sphere;
+
+			box.Minimum		=Vector3.Zero;
+			box.Maximum		=Vector3.Zero;
+			sphere.Center	=Vector3.Zero;
+			sphere.Radius	=0.0f;
+
+			if(mesh is Character)
+			{
+				Character	chr	=mesh as Character;
+
+				box		=chr.GetBoxBound();
+				sphere	=chr.GetSphereBound();
+			}
+			else
+			{
+				StaticMesh	sm	=mesh as StaticMesh;
+
+				box		=sm.GetBoxBound();
+				sphere	=sm.GetSphereBound();
+			}
+
+			cubeObj		=PrimFactory.CreateCube(gd, box);
+			sphereObj	=PrimFactory.CreateSphere(gd, sphere.Center, sphere.Radius);
 		}
 
 		static void HandleResize(int width, int height,
@@ -319,6 +350,10 @@ namespace ColladaStartSmall
 
 			renderForm.Location	=Settings.Default.MainWindowPos;
 
+			//bounding prim for drawing box or sphere
+			PrimObject	boundBox	=null;
+			PrimObject	boundSphere	=null;
+
 			ss.eMeshChanged			+=(sender, args) => matForm.SetMesh(sender);
 			matForm.eNukedMeshPart	+=(sender, args) => ss.NukeMeshPart(sender as MeshLib.Mesh);
 			matForm.eStripElements	+=(sender, args) =>
@@ -331,13 +366,15 @@ namespace ColladaStartSmall
 			se.eEscape				+=(sender, args) =>
 				{	se.Populate(null);	se.Visible	=false;	};
 			ss.eSkeletonChanged		+=(sender, args) => skel.Initialize(sender as MeshLib.Skeleton);
+			ss.eBoundsChanged		+=(sender, args) => ReBuildBoundsDrawData(device, sender,
+				out boundBox, out boundSphere);
 
 			ss.Visible		=true;
 			matForm.Visible	=true;
 			skel.Visible	=true;
 
 			Vector3	pos		=Vector3.One * 5f;
-
+			/*
 			RasterizerStateDescription	rsd	=new RasterizerStateDescription();
 			rsd.CullMode					=CullMode.Back;
 			rsd.DepthBias					=0;
@@ -388,7 +425,7 @@ namespace ColladaStartSmall
 
 			dc.OutputMerger.BlendState			=bs;
 			dc.OutputMerger.DepthStencilState	=dss;
-
+			*/
 			Vector3	lightDir		=-Vector3.UnitY;
 			bool	bMouseLookOn	=false;
 			long	lastTime		=Stopwatch.GetTimestamp();
@@ -416,6 +453,7 @@ namespace ColladaStartSmall
 
 			redColor.Y	=redColor.Z	=greenColor.X	=greenColor.Z	=blueColor.X	=blueColor.Y	=0f;
 
+			//materials for axis
 			axisMatLib.CreateMaterial("RedAxis");
 			axisMatLib.SetMaterialEffect("RedAxis", "Static.fx");
 			axisMatLib.SetMaterialTechnique("RedAxis", "TriSolidSpec");
@@ -433,6 +471,17 @@ namespace ColladaStartSmall
 			axisMatLib.SetMaterialParameter("BlueAxis", "mSolidColour", greenColor);
 
 			axisMatLib.SetParameterForAll("mWorld", Matrix.Identity);
+
+			//material for bound primitives
+			axisMatLib.CreateMaterial("BoundMat");
+			axisMatLib.SetMaterialEffect("BoundMat", "Static.fx");
+			axisMatLib.SetMaterialTechnique("BoundMat", "TriSolidSpecAlpha");
+			axisMatLib.SetMaterialParameter("BoundMat", "mLightColor0", Vector4.One);
+			axisMatLib.SetMaterialParameter("BoundMat", "mLightColor1", lightColor2);
+			axisMatLib.SetMaterialParameter("BoundMat", "mLightColor2", lightColor3);
+			axisMatLib.SetMaterialParameter("BoundMat", "mSolidColour", Vector4.One * 0.5f);
+			axisMatLib.SetMaterialParameter("BoundMat", "mSpecPower", 4);
+			axisMatLib.SetMaterialParameter("BoundMat", "mSpecColor", Vector4.One);
 
 			RenderLoop.Run(renderForm, () =>
 			{
@@ -530,6 +579,19 @@ namespace ColladaStartSmall
 					axisMatLib.ApplyMaterialPass("BlueAxis", dc, 0);
 					mZAxis.Draw(dc);
 				}
+
+				if(ss.GetDrawBox())
+				{
+					axisMatLib.ApplyMaterialPass("BoundMat", dc, 0);
+					boundBox.Draw(dc);
+				}
+
+				if(ss.GetDrawSphere())
+				{
+					axisMatLib.ApplyMaterialPass("BoundMat", dc, 0);
+					boundSphere.Draw(dc);
+				}
+
 				// Present!
 				swapChain.Present(0, PresentFlags.None);
 

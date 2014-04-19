@@ -235,6 +235,7 @@
 			this.ShowBox.TabIndex = 2;
 			this.ShowBox.Text = "Show Box";
 			this.ShowBox.UseVisualStyleBackColor = true;
+			this.ShowBox.CheckedChanged += new System.EventHandler(this.OnShowBoxChanged);
 			// 
 			// ShowSphere
 			// 
@@ -245,6 +246,7 @@
 			this.ShowSphere.TabIndex = 1;
 			this.ShowSphere.Text = "Show Sphere";
 			this.ShowSphere.UseVisualStyleBackColor = true;
+			this.ShowSphere.CheckedChanged += new System.EventHandler(this.OnShowSphereChanged);
 			// 
 			// BoundMesh
 			// 
@@ -254,6 +256,7 @@
 			this.BoundMesh.TabIndex = 0;
 			this.BoundMesh.Text = "Calc Bound";
 			this.BoundMesh.UseVisualStyleBackColor = true;
+			this.BoundMesh.Click += new System.EventHandler(this.OnCalcBounds);
 			// 
 			// PauseButton
 			// 
