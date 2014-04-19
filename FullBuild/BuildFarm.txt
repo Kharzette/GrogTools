@@ -1,3 +1,0 @@
-http://localhost:8000/MapVisService
-http://bankai:8000/MapVisService
-http://homonculus:8000/MapVisService
