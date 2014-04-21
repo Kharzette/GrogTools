@@ -24,7 +24,7 @@ using Device = SharpDX.Direct3D11.Device;
 
 namespace ColladaConvert
 {
-	public partial class StartSmall : Form
+	public partial class AnimForm : Form
 	{
 		//file dialog
 		OpenFileDialog	mOFD	=new OpenFileDialog();
@@ -53,7 +53,7 @@ namespace ColladaConvert
 		public event EventHandler	eBoundsChanged;
 
 
-		public StartSmall(Device gd, MaterialLib.MaterialLib mats, AnimLib alib)
+		public AnimForm(Device gd, MaterialLib.MaterialLib mats, AnimLib alib)
 		{
 			InitializeComponent();
 

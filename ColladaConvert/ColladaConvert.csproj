@@ -66,24 +66,6 @@
     <Compile Include="Forms\AnimForm.Designer.cs">
       <DependentUpon>AnimForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\CelTweakForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\CelTweakForm.designer.cs">
-      <DependentUpon>CelTweakForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\ListBoxContainer.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\ListBoxContainer.Designer.cs">
-      <DependentUpon>ListBoxContainer.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\MaterialForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\MaterialForm.Designer.cs">
-      <DependentUpon>MaterialForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="Forms\SkeletonEditor.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -95,9 +77,6 @@
     </Compile>
     <Compile Include="Forms\StripElements.designer.cs">
       <DependentUpon>StripElements.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\TabbyPropertyGrid.cs">
-      <SubType>Component</SubType>
     </Compile>
     <Compile Include="GraphicsDevice.cs" />
     <Compile Include="MeshConverter.cs" />
@@ -112,15 +91,6 @@
     <Compile Include="SubAnimation.cs" />
     <EmbeddedResource Include="Forms\AnimForm.resx">
       <DependentUpon>AnimForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\CelTweakForm.resx">
-      <DependentUpon>CelTweakForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\ListBoxContainer.resx">
-      <DependentUpon>ListBoxContainer.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\MaterialForm.resx">
-      <DependentUpon>MaterialForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\SkeletonEditor.resx">
       <DependentUpon>SkeletonEditor.cs</DependentUpon>
@@ -178,6 +148,10 @@
     <ProjectReference Include="..\..\Libs\ShaderLib\ShaderLib.csproj">
       <Project>{837BD265-79BF-48F1-AE02-C63850048D6C}</Project>
       <Name>ShaderLib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Libs\SharedForms\SharedForms.csproj">
+      <Project>{C1BE43B3-1AAE-4CF5-8F45-DBF6A80F7C0E}</Project>
+      <Name>SharedForms</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Libs\UtilityLib\UtilityLib.csproj">
       <Project>{C2A1DDD2-0237-4CF3-8CBD-C77388FCC54D}</Project>

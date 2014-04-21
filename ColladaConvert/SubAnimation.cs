@@ -75,7 +75,7 @@ namespace ColladaConvert
 				//me gives the bones sids, but then the address element
 				//says Name (note the case), so I guess you need to try
 				//to match via sid first and if that fails, use name?
-				node	n	=StartSmall.LookUpNode(lvs, sid);
+				node	n	=AnimForm.LookUpNode(lvs, sid);
 
 				Debug.Assert(n != null);
 
@@ -175,7 +175,7 @@ namespace ColladaConvert
 				int		sidx	=chan.target.IndexOf('/');
 				string	sid		=chan.target.Substring(0, sidx);
 
-				node	n	=StartSmall.LookUpNode(scenes, sid);
+				node	n	=AnimForm.LookUpNode(scenes, sid);
 
 				Debug.Assert(n != null);
 
@@ -229,8 +229,8 @@ namespace ColladaConvert
 					nodeElement	=nodeElement.Substring(0, dotIdx);
 				}
 
-				node	targeted	=StartSmall.LookUpNode(scenes, nodeID);
-				int		idx			=StartSmall.GetNodeItemIndex(targeted, nodeElement);
+				node	targeted	=AnimForm.LookUpNode(scenes, nodeID);
+				int		idx			=AnimForm.GetNodeItemIndex(targeted, nodeElement);
 
 				if(targeted.ItemsElementName[idx] == ItemsChoiceType2.lookat)
 				{
@@ -239,7 +239,7 @@ namespace ColladaConvert
 				else if(targeted.ItemsElementName[idx] == ItemsChoiceType2.matrix)
 				{
 					//this doesn't really work yet
-					List<Matrix>	mats	=StartSmall.GetMatrixListFromFloatList(outValues);
+					List<Matrix>	mats	=AnimForm.GetMatrixListFromFloatList(outValues);
 					for(int v=0;v < mats.Count;v++)
 					{
 						mats[v].Decompose(out keys[v].mScale, out keys[v].mRotation, out keys[v].mScale);

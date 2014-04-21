@@ -77,7 +77,7 @@ namespace ColladaConvert
 			Random			rand		=new Random();
 			ExtraPrims		extraPrims	=new ExtraPrims(gd.GD, shaderModel);
 
-			StartSmall	ss	=SetUpForms(gd.GD, matLib, extraPrims);
+			AnimForm	ss	=SetUpForms(gd.GD, matLib, extraPrims);
 
 			Vector3	pos				=Vector3.One * 5f;
 			Vector3	lightDir		=-Vector3.UnitY;
@@ -176,14 +176,15 @@ namespace ColladaConvert
 			gd.ReleaseAll();
 		}
 
-		static StartSmall SetUpForms(Device gd, MatLib matLib, ExtraPrims ep)
+		static AnimForm SetUpForms(Device gd, MatLib matLib, ExtraPrims ep)
 		{
 			MeshLib.AnimLib	animLib	=new MeshLib.AnimLib();
-			StartSmall		ss		=new StartSmall(gd, matLib, animLib);
-			MaterialForm	matForm	=new MaterialForm(matLib);
+			AnimForm		ss		=new AnimForm(gd, matLib, animLib);
 			StripElements	se		=new StripElements();
 			SkeletonEditor	skel	=new SkeletonEditor();
-			CelTweakForm	celForm	=new CelTweakForm(gd, matLib);
+
+			SharedForms.MaterialForm	matForm	=new SharedForms.MaterialForm(matLib);
+			SharedForms.CelTweakForm	celForm	=new SharedForms.CelTweakForm(gd, matLib);
 
 			//save positions
 			matForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",

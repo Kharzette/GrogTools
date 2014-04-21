@@ -1,6 +1,6 @@
 ﻿namespace ColladaConvert
 {
-	partial class StartSmall
+	partial class AnimForm
 	{
 		/// <summary>
 		/// Required designer variable.
