@@ -7,7 +7,7 @@ using System.Windows.Forms;
 using InputLib;
 using MaterialLib;
 using UtilityLib;
-using MeshLib;
+using ParticleLib;
 
 using SharpDX;
 using SharpDX.D3DCompiler;
@@ -21,9 +21,9 @@ using MapFlags = SharpDX.Direct3D11.MapFlags;
 using MatLib = MaterialLib.MaterialLib;
 
 
-namespace ColladaConvert
+namespace ParticleEdit
 {
-	internal static class Program
+	static class Program
 	{
 		enum MyActions
 		{
@@ -31,10 +31,8 @@ namespace ColladaConvert
 			MoveLeftRight, MoveLeft, MoveRight,
 			Turn, TurnLeft, TurnRight,
 			Pitch, PitchUp, PitchDown,
-			LightX, LightY, LightZ,
 			ToggleMouseLookOn, ToggleMouseLookOff
 		};
-
 
 		[STAThread]
 		static void Main()
@@ -42,7 +40,7 @@ namespace ColladaConvert
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 
-			GraphicsDevice	gd	=new GraphicsDevice("Collada Conversion Tool", FeatureLevel.Level_11_0);
+			GraphicsDevice	gd	=new GraphicsDevice("Particle Editing Tool", FeatureLevel.Level_11_0);
 
 			//save renderform position
 			gd.RendForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
@@ -51,7 +49,7 @@ namespace ColladaConvert
 					System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
 			gd.RendForm.Location	=Settings.Default.MainWindowPos;
-			
+
 			MatLib.ShaderModel	shaderModel;
 
 			switch(gd.GD.FeatureLevel)
@@ -83,9 +81,8 @@ namespace ColladaConvert
 			PlayerSteering	pSteering	=SetUpSteering();
 			Input			inp			=SetUpInput();
 			Random			rand		=new Random();
-			ExtraPrims		extraPrims	=new ExtraPrims(gd.GD, shaderModel);
-
-			AnimForm	ss	=SetUpForms(gd.GD, matLib, extraPrims);
+			ParticleForm	partForm	=SetUpForms(gd.GD, matLib);
+			ParticleBoss	pBoss		=new ParticleBoss(gd.GD, matLib);
 
 			Vector3	pos				=Vector3.One * 5f;
 			Vector3	lightDir		=-Vector3.UnitY;
@@ -133,11 +130,6 @@ namespace ColladaConvert
 					}
 				}
 
-				ChangeLight(actions, ref lightDir);
-
-				//light direction is backwards now for some strange reason
-				matLib.SetParameterForAll("mLightDirection", -lightDir);
-				
 				pos	=pSteering.Update(pos, gd.GCam.Forward, gd.GCam.Left, gd.GCam.Up, actions);
 				
 				gd.GCam.Update(pos, pSteering.Pitch, pSteering.Yaw, pSteering.Roll);
@@ -146,32 +138,17 @@ namespace ColladaConvert
 				matLib.SetParameterForAll("mEyePos", gd.GCam.Position);
 				matLib.SetParameterForAll("mProjection", gd.GCam.Projection);
 
-				extraPrims.Update(gd.GCam, lightDir);
-
-				matLib.SetCelTexture(0);
-
 				//Clear views
 				gd.ClearViews();
 
 				long	timeNow	=Stopwatch.GetTimestamp();
 				long	delta	=timeNow - lastTime;
 
-				ss.Render(gd.DC, (float)delta / (float)Stopwatch.Frequency);
-				
-				if(ss.GetDrawAxis())
-				{
-					extraPrims.DrawAxis(gd.DC);
-				}
+				delta	=(long)((float)delta / (float)Stopwatch.Frequency);
 
-				if(ss.GetDrawBox())
-				{
-					extraPrims.DrawBox(gd.DC);
-				}
+				pBoss.Update(gd.DC, (int)delta);
 
-				if(ss.GetDrawSphere())
-				{
-					extraPrims.DrawSphere(gd.DC);
-				}
+				pBoss.Draw(gd.DC, gd.GCam.View, gd.GCam.Projection);
 
 				gd.Present();
 
@@ -184,57 +161,25 @@ namespace ColladaConvert
 			gd.ReleaseAll();
 		}
 
-		static AnimForm SetUpForms(Device gd, MatLib matLib, ExtraPrims ep)
-		{
-			MeshLib.AnimLib	animLib	=new MeshLib.AnimLib();
-			AnimForm		ss		=new AnimForm(gd, matLib, animLib);
-			StripElements	se		=new StripElements();
-			SkeletonEditor	skel	=new SkeletonEditor();
 
-			SharedForms.MaterialForm	matForm	=new SharedForms.MaterialForm(matLib);
-			SharedForms.CelTweakForm	celForm	=new SharedForms.CelTweakForm(gd, matLib);
+		static ParticleForm SetUpForms(Device gd, MatLib matLib)
+		{
+			SharedForms.MaterialForm	matForm		=new SharedForms.MaterialForm(matLib);
+			ParticleForm				partForm	=new ParticleForm();
 
 			//save positions
 			matForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
 				Settings.Default, "MaterialFormPos", true,
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
-			ss.DataBindings.Add(new System.Windows.Forms.Binding("Location",
-				Settings.Default, "AnimFormPos", true,
+			partForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
+				Settings.Default, "ParticleFormPos", true,
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
-			skel.DataBindings.Add(new System.Windows.Forms.Binding("Location",
-				Settings.Default, "SkeletonEditorFormPos", true,
-				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+			matForm.Visible		=true;
+			partForm.Visible	=true;
 
-			skel.DataBindings.Add(new System.Windows.Forms.Binding("Size",
-				Settings.Default, "SkeletonEditorFormSize", true,
-				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-
-			celForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
-				Settings.Default, "CelTweakFormPos", true,
-				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-
-			ss.eMeshChanged			+=(sender, args) => matForm.SetMesh(sender);
-			matForm.eNukedMeshPart	+=(sender, args) => ss.NukeMeshPart(sender as MeshLib.Mesh);
-			matForm.eStripElements	+=(sender, args) =>
-				{	if(se.Visible){	return;	}
-					se.Populate(sender as List<MeshLib.Mesh>);	};
-			se.eDeleteElement		+=(sender, args) =>
-				{	DeleteVertElement(gd, sender as List<int>, se.GetMeshes());
-					se.Populate(null);	se.Visible	=false;
-					matForm.RefreshMeshPartList();	};
-			se.eEscape				+=(sender, args) =>
-				{	se.Populate(null);	se.Visible	=false;	};
-			ss.eSkeletonChanged		+=(sender, args) => skel.Initialize(sender as MeshLib.Skeleton);
-			ss.eBoundsChanged		+=(sender, args) => ep.ReBuildBoundsDrawData(gd, sender);
-
-			ss.Visible		=true;
-			matForm.Visible	=true;
-			skel.Visible	=true;
-			celForm.Visible	=true;
-
-			return	ss;
+			return	partForm;
 		}
 
 		static Input SetUpInput()
@@ -247,9 +192,6 @@ namespace ColladaConvert
 			inp.MapAction(MyActions.MoveLeft, 30);
 			inp.MapAction(MyActions.MoveBack, 31);
 			inp.MapAction(MyActions.MoveRight, 32);
-			inp.MapAction(MyActions.LightX, 36);
-			inp.MapAction(MyActions.LightY, 37);
-			inp.MapAction(MyActions.LightZ, 38);
 
 			inp.MapToggleAction(MyActions.ToggleMouseLookOn,
 				MyActions.ToggleMouseLookOff,
@@ -259,10 +201,6 @@ namespace ColladaConvert
 			inp.MapAxisAction(MyActions.Turn, Input.MoveAxis.GamePadRightXAxis);
 			inp.MapAxisAction(MyActions.MoveLeftRight, Input.MoveAxis.GamePadLeftXAxis);
 			inp.MapAxisAction(MyActions.MoveForwardBack, Input.MoveAxis.GamePadLeftYAxis);
-
-			inp.MapAction(MyActions.LightX, Input.VariousButtons.GamePadDPadLeft);
-			inp.MapAction(MyActions.LightY, Input.VariousButtons.GamePadDPadDown);
-			inp.MapAction(MyActions.LightZ, Input.VariousButtons.GamePadDPadRight);
 
 			return	inp;
 		}
@@ -280,46 +218,6 @@ namespace ColladaConvert
 			pSteering.SetPitchEnums(MyActions.Pitch, MyActions.PitchUp, MyActions.PitchDown);
 
 			return	pSteering;
-		}
-
-		static void ChangeLight(List<Input.InputAction> acts, ref Vector3 lightDir)
-		{
-			foreach(Input.InputAction act in acts)
-			{
-				if(act.mAction.Equals(MyActions.LightX))
-				{
-					Matrix	rot	=Matrix.RotationX(act.mMultiplier * 0.001f);
-					lightDir	=Vector3.TransformCoordinate(lightDir, rot);
-					lightDir.Normalize();
-				}
-				else if(act.mAction.Equals(MyActions.LightY))
-				{
-					Matrix	rot	=Matrix.RotationY(act.mMultiplier * 0.001f);
-					lightDir	=Vector3.TransformCoordinate(lightDir, rot);
-					lightDir.Normalize();
-				}
-				else if(act.mAction.Equals(MyActions.LightZ))
-				{
-					Matrix	rot	=Matrix.RotationZ(act.mMultiplier * 0.001f);
-					lightDir	=Vector3.TransformCoordinate(lightDir, rot);
-					lightDir.Normalize();
-				}
-			}
-		}
-
-		static void DeleteVertElement(Device gd, List<int> inds, List<Mesh> meshes)
-		{
-			Type	firstType	=meshes[0].VertexType;
-
-			foreach(Mesh m in meshes)
-			{
-				if(m.VertexType == firstType)
-				{
-					EditorMesh	em	=m as EditorMesh;
-
-					em.NukeVertexElement(inds, gd);
-				}
-			}
 		}
 	}
 }

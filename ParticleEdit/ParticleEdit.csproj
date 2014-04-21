@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{6221B3B5-8E59-4B77-AA62-71D742D904F7}</ProjectGuid>
+    <ProjectGuid>{A5DD4709-72F6-4E0D-A0A0-23F702E789C5}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ColladaConvert</RootNamespace>
-    <AssemblyName>ColladaConvert</AssemblyName>
+    <RootNamespace>ParticleEdit</RootNamespace>
+    <AssemblyName>ParticleEdit</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -43,9 +43,6 @@
     <Reference Include="SharpDX.Direct3D11">
       <HintPath>..\..\Games\packages\SharpDX.Direct3D11.2.5.0\lib\net40\SharpDX.Direct3D11.dll</HintPath>
     </Reference>
-    <Reference Include="SharpDX.Direct3D11.Effects">
-      <HintPath>..\..\Games\packages\SharpDX.Direct3D11.Effects.2.5.0\lib\net40\SharpDX.Direct3D11.Effects.dll</HintPath>
-    </Reference>
     <Reference Include="SharpDX.DXGI">
       <HintPath>..\..\Games\packages\SharpDX.DXGI.2.5.0\lib\net40\SharpDX.DXGI.dll</HintPath>
     </Reference>
@@ -54,47 +51,23 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Animation.cs" />
-    <Compile Include="collada_schema_1_4.cs" />
-    <Compile Include="ExtraPrims.cs" />
-    <Compile Include="Forms\AnimForm.cs">
+    <Compile Include="ParticleForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\AnimForm.Designer.cs">
-      <DependentUpon>AnimForm.cs</DependentUpon>
+    <Compile Include="ParticleForm.designer.cs">
+      <DependentUpon>ParticleForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\SkeletonEditor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\SkeletonEditor.designer.cs">
-      <DependentUpon>SkeletonEditor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\StripElements.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\StripElements.designer.cs">
-      <DependentUpon>StripElements.cs</DependentUpon>
-    </Compile>
-    <Compile Include="MeshConverter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.Designer.cs">
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="SubAnimation.cs" />
-    <EmbeddedResource Include="Forms\AnimForm.resx">
-      <DependentUpon>AnimForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\SkeletonEditor.resx">
-      <DependentUpon>SkeletonEditor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\StripElements.resx">
-      <DependentUpon>StripElements.cs</DependentUpon>
+    <EmbeddedResource Include="ParticleForm.resx">
+      <DependentUpon>ParticleForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -104,7 +77,6 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="app.config" />
     <None Include="packages.config" />
@@ -131,9 +103,9 @@
       <Project>{CABCC4D8-8F21-4728-B317-28D5B500BEFB}</Project>
       <Name>MaterialLib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Libs\MeshLib\MeshLib.csproj">
-      <Project>{D28619D5-2D2D-40A1-AC3C-3509B7B89033}</Project>
-      <Name>MeshLib</Name>
+    <ProjectReference Include="..\..\Libs\ParticleLib\ParticleLib.csproj">
+      <Project>{64751FBC-17AF-48E2-9C09-912C6CA6E9C6}</Project>
+      <Name>ParticleLib</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Libs\ShaderLib\ShaderLib.csproj">
       <Project>{837BD265-79BF-48F1-AE02-C63850048D6C}</Project>
