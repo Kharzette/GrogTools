@@ -725,18 +725,6 @@ namespace ColladaConvert
 				}
 			}
 
-			//temporarily paring this down to just the positions
-/*			List<int>	toNuke	=new List<int>();
-
-			toNuke.Add(1);
-			toNuke.Add(2);
-
-			int	newIndex;
-
-			verts	=VertexTypes.NukeElements(verts, VertexTypes.GetIndex(vtype), toNuke, out newIndex);
-
-			vtype	=VertexTypes.GetTypeForIndex(newIndex);*/
-
 			Buffer	vb	=VertexTypes.BuildABuffer(gd, verts, vtype);
 
 			int	vertSize	=VertexTypes.GetSizeForType(vtype);
