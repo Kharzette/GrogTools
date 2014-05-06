@@ -42,7 +42,8 @@ namespace ColladaConvert
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 
-			GraphicsDevice	gd	=new GraphicsDevice("Collada Conversion Tool", FeatureLevel.Level_11_0);
+			GraphicsDevice	gd	=new GraphicsDevice("Collada Conversion Tool",
+				FeatureLevel.Level_11_0);
 
 			//save renderform position
 			gd.RendForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
@@ -80,10 +81,32 @@ namespace ColladaConvert
 			matLib.GenerateCelTexturePreset(gd.GD,
 				gd.GD.FeatureLevel == FeatureLevel.Level_9_3, false, 0);
 
+			RenderTargetView	[]backBuf	=new RenderTargetView[1];
+			DepthStencilView	backDepth;
+
+			backBuf	=gd.DC.OutputMerger.GetRenderTargets(1, out backDepth);
+
+			//set up post processing module
+			PostProcess	post	=new PostProcess(gd, matLib.GetEffect("Post.fx"),
+				gd.RendForm.Width, gd.RendForm.Height, backBuf[0], backDepth);
+
 			PlayerSteering	pSteering	=SetUpSteering();
 			Input			inp			=SetUpInput();
 			Random			rand		=new Random();
 			ExtraPrims		extraPrims	=new ExtraPrims(gd.GD, shaderModel);
+
+			int	resx	=gd.RendForm.Width;
+			int	resy	=gd.RendForm.Height;
+
+			post.MakePostTarget(gd, "SceneColor", resx, resy, Format.R8G8B8A8_UNorm);
+			post.MakePostDepth(gd, "SceneColor", resx, resy,
+				(gd.GD.FeatureLevel != FeatureLevel.Level_9_3)?
+					Format.D32_Float_S8X24_UInt : Format.D24_UNorm_S8_UInt);
+			post.MakePostTarget(gd, "SceneDepthMatNorm", resx, resy, Format.R16G16B16A16_Float);
+			post.MakePostTarget(gd, "Bleach", resx, resy, Format.R8G8B8A8_UNorm);
+			post.MakePostTarget(gd, "Outline", resx, resy, Format.R8G8B8A8_UNorm);
+			post.MakePostTarget(gd, "Bloom1", resx/2, resy/2, Format.R8G8B8A8_UNorm);
+			post.MakePostTarget(gd, "Bloom2", resx/2, resy/2, Format.R8G8B8A8_UNorm);
 
 			AnimForm	ss	=SetUpForms(gd.GD, matLib, extraPrims);
 
@@ -156,7 +179,31 @@ namespace ColladaConvert
 				long	timeNow	=Stopwatch.GetTimestamp();
 				long	delta	=timeNow - lastTime;
 
-				ss.Render(gd.DC, (float)delta / (float)Stopwatch.Frequency);
+				ss.RenderUpdate((float)delta / (float)Stopwatch.Frequency);
+
+				post.SetTargets(gd, "SceneDepthMatNorm", "SceneColor");
+
+				post.ClearTarget(gd, "SceneDepthMatNorm", Color.White);
+				post.ClearDepth(gd, "SceneColor");
+
+				ss.RenderDMN(gd.DC);
+
+				post.SetTargets(gd, "SceneColor", "SceneColor");
+
+				post.ClearTarget(gd, "SceneColor", Color.CornflowerBlue);
+				post.ClearDepth(gd, "SceneColor");
+
+				ss.Render(gd.DC);
+
+//				post.SetTargets(gd, "BackColor", "BackDepth");
+				post.SetTargets(gd, "Outline", "null");
+				post.SetParameter("mNormalTex", "SceneDepthMatNorm");
+				post.DrawStage(gd, "Outline");
+
+				post.SetTargets(gd, "BackColor", "BackDepth");
+				post.SetParameter("mBlurTargetTex", "Outline");
+				post.SetParameter("mColorTex", "SceneColor");
+				post.DrawStage(gd, "Modulate");
 				
 				if(ss.GetDrawAxis())
 				{

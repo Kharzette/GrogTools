@@ -1792,17 +1792,13 @@ namespace ColladaConvert
 		}
 
 
-		internal void Render(DeviceContext dc, float msDelta)
+		internal void RenderUpdate(float msDelta)
 		{
 			if(mStatic == null && mChar == null)
 			{
 				return;
 			}
 
-			if(mStatic != null)
-			{
-				mStatic.Draw(dc, mMatLib);
-			}
 			if(mChar != null)
 			{
 				if(mSelectedAnim != null && mSelectedAnim != "")
@@ -1824,7 +1820,42 @@ namespace ColladaConvert
 
 					mChar.Animate(mSelectedAnim, mCurAnimTime);
 				}
+			}
+		}
+
+
+		internal void Render(DeviceContext dc)
+		{
+			if(mStatic == null && mChar == null)
+			{
+				return;
+			}
+
+			if(mStatic != null)
+			{
+				mStatic.Draw(dc, mMatLib);
+			}
+			if(mChar != null)
+			{
 				mChar.Draw(dc, mMatLib);
+			}
+		}
+
+
+		internal void RenderDMN(DeviceContext dc)
+		{
+			if(mStatic == null && mChar == null)
+			{
+				return;
+			}
+
+			if(mStatic != null)
+			{
+				mStatic.Draw(dc, mMatLib, "DMN");
+			}
+			if(mChar != null)
+			{
+				mChar.Draw(dc, mMatLib, "DMN");
 			}
 		}
 
