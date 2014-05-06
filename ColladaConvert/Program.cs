@@ -43,7 +43,7 @@ namespace ColladaConvert
 			Application.SetCompatibleTextRenderingDefault(false);
 
 			GraphicsDevice	gd	=new GraphicsDevice("Collada Conversion Tool",
-				FeatureLevel.Level_11_0);
+				FeatureLevel.Level_9_3);
 
 			//save renderform position
 			gd.RendForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
@@ -88,15 +88,16 @@ namespace ColladaConvert
 
 			//set up post processing module
 			PostProcess	post	=new PostProcess(gd, matLib.GetEffect("Post.fx"),
-				gd.RendForm.Width, gd.RendForm.Height, backBuf[0], backDepth);
+				gd.RendForm.ClientRectangle.Width, gd.RendForm.ClientRectangle.Height,
+				backBuf[0], backDepth);
 
 			PlayerSteering	pSteering	=SetUpSteering();
 			Input			inp			=SetUpInput();
 			Random			rand		=new Random();
 			ExtraPrims		extraPrims	=new ExtraPrims(gd.GD, shaderModel);
 
-			int	resx	=gd.RendForm.Width;
-			int	resy	=gd.RendForm.Height;
+			int	resx	=gd.RendForm.ClientRectangle.Width;
+			int	resy	=gd.RendForm.ClientRectangle.Height;
 
 			post.MakePostTarget(gd, "SceneColor", resx, resy, Format.R8G8B8A8_UNorm);
 			post.MakePostDepth(gd, "SceneColor", resx, resy,
@@ -195,10 +196,30 @@ namespace ColladaConvert
 
 				ss.Render(gd.DC);
 
-//				post.SetTargets(gd, "BackColor", "BackDepth");
 				post.SetTargets(gd, "Outline", "null");
 				post.SetParameter("mNormalTex", "SceneDepthMatNorm");
 				post.DrawStage(gd, "Outline");
+
+				post.SetTargets(gd, "Bleach", "null");
+				post.SetParameter("mColorTex", "SceneColor");
+				post.DrawStage(gd, "BleachBypass");
+
+				post.SetTargets(gd, "Bloom1", "null");
+				post.SetParameter("mBlurTargetTex", "Bleach");
+				post.DrawStage(gd, "BloomExtract");
+
+				post.SetTargets(gd, "Bloom2", "null");
+				post.SetParameter("mBlurTargetTex", "Bloom1");
+				post.DrawStage(gd, "GaussianBlurX");
+
+				post.SetTargets(gd, "Bloom1", "null");
+				post.SetParameter("mBlurTargetTex", "Bloom2");
+				post.DrawStage(gd, "GaussianBlurY");
+
+				post.SetTargets(gd, "SceneColor", "null");
+				post.SetParameter("mBlurTargetTex", "Bloom1");
+				post.SetParameter("mColorTex", "Bleach");
+				post.DrawStage(gd, "BloomCombine");
 
 				post.SetTargets(gd, "BackColor", "BackDepth");
 				post.SetParameter("mBlurTargetTex", "Outline");
