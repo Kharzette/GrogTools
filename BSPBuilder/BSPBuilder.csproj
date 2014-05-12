@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{A5DD4709-72F6-4E0D-A0A0-23F702E789C5}</ProjectGuid>
+    <ProjectGuid>{2451C6B3-84BA-48D4-AA26-4B407F1C70AC}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ParticleEdit</RootNamespace>
-    <AssemblyName>ParticleEdit</AssemblyName>
+    <RootNamespace>BSPBuilder</RootNamespace>
+    <AssemblyName>BSPBuilder</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -38,9 +38,17 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(SharpDXPackageBinDir)\SharpDX.dll</HintPath>
     </Reference>
+    <Reference Include="SharpDX.D3DCompiler, Version=2.6.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>$(SharpDXPackageBinDir)\SharpDX.D3DCompiler.dll</HintPath>
+    </Reference>
     <Reference Include="SharpDX.Direct3D11, Version=2.6.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(SharpDXPackageBinDir)\SharpDX.Direct3D11.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.Direct3D11.Effects, Version=2.6.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>$(SharpDXPackageBinDir)\SharpDX.Direct3D11.Effects.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.DXGI, Version=2.6.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -53,11 +61,30 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ParticleForm.cs">
+    <Compile Include="BSPBuilder.cs" />
+    <Compile Include="Forms\BSPForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ParticleForm.designer.cs">
-      <DependentUpon>ParticleForm.cs</DependentUpon>
+    <Compile Include="Forms\BSPForm.designer.cs">
+      <DependentUpon>BSPForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Output.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Output.designer.cs">
+      <DependentUpon>Output.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\VisForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\VisForm.designer.cs">
+      <DependentUpon>VisForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ZoneForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ZoneForm.designer.cs">
+      <DependentUpon>ZoneForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -66,8 +93,17 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="ParticleForm.resx">
-      <DependentUpon>ParticleForm.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\BSPForm.resx">
+      <DependentUpon>BSPForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Output.resx">
+      <DependentUpon>Output.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\VisForm.resx">
+      <DependentUpon>VisForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ZoneForm.resx">
+      <DependentUpon>ZoneForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -95,6 +131,18 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Libs\BSPCore\BSPCore.csproj">
+      <Project>{5B74D062-FE45-4CC9-8327-698F2B237685}</Project>
+      <Name>BSPCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Libs\BSPVis\BSPVis.csproj">
+      <Project>{15ACA212-4BC5-4369-9527-FEB622617EED}</Project>
+      <Name>BSPVis</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Libs\BSPZone\BSPZone.csproj">
+      <Project>{945CBC62-A6B3-493D-B026-B671E2CB41FA}</Project>
+      <Name>BSPZone</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Libs\InputLib\InputLib.csproj">
       <Project>{7B4F8D4A-3506-47EE-87A7-047F5AEA90BF}</Project>
       <Name>InputLib</Name>
@@ -103,9 +151,9 @@
       <Project>{CABCC4D8-8F21-4728-B317-28D5B500BEFB}</Project>
       <Name>MaterialLib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Libs\ParticleLib\ParticleLib.csproj">
-      <Project>{64751FBC-17AF-48E2-9C09-912C6CA6E9C6}</Project>
-      <Name>ParticleLib</Name>
+    <ProjectReference Include="..\..\Libs\MeshLib\MeshLib.csproj">
+      <Project>{D28619D5-2D2D-40A1-AC3C-3509B7B89033}</Project>
+      <Name>MeshLib</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Libs\ShaderLib\ShaderLib.csproj">
       <Project>{837BD265-79BF-48F1-AE02-C63850048D6C}</Project>
