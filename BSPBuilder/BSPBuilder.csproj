@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BSPBuilder.cs" />
+    <Compile Include="DebugDraw.cs" />
     <Compile Include="Forms\BSPForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -131,6 +132,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Games\YSNAIWNH\GameContent\GameContent.csproj">
+      <Project>{2C3CC829-BACF-4EEF-B32A-C0DA31BF2102}</Project>
+      <Name>GameContent</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Libs\BSPCore\BSPCore.csproj">
       <Project>{5B74D062-FE45-4CC9-8327-698F2B237685}</Project>
       <Name>BSPCore</Name>

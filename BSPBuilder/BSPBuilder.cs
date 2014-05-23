@@ -38,6 +38,9 @@ namespace BSPBuilder
 		GraphicsDevice	mGD;
 		PostProcess		mPost;
 
+		//debug draw stuff
+		DebugDraw	mDebugDraw;
+
 		//forms
 		BSPForm		mBSPForm	=new BSPForm();
 		VisForm		mVisForm	=new VisForm();
@@ -75,6 +78,7 @@ namespace BSPBuilder
 					break;
 			}
 
+			mDebugDraw	=new DebugDraw(gd);
 			mMatLib		=new MatLib(gd.GD, shaderModel, true);
 
 			mMatLib.InitCelShading(1);
@@ -220,6 +224,21 @@ namespace BSPBuilder
 			mPost.SetParameter("mBlurTargetTex", "Outline");
 			mPost.SetParameter("mColorTex", "SceneColor");
 			mPost.DrawStage(gd, "Modulate");
+
+			mDebugDraw.Draw(mGD);
+		}
+
+
+		void BuildDebugDraw(Map.DebugDrawChoice choice)
+		{
+			List<Vector3>	verts	=new List<Vector3>();
+			List<UInt16>	inds	=new List<UInt16>();
+			List<Vector3>	norms	=new List<Vector3>();
+			List<Color>		cols	=new List<Color>();
+
+			mMap.GetTriangles(verts, norms, cols, inds, choice);
+			
+			mDebugDraw.MakeDrawStuff(mGD.GD, verts, norms, cols, inds);
 		}
 
 
@@ -436,6 +455,8 @@ namespace BSPBuilder
 
 			mBSPForm.SetBuildEnabled(true);
 			mBSPForm.SetSaveEnabled(false);
+
+			BuildDebugDraw(Map.DebugDrawChoice.MapBrushes);
 		}
 
 		void OnSaveGBSP(object sender, EventArgs ea)
@@ -556,6 +577,9 @@ namespace BSPBuilder
 				if(mbFullBuilding)
 				{
 					OnSaveGBSP(mFullBuildFileName + ".gbsp", null);
+				}
+				else
+				{
 				}
 			}
 			else

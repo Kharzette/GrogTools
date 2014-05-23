@@ -41,7 +41,7 @@ namespace BSPBuilder
 		{
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			GraphicsDevice	gd	=new GraphicsDevice("Binary Space Partitioning tree building tools",
+			GraphicsDevice	gd	=new GraphicsDevice("BSP tree building tools",
 				FeatureLevel.Level_11_0);
 
 			//save renderform position
