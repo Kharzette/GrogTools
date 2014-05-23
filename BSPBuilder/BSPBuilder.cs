@@ -125,7 +125,6 @@ namespace BSPBuilder
 			mCTForm.Visible		=true;
 
 			//form events
-			mZoneForm.eGenerateMaterials	+=OnGenerateMaterials;
 			mZoneForm.eMaterialVis			+=OnMaterialVis;
 			mZoneForm.eSaveZone				+=OnSaveZone;
 			mZoneForm.eZoneGBSP				+=OnZoneGBSP;
@@ -237,63 +236,6 @@ namespace BSPBuilder
 		}
 
 
-		//events
-		void OnGenerateMaterials(object sender, EventArgs ea)
-		{
-			string	fileName	=sender as string;
-			if(fileName == null)
-			{
-				return;
-			}
-			mZoneForm.Text	=fileName;
-			mZoneForm.SetZoneSaveEnabled(false);
-			mZoneForm.EnableFileIO(false);
-			mBSPForm.EnableFileIO(false);
-			mVisForm.EnableFileIO(false);
-			mMap	=new Map();
-
-			mMatLib.NukeAllMaterials();
-			List<string>	mats	=mMap.GenerateMaterials(fileName);
-
-//			mMatLib.RefreshShaderParameters();
-//			mMatForm.UpdateMaterials();
-
-			mVisMap	=new VisMap();
-			mVisMap.LoadVisData(fileName);
-
-			mZoneForm.EnableFileIO(true);	//not threaded
-			mBSPForm.EnableFileIO(true);
-			mVisForm.EnableFileIO(true);
-
-			mOutForm.Print("Materials generated.\n");
-
-			//store a list of textures used
-			foreach(string m in mats)
-			{
-				string	texName	=mMatLib.GetMaterialValue(m, "mTexture") as string;
-				if(texName == null || texName == "")
-				{
-					continue;
-				}
-
-				int		starPos	=texName.LastIndexOf('*');
-				if(starPos != -1)
-				{
-					texName	=texName.Substring(0, texName.LastIndexOf('*'));
-				}
-
-				//lower case
-				texName	=texName.ToLower();
-
-				if(mAllTextures.Contains(texName))
-				{
-					continue;
-				}
-
-				mAllTextures.Add(texName);
-			}
-		}
-
 		void OnMaterialVis(object sender, EventArgs ea)
 		{
 			string	fileName	=sender as string;
@@ -311,7 +253,7 @@ namespace BSPBuilder
 			mVisForm.EnableFileIO(false);
 
 			mVisMap	=new VisMap();
-			mVisMap.MaterialVisGBSPFile(fileName);
+			mVisMap.MaterialVisGBSPFile(fileName, mGD);
 
 			mZoneForm.EnableFileIO(true);
 			mBSPForm.EnableFileIO(true);
@@ -365,7 +307,7 @@ namespace BSPBuilder
 
 					mMatLib.NukeAllMaterials();
 
-					List<string>	mats	=mMap.GetMaterials();
+					mMap.MakeMaterials(mGD, mMatLib, fileName);
 
 					mZoneDraw.BuildLM(mGD, mZoneForm.GetLightAtlasSize(), mMap.BuildLMRenderData, mMap.GetPlanes());
 					mZoneDraw.BuildVLit(mGD, mMap.BuildVLitRenderData, mMap.GetPlanes());
@@ -374,17 +316,19 @@ namespace BSPBuilder
 					mZoneDraw.BuildMirror(mGD, mMap.BuildMirrorRenderData, mMap.GetPlanes());
 					mZoneDraw.BuildSky(mGD, mMap.BuildSkyRenderData, mMap.GetPlanes());
 
+					mZoneDraw.FinishAtlas(mGD);
+
 					mModelMats	=mMap.GetModelTransforms();
 
 //					mMatLib.RefreshShaderParameters();
-//					mMatForm.UpdateMaterials();
+					mMatForm.RefreshMaterials();
 
 					//this avoids altering form stuff on another thread
 //					mMatForm.ReWireParameters(false);
 					HideParametersByMaterial();
 //					mMatForm.ReWireParameters(true);
 
-					mVisMap.SetMaterialVisBytes(mats.Count);
+					mVisMap.SetMaterialVisBytes(mMatLib.GetMaterialNames().Count);
 				}
 				mZoneForm.EnableFileIO(true);
 				mBSPForm.EnableFileIO(true);

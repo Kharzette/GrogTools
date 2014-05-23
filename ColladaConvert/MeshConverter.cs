@@ -743,11 +743,7 @@ namespace ColladaConvert
 				idxs[i]	=mIndexList[i];
 			}
 
-			BufferDescription	indDesc	=new BufferDescription(idxs.Length * 2,
-				ResourceUsage.Default, BindFlags.IndexBuffer,
-				CpuAccessFlags.None, ResourceOptionFlags.None, 0);
-
-			Buffer	inds	=Buffer.Create<UInt16>(gd, idxs, indDesc);
+			Buffer	inds	=VertexTypes.BuildAnIndexBuffer(gd, idxs);
 
 			mConverted.SetIndexBuffer(inds);
 
