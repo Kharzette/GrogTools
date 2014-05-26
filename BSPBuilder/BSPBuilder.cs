@@ -181,21 +181,27 @@ namespace BSPBuilder
 				return;
 			}
 
-			mPost.SetTargets(gd, "SceneDepthMatNorm", "SceneColor");
+			if(mZoneDraw == null || mVisMap == null)
+			{
+				mDebugDraw.Draw(mGD);
+				return;
+			}
+
+/*			mPost.SetTargets(gd, "SceneDepthMatNorm", "SceneColor");
 
 			mPost.ClearTarget(gd, "SceneDepthMatNorm", Color.White);
 			mPost.ClearDepth(gd, "SceneColor");
 
-//			ss.RenderDMN(gd.DC);
+			mZoneDraw.DrawDMN(gd, mVisMap.IsMaterialVisibleFromPos, GetModelMatrix, RenderExternalDMN);
 
 			mPost.SetTargets(gd, "SceneColor", "SceneColor");
 
 			mPost.ClearTarget(gd, "SceneColor", Color.CornflowerBlue);
-			mPost.ClearDepth(gd, "SceneColor");
+			mPost.ClearDepth(gd, "SceneColor");*/
 
-//			ss.Render(gd.DC);
+			mZoneDraw.Draw(gd, 0, mVisMap.IsMaterialVisibleFromPos, GetModelMatrix, RenderExternal, RenderShadows);
 
-			mPost.SetTargets(gd, "Outline", "null");
+/*			mPost.SetTargets(gd, "Outline", "null");
 			mPost.SetParameter("mNormalTex", "SceneDepthMatNorm");
 			mPost.DrawStage(gd, "Outline");
 
@@ -223,9 +229,7 @@ namespace BSPBuilder
 			mPost.SetTargets(gd, "BackColor", "BackDepth");
 			mPost.SetParameter("mBlurTargetTex", "Outline");
 			mPost.SetParameter("mColorTex", "SceneColor");
-			mPost.DrawStage(gd, "Modulate");
-
-			mDebugDraw.Draw(mGD);
+			mPost.DrawStage(gd, "Modulate");*/
 		}
 
 
@@ -239,6 +243,37 @@ namespace BSPBuilder
 			mMap.GetTriangles(verts, norms, cols, inds, choice);
 			
 			mDebugDraw.MakeDrawStuff(mGD.GD, verts, norms, cols, inds);
+		}
+
+
+		void RenderExternal(MaterialLib.AlphaPool ap, GameCamera gcam)
+		{
+		}
+
+
+		void RenderExternalDMN(GameCamera gcam)
+		{
+		}
+
+
+		void RenderShadows(int shadIndex)
+		{
+		}
+
+
+		Matrix GetModelMatrix(int modelIndex)
+		{
+			if(mModelMats == null)
+			{
+				return	Matrix.Identity;
+			}
+
+			if(!mModelMats.ContainsKey(modelIndex))
+			{
+				return	Matrix.Identity;
+			}
+
+			return	mModelMats[modelIndex];
 		}
 
 
@@ -322,7 +357,6 @@ namespace BSPBuilder
 					mVisMap	=new VisMap();
 					mVisMap.SetMap(mMap);
 					mVisMap.LoadVisData(fileName);
-//					GraphicsDevice	gd	=mGDM.GraphicsDevice;
 
 					mMatLib.NukeAllMaterials();
 
@@ -339,13 +373,9 @@ namespace BSPBuilder
 
 					mModelMats	=mMap.GetModelTransforms();
 
-//					mMatLib.RefreshShaderParameters();
 					mMatForm.RefreshMaterials();
 
-					//this avoids altering form stuff on another thread
-//					mMatForm.ReWireParameters(false);
 					HideParametersByMaterial();
-//					mMatForm.ReWireParameters(true);
 
 					mVisMap.SetMaterialVisBytes(mMatLib.GetMaterialNames().Count);
 				}
@@ -355,6 +385,8 @@ namespace BSPBuilder
 				mZoneForm.SetZoneSaveEnabled(true);
 
 				mOutForm.Print("Zoning complete.\n");
+
+//				BuildDebugDraw(Map.DebugDrawChoice.GFXFaces);
 			}
 		}
 

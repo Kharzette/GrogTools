@@ -32,7 +32,8 @@ namespace BSPBuilder
 			Turn, TurnLeft, TurnRight,
 			Pitch, PitchUp, PitchDown,
 			LightX, LightY, LightZ,
-			ToggleMouseLookOn, ToggleMouseLookOff
+			ToggleMouseLookOn, ToggleMouseLookOff,
+			BoostSpeedOn, BoostSpeedOff
 		};
 
 
@@ -100,6 +101,14 @@ namespace BSPBuilder
 							inp.UnMapAxisAction(MyActions.Pitch, Input.MoveAxis.MouseYAxis);
 							inp.UnMapAxisAction(MyActions.Turn, Input.MoveAxis.MouseXAxis);
 						}
+						else if(act.mAction.Equals(MyActions.BoostSpeedOn))
+						{
+							pSteering.Speed	=3;
+						}
+						else if(act.mAction.Equals(MyActions.BoostSpeedOff))
+						{
+							pSteering.Speed	=0.5f;
+						}
 					}
 				}
 
@@ -143,6 +152,10 @@ namespace BSPBuilder
 			inp.MapAction(MyActions.LightY, 37);
 			inp.MapAction(MyActions.LightZ, 38);
 
+			inp.MapToggleAction(MyActions.BoostSpeedOn,
+				MyActions.BoostSpeedOff,
+				42);
+
 			inp.MapToggleAction(MyActions.ToggleMouseLookOn,
 				MyActions.ToggleMouseLookOff,
 				Input.VariousButtons.RightMouseButton);
@@ -170,6 +183,8 @@ namespace BSPBuilder
 			pSteering.SetTurnEnums(MyActions.Turn, MyActions.TurnLeft, MyActions.TurnRight);
 
 			pSteering.SetPitchEnums(MyActions.Pitch, MyActions.PitchUp, MyActions.PitchDown);
+
+			pSteering.Speed	=0.5f;
 
 			return	pSteering;
 		}

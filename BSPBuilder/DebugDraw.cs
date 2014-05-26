@@ -22,7 +22,7 @@ namespace BSPBuilder
 		{
 			internal Vector3	Position;
 			internal Vector3	Normal;
-			internal Color		Color;
+			internal Vector4	Color;
 		}
 
 		Buffer				mVB, mIB;
@@ -47,7 +47,7 @@ namespace BSPBuilder
 
 			mMatLib.CreateMaterial("LevelGeometry");
 			mMatLib.SetMaterialEffect("LevelGeometry", "Static.fx");
-			mMatLib.SetMaterialTechnique("LevelGeometry", "TriSolidSpec");
+			mMatLib.SetMaterialTechnique("LevelGeometry", "TriVColorSolidSpec");
 			mMatLib.SetMaterialParameter("LevelGeometry", "mLightColor0", Vector4.One);
 			mMatLib.SetMaterialParameter("LevelGeometry", "mLightColor1", lightColor2);
 			mMatLib.SetMaterialParameter("LevelGeometry", "mLightColor2", lightColor3);
@@ -64,17 +64,21 @@ namespace BSPBuilder
 			List<Color> colors,
 			List<UInt16> inds)
 		{
+			if(verts.Count <= 0)
+			{
+				return;
+			}
 			VertexPositionNormalColor	[]vpnc	=new VertexPositionNormalColor[verts.Count];
 
 			for(int i=0;i < vpnc.Length;i++)
 			{
 				vpnc[i].Position	=verts[i];
 				vpnc[i].Normal		=norms[i];
-				vpnc[i].Color		=colors[i];
+				vpnc[i].Color		=colors[i].ToVector4();
 			}
 
 			BufferDescription	bd	=new BufferDescription(
-				28 * verts.Count,
+				40 * verts.Count,
 				ResourceUsage.Default, BindFlags.VertexBuffer,
 				CpuAccessFlags.None, ResourceOptionFlags.None, 0);
 
@@ -86,7 +90,7 @@ namespace BSPBuilder
 
 			mIB	=Buffer.Create<UInt16>(dev, inds.ToArray(), id);
 
-			mVBBinding	=new VertexBufferBinding(mVB, 28, 0);
+			mVBBinding	=new VertexBufferBinding(mVB, 40, 0);
 
 			mNumIndexes	=inds.Count;
 		}
