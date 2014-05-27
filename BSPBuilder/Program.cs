@@ -121,8 +121,10 @@ namespace BSPBuilder
 
 				long	timeNow	=Stopwatch.GetTimestamp();
 				long	delta	=timeNow - lastTime;
+				long	freq	=Stopwatch.Frequency;
+				long	freqMS	=freq / 1000;
 
-				bspBuild.Update((float)delta / (float)Stopwatch.Frequency, gd);
+				bspBuild.Update((float)delta / (float)freqMS, gd);
 
 				bspBuild.Render(gd);
 				

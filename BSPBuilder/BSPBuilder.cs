@@ -166,6 +166,8 @@ namespace BSPBuilder
 				return;
 			}
 
+			mZoneDraw.Update(msDelta);
+
 			mMatLib.SetParameterForAll("mView", gd.GCam.View);
 			mMatLib.SetParameterForAll("mEyePos", gd.GCam.Position);
 			mMatLib.SetParameterForAll("mProjection", gd.GCam.Projection);
@@ -378,6 +380,8 @@ namespace BSPBuilder
 					HideParametersByMaterial();
 
 					mVisMap.SetMaterialVisBytes(mMatLib.GetMaterialNames().Count);
+
+					mMatLib.SetLightMapsToAtlas();
 				}
 				mZoneForm.EnableFileIO(true);
 				mBSPForm.EnableFileIO(true);
