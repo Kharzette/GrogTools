@@ -158,6 +158,12 @@ namespace BSPBuilder
 		}
 
 
+		internal bool Busy()
+		{
+			return	mbWorking;
+		}
+
+
 		internal void Update(float msDelta, GraphicsDevice gd)
 		{
 			if(mbWorking)
@@ -638,9 +644,9 @@ namespace BSPBuilder
 			{
 				if(mbFullBuilding)
 				{
+					mbWorking	=true;
 					OnMaterialVis(mFullBuildFileName + ".gbsp", null);
 
-					mbWorking	=true;
 					OnZoneGBSP(mFullBuildFileName + ".gbsp", null);
 					mbFullBuilding	=false;
 					mbWorking		=false;

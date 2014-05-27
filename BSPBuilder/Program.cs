@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,7 +44,7 @@ namespace BSPBuilder
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 			GraphicsDevice	gd	=new GraphicsDevice("BSP tree building tools",
-				FeatureLevel.Level_11_0);
+				FeatureLevel.Level_9_3);
 
 			//save renderform position
 			gd.RendForm.DataBindings.Add(new Binding("Location",
@@ -65,6 +66,12 @@ namespace BSPBuilder
 
 			RenderLoop.Run(gd.RendForm, () =>
 			{
+				if(bspBuild.Busy())
+				{
+					Thread.Sleep(5);
+					return;
+				}
+
 				gd.CheckResize();
 
 				if(bMouseLookOn)
