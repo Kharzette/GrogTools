@@ -32,7 +32,8 @@ namespace ColladaConvert
 			Turn, TurnLeft, TurnRight,
 			Pitch, PitchUp, PitchDown,
 			LightX, LightY, LightZ,
-			ToggleMouseLookOn, ToggleMouseLookOff
+			ToggleMouseLookOn, ToggleMouseLookOff,
+			BoostSpeedOn, BoostSpeedOff
 		};
 
 
@@ -154,6 +155,14 @@ namespace ColladaConvert
 							inp.UnMapAxisAction(MyActions.Pitch, Input.MoveAxis.MouseYAxis);
 							inp.UnMapAxisAction(MyActions.Turn, Input.MoveAxis.MouseXAxis);
 						}
+						else if(act.mAction.Equals(MyActions.BoostSpeedOn))
+						{
+							pSteering.Speed	=2;
+						}
+						else if(act.mAction.Equals(MyActions.BoostSpeedOff))
+						{
+							pSteering.Speed	=0.5f;
+						}
 					}
 				}
 
@@ -196,6 +205,21 @@ namespace ColladaConvert
 
 				ss.Render(gd.DC);
 
+				if(ss.GetDrawAxis())
+				{
+					extraPrims.DrawAxis(gd.DC);
+				}
+
+				if(ss.GetDrawBox())
+				{
+					extraPrims.DrawBox(gd.DC);
+				}
+
+				if(ss.GetDrawSphere())
+				{
+					extraPrims.DrawSphere(gd.DC);
+				}
+
 				post.SetTargets(gd, "Outline", "null");
 				post.SetParameter("mNormalTex", "SceneDepthMatNorm");
 				post.DrawStage(gd, "Outline");
@@ -226,21 +250,6 @@ namespace ColladaConvert
 				post.SetParameter("mColorTex", "SceneColor");
 				post.DrawStage(gd, "Modulate");
 				
-				if(ss.GetDrawAxis())
-				{
-					extraPrims.DrawAxis(gd.DC);
-				}
-
-				if(ss.GetDrawBox())
-				{
-					extraPrims.DrawBox(gd.DC);
-				}
-
-				if(ss.GetDrawSphere())
-				{
-					extraPrims.DrawSphere(gd.DC);
-				}
-
 				gd.Present();
 
 				lastTime	=timeNow;
@@ -319,6 +328,10 @@ namespace ColladaConvert
 			inp.MapAction(MyActions.LightY, 37);
 			inp.MapAction(MyActions.LightZ, 38);
 
+			inp.MapToggleAction(MyActions.BoostSpeedOn,
+				MyActions.BoostSpeedOff,
+				42);
+
 			inp.MapToggleAction(MyActions.ToggleMouseLookOn,
 				MyActions.ToggleMouseLookOff,
 				Input.VariousButtons.RightMouseButton);
@@ -346,6 +359,8 @@ namespace ColladaConvert
 			pSteering.SetTurnEnums(MyActions.Turn, MyActions.TurnLeft, MyActions.TurnRight);
 
 			pSteering.SetPitchEnums(MyActions.Pitch, MyActions.PitchUp, MyActions.PitchDown);
+
+			pSteering.Speed	=0.5f;
 
 			return	pSteering;
 		}

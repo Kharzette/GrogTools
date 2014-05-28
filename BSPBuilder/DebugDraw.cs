@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UtilityLib;
+using MeshLib;
 
 using SharpDX;
 using SharpDX.DXGI;
@@ -18,13 +19,6 @@ namespace BSPBuilder
 {
 	internal class DebugDraw
 	{
-		internal struct VertexPositionNormalColor
-		{
-			internal Vector3	Position;
-			internal Vector3	Normal;
-			internal Vector4	Color;
-		}
-
 		Buffer				mVB, mIB;
 		VertexBufferBinding	mVBBinding;
 		int					mNumIndexes;
@@ -68,29 +62,19 @@ namespace BSPBuilder
 			{
 				return;
 			}
-			VertexPositionNormalColor	[]vpnc	=new VertexPositionNormalColor[verts.Count];
+
+			VPosNormCol0	[]vpnc	=new VPosNormCol0[verts.Count];
 
 			for(int i=0;i < vpnc.Length;i++)
 			{
 				vpnc[i].Position	=verts[i];
 				vpnc[i].Normal		=norms[i];
-				vpnc[i].Color		=colors[i].ToVector4();
+				vpnc[i].Color0		=colors[i];
 			}
 
-			BufferDescription	bd	=new BufferDescription(
-				40 * verts.Count,
-				ResourceUsage.Default, BindFlags.VertexBuffer,
-				CpuAccessFlags.None, ResourceOptionFlags.None, 0);
-
-			mVB	=Buffer.Create(dev, vpnc, bd);
-			
-			BufferDescription	id	=new BufferDescription(inds.Count * 2,
-				ResourceUsage.Default, BindFlags.IndexBuffer,
-				CpuAccessFlags.None, ResourceOptionFlags.None, 0);
-
-			mIB	=Buffer.Create<UInt16>(dev, inds.ToArray(), id);
-
-			mVBBinding	=new VertexBufferBinding(mVB, 40, 0);
+			mVB			=VertexTypes.BuildABuffer(dev, vpnc, vpnc[0].GetType());
+			mIB			=VertexTypes.BuildAnIndexBuffer(dev, inds.ToArray());
+			mVBBinding	=VertexTypes.BuildAVBB(VertexTypes.GetIndex(vpnc[0].GetType()), mVB);
 
 			mNumIndexes	=inds.Count;
 		}

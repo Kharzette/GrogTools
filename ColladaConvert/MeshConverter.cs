@@ -693,35 +693,39 @@ namespace ColladaConvert
 				}
 				if(bTexCoord0)
 				{
-					VertexTypes.SetArrayField(verts, i, "TexCoord0", mBaseVerts[i].TexCoord0);
+					VertexTypes.SetArrayField(verts, i, "TexCoord0",
+						new Half2(mBaseVerts[i].TexCoord0.X, mBaseVerts[i].TexCoord0.Y));
 				}
 				if(bTexCoord1)
 				{
-					VertexTypes.SetArrayField(verts, i, "TexCoord1", mBaseVerts[i].TexCoord1);
+					VertexTypes.SetArrayField(verts, i, "TexCoord1",
+						new Half2(mBaseVerts[i].TexCoord1.X, mBaseVerts[i].TexCoord1.Y));
 				}
 				if(bTexCoord2)
 				{
-					VertexTypes.SetArrayField(verts, i, "TexCoord2", mBaseVerts[i].TexCoord2);
+					VertexTypes.SetArrayField(verts, i, "TexCoord2",
+						new Half2(mBaseVerts[i].TexCoord2.X, mBaseVerts[i].TexCoord2.Y));
 				}
 				if(bTexCoord3)
 				{
-					VertexTypes.SetArrayField(verts, i, "TexCoord3", mBaseVerts[i].TexCoord3);
+					VertexTypes.SetArrayField(verts, i, "TexCoord3",
+						new Half2(mBaseVerts[i].TexCoord3.X, mBaseVerts[i].TexCoord3.Y));
 				}
 				if(bColor0)
 				{
-					VertexTypes.SetArrayField(verts, i, "Color0", mBaseVerts[i].Color0);
+					VertexTypes.SetArrayField(verts, i, "Color0", new Color(mBaseVerts[i].Color0));
 				}
 				if(bColor1)
 				{
-					VertexTypes.SetArrayField(verts, i, "Color1", mBaseVerts[i].Color1);
+					VertexTypes.SetArrayField(verts, i, "Color1", new Color(mBaseVerts[i].Color1));
 				}
 				if(bColor2)
 				{
-					VertexTypes.SetArrayField(verts, i, "Color2", mBaseVerts[i].Color2);
+					VertexTypes.SetArrayField(verts, i, "Color2", new Color(mBaseVerts[i].Color2));
 				}
 				if(bColor3)
 				{
-					VertexTypes.SetArrayField(verts, i, "Color3", mBaseVerts[i].Color3);
+					VertexTypes.SetArrayField(verts, i, "Color3", new Color(mBaseVerts[i].Color3));
 				}
 			}
 
