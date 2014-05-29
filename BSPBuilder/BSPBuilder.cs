@@ -786,7 +786,8 @@ namespace BSPBuilder
 				if(tech == "FullBright"
 					|| tech == "VertexLightingCel"
 					|| tech == "VertexLighting"
-					|| tech == "Alpha")
+					|| tech == "VertexLightingAlpha"
+					|| tech == "VertexLightingAlphaCel")
 				{
 					matIgnores.Add("mLightMap");
 					matIgnores.Add("mEyePos");
