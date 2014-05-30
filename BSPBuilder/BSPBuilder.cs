@@ -129,20 +129,20 @@ namespace BSPBuilder
 			mCTForm.Visible		=true;
 
 			//form events
-			mZoneForm.eMaterialVis			+=OnMaterialVis;
-			mZoneForm.eSaveZone				+=OnSaveZone;
-			mZoneForm.eZoneGBSP				+=OnZoneGBSP;
-			mZoneForm.eLoadDebug			+=OnLoadDebug;
-			mZoneForm.eDumpTextures			+=OnDumpTextures;
-			mBSPForm.eBuild					+=OnBuild;
-			mBSPForm.eLight					+=OnLight;
-			mBSPForm.eOpenMap				+=OnOpenMap;
-			mBSPForm.eSave					+=OnSaveGBSP;
-			mBSPForm.eFullBuild				+=OnFullBuild;
-			mBSPForm.eUpdateEntities		+=OnUpdateEntities;
-			mVisForm.eResumeVis				+=OnResumeVis;
-			mVisForm.eStopVis				+=OnStopVis;
-			mVisForm.eVis					+=OnVis;
+			mZoneForm.eMaterialVis		+=OnMaterialVis;
+			mZoneForm.eSaveZone			+=OnSaveZone;
+			mZoneForm.eZoneGBSP			+=OnZoneGBSP;
+			mZoneForm.eLoadDebug		+=OnLoadDebug;
+			mZoneForm.eDumpTextures		+=OnDumpTextures;
+			mBSPForm.eBuild				+=OnBuild;
+			mBSPForm.eLight				+=OnLight;
+			mBSPForm.eOpenMap			+=OnOpenMap;
+			mBSPForm.eSave				+=OnSaveGBSP;
+			mBSPForm.eFullBuild			+=OnFullBuild;
+			mBSPForm.eUpdateEntities	+=OnUpdateEntities;
+			mVisForm.eResumeVis			+=OnResumeVis;
+			mVisForm.eStopVis			+=OnStopVis;
+			mVisForm.eVis				+=OnVis;
 
 			//core events
 			CoreEvents.eBuildDone		+=OnBuildDone;
@@ -151,10 +151,10 @@ namespace BSPBuilder
 			CoreEvents.eVisDone			+=OnVisDone;
 
 			//stats
-			CoreEvents.eNumPortalsChanged		+=OnNumPortalsChanged;
-			CoreEvents.eNumClustersChanged		+=OnNumClustersChanged;
-			CoreEvents.eNumPlanesChanged		+=OnNumPlanesChanged;
-			CoreEvents.eNumVertsChanged			+=OnNumVertsChanged;
+			CoreEvents.eNumPortalsChanged	+=OnNumPortalsChanged;
+			CoreEvents.eNumClustersChanged	+=OnNumClustersChanged;
+			CoreEvents.eNumPlanesChanged	+=OnNumPlanesChanged;
+			CoreEvents.eNumVertsChanged		+=OnNumVertsChanged;
 		}
 
 
