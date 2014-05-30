@@ -24,7 +24,7 @@ namespace ColladaConvert
 		struct TrackedVert
 		{
 			public Vector3		Position0;
-			public Vector3		Normal0;
+			public Half4		Normal0;
 			public Color		BoneIndex;
 			public Half4		BoneWeights;
 			public Vector2		TexCoord0;
@@ -201,8 +201,19 @@ namespace ColladaConvert
 		{
 			for(int i=0;i < mBaseVerts.Length;i++)
 			{
-				mBaseVerts[i].Normal0	=Vector3.TransformNormal(mBaseVerts[i].Normal0, mat);
-				mBaseVerts[i].Normal0.Normalize();
+				Vector3	norm	=Vector3.Zero;
+
+				norm.X	=mBaseVerts[i].Normal0.X;
+				norm.Y	=mBaseVerts[i].Normal0.Y;
+				norm.Z	=mBaseVerts[i].Normal0.Z;
+
+				norm	=Vector3.TransformNormal(norm, mat);
+				norm.Normalize();
+
+				mBaseVerts[i].Normal0.X	=norm.X;
+				mBaseVerts[i].Normal0.Y	=norm.Y;
+				mBaseVerts[i].Normal0.Z	=norm.Z;
+				mBaseVerts[i].Normal0.W	=1f;
 			}
 		}
 
@@ -211,7 +222,10 @@ namespace ColladaConvert
 		{
 			for(int i=0;i < mBaseVerts.Length;i++)
 			{
-				mBaseVerts[i].Normal0	=-mBaseVerts[i].Normal0;
+				mBaseVerts[i].Normal0.X	=-mBaseVerts[i].Normal0.X;
+				mBaseVerts[i].Normal0.Y	=-mBaseVerts[i].Normal0.Y;
+				mBaseVerts[i].Normal0.Z	=-mBaseVerts[i].Normal0.Z;
+				mBaseVerts[i].Normal0.W	=-mBaseVerts[i].Normal0.W;
 			}
 		}
 
