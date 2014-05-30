@@ -68,8 +68,11 @@ namespace BSPBuilder
 			for(int i=0;i < vpnc.Length;i++)
 			{
 				vpnc[i].Position	=verts[i];
-				vpnc[i].Normal		=norms[i];
 				vpnc[i].Color0		=colors[i];
+				vpnc[i].Normal.X	=norms[i].X;
+				vpnc[i].Normal.Y	=norms[i].Y;
+				vpnc[i].Normal.Z	=norms[i].Z;
+				vpnc[i].Normal.W	=1f;
 			}
 
 			mVB			=VertexTypes.BuildABuffer(dev, vpnc, vpnc[0].GetType());
