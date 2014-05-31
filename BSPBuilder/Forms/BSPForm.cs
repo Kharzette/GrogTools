@@ -158,13 +158,6 @@ namespace BSPBuilder
 		}
 
 
-		void OnSurfaceLighting(object sender, EventArgs e)
-		{
-			SurfaceLightFrequency.Enabled	=SurfaceLighting.Checked;
-			SurfaceLightStrength.Enabled	=SurfaceLighting.Checked;
-		}
-
-
 		void OnUpdateEntities(object sender, EventArgs e)
 		{
 			mOFD.DefaultExt	="*.map";

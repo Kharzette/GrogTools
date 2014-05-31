@@ -88,9 +88,7 @@ namespace ColladaConvert
 			backBuf	=gd.DC.OutputMerger.GetRenderTargets(1, out backDepth);
 
 			//set up post processing module
-			PostProcess	post	=new PostProcess(gd, matLib.GetEffect("Post.fx"),
-				gd.RendForm.ClientRectangle.Width, gd.RendForm.ClientRectangle.Height,
-				backBuf[0], backDepth);
+			PostProcess	post	=new PostProcess(gd, matLib.GetEffect("Post.fx"));
 
 			PlayerSteering	pSteering	=SetUpSteering();
 			Input			inp			=SetUpInput();

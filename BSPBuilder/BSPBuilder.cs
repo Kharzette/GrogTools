@@ -93,15 +93,13 @@ namespace BSPBuilder
 			backBuf	=gd.DC.OutputMerger.GetRenderTargets(1, out backDepth);
 
 			//set up post processing module
-			mPost	=new PostProcess(gd, mMatLib.GetEffect("Post.fx"),
-				gd.RendForm.ClientRectangle.Width, gd.RendForm.ClientRectangle.Height,
-				backBuf[0], backDepth);
+			mPost	=new PostProcess(gd, mMatLib.GetEffect("Post.fx"));
 
 			int	resx	=gd.RendForm.ClientRectangle.Width;
 			int	resy	=gd.RendForm.ClientRectangle.Height;
 
 			mPost.MakePostTarget(gd, "SceneColor", resx, resy, Format.R8G8B8A8_UNorm);
-			mPost.MakePostDepth(gd, "SceneColor", resx, resy,
+			mPost.MakePostDepth(gd, "SceneDepth", resx, resy,
 				(gd.GD.FeatureLevel != FeatureLevel.Level_9_3)?
 					Format.D32_Float_S8X24_UInt : Format.D24_UNorm_S8_UInt);
 			mPost.MakePostTarget(gd, "SceneDepthMatNorm", resx, resy, Format.R16G16B16A16_Float);
