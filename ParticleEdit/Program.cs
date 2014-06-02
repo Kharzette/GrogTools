@@ -50,29 +50,7 @@ namespace ParticleEdit
 
 			gd.RendForm.Location	=Settings.Default.MainWindowPos;
 
-			MatLib.ShaderModel	shaderModel;
-
-			switch(gd.GD.FeatureLevel)
-			{
-				case	FeatureLevel.Level_11_0:
-					shaderModel	=MatLib.ShaderModel.SM5;
-					break;
-				case	FeatureLevel.Level_10_1:
-					shaderModel	=MatLib.ShaderModel.SM41;
-					break;
-				case	FeatureLevel.Level_10_0:
-					shaderModel	=MatLib.ShaderModel.SM4;
-					break;
-				case	FeatureLevel.Level_9_3:
-					shaderModel	=MatLib.ShaderModel.SM2;
-					break;
-				default:
-					Debug.Assert(false);	//only support the above
-					shaderModel	=MatLib.ShaderModel.SM2;
-					break;
-			}
-
-			MatLib	matLib		=new MatLib(gd.GD, shaderModel, true);
+			MatLib	matLib		=new MatLib(gd, "C:/Games/CurrentGame", true);
 
 			matLib.InitCelShading(1);
 			matLib.GenerateCelTexturePreset(gd.GD,
@@ -155,6 +133,8 @@ namespace ParticleEdit
 
 				lastTime	=timeNow;
 			});
+
+			matLib.FreeAll();
 
 			Settings.Default.Save();
 			

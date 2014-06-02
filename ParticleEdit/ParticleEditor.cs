@@ -36,12 +36,13 @@ namespace ParticleEdit
 			mMats	=mats;
 			mPB		=new ParticleBoss(gd.GD, mats);
 
-			pf.eCreate					+=OnCreate;
-			pf.eItemNuked				+=OnEmitterNuked;
-			pf.eValueChanged			+=OnValueChanged;
-			pf.eSelectionChanged		+=OnEmitterSelChanged;
-			pf.eCopyEmitterToClipBoard	+=OnCopyEmitterToClipBoard;
-			pf.eTextureChanged			+=OnTextureChanged;
+			pf.eCreate						+=OnCreate;
+			pf.eItemNuked					+=OnEmitterNuked;
+			pf.eValueChanged				+=OnValueChanged;
+			pf.eSelectionChanged			+=OnEmitterSelChanged;
+			pf.eCopyEmitterToClipBoard		+=OnCopyEmitterToClipBoard;
+			pf.ePasteEmitterFromClipBoard	+=OnPasteEmitterFromClipBoard;
+			pf.eTextureChanged				+=OnTextureChanged;
 		}
 
 
@@ -64,7 +65,8 @@ namespace ParticleEdit
 				mPF.StartingSize, mPF.StartingAlpha, mPF.EmitMS,
 				mPF.SpinMin, mPF.SpinMax, mPF.VelMin, mPF.VelMax,
 				mPF.SizeMin, mPF.SizeMax, mPF.AlphaMin,
-				mPF.AlphaMax, mPF.LifeMin, mPF.LifeMax);
+				mPF.AlphaMax, mPF.LifeMin, mPF.LifeMax,
+				mPF.EMSortPriority);
 
 			UpdateListView();
 		}
@@ -144,6 +146,16 @@ namespace ParticleEdit
 			{
 				System.Windows.Forms.Clipboard.SetText(ent);
 			}
+		}
+
+
+		void OnPasteEmitterFromClipBoard(object sender, EventArgs ea)
+		{
+			string	ent	=System.Windows.Forms.Clipboard.GetText();
+
+			mPB.CreateEmitterFromQuArK(ent);
+
+			UpdateListView();
 		}
 
 

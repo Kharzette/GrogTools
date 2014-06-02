@@ -132,10 +132,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Games\YSNAIWNH\GameContent\GameContent.csproj">
-      <Project>{2C3CC829-BACF-4EEF-B32A-C0DA31BF2102}</Project>
-      <Name>GameContent</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Libs\BSPCore\BSPCore.csproj">
       <Project>{5B74D062-FE45-4CC9-8327-698F2B237685}</Project>
       <Name>BSPCore</Name>
@@ -159,10 +155,6 @@
     <ProjectReference Include="..\..\Libs\MeshLib\MeshLib.csproj">
       <Project>{D28619D5-2D2D-40A1-AC3C-3509B7B89033}</Project>
       <Name>MeshLib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Libs\ShaderLib\ShaderLib.csproj">
-      <Project>{837BD265-79BF-48F1-AE02-C63850048D6C}</Project>
-      <Name>ShaderLib</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Libs\SharedForms\SharedForms.csproj">
       <Project>{C1BE43B3-1AAE-4CF5-8F45-DBF6A80F7C0E}</Project>

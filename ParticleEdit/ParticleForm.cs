@@ -30,6 +30,7 @@ namespace ParticleEdit
 		internal event EventHandler	eValueChanged;
 		internal event EventHandler	eSelectionChanged;
 		internal event EventHandler	eCopyEmitterToClipBoard;
+		internal event EventHandler	ePasteEmitterFromClipBoard;
 		internal event EventHandler	eTextureChanged;
 
 
@@ -52,6 +53,10 @@ namespace ParticleEdit
 			Shape.SelectedIndex	=0;
 
 			mParticleTextures	=mats.GetParticleTextures();
+			if(mParticleTextures.Count <= 0)
+			{
+				return;
+			}
 
 			foreach(string tex in mParticleTextures)
 			{
@@ -274,6 +279,16 @@ namespace ParticleEdit
 			}
 		}
 
+		public int EMSortPriority
+		{
+			get { return (int)SortPriority.Value; }
+			set
+			{
+				Action<NumericUpDown>	upVal	=numer => numer.Value = value;
+				SharedForms.FormExtensions.Invoke(SortPriority, upVal);
+			}
+		}
+
 
 		void OnCreate(object sender, EventArgs e)
 		{
@@ -314,7 +329,7 @@ namespace ParticleEdit
 			em.mGravityYaw				=GravYaw;
 			em.mGravityPitch			=GravPitch;
 			em.mGravityStrength			=GravStrength;
-			em.mbOn						=Active.Checked;
+			em.mbOn						=true;
 			em.mShape					=EmShape;
 			em.mShapeSize				=EmShapeSize;
 
@@ -348,7 +363,6 @@ namespace ParticleEdit
 			GravPitch		=em.mGravityPitch;
 			GravStrength	=em.mGravityStrength;
 			PartColor		=color;
-			Active.Checked	=em.mbOn;
 			EmShape			=em.mShape;
 			EmShapeSize		=em.mShapeSize;
 
@@ -437,6 +451,10 @@ namespace ParticleEdit
 
 					Misc.SafeInvoke(eCopyEmitterToClipBoard, new Nullable<int>((int)itm.Tag));
 				}
+			}
+			else if(e.KeyCode == Keys.V && e.Control)
+			{
+				Misc.SafeInvoke(ePasteEmitterFromClipBoard, null);
 			}
 		}
 

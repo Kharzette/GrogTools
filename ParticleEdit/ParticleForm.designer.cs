@@ -31,7 +31,6 @@
 			this.MaxParticles = new System.Windows.Forms.NumericUpDown();
 			this.label1 = new System.Windows.Forms.Label();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
-			this.Active = new System.Windows.Forms.CheckBox();
 			this.label15 = new System.Windows.Forms.Label();
 			this.StartAlpha = new System.Windows.Forms.NumericUpDown();
 			this.LifeTimeMin = new System.Windows.Forms.NumericUpDown();
@@ -75,6 +74,8 @@
 			this.ColorPanel = new System.Windows.Forms.Panel();
 			this.button1 = new System.Windows.Forms.Button();
 			this.EmitterListView = new System.Windows.Forms.ListView();
+			this.SortPriority = new System.Windows.Forms.NumericUpDown();
+			this.label18 = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.MaxParticles)).BeginInit();
 			this.groupBox1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.StartAlpha)).BeginInit();
@@ -97,6 +98,7 @@
 			((System.ComponentModel.ISupportInitialize)(this.GravityYaw)).BeginInit();
 			this.ColorGroup.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.ShapeSize)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.SortPriority)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// MaxParticles
@@ -138,7 +140,8 @@
 			// 
 			// groupBox1
 			// 
-			this.groupBox1.Controls.Add(this.Active);
+			this.groupBox1.Controls.Add(this.label18);
+			this.groupBox1.Controls.Add(this.SortPriority);
 			this.groupBox1.Controls.Add(this.label15);
 			this.groupBox1.Controls.Add(this.StartAlpha);
 			this.groupBox1.Controls.Add(this.LifeTimeMin);
@@ -157,19 +160,6 @@
 			this.groupBox1.TabIndex = 2;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Emitter Details";
-			// 
-			// Active
-			// 
-			this.Active.AutoSize = true;
-			this.Active.Checked = true;
-			this.Active.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.Active.Location = new System.Drawing.Point(6, 175);
-			this.Active.Name = "Active";
-			this.Active.Size = new System.Drawing.Size(56, 17);
-			this.Active.TabIndex = 38;
-			this.Active.Text = "Active";
-			this.Active.UseVisualStyleBackColor = true;
-			this.Active.CheckedChanged += new System.EventHandler(this.OnValueChanged);
 			// 
 			// label15
 			// 
@@ -811,6 +801,22 @@
 			this.EmitterListView.SelectedIndexChanged += new System.EventHandler(this.OnSelectedIndexChanged);
 			this.EmitterListView.KeyUp += new System.Windows.Forms.KeyEventHandler(this.OnKeyUp);
 			// 
+			// SortPriority
+			// 
+			this.SortPriority.Location = new System.Drawing.Point(6, 175);
+			this.SortPriority.Name = "SortPriority";
+			this.SortPriority.Size = new System.Drawing.Size(58, 20);
+			this.SortPriority.TabIndex = 38;
+			// 
+			// label18
+			// 
+			this.label18.AutoSize = true;
+			this.label18.Location = new System.Drawing.Point(70, 177);
+			this.label18.Name = "label18";
+			this.label18.Size = new System.Drawing.Size(60, 13);
+			this.label18.TabIndex = 39;
+			this.label18.Text = "Sort Priority";
+			// 
 			// ParticleForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -851,6 +857,7 @@
 			this.ColorGroup.ResumeLayout(false);
 			this.ColorGroup.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.ShapeSize)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.SortPriority)).EndInit();
 			this.ResumeLayout(false);
 
 		}
@@ -899,10 +906,11 @@
 		private System.Windows.Forms.Button button1;
 		private System.Windows.Forms.Panel ColorPanel;
 		private System.Windows.Forms.ListView EmitterListView;
-		private System.Windows.Forms.CheckBox Active;
 		private System.Windows.Forms.ComboBox Shape;
 		private System.Windows.Forms.Label label4;
 		private System.Windows.Forms.NumericUpDown ShapeSize;
 		private System.Windows.Forms.ComboBox TextureBox;
+		private System.Windows.Forms.Label label18;
+		private System.Windows.Forms.NumericUpDown SortPriority;
 	}
 }

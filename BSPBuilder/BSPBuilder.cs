@@ -10,6 +10,7 @@ using BSPCore;
 using BSPVis;
 using MeshLib;
 using UtilityLib;
+using MaterialLib;
 
 using SharpDX;
 using SharpDX.DXGI;
@@ -32,6 +33,7 @@ namespace BSPBuilder
 		string					mFullBuildFileName;
 		List<string>			mAllTextures	=new List<string>();
 		Dictionary<int, Matrix>	mModelMats;
+		string					mGameRootDir;
 
 		//gpu
 		GraphicsDevice	mGD;
@@ -51,34 +53,13 @@ namespace BSPBuilder
 		SharedForms.CelTweakForm	mCTForm;
 
 
-		internal BSPBuilder(GraphicsDevice gd)
+		internal BSPBuilder(GraphicsDevice gd, string gameRootDir)
 		{
-			mGD	=gd;
+			mGD				=gd;
+			mGameRootDir	=gameRootDir;
 
-			MatLib.ShaderModel	shaderModel;
-
-			switch(gd.GD.FeatureLevel)
-			{
-				case	FeatureLevel.Level_11_0:
-					shaderModel	=MatLib.ShaderModel.SM5;
-					break;
-				case	FeatureLevel.Level_10_1:
-					shaderModel	=MatLib.ShaderModel.SM41;
-					break;
-				case	FeatureLevel.Level_10_0:
-					shaderModel	=MatLib.ShaderModel.SM4;
-					break;
-				case	FeatureLevel.Level_9_3:
-					shaderModel	=MatLib.ShaderModel.SM2;
-					break;
-				default:
-					Debug.Assert(false);	//only support the above
-					shaderModel	=MatLib.ShaderModel.SM2;
-					break;
-			}
-
-			mDebugDraw	=new DebugDraw(gd);
-			mMatLib		=new MatLib(gd.GD, shaderModel, true);
+			mDebugDraw	=new DebugDraw(gd, gameRootDir);
+			mMatLib		=new MatLib(gd, gameRootDir, true);
 
 			mMatLib.InitCelShading(1);
 			mMatLib.GenerateCelTexturePreset(gd.GD,
@@ -174,7 +155,6 @@ namespace BSPBuilder
 			mMatLib.SetParameterForAll("mView", gd.GCam.View);
 			mMatLib.SetParameterForAll("mEyePos", gd.GCam.Position);
 			mMatLib.SetParameterForAll("mProjection", gd.GCam.Projection);
-//			mMatLib.SetCelTexture(0);
 		}
 
 
@@ -312,7 +292,7 @@ namespace BSPBuilder
 			mVisForm.EnableFileIO(false);
 
 			mVisMap	=new VisMap();
-			mVisMap.MaterialVisGBSPFile(fileName, mGD);
+			mVisMap.MaterialVisGBSPFile(fileName, mGD, mGameRootDir);
 
 			mZoneForm.EnableFileIO(true);
 			mBSPForm.EnableFileIO(true);
@@ -367,12 +347,12 @@ namespace BSPBuilder
 
 					mMap.MakeMaterials(mGD, mMatLib, fileName);
 
-					mZoneDraw.BuildLM(mGD, mZoneForm.GetLightAtlasSize(), mMap.BuildLMRenderData, mMap.GetPlanes());
-					mZoneDraw.BuildVLit(mGD, mMap.BuildVLitRenderData, mMap.GetPlanes());
-					mZoneDraw.BuildAlpha(mGD, mMap.BuildAlphaRenderData, mMap.GetPlanes());
-					mZoneDraw.BuildFullBright(mGD, mMap.BuildFullBrightRenderData, mMap.GetPlanes());
-					mZoneDraw.BuildMirror(mGD, mMap.BuildMirrorRenderData, mMap.GetPlanes());
-					mZoneDraw.BuildSky(mGD, mMap.BuildSkyRenderData, mMap.GetPlanes());
+					mZoneDraw.BuildLM(mGD, mGameRootDir, mZoneForm.GetLightAtlasSize(), mMap.BuildLMRenderData, mMap.GetPlanes());
+					mZoneDraw.BuildVLit(mGD, mGameRootDir, mMap.BuildVLitRenderData, mMap.GetPlanes());
+					mZoneDraw.BuildAlpha(mGD, mGameRootDir, mMap.BuildAlphaRenderData, mMap.GetPlanes());
+					mZoneDraw.BuildFullBright(mGD, mGameRootDir, mMap.BuildFullBrightRenderData, mMap.GetPlanes());
+					mZoneDraw.BuildMirror(mGD, mGameRootDir, mMap.BuildMirrorRenderData, mMap.GetPlanes());
+					mZoneDraw.BuildSky(mGD, mGameRootDir, mMap.BuildSkyRenderData, mMap.GetPlanes());
 
 					mZoneDraw.FinishAtlas(mGD);
 

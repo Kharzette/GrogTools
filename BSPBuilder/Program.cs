@@ -44,7 +44,7 @@ namespace BSPBuilder
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 			GraphicsDevice	gd	=new GraphicsDevice("BSP tree building tools",
-				FeatureLevel.Level_9_3);
+				FeatureLevel.Level_11_0);
 
 			//save renderform position
 			gd.RendForm.DataBindings.Add(new Binding("Location",
@@ -57,7 +57,7 @@ namespace BSPBuilder
 			Input			inp			=SetUpInput();
 			Random			rand		=new Random();
 
-			BSPBuilder	bspBuild	=new BSPBuilder(gd);
+			BSPBuilder	bspBuild	=new BSPBuilder(gd, "C:\\Games\\CurrentGame");
 
 			Vector3	pos				=Vector3.One * 5f;
 			Vector3	lightDir		=-Vector3.UnitY;

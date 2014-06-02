@@ -28,9 +28,9 @@ namespace BSPBuilder
 		MatLib	mMatLib;
 
 
-		internal DebugDraw(GraphicsDevice gd)
+		internal DebugDraw(GraphicsDevice gd, string gameRoot)
 		{
-			mMatLib	=new MatLib(gd.GD, gd.GD.FeatureLevel, true);
+			mMatLib	=new MatLib(gd, gameRoot, true);
 
 			mLightDir	=Mathery.RandomDirection(mRand);
 

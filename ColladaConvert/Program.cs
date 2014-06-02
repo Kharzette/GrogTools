@@ -54,29 +54,7 @@ namespace ColladaConvert
 
 			gd.RendForm.Location	=Settings.Default.MainWindowPos;
 			
-			MatLib.ShaderModel	shaderModel;
-
-			switch(gd.GD.FeatureLevel)
-			{
-				case	FeatureLevel.Level_11_0:
-					shaderModel	=MatLib.ShaderModel.SM5;
-					break;
-				case	FeatureLevel.Level_10_1:
-					shaderModel	=MatLib.ShaderModel.SM41;
-					break;
-				case	FeatureLevel.Level_10_0:
-					shaderModel	=MatLib.ShaderModel.SM4;
-					break;
-				case	FeatureLevel.Level_9_3:
-					shaderModel	=MatLib.ShaderModel.SM2;
-					break;
-				default:
-					Debug.Assert(false);	//only support the above
-					shaderModel	=MatLib.ShaderModel.SM2;
-					break;
-			}
-
-			MatLib	matLib		=new MatLib(gd.GD, shaderModel, true);
+			MatLib	matLib		=new MatLib(gd, "C:\\Games\\CurrentGame", true);
 
 			matLib.InitCelShading(1);
 			matLib.GenerateCelTexturePreset(gd.GD,
@@ -93,13 +71,13 @@ namespace ColladaConvert
 			PlayerSteering	pSteering	=SetUpSteering();
 			Input			inp			=SetUpInput();
 			Random			rand		=new Random();
-			ExtraPrims		extraPrims	=new ExtraPrims(gd.GD, shaderModel);
+			ExtraPrims		extraPrims	=new ExtraPrims(gd, "C:\\Games\\CurrentGame");
 
 			int	resx	=gd.RendForm.ClientRectangle.Width;
 			int	resy	=gd.RendForm.ClientRectangle.Height;
 
 			post.MakePostTarget(gd, "SceneColor", resx, resy, Format.R8G8B8A8_UNorm);
-			post.MakePostDepth(gd, "SceneColor", resx, resy,
+			post.MakePostDepth(gd, "SceneDepth", resx, resy,
 				(gd.GD.FeatureLevel != FeatureLevel.Level_9_3)?
 					Format.D32_Float_S8X24_UInt : Format.D24_UNorm_S8_UInt);
 			post.MakePostTarget(gd, "SceneDepthMatNorm", resx, resy, Format.R16G16B16A16_Float);
@@ -189,17 +167,17 @@ namespace ColladaConvert
 
 				ss.RenderUpdate((float)delta / (float)Stopwatch.Frequency);
 
-				post.SetTargets(gd, "SceneDepthMatNorm", "SceneColor");
+				post.SetTargets(gd, "SceneDepthMatNorm", "SceneDepth");
 
 				post.ClearTarget(gd, "SceneDepthMatNorm", Color.White);
-				post.ClearDepth(gd, "SceneColor");
+				post.ClearDepth(gd, "SceneDepth");
 
 				ss.RenderDMN(gd.DC);
 
-				post.SetTargets(gd, "SceneColor", "SceneColor");
+				post.SetTargets(gd, "SceneColor", "SceneDepth");
 
 				post.ClearTarget(gd, "SceneColor", Color.CornflowerBlue);
-				post.ClearDepth(gd, "SceneColor");
+				post.ClearDepth(gd, "SceneDepth");
 
 				ss.Render(gd.DC);
 

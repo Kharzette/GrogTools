@@ -23,19 +23,19 @@ namespace ColladaConvert
 		const float	AxisSize	=50f;
 
 
-		internal ExtraPrims(Device gd, MatLib.ShaderModel sm)
+		internal ExtraPrims(GraphicsDevice gd, string gameRoot)
 		{
 			//extra material lib for prim stuff
-			mMatLib	=new MatLib(gd, sm, true);
+			mMatLib	=new MatLib(gd, gameRoot, true);
 
 			//axis boxes
 			BoundingBox	xBox	=Misc.MakeBox(AxisSize, 1f, 1f);
 			BoundingBox	yBox	=Misc.MakeBox(1f, AxisSize, 1f);
 			BoundingBox	zBox	=Misc.MakeBox(1f, 1f, AxisSize);
 
-			mXAxis	=PrimFactory.CreateCube(gd, xBox);
-			mYAxis	=PrimFactory.CreateCube(gd, yBox);
-			mZAxis	=PrimFactory.CreateCube(gd, zBox);
+			mXAxis	=PrimFactory.CreateCube(gd.GD, xBox);
+			mYAxis	=PrimFactory.CreateCube(gd.GD, yBox);
+			mZAxis	=PrimFactory.CreateCube(gd.GD, zBox);
 
 			Vector4	redColor	=Vector4.One;
 			Vector4	greenColor	=Vector4.One;
