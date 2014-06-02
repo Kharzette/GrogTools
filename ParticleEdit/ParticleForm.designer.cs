@@ -68,6 +68,7 @@
 			this.label16 = new System.Windows.Forms.Label();
 			this.GravityYaw = new System.Windows.Forms.NumericUpDown();
 			this.ColorGroup = new System.Windows.Forms.GroupBox();
+			this.TextureBox = new System.Windows.Forms.ComboBox();
 			this.label4 = new System.Windows.Forms.Label();
 			this.ShapeSize = new System.Windows.Forms.NumericUpDown();
 			this.Shape = new System.Windows.Forms.ComboBox();
@@ -708,17 +709,28 @@
 			// 
 			// ColorGroup
 			// 
+			this.ColorGroup.Controls.Add(this.TextureBox);
 			this.ColorGroup.Controls.Add(this.label4);
 			this.ColorGroup.Controls.Add(this.ShapeSize);
 			this.ColorGroup.Controls.Add(this.Shape);
 			this.ColorGroup.Controls.Add(this.ColorPanel);
 			this.ColorGroup.Controls.Add(this.button1);
-			this.ColorGroup.Location = new System.Drawing.Point(375, 148);
+			this.ColorGroup.Location = new System.Drawing.Point(375, 121);
 			this.ColorGroup.Name = "ColorGroup";
-			this.ColorGroup.Size = new System.Drawing.Size(156, 97);
+			this.ColorGroup.Size = new System.Drawing.Size(156, 124);
 			this.ColorGroup.TabIndex = 30;
 			this.ColorGroup.TabStop = false;
 			this.ColorGroup.Text = "Color and Shape";
+			// 
+			// TextureBox
+			// 
+			this.TextureBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.TextureBox.FormattingEnabled = true;
+			this.TextureBox.Location = new System.Drawing.Point(6, 98);
+			this.TextureBox.Name = "TextureBox";
+			this.TextureBox.Size = new System.Drawing.Size(121, 21);
+			this.TextureBox.TabIndex = 42;
+			this.TextureBox.SelectedIndexChanged += new System.EventHandler(this.OnTextureChanged);
 			// 
 			// label4
 			// 
@@ -891,5 +903,6 @@
 		private System.Windows.Forms.ComboBox Shape;
 		private System.Windows.Forms.Label label4;
 		private System.Windows.Forms.NumericUpDown ShapeSize;
+		private System.Windows.Forms.ComboBox TextureBox;
 	}
 }

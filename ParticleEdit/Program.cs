@@ -14,10 +14,11 @@ using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using SharpDX.Windows;
-using Buffer = SharpDX.Direct3D11.Buffer;
-using Device = SharpDX.Direct3D11.Device;
-using MapFlags = SharpDX.Direct3D11.MapFlags;
-using MatLib = MaterialLib.MaterialLib;
+
+using Buffer	=SharpDX.Direct3D11.Buffer;
+using Device	=SharpDX.Direct3D11.Device;
+using MapFlags	=SharpDX.Direct3D11.MapFlags;
+using MatLib	=MaterialLib.MaterialLib;
 
 
 namespace ParticleEdit
@@ -76,12 +77,13 @@ namespace ParticleEdit
 			matLib.InitCelShading(1);
 			matLib.GenerateCelTexturePreset(gd.GD,
 				gd.GD.FeatureLevel == FeatureLevel.Level_9_3, false, 0);
+			matLib.SetCelTexture(0);
 
 			PlayerSteering	pSteering	=SetUpSteering();
 			Input			inp			=SetUpInput();
 			Random			rand		=new Random();
 			ParticleForm	partForm	=SetUpForms(gd.GD, matLib);
-			ParticleBoss	pBoss		=new ParticleBoss(gd.GD, matLib);
+			ParticleEditor	partEdit	=new ParticleEditor(gd, partForm, matLib);
 
 			Vector3	pos				=Vector3.One * 5f;
 			Vector3	lightDir		=-Vector3.UnitY;
@@ -142,12 +144,12 @@ namespace ParticleEdit
 
 				long	timeNow	=Stopwatch.GetTimestamp();
 				long	delta	=timeNow - lastTime;
+				float	msFreq	=Stopwatch.Frequency / 1000f;
 
-				delta	=(long)((float)delta / (float)Stopwatch.Frequency);
+				float	msDelta	=((float)delta / msFreq);
 
-				pBoss.Update(gd.DC, (int)delta);
-
-				pBoss.Draw(gd.DC, gd.GCam.View, gd.GCam.Projection);
+				partEdit.Update(msDelta);
+				partEdit.Draw();
 
 				gd.Present();
 
@@ -163,19 +165,13 @@ namespace ParticleEdit
 
 		static ParticleForm SetUpForms(Device gd, MatLib matLib)
 		{
-			SharedForms.MaterialForm	matForm		=new SharedForms.MaterialForm(matLib);
-			ParticleForm				partForm	=new ParticleForm();
+			ParticleForm	partForm	=new ParticleForm(matLib);
 
 			//save positions
-			matForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
-				Settings.Default, "MaterialFormPos", true,
-				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-
 			partForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
 				Settings.Default, "ParticleFormPos", true,
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
-			matForm.Visible		=true;
 			partForm.Visible	=true;
 
 			return	partForm;

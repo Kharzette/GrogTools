@@ -10,7 +10,6 @@ using BSPCore;
 using BSPVis;
 using MeshLib;
 using UtilityLib;
-using MaterialLib;
 
 using SharpDX;
 using SharpDX.DXGI;

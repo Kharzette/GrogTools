@@ -9,7 +9,8 @@ using System.Collections.Generic;
 using SharpDX;
 using UtilityLib;
 
-using Color	=System.Drawing.Color;
+using Color		=System.Drawing.Color;
+using MatLib	=MaterialLib.MaterialLib;
 
 
 namespace ParticleEdit
@@ -20,16 +21,23 @@ namespace ParticleEdit
 		ColorDialog	mColorPicker	=new ColorDialog();
 		bool		mbUpdating;
 
+		List<string>	mParticleTextures	=new List<string>();
+
+		MatLib	mMats;
+
 		internal event EventHandler	eCreate;
 		internal event EventHandler	eItemNuked;
 		internal event EventHandler	eValueChanged;
 		internal event EventHandler	eSelectionChanged;
 		internal event EventHandler	eCopyEmitterToClipBoard;
+		internal event EventHandler	eTextureChanged;
 
 
-		internal ParticleForm() : base()
+		internal ParticleForm(MatLib mats) : base()
 		{
 			InitializeComponent();
+
+			mMats	=mats;
 
 			ColorPanel.BackColor	=mCurrentColor;
 
@@ -41,8 +49,23 @@ namespace ParticleEdit
 			{
 				Shape.Items.Add(val);
 			}
-
 			Shape.SelectedIndex	=0;
+
+			mParticleTextures	=mats.GetParticleTextures();
+
+			foreach(string tex in mParticleTextures)
+			{
+				//strip particles off the front
+				string	justTex	=tex.Substring(10);
+
+				TextureBox.Items.Add(justTex);
+			}
+			TextureBox.SelectedIndex	=0;
+		}
+
+		public string EmTexture
+		{
+			get { return mParticleTextures[TextureBox.SelectedIndex]; }
 		}
 
 		public ParticleLib.Emitter.Shapes EmShape
@@ -299,7 +322,7 @@ namespace ParticleEdit
 		}
 
 
-		internal void UpdateControls(ParticleLib.Emitter em, Vector4 color)
+		internal void UpdateControls(ParticleLib.Emitter em, Vector4 color, string tex)
 		{
 			if(mbUpdating)
 			{
@@ -329,19 +352,31 @@ namespace ParticleEdit
 			EmShape			=em.mShape;
 			EmShapeSize		=em.mShapeSize;
 
+			foreach(string pt in mParticleTextures)
+			{
+				if(pt == tex)
+				{
+					TextureBox.SelectedIndex	=mParticleTextures.IndexOf(pt);
+					break;
+				}
+			}
+
 			mbUpdating	=false;
 		}
 
 
-		internal void UpdateListView(List<string> list)
+		internal void UpdateListView(List<string> list, List<int> indexes)
 		{
+			Debug.Assert(list.Count == indexes.Count);
+
 			EmitterListView.Clear();
 
-			foreach(string s in list)
+			for(int i=0;i < list.Count;i++)
 			{
 				ListViewItem	lvi	=new ListViewItem();
 
-				lvi.Text	=s;
+				lvi.Text	=list[i];
+				lvi.Tag		=indexes[i];
 
 				EmitterListView.Items.Add(lvi);
 			}
@@ -360,7 +395,8 @@ namespace ParticleEdit
 			else
 			{
 				MaxParticles.Enabled	=false;
-				Misc.SafeInvoke(eSelectionChanged, new Nullable<int>(EmitterListView.SelectedItems[0].Index));
+				Misc.SafeInvoke(eSelectionChanged,
+					new Nullable<int>((int)EmitterListView.SelectedItems[0].Tag));
 			}
 		}
 
@@ -390,7 +426,7 @@ namespace ParticleEdit
 					EmitterListView.Items.Remove(itm);
 
 					//nuke from system
-					Misc.SafeInvoke(eItemNuked, new Nullable<int>(index));
+					Misc.SafeInvoke(eItemNuked, new Nullable<int>((int)itm.Tag));
 				}
 			}
 			else if(e.KeyCode == Keys.C && e.Control)
@@ -399,11 +435,15 @@ namespace ParticleEdit
 				{
 					ListViewItem	itm	=EmitterListView.SelectedItems[0];
 
-					int	index	=itm.Index;
-
-					Misc.SafeInvoke(eCopyEmitterToClipBoard, new Nullable<int>(index));
+					Misc.SafeInvoke(eCopyEmitterToClipBoard, new Nullable<int>((int)itm.Tag));
 				}
 			}
+		}
+
+
+		void OnTextureChanged(object sender, EventArgs e)
+		{			
+			Misc.SafeInvoke(eTextureChanged, mParticleTextures[TextureBox.SelectedIndex]);
 		}
 	}
 }

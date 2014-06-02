@@ -53,6 +53,7 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ParticleEditor.cs" />
     <Compile Include="ParticleForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -95,6 +96,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Games\YSNAIWNH\GameContent\GameContent.csproj">
+      <Project>{2C3CC829-BACF-4EEF-B32A-C0DA31BF2102}</Project>
+      <Name>GameContent</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Libs\InputLib\InputLib.csproj">
       <Project>{7B4F8D4A-3506-47EE-87A7-047F5AEA90BF}</Project>
       <Name>InputLib</Name>
