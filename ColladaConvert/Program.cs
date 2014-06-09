@@ -117,7 +117,7 @@ namespace ColladaConvert
 							bMouseLookOn	=true;
 							Debug.WriteLine("Mouse look: " + bMouseLookOn);
 
-							gd.ToggleCapture(true);
+							gd.SetCapture(true);
 
 							inp.MapAxisAction(MyActions.Pitch, Input.MoveAxis.MouseYAxis);
 							inp.MapAxisAction(MyActions.Turn, Input.MoveAxis.MouseXAxis);
@@ -127,7 +127,7 @@ namespace ColladaConvert
 							bMouseLookOn	=false;
 							Debug.WriteLine("Mouse look: " + bMouseLookOn);
 
-							gd.ToggleCapture(false);
+							gd.SetCapture(false);
 
 							inp.UnMapAxisAction(MyActions.Pitch, Input.MoveAxis.MouseYAxis);
 							inp.UnMapAxisAction(MyActions.Turn, Input.MoveAxis.MouseXAxis);
@@ -228,7 +228,7 @@ namespace ColladaConvert
 				gd.Present();
 
 				lastTime	=timeNow;
-			});
+			}, true);	//true here is slow but needed for winforms events
 
 			Settings.Default.Save();
 			

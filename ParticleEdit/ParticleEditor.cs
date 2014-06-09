@@ -49,15 +49,7 @@ namespace ParticleEdit
 
 		void OnCreate(object sender, EventArgs ea)
 		{
-			float	yaw		=mPF.GravYaw;
-			float	pitch	=mPF.GravPitch;
 			float	str		=mPF.GravStrength;
-
-			Mathery.WrapAngleDegrees(ref yaw);
-			Mathery.WrapAngleDegrees(ref pitch);
-
-			yaw		=MathUtil.DegreesToRadians(yaw);
-			pitch	=MathUtil.DegreesToRadians(pitch);
 
 			Vector4	colorMin	=new Vector4(mPF.ColorVelocityMin.X,
 				mPF.ColorVelocityMin.Y, mPF.ColorVelocityMin.Z, mPF.AlphaMin);
@@ -68,7 +60,7 @@ namespace ParticleEdit
 			mPB.CreateEmitter(mPF.EmTexture, mPF.EMStartColor,
 				mPF.EmShape, mPF.EmShapeSize,
 				mPF.MaxParts, Vector3.Zero,
-				mPF.GravYaw, mPF.GravPitch, mPF.GravStrength,
+				mPF.GravPos, mPF.GravStrength,
 				mPF.StartingSize, mPF.EmitMS,
 				mPF.SpinMin, mPF.SpinMax, mPF.VelMin, mPF.VelMax,
 				mPF.SizeMin, mPF.SizeMax,

@@ -58,12 +58,10 @@
 			this.label2 = new System.Windows.Forms.Label();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
+			this.GravityPosition = new System.Windows.Forms.TextBox();
 			this.label19 = new System.Windows.Forms.Label();
 			this.GravityStrength = new System.Windows.Forms.NumericUpDown();
-			this.label17 = new System.Windows.Forms.Label();
-			this.GravityPitch = new System.Windows.Forms.NumericUpDown();
 			this.label16 = new System.Windows.Forms.Label();
-			this.GravityYaw = new System.Windows.Forms.NumericUpDown();
 			this.ColorGroup = new System.Windows.Forms.GroupBox();
 			this.TextureBox = new System.Windows.Forms.ComboBox();
 			this.label4 = new System.Windows.Forms.Label();
@@ -103,8 +101,6 @@
 			this.groupBox2.SuspendLayout();
 			this.groupBox3.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.GravityStrength)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.GravityPitch)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.GravityYaw)).BeginInit();
 			this.ColorGroup.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.ShapeSize)).BeginInit();
 			this.groupBox4.SuspendLayout();
@@ -192,7 +188,7 @@
 			this.StartColor.Location = new System.Drawing.Point(6, 97);
 			this.StartColor.Name = "StartColor";
 			this.StartColor.Size = new System.Drawing.Size(62, 29);
-			this.StartColor.TabIndex = 40;
+			this.StartColor.TabIndex = 3;
 			this.StartColor.Click += new System.EventHandler(this.OnChangeColor);
 			// 
 			// label15
@@ -220,7 +216,7 @@
             0});
 			this.StartAlpha.Name = "StartAlpha";
 			this.StartAlpha.Size = new System.Drawing.Size(58, 20);
-			this.StartAlpha.TabIndex = 36;
+			this.StartAlpha.TabIndex = 2;
 			this.StartAlpha.Value = new decimal(new int[] {
             1,
             0,
@@ -239,7 +235,7 @@
 			this.LifeTimeMin.Location = new System.Drawing.Point(6, 158);
 			this.LifeTimeMin.Name = "LifeTimeMin";
 			this.LifeTimeMin.Size = new System.Drawing.Size(58, 20);
-			this.LifeTimeMin.TabIndex = 22;
+			this.LifeTimeMin.TabIndex = 5;
 			this.LifeTimeMin.Value = new decimal(new int[] {
             3,
             0,
@@ -267,7 +263,7 @@
 			this.LifeTimeMax.Location = new System.Drawing.Point(6, 184);
 			this.LifeTimeMax.Name = "LifeTimeMax";
 			this.LifeTimeMax.Size = new System.Drawing.Size(58, 20);
-			this.LifeTimeMax.TabIndex = 20;
+			this.LifeTimeMax.TabIndex = 6;
 			this.LifeTimeMax.Value = new decimal(new int[] {
             4,
             0,
@@ -305,7 +301,7 @@
             65536});
 			this.StartSize.Name = "StartSize";
 			this.StartSize.Size = new System.Drawing.Size(58, 20);
-			this.StartSize.TabIndex = 8;
+			this.StartSize.TabIndex = 1;
 			this.StartSize.Value = new decimal(new int[] {
             8,
             0,
@@ -371,7 +367,7 @@
             0});
 			this.VelocityMax.Name = "VelocityMax";
 			this.VelocityMax.Size = new System.Drawing.Size(58, 20);
-			this.VelocityMax.TabIndex = 35;
+			this.VelocityMax.TabIndex = 8;
 			this.VelocityMax.Value = new decimal(new int[] {
             8,
             0,
@@ -395,7 +391,7 @@
             -2147483648});
 			this.SizeVelocityMin.Name = "SizeVelocityMin";
 			this.SizeVelocityMin.Size = new System.Drawing.Size(58, 20);
-			this.SizeVelocityMin.TabIndex = 34;
+			this.SizeVelocityMin.TabIndex = 9;
 			this.SizeVelocityMin.Value = new decimal(new int[] {
             5,
             0,
@@ -419,7 +415,7 @@
             -2147483648});
 			this.SizeVelocityMax.Name = "SizeVelocityMax";
 			this.SizeVelocityMax.Size = new System.Drawing.Size(58, 20);
-			this.SizeVelocityMax.TabIndex = 33;
+			this.SizeVelocityMax.TabIndex = 10;
 			this.SizeVelocityMax.Value = new decimal(new int[] {
             5,
             0,
@@ -443,7 +439,7 @@
             -2147483648});
 			this.SpinVelocityMin.Name = "SpinVelocityMin";
 			this.SpinVelocityMin.Size = new System.Drawing.Size(58, 20);
-			this.SpinVelocityMin.TabIndex = 32;
+			this.SpinVelocityMin.TabIndex = 11;
 			this.SpinVelocityMin.ValueChanged += new System.EventHandler(this.OnValueChanged);
 			// 
 			// SpinVelocityMax
@@ -462,15 +458,15 @@
             -2147483648});
 			this.SpinVelocityMax.Name = "SpinVelocityMax";
 			this.SpinVelocityMax.Size = new System.Drawing.Size(58, 20);
-			this.SpinVelocityMax.TabIndex = 31;
+			this.SpinVelocityMax.TabIndex = 12;
 			this.SpinVelocityMax.ValueChanged += new System.EventHandler(this.OnValueChanged);
 			// 
 			// CreateEmitter
 			// 
-			this.CreateEmitter.Location = new System.Drawing.Point(164, 305);
+			this.CreateEmitter.Location = new System.Drawing.Point(341, 276);
 			this.CreateEmitter.Name = "CreateEmitter";
 			this.CreateEmitter.Size = new System.Drawing.Size(75, 29);
-			this.CreateEmitter.TabIndex = 28;
+			this.CreateEmitter.TabIndex = 26;
 			this.CreateEmitter.Text = "Create";
 			this.CreateEmitter.UseVisualStyleBackColor = true;
 			this.CreateEmitter.Click += new System.EventHandler(this.OnCreate);
@@ -536,7 +532,7 @@
             0});
 			this.VelocityMin.Name = "VelocityMin";
 			this.VelocityMin.Size = new System.Drawing.Size(58, 20);
-			this.VelocityMin.TabIndex = 2;
+			this.VelocityMin.TabIndex = 7;
 			this.VelocityMin.Value = new decimal(new int[] {
             5,
             0,
@@ -576,23 +572,28 @@
 			// 
 			// groupBox3
 			// 
+			this.groupBox3.Controls.Add(this.GravityPosition);
 			this.groupBox3.Controls.Add(this.label19);
 			this.groupBox3.Controls.Add(this.GravityStrength);
-			this.groupBox3.Controls.Add(this.label17);
-			this.groupBox3.Controls.Add(this.GravityPitch);
 			this.groupBox3.Controls.Add(this.label16);
-			this.groupBox3.Controls.Add(this.GravityYaw);
 			this.groupBox3.Location = new System.Drawing.Point(12, 231);
 			this.groupBox3.Name = "groupBox3";
-			this.groupBox3.Size = new System.Drawing.Size(146, 103);
+			this.groupBox3.Size = new System.Drawing.Size(179, 74);
 			this.groupBox3.TabIndex = 29;
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = "Forces";
 			// 
+			// GravityPosition
+			// 
+			this.GravityPosition.Location = new System.Drawing.Point(6, 19);
+			this.GravityPosition.Name = "GravityPosition";
+			this.GravityPosition.Size = new System.Drawing.Size(100, 20);
+			this.GravityPosition.TabIndex = 21;
+			// 
 			// label19
 			// 
 			this.label19.AutoSize = true;
-			this.label19.Location = new System.Drawing.Point(70, 73);
+			this.label19.Location = new System.Drawing.Point(70, 47);
 			this.label19.Name = "label19";
 			this.label19.Size = new System.Drawing.Size(56, 13);
 			this.label19.TabIndex = 39;
@@ -606,7 +607,7 @@
             0,
             0,
             196608});
-			this.GravityStrength.Location = new System.Drawing.Point(6, 71);
+			this.GravityStrength.Location = new System.Drawing.Point(6, 45);
 			this.GravityStrength.Minimum = new decimal(new int[] {
             100,
             0,
@@ -614,62 +615,17 @@
             -2147483648});
 			this.GravityStrength.Name = "GravityStrength";
 			this.GravityStrength.Size = new System.Drawing.Size(58, 20);
-			this.GravityStrength.TabIndex = 38;
+			this.GravityStrength.TabIndex = 22;
 			this.GravityStrength.ValueChanged += new System.EventHandler(this.OnValueChanged);
-			// 
-			// label17
-			// 
-			this.label17.AutoSize = true;
-			this.label17.Location = new System.Drawing.Point(70, 47);
-			this.label17.Name = "label17";
-			this.label17.Size = new System.Drawing.Size(67, 13);
-			this.label17.TabIndex = 34;
-			this.label17.Text = "Gravity Pitch";
-			// 
-			// GravityPitch
-			// 
-			this.GravityPitch.Location = new System.Drawing.Point(6, 45);
-			this.GravityPitch.Maximum = new decimal(new int[] {
-            359,
-            0,
-            0,
-            0});
-			this.GravityPitch.Minimum = new decimal(new int[] {
-            100,
-            0,
-            0,
-            -2147483648});
-			this.GravityPitch.Name = "GravityPitch";
-			this.GravityPitch.Size = new System.Drawing.Size(58, 20);
-			this.GravityPitch.TabIndex = 35;
-			this.GravityPitch.ValueChanged += new System.EventHandler(this.OnValueChanged);
 			// 
 			// label16
 			// 
 			this.label16.AutoSize = true;
-			this.label16.Location = new System.Drawing.Point(70, 21);
+			this.label16.Location = new System.Drawing.Point(112, 22);
 			this.label16.Name = "label16";
-			this.label16.Size = new System.Drawing.Size(64, 13);
+			this.label16.Size = new System.Drawing.Size(61, 13);
 			this.label16.TabIndex = 32;
-			this.label16.Text = "Gravity Yaw";
-			// 
-			// GravityYaw
-			// 
-			this.GravityYaw.Location = new System.Drawing.Point(6, 19);
-			this.GravityYaw.Maximum = new decimal(new int[] {
-            359,
-            0,
-            0,
-            0});
-			this.GravityYaw.Minimum = new decimal(new int[] {
-            100,
-            0,
-            0,
-            -2147483648});
-			this.GravityYaw.Name = "GravityYaw";
-			this.GravityYaw.Size = new System.Drawing.Size(58, 20);
-			this.GravityYaw.TabIndex = 33;
-			this.GravityYaw.ValueChanged += new System.EventHandler(this.OnValueChanged);
+			this.label16.Text = "Gravity Pos";
 			// 
 			// ColorGroup
 			// 
@@ -677,9 +633,9 @@
 			this.ColorGroup.Controls.Add(this.label4);
 			this.ColorGroup.Controls.Add(this.ShapeSize);
 			this.ColorGroup.Controls.Add(this.Shape);
-			this.ColorGroup.Location = new System.Drawing.Point(164, 196);
+			this.ColorGroup.Location = new System.Drawing.Point(197, 196);
 			this.ColorGroup.Name = "ColorGroup";
-			this.ColorGroup.Size = new System.Drawing.Size(146, 103);
+			this.ColorGroup.Size = new System.Drawing.Size(138, 103);
 			this.ColorGroup.TabIndex = 30;
 			this.ColorGroup.TabStop = false;
 			this.ColorGroup.Text = "Shape Size and Texture";
@@ -691,7 +647,7 @@
 			this.TextureBox.Location = new System.Drawing.Point(6, 72);
 			this.TextureBox.Name = "TextureBox";
 			this.TextureBox.Size = new System.Drawing.Size(121, 21);
-			this.TextureBox.TabIndex = 42;
+			this.TextureBox.TabIndex = 25;
 			this.TextureBox.SelectedIndexChanged += new System.EventHandler(this.OnTextureChanged);
 			// 
 			// label4
@@ -719,7 +675,7 @@
             0});
 			this.ShapeSize.Name = "ShapeSize";
 			this.ShapeSize.Size = new System.Drawing.Size(58, 20);
-			this.ShapeSize.TabIndex = 32;
+			this.ShapeSize.TabIndex = 23;
 			this.ShapeSize.Value = new decimal(new int[] {
             1,
             0,
@@ -740,7 +696,7 @@
 			this.Shape.Location = new System.Drawing.Point(6, 45);
 			this.Shape.Name = "Shape";
 			this.Shape.Size = new System.Drawing.Size(121, 21);
-			this.Shape.TabIndex = 40;
+			this.Shape.TabIndex = 24;
 			this.Shape.SelectedIndexChanged += new System.EventHandler(this.OnValueChanged);
 			// 
 			// EmitterListView
@@ -749,11 +705,11 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.EmitterListView.HideSelection = false;
-			this.EmitterListView.Location = new System.Drawing.Point(12, 340);
+			this.EmitterListView.Location = new System.Drawing.Point(12, 311);
 			this.EmitterListView.MultiSelect = false;
 			this.EmitterListView.Name = "EmitterListView";
-			this.EmitterListView.Size = new System.Drawing.Size(502, 150);
-			this.EmitterListView.TabIndex = 31;
+			this.EmitterListView.Size = new System.Drawing.Size(500, 107);
+			this.EmitterListView.TabIndex = 27;
 			this.EmitterListView.UseCompatibleStateImageBehavior = false;
 			this.EmitterListView.View = System.Windows.Forms.View.List;
 			this.EmitterListView.SelectedIndexChanged += new System.EventHandler(this.OnSelectedIndexChanged);
@@ -779,7 +735,7 @@
 			this.groupBox4.Controls.Add(this.label28);
 			this.groupBox4.Location = new System.Drawing.Point(341, 12);
 			this.groupBox4.Name = "groupBox4";
-			this.groupBox4.Size = new System.Drawing.Size(173, 229);
+			this.groupBox4.Size = new System.Drawing.Size(171, 229);
 			this.groupBox4.TabIndex = 32;
 			this.groupBox4.TabStop = false;
 			this.groupBox4.Text = "Color Velocities";
@@ -854,7 +810,7 @@
             -2147483648});
 			this.BlueVelocityMax.Name = "BlueVelocityMax";
 			this.BlueVelocityMax.Size = new System.Drawing.Size(58, 20);
-			this.BlueVelocityMax.TabIndex = 41;
+			this.BlueVelocityMax.TabIndex = 20;
 			this.BlueVelocityMax.ValueChanged += new System.EventHandler(this.OnValueChanged);
 			// 
 			// BlueVelocityMin
@@ -873,7 +829,7 @@
             -2147483648});
 			this.BlueVelocityMin.Name = "BlueVelocityMin";
 			this.BlueVelocityMin.Size = new System.Drawing.Size(58, 20);
-			this.BlueVelocityMin.TabIndex = 40;
+			this.BlueVelocityMin.TabIndex = 19;
 			this.BlueVelocityMin.ValueChanged += new System.EventHandler(this.OnValueChanged);
 			// 
 			// GreenVelocityMax
@@ -892,7 +848,7 @@
             -2147483648});
 			this.GreenVelocityMax.Name = "GreenVelocityMax";
 			this.GreenVelocityMax.Size = new System.Drawing.Size(58, 20);
-			this.GreenVelocityMax.TabIndex = 39;
+			this.GreenVelocityMax.TabIndex = 18;
 			this.GreenVelocityMax.ValueChanged += new System.EventHandler(this.OnValueChanged);
 			// 
 			// GreenVelocityMin
@@ -911,7 +867,7 @@
             -2147483648});
 			this.GreenVelocityMin.Name = "GreenVelocityMin";
 			this.GreenVelocityMin.Size = new System.Drawing.Size(58, 20);
-			this.GreenVelocityMin.TabIndex = 38;
+			this.GreenVelocityMin.TabIndex = 17;
 			this.GreenVelocityMin.ValueChanged += new System.EventHandler(this.OnValueChanged);
 			// 
 			// RedVelocityMax
@@ -930,7 +886,7 @@
             -2147483648});
 			this.RedVelocityMax.Name = "RedVelocityMax";
 			this.RedVelocityMax.Size = new System.Drawing.Size(58, 20);
-			this.RedVelocityMax.TabIndex = 37;
+			this.RedVelocityMax.TabIndex = 16;
 			this.RedVelocityMax.ValueChanged += new System.EventHandler(this.OnValueChanged);
 			// 
 			// RedVelocityMin
@@ -949,7 +905,7 @@
             -2147483648});
 			this.RedVelocityMin.Name = "RedVelocityMin";
 			this.RedVelocityMin.Size = new System.Drawing.Size(58, 20);
-			this.RedVelocityMin.TabIndex = 36;
+			this.RedVelocityMin.TabIndex = 15;
 			this.RedVelocityMin.ValueChanged += new System.EventHandler(this.OnValueChanged);
 			// 
 			// AlphaVelocityMin
@@ -968,7 +924,7 @@
             -2147483648});
 			this.AlphaVelocityMin.Name = "AlphaVelocityMin";
 			this.AlphaVelocityMin.Size = new System.Drawing.Size(58, 20);
-			this.AlphaVelocityMin.TabIndex = 30;
+			this.AlphaVelocityMin.TabIndex = 13;
 			this.AlphaVelocityMin.ValueChanged += new System.EventHandler(this.OnValueChanged);
 			// 
 			// AlphaVelocityMax
@@ -987,7 +943,7 @@
             -2147483648});
 			this.AlphaVelocityMax.Name = "AlphaVelocityMax";
 			this.AlphaVelocityMax.Size = new System.Drawing.Size(58, 20);
-			this.AlphaVelocityMax.TabIndex = 29;
+			this.AlphaVelocityMax.TabIndex = 14;
 			this.AlphaVelocityMax.ValueChanged += new System.EventHandler(this.OnValueChanged);
 			// 
 			// label27
@@ -1012,7 +968,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(524, 502);
+			this.ClientSize = new System.Drawing.Size(524, 430);
 			this.ControlBox = false;
 			this.Controls.Add(this.groupBox4);
 			this.Controls.Add(this.EmitterListView);
@@ -1042,8 +998,6 @@
 			this.groupBox3.ResumeLayout(false);
 			this.groupBox3.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.GravityStrength)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.GravityPitch)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.GravityYaw)).EndInit();
 			this.ColorGroup.ResumeLayout(false);
 			this.ColorGroup.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.ShapeSize)).EndInit();
@@ -1091,10 +1045,7 @@
 		private System.Windows.Forms.NumericUpDown SpinVelocityMax;
 		private System.Windows.Forms.GroupBox groupBox2;
 		private System.Windows.Forms.GroupBox groupBox3;
-		private System.Windows.Forms.Label label17;
-		private System.Windows.Forms.NumericUpDown GravityPitch;
 		private System.Windows.Forms.Label label16;
-		private System.Windows.Forms.NumericUpDown GravityYaw;
 		private System.Windows.Forms.Label label19;
 		private System.Windows.Forms.NumericUpDown GravityStrength;
 		private System.Windows.Forms.GroupBox ColorGroup;
@@ -1122,5 +1073,6 @@
 		private System.Windows.Forms.NumericUpDown AlphaVelocityMax;
 		private System.Windows.Forms.Label label27;
 		private System.Windows.Forms.Label label28;
+		private System.Windows.Forms.TextBox GravityPosition;
 	}
 }

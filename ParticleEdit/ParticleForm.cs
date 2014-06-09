@@ -275,23 +275,14 @@ namespace ParticleEdit
 			}
 		}
 
-		public int GravYaw
+		public Vector3 GravPos
 		{
-			get { return (int)GravityYaw.Value; }
+			get	{ return Misc.StringToVector3(GravityPosition.Text); }
 			set
 			{
-				Action<NumericUpDown>	upVal	=numer => numer.Value = value;
-				SharedForms.FormExtensions.Invoke(GravityYaw, upVal);
-			}
-		}
-
-		public int GravPitch
-		{
-			get { return (int)GravityPitch.Value; }
-			set
-			{
-				Action<NumericUpDown>	upVal	=numer => numer.Value = value;
-				SharedForms.FormExtensions.Invoke(GravityPitch, upVal);
+				string	gravPos	=Misc.VectorToString(value, 2);
+				Action<TextBox>	upVal	=tbox => tbox.Text = gravPos;
+				SharedForms.FormExtensions.Invoke(GravityPosition, upVal);
 			}
 		}
 
@@ -353,8 +344,7 @@ namespace ParticleEdit
 			em.mSizeVelocityMax			=SizeMax;
 			em.mLifeMin					=LifeMin;
 			em.mLifeMax					=LifeMax;
-			em.mGravityYaw				=GravYaw;
-			em.mGravityPitch			=GravPitch;
+			em.mGravityLocation			=GravPos;
 			em.mGravityStrength			=GravStrength;
 			em.mbOn						=true;
 			em.mShape					=EmShape;
@@ -366,8 +356,6 @@ namespace ParticleEdit
 			em.mColorVelocityMax		=new Vector4(
 				ColorVelocityMax.X, ColorVelocityMax.Y, ColorVelocityMax.Z,
 				AlphaMax);
-
-			em.UpdateGravity();
 		}
 
 
@@ -393,8 +381,7 @@ namespace ParticleEdit
 			AlphaMax			=em.mColorVelocityMax.W;
 			LifeMin				=em.mLifeMin;
 			LifeMax				=em.mLifeMax;
-			GravYaw				=em.mGravityYaw;
-			GravPitch			=em.mGravityPitch;
+			GravPos				=em.mGravityLocation;
 			GravStrength		=em.mGravityStrength;
 			EMStartColor		=em.mStartColor;
 			EmShape				=em.mShape;
@@ -467,6 +454,7 @@ namespace ParticleEdit
 
 		void OnKeyUp(object sender, KeyEventArgs e)
 		{
+			e.Handled	=true;
 			if(e.KeyCode == Keys.Delete)
 			{
 				if(EmitterListView.SelectedItems.Count == 1)
@@ -494,6 +482,10 @@ namespace ParticleEdit
 			else if(e.KeyCode == Keys.V && e.Control)
 			{
 				Misc.SafeInvoke(ePasteEmitterFromClipBoard, null);
+			}
+			else
+			{
+				e.Handled	=false;
 			}
 		}
 

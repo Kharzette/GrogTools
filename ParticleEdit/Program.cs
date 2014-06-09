@@ -65,51 +65,15 @@ namespace ParticleEdit
 			ParticleForm	partForm	=SetUpForms(gd.GD, matLib);
 			ParticleEditor	partEdit	=new ParticleEditor(gd, partForm, matLib);
 
-			Vector3	pos				=Vector3.One * 5f;
-			Vector3	lightDir		=-Vector3.UnitY;
-			bool	bMouseLookOn	=false;
-			long	lastTime		=Stopwatch.GetTimestamp();
+			Vector3	pos			=Vector3.One * 5f;
+			Vector3	lightDir	=-Vector3.UnitY;
+			long	lastTime	=Stopwatch.GetTimestamp();
 
 			RenderLoop.Run(gd.RendForm, () =>
 			{
 				gd.CheckResize();
 
-				if(bMouseLookOn)
-				{
-					gd.ResetCursorPos();
-				}
-
-				List<Input.InputAction>	actions	=inp.GetAction();
-				if(!gd.RendForm.Focused)
-				{
-					actions.Clear();
-				}
-				else
-				{
-					foreach(Input.InputAction act in actions)
-					{
-						if(act.mAction.Equals(MyActions.ToggleMouseLookOn))
-						{
-							bMouseLookOn	=true;
-							Debug.WriteLine("Mouse look: " + bMouseLookOn);
-
-							gd.ToggleCapture(true);
-
-							inp.MapAxisAction(MyActions.Pitch, Input.MoveAxis.MouseYAxis);
-							inp.MapAxisAction(MyActions.Turn, Input.MoveAxis.MouseXAxis);
-						}
-						else if(act.mAction.Equals(MyActions.ToggleMouseLookOff))
-						{
-							bMouseLookOn	=false;
-							Debug.WriteLine("Mouse look: " + bMouseLookOn);
-
-							gd.ToggleCapture(false);
-
-							inp.UnMapAxisAction(MyActions.Pitch, Input.MoveAxis.MouseYAxis);
-							inp.UnMapAxisAction(MyActions.Turn, Input.MoveAxis.MouseXAxis);
-						}
-					}
-				}
+				List<Input.InputAction>	actions	=UpdateInput(inp, gd);
 
 				pos	=pSteering.Update(pos, gd.GCam.Forward, gd.GCam.Left, gd.GCam.Up, actions);
 				
@@ -138,7 +102,7 @@ namespace ParticleEdit
 				gd.Present();
 
 				lastTime	=timeNow;
-			});
+			}, true);	//true here is slow but needed for winforms events
 
 			matLib.FreeAll();
 
@@ -148,7 +112,7 @@ namespace ParticleEdit
 			gd.ReleaseAll();
 		}
 
-
+		
 		static ParticleForm SetUpForms(Device gd, MatLib matLib)
 		{
 			ParticleForm	partForm	=new ParticleForm(matLib);
@@ -199,6 +163,41 @@ namespace ParticleEdit
 			pSteering.SetPitchEnums(MyActions.Pitch, MyActions.PitchUp, MyActions.PitchDown);
 
 			return	pSteering;
+		}
+
+		static List<Input.InputAction> UpdateInput(Input inp, GraphicsDevice gd)
+		{
+			if(gd.RendForm.Capture)
+			{
+				gd.ResetCursorPos();
+			}
+
+			List<Input.InputAction>	actions	=inp.GetAction();
+			if(!gd.RendForm.Focused)
+			{
+				actions.Clear();
+			}
+			else
+			{
+				foreach(Input.InputAction act in actions)
+				{
+					if(act.mAction.Equals(MyActions.ToggleMouseLookOn))
+					{
+						gd.SetCapture(true);
+
+						inp.MapAxisAction(MyActions.Pitch, Input.MoveAxis.MouseYAxis);
+						inp.MapAxisAction(MyActions.Turn, Input.MoveAxis.MouseXAxis);
+					}
+					else if(act.mAction.Equals(MyActions.ToggleMouseLookOff))
+					{
+						gd.SetCapture(false);
+
+						inp.UnMapAxisAction(MyActions.Pitch, Input.MoveAxis.MouseYAxis);
+						inp.UnMapAxisAction(MyActions.Turn, Input.MoveAxis.MouseXAxis);
+					}
+				}
+			}
+			return	actions;
 		}
 	}
 }
