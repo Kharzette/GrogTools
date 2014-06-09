@@ -58,15 +58,21 @@ namespace ParticleEdit
 			yaw		=MathUtil.DegreesToRadians(yaw);
 			pitch	=MathUtil.DegreesToRadians(pitch);
 
-			mPB.CreateEmitter(mPF.EmTexture, mPF.PartColor,
+			Vector4	colorMin	=new Vector4(mPF.ColorVelocityMin.X,
+				mPF.ColorVelocityMin.Y, mPF.ColorVelocityMin.Z, mPF.AlphaMin);
+
+			Vector4	colorMax	=new Vector4(mPF.ColorVelocityMax.X,
+				mPF.ColorVelocityMax.Y, mPF.ColorVelocityMax.Z, mPF.AlphaMax);
+
+			mPB.CreateEmitter(mPF.EmTexture, mPF.EMStartColor,
 				mPF.EmShape, mPF.EmShapeSize,
 				mPF.MaxParts, Vector3.Zero,
 				mPF.GravYaw, mPF.GravPitch, mPF.GravStrength,
-				mPF.StartingSize, mPF.StartingAlpha, mPF.EmitMS,
+				mPF.StartingSize, mPF.EmitMS,
 				mPF.SpinMin, mPF.SpinMax, mPF.VelMin, mPF.VelMax,
-				mPF.SizeMin, mPF.SizeMax, mPF.AlphaMin,
-				mPF.AlphaMax, mPF.LifeMin, mPF.LifeMax,
-				mPF.EMSortPriority);
+				mPF.SizeMin, mPF.SizeMax,
+				colorMin, colorMax,
+				mPF.LifeMin, mPF.LifeMax);
 
 			UpdateListView();
 		}
@@ -128,8 +134,6 @@ namespace ParticleEdit
 			}
 
 			mPF.UpdateEmitter(em);
-
-			mPB.SetColorByIndex(mCurSelection, mPF.PartColor);
 		}
 
 
@@ -197,7 +201,7 @@ namespace ParticleEdit
 			}
 
 			mPF.UpdateControls(mPB.GetEmitterByIndex(index),
-				mPB.GetColorByIndex(index), mPB.GetTextureByIndex(index));
+				mPB.GetTextureByIndex(index));
 		}
 
 

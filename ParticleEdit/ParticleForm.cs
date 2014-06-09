@@ -40,7 +40,7 @@ namespace ParticleEdit
 
 			mMats	=mats;
 
-			ColorPanel.BackColor	=mCurrentColor;
+			StartColor.BackColor	=mCurrentColor;
 
 			Array	shapeVals	=Enum.GetValues(typeof(ParticleLib.Emitter.Shapes));
 
@@ -134,6 +134,44 @@ namespace ParticleEdit
 			{
 				Action<NumericUpDown>	upVal	=numer => numer.Value = (decimal)value;
 				SharedForms.FormExtensions.Invoke(EmitPerMS, upVal);
+			}
+		}
+
+		public Vector3 ColorVelocityMin
+		{
+			get
+			{
+ 				return	new Vector3((float)RedVelocityMin.Value / 10000f,
+					(float)GreenVelocityMin.Value / 10000f,
+					(float)BlueVelocityMin.Value / 10000f);
+			}
+			set
+			{
+				Action<NumericUpDown>	upVal	=numer => numer.Value = (decimal)(value.X * 10000f);
+				SharedForms.FormExtensions.Invoke(RedVelocityMin, upVal);
+				upVal	=numer => numer.Value = (decimal)(value.Y * 10000f);
+				SharedForms.FormExtensions.Invoke(GreenVelocityMin, upVal);
+				upVal	=numer => numer.Value = (decimal)(value.Z * 10000f);
+				SharedForms.FormExtensions.Invoke(BlueVelocityMin, upVal);
+			}
+		}
+
+		public Vector3 ColorVelocityMax
+		{
+			get
+			{
+ 				return	new Vector3((float)RedVelocityMax.Value / 10000f,
+					(float)GreenVelocityMax.Value / 10000f,
+					(float)BlueVelocityMax.Value / 10000f);
+			}
+			set
+			{
+				Action<NumericUpDown>	upVal	=numer => numer.Value = (decimal)(value.X * 10000f);
+				SharedForms.FormExtensions.Invoke(RedVelocityMax, upVal);
+				upVal	=numer => numer.Value = (decimal)(value.Y * 10000f);
+				SharedForms.FormExtensions.Invoke(GreenVelocityMax, upVal);
+				upVal	=numer => numer.Value = (decimal)(value.Z * 10000f);
+				SharedForms.FormExtensions.Invoke(BlueVelocityMax, upVal);
 			}
 		}
 
@@ -267,7 +305,7 @@ namespace ParticleEdit
 			}
 		}
 
-		public Vector4 PartColor
+		public Vector4 EMStartColor
 		{
 			get { return Misc.ARGBToVector4(mCurrentColor.ToArgb()); }
 			set
@@ -275,17 +313,7 @@ namespace ParticleEdit
 				mCurrentColor	=Color.FromArgb(Misc.Vector4ToARGB(value));
 
 				Action<Panel>	upVal	=pan => pan.BackColor = mCurrentColor;
-				SharedForms.FormExtensions.Invoke(ColorPanel, upVal);
-			}
-		}
-
-		public int EMSortPriority
-		{
-			get { return (int)SortPriority.Value; }
-			set
-			{
-				Action<NumericUpDown>	upVal	=numer => numer.Value = value;
-				SharedForms.FormExtensions.Invoke(SortPriority, upVal);
+				SharedForms.FormExtensions.Invoke(StartColor, upVal);
 			}
 		}
 
@@ -304,7 +332,7 @@ namespace ParticleEdit
 			if(dr == System.Windows.Forms.DialogResult.OK)
 			{
 				mCurrentColor			=mColorPicker.Color;
-				ColorPanel.BackColor	=mCurrentColor;
+				StartColor.BackColor	=mCurrentColor;
 			}
 
 			Misc.SafeInvoke(eValueChanged, null);
@@ -314,7 +342,8 @@ namespace ParticleEdit
 		internal void UpdateEmitter(ParticleLib.Emitter em)
 		{
 			em.mStartSize				=StartingSize;
-			em.mStartAlpha				=StartingAlpha;
+			em.mStartColor				=EMStartColor;
+			em.mStartColor.W			=StartingAlpha;
 			em.mEmitMS					=EmitMS;
 			em.mRotationalVelocityMin	=SpinMin;
 			em.mRotationalVelocityMax	=SpinMax;
@@ -322,8 +351,6 @@ namespace ParticleEdit
 			em.mVelocityMax				=VelMax;
 			em.mSizeVelocityMin			=SizeMin;
 			em.mSizeVelocityMax			=SizeMax;
-			em.mAlphaVelocityMin		=AlphaMin;
-			em.mAlphaVelocityMax		=AlphaMax;
 			em.mLifeMin					=LifeMin;
 			em.mLifeMax					=LifeMax;
 			em.mGravityYaw				=GravYaw;
@@ -333,11 +360,18 @@ namespace ParticleEdit
 			em.mShape					=EmShape;
 			em.mShapeSize				=EmShapeSize;
 
+			em.mColorVelocityMin		=new Vector4(
+				ColorVelocityMin.X, ColorVelocityMin.Y, ColorVelocityMin.Z,
+				AlphaMin);
+			em.mColorVelocityMax		=new Vector4(
+				ColorVelocityMax.X, ColorVelocityMax.Y, ColorVelocityMax.Z,
+				AlphaMax);
+
 			em.UpdateGravity();
 		}
 
 
-		internal void UpdateControls(ParticleLib.Emitter em, Vector4 color, string tex)
+		internal void UpdateControls(ParticleLib.Emitter em, string tex)
 		{
 			if(mbUpdating)
 			{
@@ -346,25 +380,30 @@ namespace ParticleEdit
 
 			mbUpdating	=true;
 
-			StartingSize	=em.mStartSize;
-			StartingAlpha	=em.mStartAlpha;
-			EmitMS			=em.mEmitMS;
-			SpinMin			=em.mRotationalVelocityMin;
-			SpinMax			=em.mRotationalVelocityMax;
-			VelMin			=em.mVelocityMin;
-			VelMax			=em.mVelocityMax;
-			SizeMin			=em.mSizeVelocityMin;
-			SizeMax			=em.mSizeVelocityMax;
-			AlphaMin		=em.mAlphaVelocityMin;
-			AlphaMax		=em.mAlphaVelocityMax;
-			LifeMin			=em.mLifeMin;
-			LifeMax			=em.mLifeMax;
-			GravYaw			=em.mGravityYaw;
-			GravPitch		=em.mGravityPitch;
-			GravStrength	=em.mGravityStrength;
-			PartColor		=color;
-			EmShape			=em.mShape;
-			EmShapeSize		=em.mShapeSize;
+			StartingSize		=em.mStartSize;
+			StartingAlpha		=em.mStartColor.W;
+			EmitMS				=em.mEmitMS;
+			SpinMin				=em.mRotationalVelocityMin;
+			SpinMax				=em.mRotationalVelocityMax;
+			VelMin				=em.mVelocityMin;
+			VelMax				=em.mVelocityMax;
+			SizeMin				=em.mSizeVelocityMin;
+			SizeMax				=em.mSizeVelocityMax;
+			AlphaMin			=em.mColorVelocityMin.W;
+			AlphaMax			=em.mColorVelocityMax.W;
+			LifeMin				=em.mLifeMin;
+			LifeMax				=em.mLifeMax;
+			GravYaw				=em.mGravityYaw;
+			GravPitch			=em.mGravityPitch;
+			GravStrength		=em.mGravityStrength;
+			EMStartColor		=em.mStartColor;
+			EmShape				=em.mShape;
+			EmShapeSize			=em.mShapeSize;
+
+			ColorVelocityMin	=new Vector3(
+				em.mColorVelocityMin.X, em.mColorVelocityMin.Y, em.mColorVelocityMin.Z);
+			ColorVelocityMax	=new Vector3(
+				em.mColorVelocityMax.X, em.mColorVelocityMax.Y, em.mColorVelocityMax.Z);
 
 			foreach(string pt in mParticleTextures)
 			{
