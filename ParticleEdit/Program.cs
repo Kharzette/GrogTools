@@ -8,6 +8,7 @@ using InputLib;
 using MaterialLib;
 using UtilityLib;
 using ParticleLib;
+using MeshLib;
 
 using SharpDX;
 using SharpDX.Direct3D;
@@ -50,7 +51,8 @@ namespace ParticleEdit
 
 			gd.RendForm.Location	=Settings.Default.MainWindowPos;
 
-			MatLib	matLib		=new MatLib(gd, "C:/Games/CurrentGame", true);
+			MatLib		matLib	=new MatLib(gd, "C:/Games/CurrentGame", true);
+			CommonPrims	cprims	=new CommonPrims(gd, "C:/Games/CurrentGame");
 
 			matLib.InitCelShading(1);
 			matLib.GenerateCelTexturePreset(gd.GD,
@@ -117,6 +119,8 @@ namespace ParticleEdit
 				matLib.SetParameterForAll("mEyePos", gd.GCam.Position);
 				matLib.SetParameterForAll("mProjection", gd.GCam.Projection);
 
+				cprims.Update(gd.GCam, lightDir);
+
 				//Clear views
 				gd.ClearViews();
 
@@ -125,6 +129,8 @@ namespace ParticleEdit
 				float	msFreq	=Stopwatch.Frequency / 1000f;
 
 				float	msDelta	=((float)delta / msFreq);
+
+				cprims.DrawAxis(gd.DC);
 
 				partEdit.Update(msDelta);
 				partEdit.Draw();

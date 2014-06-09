@@ -104,6 +104,10 @@
       <Project>{CABCC4D8-8F21-4728-B317-28D5B500BEFB}</Project>
       <Name>MaterialLib</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Libs\MeshLib\MeshLib.csproj">
+      <Project>{D28619D5-2D2D-40A1-AC3C-3509B7B89033}</Project>
+      <Name>MeshLib</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Libs\ParticleLib\ParticleLib.csproj">
       <Project>{64751FBC-17AF-48E2-9C09-912C6CA6E9C6}</Project>
       <Name>ParticleLib</Name>

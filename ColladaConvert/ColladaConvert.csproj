@@ -64,7 +64,6 @@
   <ItemGroup>
     <Compile Include="Animation.cs" />
     <Compile Include="collada_schema_1_4.cs" />
-    <Compile Include="ExtraPrims.cs" />
     <Compile Include="Forms\AnimForm.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -59,6 +59,7 @@ namespace ColladaConvert
 			matLib.InitCelShading(1);
 			matLib.GenerateCelTexturePreset(gd.GD,
 				gd.GD.FeatureLevel == FeatureLevel.Level_9_3, false, 0);
+			matLib.SetCelTexture(0);
 
 			RenderTargetView	[]backBuf	=new RenderTargetView[1];
 			DepthStencilView	backDepth;
@@ -71,7 +72,7 @@ namespace ColladaConvert
 			PlayerSteering	pSteering	=SetUpSteering();
 			Input			inp			=SetUpInput();
 			Random			rand		=new Random();
-			ExtraPrims		extraPrims	=new ExtraPrims(gd, "C:\\Games\\CurrentGame");
+			CommonPrims		comPrims	=new CommonPrims(gd, "C:\\Games\\CurrentGame");
 
 			int	resx	=gd.RendForm.ClientRectangle.Width;
 			int	resy	=gd.RendForm.ClientRectangle.Height;
@@ -86,7 +87,7 @@ namespace ColladaConvert
 			post.MakePostTarget(gd, "Bloom1", resx/2, resy/2, Format.R8G8B8A8_UNorm);
 			post.MakePostTarget(gd, "Bloom2", resx/2, resy/2, Format.R8G8B8A8_UNorm);
 
-			AnimForm	ss	=SetUpForms(gd.GD, matLib, extraPrims);
+			AnimForm	ss	=SetUpForms(gd.GD, matLib, comPrims);
 
 			Vector3	pos				=Vector3.One * 5f;
 			Vector3	lightDir		=-Vector3.UnitY;
@@ -155,9 +156,7 @@ namespace ColladaConvert
 				matLib.SetParameterForAll("mEyePos", gd.GCam.Position);
 				matLib.SetParameterForAll("mProjection", gd.GCam.Projection);
 
-				extraPrims.Update(gd.GCam, lightDir);
-
-				matLib.SetCelTexture(0);
+				comPrims.Update(gd.GCam, lightDir);
 
 				//Clear views
 				gd.ClearViews();
@@ -183,17 +182,17 @@ namespace ColladaConvert
 
 				if(ss.GetDrawAxis())
 				{
-					extraPrims.DrawAxis(gd.DC);
+					comPrims.DrawAxis(gd.DC);
 				}
 
 				if(ss.GetDrawBox())
 				{
-					extraPrims.DrawBox(gd.DC);
+					comPrims.DrawBox(gd.DC);
 				}
 
 				if(ss.GetDrawSphere())
 				{
-					extraPrims.DrawSphere(gd.DC);
+					comPrims.DrawSphere(gd.DC);
 				}
 
 				post.SetTargets(gd, "Outline", "null");
@@ -237,7 +236,7 @@ namespace ColladaConvert
 			gd.ReleaseAll();
 		}
 
-		static AnimForm SetUpForms(Device gd, MatLib matLib, ExtraPrims ep)
+		static AnimForm SetUpForms(Device gd, MatLib matLib, CommonPrims ep)
 		{
 			MeshLib.AnimLib	animLib	=new MeshLib.AnimLib();
 			AnimForm		ss		=new AnimForm(gd, matLib, animLib);
