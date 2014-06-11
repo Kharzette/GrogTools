@@ -57,6 +57,8 @@
 			this.VelocityMin = new System.Windows.Forms.NumericUpDown();
 			this.label2 = new System.Windows.Forms.Label();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this.label17 = new System.Windows.Forms.Label();
+			this.VelocityCap = new System.Windows.Forms.NumericUpDown();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
 			this.GravityPosition = new System.Windows.Forms.TextBox();
 			this.label19 = new System.Windows.Forms.Label();
@@ -99,6 +101,7 @@
 			((System.ComponentModel.ISupportInitialize)(this.SpinVelocityMax)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.VelocityMin)).BeginInit();
 			this.groupBox2.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.VelocityCap)).BeginInit();
 			this.groupBox3.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.GravityStrength)).BeginInit();
 			this.ColorGroup.SuspendLayout();
@@ -169,7 +172,7 @@
 			this.groupBox1.Controls.Add(this.label1);
 			this.groupBox1.Location = new System.Drawing.Point(12, 12);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(146, 213);
+			this.groupBox1.Size = new System.Drawing.Size(146, 229);
 			this.groupBox1.TabIndex = 2;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Emitter Details";
@@ -383,7 +386,7 @@
             0,
             0,
             131072});
-			this.SizeVelocityMin.Location = new System.Drawing.Point(6, 71);
+			this.SizeVelocityMin.Location = new System.Drawing.Point(6, 97);
 			this.SizeVelocityMin.Minimum = new decimal(new int[] {
             100,
             0,
@@ -407,7 +410,7 @@
             0,
             0,
             131072});
-			this.SizeVelocityMax.Location = new System.Drawing.Point(6, 97);
+			this.SizeVelocityMax.Location = new System.Drawing.Point(6, 123);
 			this.SizeVelocityMax.Minimum = new decimal(new int[] {
             100,
             0,
@@ -431,7 +434,7 @@
             0,
             0,
             131072});
-			this.SpinVelocityMin.Location = new System.Drawing.Point(6, 123);
+			this.SpinVelocityMin.Location = new System.Drawing.Point(6, 149);
 			this.SpinVelocityMin.Minimum = new decimal(new int[] {
             100,
             0,
@@ -450,7 +453,7 @@
             0,
             0,
             131072});
-			this.SpinVelocityMax.Location = new System.Drawing.Point(6, 149);
+			this.SpinVelocityMax.Location = new System.Drawing.Point(6, 175);
 			this.SpinVelocityMax.Minimum = new decimal(new int[] {
             100,
             0,
@@ -463,7 +466,7 @@
 			// 
 			// CreateEmitter
 			// 
-			this.CreateEmitter.Location = new System.Drawing.Point(341, 276);
+			this.CreateEmitter.Location = new System.Drawing.Point(341, 321);
 			this.CreateEmitter.Name = "CreateEmitter";
 			this.CreateEmitter.Size = new System.Drawing.Size(75, 29);
 			this.CreateEmitter.TabIndex = 26;
@@ -474,7 +477,7 @@
 			// label6
 			// 
 			this.label6.AutoSize = true;
-			this.label6.Location = new System.Drawing.Point(70, 73);
+			this.label6.Location = new System.Drawing.Point(70, 99);
 			this.label6.Name = "label6";
 			this.label6.Size = new System.Drawing.Size(87, 13);
 			this.label6.TabIndex = 19;
@@ -483,7 +486,7 @@
 			// label7
 			// 
 			this.label7.AutoSize = true;
-			this.label7.Location = new System.Drawing.Point(70, 99);
+			this.label7.Location = new System.Drawing.Point(70, 125);
 			this.label7.Name = "label7";
 			this.label7.Size = new System.Drawing.Size(90, 13);
 			this.label7.TabIndex = 17;
@@ -492,7 +495,7 @@
 			// label8
 			// 
 			this.label8.AutoSize = true;
-			this.label8.Location = new System.Drawing.Point(70, 125);
+			this.label8.Location = new System.Drawing.Point(70, 151);
 			this.label8.Name = "label8";
 			this.label8.Size = new System.Drawing.Size(88, 13);
 			this.label8.TabIndex = 15;
@@ -501,7 +504,7 @@
 			// label9
 			// 
 			this.label9.AutoSize = true;
-			this.label9.Location = new System.Drawing.Point(70, 151);
+			this.label9.Location = new System.Drawing.Point(70, 177);
 			this.label9.Name = "label9";
 			this.label9.Size = new System.Drawing.Size(91, 13);
 			this.label9.TabIndex = 13;
@@ -551,8 +554,10 @@
 			// 
 			// groupBox2
 			// 
+			this.groupBox2.Controls.Add(this.label17);
 			this.groupBox2.Controls.Add(this.label2);
 			this.groupBox2.Controls.Add(this.VelocityMax);
+			this.groupBox2.Controls.Add(this.VelocityCap);
 			this.groupBox2.Controls.Add(this.VelocityMin);
 			this.groupBox2.Controls.Add(this.SizeVelocityMin);
 			this.groupBox2.Controls.Add(this.label10);
@@ -565,10 +570,48 @@
 			this.groupBox2.Controls.Add(this.label6);
 			this.groupBox2.Location = new System.Drawing.Point(164, 12);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(171, 178);
+			this.groupBox2.Size = new System.Drawing.Size(171, 229);
 			this.groupBox2.TabIndex = 3;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Physical Velocities";
+			// 
+			// label17
+			// 
+			this.label17.AutoSize = true;
+			this.label17.Location = new System.Drawing.Point(70, 76);
+			this.label17.Name = "label17";
+			this.label17.Size = new System.Drawing.Size(66, 13);
+			this.label17.TabIndex = 21;
+			this.label17.Text = "Velocity Cap";
+			// 
+			// VelocityCap
+			// 
+			this.VelocityCap.DecimalPlaces = 3;
+			this.VelocityCap.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            196608});
+			this.VelocityCap.Location = new System.Drawing.Point(6, 71);
+			this.VelocityCap.Maximum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+			this.VelocityCap.Minimum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            -2147483648});
+			this.VelocityCap.Name = "VelocityCap";
+			this.VelocityCap.Size = new System.Drawing.Size(58, 20);
+			this.VelocityCap.TabIndex = 20;
+			this.VelocityCap.Value = new decimal(new int[] {
+            4,
+            0,
+            0,
+            131072});
+			this.VelocityCap.ValueChanged += new System.EventHandler(this.OnValueChanged);
 			// 
 			// groupBox3
 			// 
@@ -576,7 +619,7 @@
 			this.groupBox3.Controls.Add(this.label19);
 			this.groupBox3.Controls.Add(this.GravityStrength);
 			this.groupBox3.Controls.Add(this.label16);
-			this.groupBox3.Location = new System.Drawing.Point(12, 231);
+			this.groupBox3.Location = new System.Drawing.Point(12, 247);
 			this.groupBox3.Name = "groupBox3";
 			this.groupBox3.Size = new System.Drawing.Size(179, 74);
 			this.groupBox3.TabIndex = 29;
@@ -633,7 +676,7 @@
 			this.ColorGroup.Controls.Add(this.label4);
 			this.ColorGroup.Controls.Add(this.ShapeSize);
 			this.ColorGroup.Controls.Add(this.Shape);
-			this.ColorGroup.Location = new System.Drawing.Point(197, 196);
+			this.ColorGroup.Location = new System.Drawing.Point(197, 247);
 			this.ColorGroup.Name = "ColorGroup";
 			this.ColorGroup.Size = new System.Drawing.Size(138, 103);
 			this.ColorGroup.TabIndex = 30;
@@ -705,10 +748,10 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.EmitterListView.HideSelection = false;
-			this.EmitterListView.Location = new System.Drawing.Point(12, 311);
+			this.EmitterListView.Location = new System.Drawing.Point(12, 356);
 			this.EmitterListView.MultiSelect = false;
 			this.EmitterListView.Name = "EmitterListView";
-			this.EmitterListView.Size = new System.Drawing.Size(500, 107);
+			this.EmitterListView.Size = new System.Drawing.Size(500, 104);
 			this.EmitterListView.TabIndex = 27;
 			this.EmitterListView.UseCompatibleStateImageBehavior = false;
 			this.EmitterListView.View = System.Windows.Forms.View.List;
@@ -968,7 +1011,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(524, 430);
+			this.ClientSize = new System.Drawing.Size(524, 472);
 			this.ControlBox = false;
 			this.Controls.Add(this.groupBox4);
 			this.Controls.Add(this.EmitterListView);
@@ -995,6 +1038,7 @@
 			((System.ComponentModel.ISupportInitialize)(this.VelocityMin)).EndInit();
 			this.groupBox2.ResumeLayout(false);
 			this.groupBox2.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.VelocityCap)).EndInit();
 			this.groupBox3.ResumeLayout(false);
 			this.groupBox3.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.GravityStrength)).EndInit();
@@ -1074,5 +1118,7 @@
 		private System.Windows.Forms.Label label27;
 		private System.Windows.Forms.Label label28;
 		private System.Windows.Forms.TextBox GravityPosition;
+		private System.Windows.Forms.Label label17;
+		private System.Windows.Forms.NumericUpDown VelocityCap;
 	}
 }

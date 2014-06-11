@@ -215,6 +215,16 @@ namespace ParticleEdit
 			}
 		}
 
+		public float VelCap
+		{
+			get { return (float)VelocityCap.Value; }
+			set
+			{
+				Action<NumericUpDown>	upVal	=numer => numer.Value = (decimal)(value);
+				SharedForms.FormExtensions.Invoke(VelocityCap, upVal);
+			}
+		}
+
 		public float SizeMin
 		{
 			get { return (float)SizeVelocityMin.Value / 1000f; }
@@ -340,6 +350,7 @@ namespace ParticleEdit
 			em.mRotationalVelocityMax	=SpinMax;
 			em.mVelocityMin				=VelMin;
 			em.mVelocityMax				=VelMax;
+			em.mVelocityCap				=VelCap;
 			em.mSizeVelocityMin			=SizeMin;
 			em.mSizeVelocityMax			=SizeMax;
 			em.mLifeMin					=LifeMin;
@@ -375,6 +386,7 @@ namespace ParticleEdit
 			SpinMax				=em.mRotationalVelocityMax;
 			VelMin				=em.mVelocityMin;
 			VelMax				=em.mVelocityMax;
+			VelCap				=em.mVelocityCap;
 			SizeMin				=em.mSizeVelocityMin;
 			SizeMax				=em.mSizeVelocityMax;
 			AlphaMin			=em.mColorVelocityMin.W;

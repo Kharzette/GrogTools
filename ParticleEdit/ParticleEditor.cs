@@ -62,7 +62,8 @@ namespace ParticleEdit
 				mPF.MaxParts, Vector3.Zero,
 				mPF.GravPos, mPF.GravStrength,
 				mPF.StartingSize, mPF.EmitMS,
-				mPF.SpinMin, mPF.SpinMax, mPF.VelMin, mPF.VelMax,
+				mPF.SpinMin, mPF.SpinMax,
+				mPF.VelMin, mPF.VelMax, mPF.VelCap,
 				mPF.SizeMin, mPF.SizeMax,
 				colorMin, colorMax,
 				mPF.LifeMin, mPF.LifeMax);
