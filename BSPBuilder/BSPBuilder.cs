@@ -727,7 +727,26 @@ namespace BSPBuilder
 			List<string>	toIgnore	=new List<string>();
 			toIgnore.Add("mSpecColor");
 			toIgnore.Add("mSpecPower");
-			toIgnore.Add("mDanglyForce");
+			toIgnore.Add("mSolidColour");
+
+			//renderstates are never used as a variable
+			toIgnore.Add("AlphaBlending");
+			toIgnore.Add("NoBlending");
+			toIgnore.Add("ShadowBlending");
+			toIgnore.Add("EnableDepth");
+			toIgnore.Add("DisableDepth");
+			toIgnore.Add("DisableDepthWrite");
+			toIgnore.Add("DisableDepthTest");
+			toIgnore.Add("NoCull");
+			toIgnore.Add("LinearClamp");
+			toIgnore.Add("LinearWrap");
+			toIgnore.Add("PointClamp");
+			toIgnore.Add("PointWrap");
+			toIgnore.Add("LinearClampCube");
+			toIgnore.Add("LinearWrapCube");
+			toIgnore.Add("PointClampCube");
+			toIgnore.Add("PointWrapCube");
+			toIgnore.Add("PointClamp1D");
 
 			//common hidey stuff
 			List<string>	toHide	=new List<string>();
@@ -738,17 +757,15 @@ namespace BSPBuilder
 			toHide.Add("mEyePos");
 			toHide.Add("mCelTable");
 			toHide.Add("mShadowTexture");
+			toHide.Add("mShadowCube");
 			toHide.Add("mShadowLightPos");
 			toHide.Add("mbDirectional");
 			toHide.Add("mAniIntensities");
-			toHide.Add("mWarpFactor");
-			toHide.Add("mDanglyForce");
 			toHide.Add("mDynLights");
 			toHide.Add("mShadowAtten");
-			toHide.Add("mYRangeMax");
-			toHide.Add("mYRangeMin");
 			toHide.Add("mSpecColor");	//eventually want these
 			toHide.Add("mSpecPower");	//for future
+			toHide.Add("mMaterialID");	//idkeeper takes care of this
 
 			//hide stuff that the user doesn't care about
 			//these are for all indoormesh materials
@@ -783,6 +800,7 @@ namespace BSPBuilder
 					matHides.Add("mSkyGradient0");
 					matHides.Add("mSkyGradient1");
 					matHides.Add("mEyePos");
+					matHides.Add("mLightMap");	//autohandled
 				}
 				else if(tech == "Sky")
 				{
@@ -804,8 +822,8 @@ namespace BSPBuilder
 				matHides.AddRange(toHide);
 				matIgnores.AddRange(toIgnore);
 
-				mMatLib.IgnoreMaterialVariables(m, toIgnore);
-				mMatLib.HideMaterialVariables(m, toHide);
+				mMatLib.IgnoreMaterialVariables(m, matIgnores);
+				mMatLib.HideMaterialVariables(m, matHides);
 			}
 		}
 	}

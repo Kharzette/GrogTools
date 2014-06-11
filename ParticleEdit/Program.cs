@@ -51,8 +51,14 @@ namespace ParticleEdit
 
 			gd.RendForm.Location	=Settings.Default.MainWindowPos;
 
-			MatLib		matLib	=new MatLib(gd, "C:/Games/CurrentGame", true);
-			CommonPrims	cprims	=new CommonPrims(gd, "C:/Games/CurrentGame");
+#if DEBUG
+			string	rootDir	="C:\\Games\\CurrentGame";
+#else
+			string	rootDir	=AppDomain.CurrentDomain.BaseDirectory;
+#endif
+
+			MatLib		matLib	=new MatLib(gd, rootDir, true);
+			CommonPrims	cprims	=new CommonPrims(gd, rootDir);
 
 			matLib.InitCelShading(1);
 			matLib.GenerateCelTexturePreset(gd.GD,
