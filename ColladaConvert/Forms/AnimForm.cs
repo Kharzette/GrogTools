@@ -119,7 +119,7 @@ namespace ColladaConvert
 				return;
 			}
 
-			mAnimLib.ReadFromFile(mOFD.FileName, true);
+			mAnimLib.ReadFromFile(mOFD.FileName);
 
 			Misc.SafeInvoke(eSkeletonChanged, mAnimLib.GetSkeleton());
 
