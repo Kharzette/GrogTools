@@ -54,7 +54,8 @@ namespace ColladaConvert
 
 			gd.RendForm.Location	=Settings.Default.MainWindowPos;
 			
-			MatLib	matLib		=new MatLib(gd, "C:\\Games\\CurrentGame", true);
+			StuffKeeper	sk		=new StuffKeeper(gd, "C:\\Games\\CurrentGame");
+			MatLib		matLib	=new MatLib(gd, sk);
 
 			matLib.InitCelShading(1);
 			matLib.GenerateCelTexturePreset(gd.GD,
@@ -72,7 +73,7 @@ namespace ColladaConvert
 			PlayerSteering	pSteering	=SetUpSteering();
 			Input			inp			=SetUpInput();
 			Random			rand		=new Random();
-			CommonPrims		comPrims	=new CommonPrims(gd, "C:\\Games\\CurrentGame");
+			CommonPrims		comPrims	=new CommonPrims(gd, sk);
 
 			int	resx	=gd.RendForm.ClientRectangle.Width;
 			int	resy	=gd.RendForm.ClientRectangle.Height;
@@ -87,7 +88,7 @@ namespace ColladaConvert
 			post.MakePostTarget(gd, "Bloom1", resx/2, resy/2, Format.R8G8B8A8_UNorm);
 			post.MakePostTarget(gd, "Bloom2", resx/2, resy/2, Format.R8G8B8A8_UNorm);
 
-			AnimForm	ss	=SetUpForms(gd.GD, matLib, comPrims);
+			AnimForm	ss	=SetUpForms(gd.GD, matLib, sk, comPrims);
 
 			Vector3	pos				=Vector3.One * 5f;
 			Vector3	lightDir		=-Vector3.UnitY;
@@ -236,14 +237,14 @@ namespace ColladaConvert
 			gd.ReleaseAll();
 		}
 
-		static AnimForm SetUpForms(Device gd, MatLib matLib, CommonPrims ep)
+		static AnimForm SetUpForms(Device gd, MatLib matLib, StuffKeeper sk, CommonPrims ep)
 		{
 			MeshLib.AnimLib	animLib	=new MeshLib.AnimLib();
 			AnimForm		ss		=new AnimForm(gd, matLib, animLib);
 			StripElements	se		=new StripElements();
 			SkeletonEditor	skel	=new SkeletonEditor();
 
-			SharedForms.MaterialForm	matForm	=new SharedForms.MaterialForm(matLib);
+			SharedForms.MaterialForm	matForm	=new SharedForms.MaterialForm(matLib, sk);
 			SharedForms.CelTweakForm	celForm	=new SharedForms.CelTweakForm(gd, matLib);
 
 			//save positions

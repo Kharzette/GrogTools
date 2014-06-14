@@ -57,8 +57,9 @@ namespace ParticleEdit
 			string	rootDir	=AppDomain.CurrentDomain.BaseDirectory;
 #endif
 
-			MatLib		matLib	=new MatLib(gd, rootDir, true);
-			CommonPrims	cprims	=new CommonPrims(gd, rootDir);
+			StuffKeeper	sk		=new StuffKeeper(gd, rootDir);
+			MatLib		matLib	=new MatLib(gd, sk);
+			CommonPrims	cprims	=new CommonPrims(gd, sk);
 
 			matLib.InitCelShading(1);
 			matLib.GenerateCelTexturePreset(gd.GD,

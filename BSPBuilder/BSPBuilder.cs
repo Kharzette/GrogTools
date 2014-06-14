@@ -29,6 +29,7 @@ namespace BSPBuilder
 		VisMap					mVisMap;
 		IndoorMesh				mZoneDraw;
 		MatLib					mMatLib;
+		StuffKeeper				mSKeeper;
 		bool					mbWorking, mbFullBuilding;
 		string					mFullBuildFileName;
 		List<string>			mAllTextures	=new List<string>();
@@ -58,8 +59,10 @@ namespace BSPBuilder
 			mGD				=gd;
 			mGameRootDir	=gameRootDir;
 
-			mDebugDraw	=new DebugDraw(gd, gameRootDir);
-			mMatLib		=new MatLib(gd, gameRootDir, true);
+			mSKeeper	=new StuffKeeper(mGD, gameRootDir);
+
+			mDebugDraw	=new DebugDraw(gd, mSKeeper);
+			mMatLib		=new MatLib(gd, mSKeeper);
 
 			mMatLib.InitCelShading(1);
 			mMatLib.GenerateCelTexturePreset(gd.GD,
@@ -88,7 +91,7 @@ namespace BSPBuilder
 			mPost.MakePostTarget(gd, "Bloom1", resx/2, resy/2, Format.R8G8B8A8_UNorm);
 			mPost.MakePostTarget(gd, "Bloom2", resx/2, resy/2, Format.R8G8B8A8_UNorm);
 
-			mMatForm	=new SharedForms.MaterialForm(mMatLib);
+			mMatForm	=new SharedForms.MaterialForm(mMatLib, mSKeeper);
 			mCTForm		=new SharedForms.CelTweakForm(gd.GD, mMatLib);
 
 			SetFormPos(mBSPForm, "BSPFormPos");
@@ -241,8 +244,9 @@ namespace BSPBuilder
 		}
 
 
-		void RenderShadows(int shadIndex)
+		bool RenderShadows(int shadIndex)
 		{
+			return	false;
 		}
 
 
@@ -292,7 +296,7 @@ namespace BSPBuilder
 			mVisForm.EnableFileIO(false);
 
 			mVisMap	=new VisMap();
-			mVisMap.MaterialVisGBSPFile(fileName, mGD, mGameRootDir);
+			mVisMap.MaterialVisGBSPFile(fileName, mGD);
 
 			mZoneForm.EnableFileIO(true);
 			mBSPForm.EnableFileIO(true);
@@ -347,14 +351,14 @@ namespace BSPBuilder
 
 					mMap.MakeMaterials(mGD, mMatLib, fileName);
 
-					mZoneDraw.BuildLM(mGD, mGameRootDir, mZoneForm.GetLightAtlasSize(), mMap.BuildLMRenderData, mMap.GetPlanes());
-					mZoneDraw.BuildVLit(mGD, mGameRootDir, mMap.BuildVLitRenderData, mMap.GetPlanes());
-					mZoneDraw.BuildAlpha(mGD, mGameRootDir, mMap.BuildAlphaRenderData, mMap.GetPlanes());
-					mZoneDraw.BuildFullBright(mGD, mGameRootDir, mMap.BuildFullBrightRenderData, mMap.GetPlanes());
-					mZoneDraw.BuildMirror(mGD, mGameRootDir, mMap.BuildMirrorRenderData, mMap.GetPlanes());
-					mZoneDraw.BuildSky(mGD, mGameRootDir, mMap.BuildSkyRenderData, mMap.GetPlanes());
+					mZoneDraw.BuildLM(mGD, mSKeeper, mZoneForm.GetLightAtlasSize(), mMap.BuildLMRenderData, mMap.GetPlanes());
+					mZoneDraw.BuildVLit(mGD, mSKeeper, mMap.BuildVLitRenderData, mMap.GetPlanes());
+					mZoneDraw.BuildAlpha(mGD, mSKeeper, mMap.BuildAlphaRenderData, mMap.GetPlanes());
+					mZoneDraw.BuildFullBright(mGD, mSKeeper, mMap.BuildFullBrightRenderData, mMap.GetPlanes());
+					mZoneDraw.BuildMirror(mGD, mSKeeper, mMap.BuildMirrorRenderData, mMap.GetPlanes());
+					mZoneDraw.BuildSky(mGD, mSKeeper, mMap.BuildSkyRenderData, mMap.GetPlanes());
 
-					mZoneDraw.FinishAtlas(mGD);
+					mZoneDraw.FinishAtlas(mGD, mSKeeper);
 
 					mModelMats	=mMap.GetModelTransforms();
 
