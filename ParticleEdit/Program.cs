@@ -69,7 +69,7 @@ namespace ParticleEdit
 			PlayerSteering	pSteering	=SetUpSteering();
 			Input			inp			=SetUpInput();
 			Random			rand		=new Random();
-			ParticleForm	partForm	=SetUpForms(gd.GD, matLib);
+			ParticleForm	partForm	=SetUpForms(gd.GD, matLib, sk);
 			ParticleEditor	partEdit	=new ParticleEditor(gd, partForm, matLib);
 
 			Vector3	pos			=Vector3.One * 5f;
@@ -120,9 +120,9 @@ namespace ParticleEdit
 		}
 
 		
-		static ParticleForm SetUpForms(Device gd, MatLib matLib)
+		static ParticleForm SetUpForms(Device gd, MatLib matLib, StuffKeeper sk)
 		{
-			ParticleForm	partForm	=new ParticleForm(matLib);
+			ParticleForm	partForm	=new ParticleForm(matLib, sk);
 
 			//save positions
 			partForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",

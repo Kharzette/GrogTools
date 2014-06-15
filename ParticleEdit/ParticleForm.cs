@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.Collections.Generic;
 using SharpDX;
 using UtilityLib;
+using MaterialLib;
 
 using Color		=System.Drawing.Color;
 using MatLib	=MaterialLib.MaterialLib;
@@ -23,7 +24,8 @@ namespace ParticleEdit
 
 		List<string>	mParticleTextures	=new List<string>();
 
-		MatLib	mMats;
+		MatLib		mMats;
+		StuffKeeper	mSKeeper;
 
 		internal event EventHandler	eCreate;
 		internal event EventHandler	eItemNuked;
@@ -34,11 +36,12 @@ namespace ParticleEdit
 		internal event EventHandler	eTextureChanged;
 
 
-		internal ParticleForm(MatLib mats) : base()
+		internal ParticleForm(MatLib mats, StuffKeeper sk) : base()
 		{
 			InitializeComponent();
 
-			mMats	=mats;
+			mMats		=mats;
+			mSKeeper	=sk;
 
 			StartColor.BackColor	=mCurrentColor;
 
@@ -52,10 +55,18 @@ namespace ParticleEdit
 			}
 			Shape.SelectedIndex	=0;
 
-			mParticleTextures	=mats.GetParticleTextures();
-			if(mParticleTextures.Count <= 0)
+			List<string>	texs	=sk.GetTexture2DList();
+			if(texs.Count <= 0)
 			{
 				return;
+			}
+
+			foreach(string tex in texs)
+			{
+				if(tex.StartsWith("Particles"))
+				{
+					mParticleTextures.Add(tex);
+				}
 			}
 
 			foreach(string tex in mParticleTextures)
