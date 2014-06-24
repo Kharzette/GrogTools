@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using System.IO;
 using MeshLib;
 using UtilityLib;
+using SharedForms;
 
 using SharpDX;
 using SharpDX.DXGI;
@@ -60,6 +61,13 @@ namespace ColladaConvert
 			mGD			=gd;
 			mMatLib		=mats;
 			mAnimLib	=alib;
+
+			AnimList.Columns.Add("Name");
+			AnimList.Columns.Add("Total Time");
+			AnimList.Columns.Add("Start Time");
+			AnimList.Columns.Add("Looping");
+			AnimList.Columns.Add("Ping Pong");
+			AnimList.Columns.Add("Num Keys");
 		}
 
 
@@ -89,163 +97,6 @@ namespace ColladaConvert
 			fs.Close();
 
 			return	ret;
-		}
-
-
-		void OnSaveAnimLib(object sender, EventArgs e)
-		{
-			mSFD.DefaultExt		="*.AnimLib";
-			mSFD.Filter			="Animation library files (*.AnimLib)|*.AnimLib|All files (*.*)|*.*";
-			DialogResult	dr	=mSFD.ShowDialog();
-
-			if(dr == DialogResult.Cancel)
-			{
-				return;
-			}
-
-			mAnimLib.SaveToFile(mSFD.FileName);
-		}
-
-
-		void OnLoadAnimLib(object sender, EventArgs e)
-		{
-			mOFD.DefaultExt		="*.AnimLib";
-			mOFD.Filter			="Animation library files (*.AnimLib)|*.AnimLib|All files (*.*)|*.*";
-			mOFD.Multiselect	=false;
-			DialogResult	dr	=mOFD.ShowDialog();
-
-			if(dr == DialogResult.Cancel)
-			{
-				return;
-			}
-
-			mAnimLib.ReadFromFile(mOFD.FileName);
-
-			Misc.SafeInvoke(eSkeletonChanged, mAnimLib.GetSkeleton());
-
-			AnimGrid.DataSource	=new BindingList<Anim>(mAnimLib.GetAnims());
-		}
-
-
-		void OnLoadCharacter(object sender, EventArgs e)
-		{
-			mOFD.DefaultExt		="*.Character";
-			mOFD.Filter			="Character files (*.Character)|*.Character|All files (*.*)|*.*";
-			DialogResult	dr	=mOFD.ShowDialog();
-
-			if(dr == DialogResult.Cancel)
-			{
-				return;
-			}
-
-			mChar	=new Character(mAnimLib);
-			mChar.ReadFromFile(mOFD.FileName, mGD, true);
-
-			Misc.SafeInvoke(eMeshChanged, mChar);
-		}
-
-
-		void OnSaveCharacter(object sender, EventArgs e)
-		{
-			mSFD.DefaultExt		="*.Character";
-			mSFD.Filter			="Character files (*.Character)|*.Character|All files (*.*)|*.*";
-			DialogResult	dr	=mSFD.ShowDialog();
-
-			if(dr == DialogResult.Cancel)
-			{
-				return;
-			}
-
-			mChar.SaveToFile(mSFD.FileName);
-		}
-
-
-		void OnLoadStatic(object sender, EventArgs e)
-		{
-			mOFD.DefaultExt		="*.Static";
-			mOFD.Filter			="Static mesh files (*.Static)|*.Static|All files (*.*)|*.*";
-			DialogResult	dr	=mOFD.ShowDialog();
-
-			if(dr == DialogResult.Cancel)
-			{
-				return;
-			}
-
-			mStatic	=new StaticMesh();
-			mStatic.ReadFromFile(mOFD.FileName, mGD, true);
-
-			Misc.SafeInvoke(eMeshChanged, mStatic);
-		}
-
-
-		void OnSaveStatic(object sender, EventArgs e)
-		{
-			mSFD.DefaultExt		="*.Static";
-			mSFD.Filter			="Static mesh files (*.Static)|*.Static|All files (*.*)|*.*";
-			DialogResult	dr	=mSFD.ShowDialog();
-
-			if(dr == DialogResult.Cancel)
-			{
-				return;
-			}
-
-			mStatic.SaveToFile(mSFD.FileName);
-		}
-
-
-		void OnOpenStaticDAE(object sender, EventArgs e)
-		{
-			mOFD.DefaultExt		="*.dae";
-			mOFD.Filter			="DAE Collada files (*.dae)|*.dae|All files (*.*)|*.*";
-			mOFD.Multiselect	=false;
-			DialogResult	dr	=mOFD.ShowDialog();
-
-			if(dr == DialogResult.Cancel)
-			{
-				return;
-			}
-
-			mStatic	=LoadStatic(mOFD.FileName);
-
-			Misc.SafeInvoke(eMeshChanged, mStatic);
-		}
-
-
-		void OnLoadCharacterDAE(object sender, EventArgs e)
-		{
-			mOFD.DefaultExt		="*.dae";
-			mOFD.Filter			="DAE Collada files (*.dae)|*.dae|All files (*.*)|*.*";
-			mOFD.Multiselect	=false;
-			DialogResult	dr	=mOFD.ShowDialog();
-
-			if(dr == DialogResult.Cancel)
-			{
-				return;
-			}
-
-			mChar	=LoadCharacterDAE(mOFD.FileName, mAnimLib);
-
-			AnimGrid.DataSource	=new BindingList<Anim>(mAnimLib.GetAnims());
-
-			Misc.SafeInvoke(eMeshChanged, mChar);
-		}
-
-
-		void OnLoadAnimDAE(object sender, EventArgs e)
-		{
-			mOFD.DefaultExt		="*.dae";
-			mOFD.Filter			="DAE Collada files (*.dae)|*.dae|All files (*.*)|*.*";
-			mOFD.Multiselect	=false;
-			DialogResult	dr	=mOFD.ShowDialog();
-
-			if(dr == DialogResult.Cancel)
-			{
-				return;
-			}
-
-			LoadAnimDAE(mOFD.FileName, mAnimLib, CheckSkeleton.Checked);
-
-			AnimGrid.DataSource	=new BindingList<Anim>(mAnimLib.GetAnims());
 		}
 
 
@@ -1873,18 +1724,244 @@ namespace ColladaConvert
 		}
 
 
-		void OnAnimFormSelectionChanged(object sender, EventArgs e)
+		void SizeColumns(ListView lv)
 		{
-			if(AnimGrid.SelectedRows.Count == 1)
+			//set to header size first
+			Action<ListView>	autoResize	=lvar => lvar.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+			FormExtensions.Invoke(lv, autoResize);
+
+			List<int>	sizes	=new List<int>();
+			for(int i=0;i < lv.Columns.Count;i++)
 			{
-				Anim	anm	=AnimGrid.SelectedRows[0].DataBoundItem	as Anim;
-				if(anm != null)
-				{
-					mSelectedAnim	=anm.Name;
-					mAnimStartTime	=anm.StartTime;
-					mAnimEndTime	=anm.TotalTime + anm.StartTime;
-				}
+				Action<ListView>	addWidth	=lvar => sizes.Add(lvar.Columns[i].Width);
+				FormExtensions.Invoke(lv, addWidth);
 			}
+
+			for(int i=0;i < lv.Columns.Count;i++)
+			{
+				Action<ListView>	arHeader	=lvar => {
+					lvar.Columns[i].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+
+					if(lvar.Columns[i].Width < sizes[i])
+					{
+						lvar.Columns[i].AutoResize(ColumnHeaderAutoResizeStyle.HeaderSize);
+					}
+				};
+
+				FormExtensions.Invoke(lv, arHeader);
+			}
+		}
+
+
+		void RefreshAnimList()
+		{
+			Action<ListView>	clear	=lv => lv.Items.Clear();
+
+			FormExtensions.Invoke(AnimList, clear);
+
+			List<Anim>	anims	=mAnimLib.GetAnims();
+
+			foreach(Anim anm in anims)
+			{
+				Action<ListView>	addItem	=lv => lv.Items.Add(anm.Name);
+
+				FormExtensions.Invoke(AnimList, addItem);
+			}
+
+			for(int i=0;i < AnimList.Items.Count;i++)
+			{
+				Action<ListView>	tagAndSub	=lv =>
+				{
+					lv.Items[i].SubItems.Add(anims[i].TotalTime.ToString());
+					lv.Items[i].SubItems.Add(anims[i].StartTime.ToString());
+					lv.Items[i].SubItems.Add(anims[i].Looping.ToString());
+					lv.Items[i].SubItems.Add(anims[i].PingPong.ToString());
+					lv.Items[i].SubItems.Add(anims[i].NumKeyFrames.ToString());
+				};
+
+				FormExtensions.Invoke(AnimList, tagAndSub);
+			}
+
+			SizeColumns(AnimList);
+		}
+
+
+		#region FormEvents
+		void OnSaveAnimLib(object sender, EventArgs e)
+		{
+			mSFD.DefaultExt		="*.AnimLib";
+			mSFD.Filter			="Animation library files (*.AnimLib)|*.AnimLib|All files (*.*)|*.*";
+			DialogResult	dr	=mSFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			mAnimLib.SaveToFile(mSFD.FileName);
+		}
+
+
+		void OnLoadAnimLib(object sender, EventArgs e)
+		{
+			mOFD.DefaultExt		="*.AnimLib";
+			mOFD.Filter			="Animation library files (*.AnimLib)|*.AnimLib|All files (*.*)|*.*";
+			mOFD.Multiselect	=false;
+			DialogResult	dr	=mOFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			mAnimLib.ReadFromFile(mOFD.FileName);
+
+			Misc.SafeInvoke(eSkeletonChanged, mAnimLib.GetSkeleton());
+
+			RefreshAnimList();
+		}
+
+
+		void OnLoadCharacter(object sender, EventArgs e)
+		{
+			mOFD.DefaultExt		="*.Character";
+			mOFD.Filter			="Character files (*.Character)|*.Character|All files (*.*)|*.*";
+			DialogResult	dr	=mOFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			mChar	=new Character(mAnimLib);
+			mChar.ReadFromFile(mOFD.FileName, mGD, true);
+
+			Misc.SafeInvoke(eMeshChanged, mChar);
+		}
+
+
+		void OnSaveCharacter(object sender, EventArgs e)
+		{
+			mSFD.DefaultExt		="*.Character";
+			mSFD.Filter			="Character files (*.Character)|*.Character|All files (*.*)|*.*";
+			DialogResult	dr	=mSFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			mChar.SaveToFile(mSFD.FileName);
+		}
+
+
+		void OnLoadStatic(object sender, EventArgs e)
+		{
+			mOFD.DefaultExt		="*.Static";
+			mOFD.Filter			="Static mesh files (*.Static)|*.Static|All files (*.*)|*.*";
+			DialogResult	dr	=mOFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			mStatic	=new StaticMesh();
+			mStatic.ReadFromFile(mOFD.FileName, mGD, true);
+
+			Misc.SafeInvoke(eMeshChanged, mStatic);
+		}
+
+
+		void OnSaveStatic(object sender, EventArgs e)
+		{
+			mSFD.DefaultExt		="*.Static";
+			mSFD.Filter			="Static mesh files (*.Static)|*.Static|All files (*.*)|*.*";
+			DialogResult	dr	=mSFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			mStatic.SaveToFile(mSFD.FileName);
+		}
+
+
+		void OnOpenStaticDAE(object sender, EventArgs e)
+		{
+			mOFD.DefaultExt		="*.dae";
+			mOFD.Filter			="DAE Collada files (*.dae)|*.dae|All files (*.*)|*.*";
+			mOFD.Multiselect	=false;
+			DialogResult	dr	=mOFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			mStatic	=LoadStatic(mOFD.FileName);
+
+			Misc.SafeInvoke(eMeshChanged, mStatic);
+		}
+
+
+		void OnLoadCharacterDAE(object sender, EventArgs e)
+		{
+			mOFD.DefaultExt		="*.dae";
+			mOFD.Filter			="DAE Collada files (*.dae)|*.dae|All files (*.*)|*.*";
+			mOFD.Multiselect	=false;
+			DialogResult	dr	=mOFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			mChar	=LoadCharacterDAE(mOFD.FileName, mAnimLib);
+
+			RefreshAnimList();
+
+			Misc.SafeInvoke(eMeshChanged, mChar);
+		}
+
+
+		void OnLoadAnimDAE(object sender, EventArgs e)
+		{
+			mOFD.DefaultExt		="*.dae";
+			mOFD.Filter			="DAE Collada files (*.dae)|*.dae|All files (*.*)|*.*";
+			mOFD.Multiselect	=false;
+			DialogResult	dr	=mOFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			LoadAnimDAE(mOFD.FileName, mAnimLib, CheckSkeleton.Checked);
+
+			RefreshAnimList();
+		}
+
+
+		void OnAnimListSelectionChanged(object sender, EventArgs e)
+		{
+			if(AnimList.SelectedIndices.Count != 1)
+			{
+				return;
+			}
+
+			string	selAnim	=AnimList.SelectedItems[0].Text;
+
+			Anim	anm	=mAnimLib.GetAnim(selAnim);
+			if(anm == null)
+			{
+				return;
+			}
+
+			mSelectedAnim	=anm.Name;
+			mAnimStartTime	=anm.StartTime;
+			mAnimEndTime	=anm.TotalTime + anm.StartTime;
 		}
 
 
@@ -1943,5 +2020,38 @@ namespace ColladaConvert
 				ShowSphere.Checked	=false;
 			}
 		}
+
+
+		void OnAnimRename(object sender, LabelEditEventArgs e)
+		{
+			if(!mAnimLib.RenameAnim(AnimList.Items[e.Item].Text, e.Label))
+			{
+				e.CancelEdit	=true;
+			}
+			else
+			{
+				SizeColumns(AnimList);
+			}
+		}
+
+
+		void OnAnimListKeyUp(object sender, KeyEventArgs e)
+		{
+			if(e.KeyValue == 46)	//delete
+			{
+				if(AnimList.SelectedItems.Count < 1)
+				{
+					return;	//nothing to do
+				}
+
+				foreach(ListViewItem lvi in AnimList.SelectedItems)
+				{
+					mAnimLib.NukeAnim(lvi.Text);
+				}
+
+				RefreshAnimList();
+			}
+		}
+		#endregion
 	}
 }

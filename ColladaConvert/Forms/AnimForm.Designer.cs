@@ -50,14 +50,13 @@
 			this.AnimTimeScale = new System.Windows.Forms.NumericUpDown();
 			this.label1 = new System.Windows.Forms.Label();
 			this.groupBox4 = new System.Windows.Forms.GroupBox();
-			this.AnimGrid = new System.Windows.Forms.DataGridView();
+			this.AnimList = new System.Windows.Forms.ListView();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.groupBox3.SuspendLayout();
 			this.BoundGroup.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.AnimTimeScale)).BeginInit();
 			this.groupBox4.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.AnimGrid)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// groupBox1
@@ -313,30 +312,32 @@
 			this.groupBox4.TabStop = false;
 			this.groupBox4.Text = "Playback";
 			// 
-			// AnimGrid
+			// AnimList
 			// 
-			this.AnimGrid.AllowUserToAddRows = false;
-			this.AnimGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+			this.AnimList.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.AnimGrid.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-			this.AnimGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			this.AnimGrid.Location = new System.Drawing.Point(12, 12);
-			this.AnimGrid.MultiSelect = false;
-			this.AnimGrid.Name = "AnimGrid";
-			this.AnimGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-			this.AnimGrid.Size = new System.Drawing.Size(469, 183);
-			this.AnimGrid.TabIndex = 24;
-			this.AnimGrid.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.OnAnimCellValueChanged);
-			this.AnimGrid.SelectionChanged += new System.EventHandler(this.OnAnimFormSelectionChanged);
+			this.AnimList.GridLines = true;
+			this.AnimList.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+			this.AnimList.HideSelection = false;
+			this.AnimList.LabelEdit = true;
+			this.AnimList.Location = new System.Drawing.Point(12, 12);
+			this.AnimList.Name = "AnimList";
+			this.AnimList.Size = new System.Drawing.Size(469, 183);
+			this.AnimList.TabIndex = 24;
+			this.AnimList.UseCompatibleStateImageBehavior = false;
+			this.AnimList.View = System.Windows.Forms.View.Details;
+			this.AnimList.AfterLabelEdit += new System.Windows.Forms.LabelEditEventHandler(this.OnAnimRename);
+			this.AnimList.SelectedIndexChanged += new System.EventHandler(this.OnAnimListSelectionChanged);
+			this.AnimList.KeyUp += new System.Windows.Forms.KeyEventHandler(this.OnAnimListKeyUp);
 			// 
-			// StartSmall
+			// AnimForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(493, 375);
 			this.ControlBox = false;
-			this.Controls.Add(this.AnimGrid);
+			this.Controls.Add(this.AnimList);
 			this.Controls.Add(this.BoundGroup);
 			this.Controls.Add(this.groupBox3);
 			this.Controls.Add(this.groupBox2);
@@ -344,7 +345,7 @@
 			this.Controls.Add(this.groupBox1);
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
-			this.Name = "StartSmall";
+			this.Name = "AnimForm";
 			this.ShowInTaskbar = false;
 			this.Text = "Animation Stuff";
 			this.groupBox1.ResumeLayout(false);
@@ -356,7 +357,6 @@
 			((System.ComponentModel.ISupportInitialize)(this.AnimTimeScale)).EndInit();
 			this.groupBox4.ResumeLayout(false);
 			this.groupBox4.PerformLayout();
-			((System.ComponentModel.ISupportInitialize)(this.AnimGrid)).EndInit();
 			this.ResumeLayout(false);
 
 		}
@@ -385,7 +385,7 @@
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.GroupBox groupBox4;
 		private System.Windows.Forms.CheckBox DrawAxis;
-		private System.Windows.Forms.DataGridView AnimGrid;
+		private System.Windows.Forms.ListView AnimList;
 
 	}
 }
