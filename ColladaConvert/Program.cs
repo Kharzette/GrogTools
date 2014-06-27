@@ -243,6 +243,7 @@ namespace ColladaConvert
 			AnimForm		ss		=new AnimForm(gd, matLib, animLib);
 			StripElements	se		=new StripElements();
 			SkeletonEditor	skel	=new SkeletonEditor();
+			SeamEditor		seam	=new SeamEditor();
 
 			SharedForms.MaterialForm	matForm	=new SharedForms.MaterialForm(matLib, sk);
 			SharedForms.CelTweakForm	celForm	=new SharedForms.CelTweakForm(gd, matLib);
@@ -264,6 +265,14 @@ namespace ColladaConvert
 				Settings.Default, "SkeletonEditorFormSize", true,
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
+			seam.DataBindings.Add(new System.Windows.Forms.Binding("Location",
+				Settings.Default, "SeamEditorFormPos", true,
+				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+
+			seam.DataBindings.Add(new System.Windows.Forms.Binding("Size",
+				Settings.Default, "SeamEditorFormSize", true,
+				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+
 			celForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
 				Settings.Default, "CelTweakFormPos", true,
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
@@ -273,6 +282,13 @@ namespace ColladaConvert
 			matForm.eStripElements	+=(sender, args) =>
 				{	if(se.Visible){	return;	}
 					se.Populate(sender as List<MeshLib.Mesh>);	};
+			matForm.eFindSeams		+=(sender, args) =>
+				{	seam.Initialize(sender as List<Mesh>, gd);	};
+			matForm.eSeamFound		+=(sender, args) =>
+				{	seam.AddSeam(sender as EditorMesh.WeightSeam);	};
+			matForm.eSeamsDone		+=(sender, args) =>
+				{	seam.SizeColumns();
+					seam.Visible	=true;	};
 			se.eDeleteElement		+=(sender, args) =>
 				{	DeleteVertElement(gd, sender as List<int>, se.GetMeshes());
 					se.Populate(null);	se.Visible	=false;
@@ -280,7 +296,7 @@ namespace ColladaConvert
 			se.eEscape				+=(sender, args) =>
 				{	se.Populate(null);	se.Visible	=false;	};
 			ss.eSkeletonChanged		+=(sender, args) => skel.Initialize(sender as MeshLib.Skeleton);
-			ss.eBoundsChanged		+=(sender, args) => ep.ReBuildBoundsDrawData(gd, sender);
+			ss.eBoundsChanged		+=(sender, args) => ep.ReBuildBoundsDrawData(gd, sender);			
 
 			ss.Visible		=true;
 			matForm.Visible	=true;

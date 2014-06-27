@@ -57,6 +57,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.XML" />
@@ -69,6 +70,12 @@
     </Compile>
     <Compile Include="Forms\AnimForm.Designer.cs">
       <DependentUpon>AnimForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\SeamEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SeamEditor.Designer.cs">
+      <DependentUpon>SeamEditor.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\SkeletonEditor.cs">
       <SubType>Form</SubType>
@@ -93,6 +100,9 @@
     <Compile Include="SubAnimation.cs" />
     <EmbeddedResource Include="Forms\AnimForm.resx">
       <DependentUpon>AnimForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\SeamEditor.resx">
+      <DependentUpon>SeamEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\SkeletonEditor.resx">
       <DependentUpon>SkeletonEditor.cs</DependentUpon>

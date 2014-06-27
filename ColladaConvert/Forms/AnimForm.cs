@@ -61,6 +61,7 @@ namespace ColladaConvert
 			mGD			=gd;
 			mMatLib		=mats;
 			mAnimLib	=alib;
+			mChar		=new Character(alib);
 
 			AnimList.Columns.Add("Name");
 			AnimList.Columns.Add("Total Time");
@@ -133,7 +134,7 @@ namespace ColladaConvert
 		}
 
 
-		internal Character LoadCharacterDAE(string	path, AnimLib alib)
+		internal void LoadCharacterDAE(string path, AnimLib alib, Character chr)
 		{
 			COLLADA	colladaFile	=DeSerializeCOLLADA(path);
 
@@ -142,8 +143,6 @@ namespace ColladaConvert
 				colladaFile.Items.OfType<library_visual_scenes>();
 
 			library_visual_scenes	lvs	=lvss.First();
-
-			Character	chr	=new Character(alib);
 
 			//adjust coordinate system
 			Matrix	shiftMat	=Matrix.Identity;
@@ -158,18 +157,33 @@ namespace ColladaConvert
 
 			AddVertexWeightsToChunks(colladaFile, chunks);
 
-			//build skeleton
+			//build or get skeleton
 			Skeleton	skel	=BuildSkeleton(colladaFile);
+
+			//see if animlib has a skeleton yet
+			if(alib.GetSkeleton() == null)
+			{
+				alib.SetSkeleton(skel);
+				Misc.SafeInvoke(eSkeletonChanged, skel);
+			}
+			else
+			{
+				//make sure they match
+				if(!alib.CheckSkeleton(skel))
+				{
+					return;
+				}
+
+				//use old one
+				skel	=alib.GetSkeleton();
+			}
 
 			//bake scene node modifiers into controllers
 			BakeSceneNodesIntoVerts(colladaFile, skel, chunks);
 
-			alib.SetSkeleton(skel);
-			Misc.SafeInvoke(eSkeletonChanged, skel);
-
 			alib.AddAnim(BuildAnim(colladaFile, skel, lvs, path));
 
-			CreateSkin(colladaFile, chr, chunks);
+			CreateSkin(colladaFile, chr, chunks, skel);
 
 			BuildFinalVerts(mGD, colladaFile, chunks);
 
@@ -189,8 +203,6 @@ namespace ColladaConvert
 				conv.MaterialName	="TestMat";
 				conv.Name			+="Mesh";
 			}
-
-			return	chr;
 		}
 
 
@@ -413,7 +425,8 @@ namespace ColladaConvert
 
 		static void CreateSkin(COLLADA				colladaFile,
 							   Character			chr,
-							   List<MeshConverter>	chunks)
+							   List<MeshConverter>	chunks,
+							   Skeleton				skel)
 		{
 			IEnumerable<library_controllers>	lcs	=colladaFile.Items.OfType<library_controllers>();
 			if(lcs.Count() <= 0)
@@ -421,10 +434,14 @@ namespace ColladaConvert
 				return;
 			}
 
-			//create a single master skin for the character's parts
-			Skin	skin	=new Skin();
+			//create or reuse a single master skin for the character's parts
+			Skin	skin	=chr.GetSkin();
+			if(skin == null)
+			{
+				skin	=new Skin();
+			}
 
-			Dictionary<string, Matrix>	invBindPoses	=new Dictionary<string, Matrix>();
+			Dictionary<int, Matrix>	invBindPoses	=new Dictionary<int, Matrix>();
 
 			foreach(controller cont in lcs.First().controller)
 			{
@@ -484,25 +501,32 @@ namespace ColladaConvert
 				{
 					string	bname	=bnames[i];
 					Matrix	ibp		=mats[i];
+					int		idx		=skel.GetBoneIndex(bname);
 
-					if(invBindPoses.ContainsKey(bname))
+					Debug.Assert(!invBindPoses.ContainsKey(idx));
+
+					if(invBindPoses.ContainsKey(idx))
 					{
-						//if bone name already added, make sure the
-						//inverse bind pose is the same for this skin
-						Debug.Assert(Mathery.CompareMatrix(ibp, invBindPoses[bname], Mathery.VCompareEpsilon));
+						if(!Mathery.IsIdentity(invBindPoses[idx], Mathery.VCompareEpsilon))
+						{
+							//if bone name already added, make sure the
+							//inverse bind pose is the same for this skin
+							Debug.Assert(Mathery.CompareMatrix(ibp, invBindPoses[idx], Mathery.VCompareEpsilon));
+						}
+						invBindPoses[idx]	=ibp;
 					}
 					else
 					{
-						invBindPoses.Add(bname, ibp);
+						invBindPoses.Add(idx, ibp);
 					}
 				}
 			}
 
-			skin.SetBoneNamesAndPoses(invBindPoses);
+			skin.SetBonePoses(invBindPoses);
 
 			chr.SetSkin(skin);
 
-			FixBoneIndexes(colladaFile, chunks, invBindPoses);
+			FixBoneIndexes(colladaFile, chunks, skel);
 		}
 
 
@@ -789,7 +813,7 @@ namespace ColladaConvert
 
 		static void FixBoneIndexes(COLLADA colladaFile,
 			List<MeshConverter> chunks,
-			Dictionary<string, Matrix> invBindPoses)
+			Skeleton skel)
 		{
 			if(colladaFile.Items.OfType<library_controllers>().Count() <= 0)
 			{
@@ -827,7 +851,7 @@ namespace ColladaConvert
 				{
 					if(cnk.mGeometryID == skinSource)
 					{
-						cnk.FixBoneIndexes(invBindPoses, bnames);
+						cnk.FixBoneIndexes(skel, bnames);
 					}
 				}
 			}
@@ -1070,6 +1094,9 @@ namespace ColladaConvert
 
 				ret.AddRoot(gsnRoot);
 			}
+
+			ret.ComputeNameIndex();
+
 			return	ret;
 		}
 
@@ -1659,15 +1686,24 @@ namespace ColladaConvert
 						mCurAnimTime	+=msDelta * (float)AnimTimeScale.Value;
 					}
 
-					if(mCurAnimTime > mAnimEndTime)
+					if(mAnimStartTime == 0f && mAnimEndTime == 0)
 					{
-						mCurAnimTime	%=mAnimEndTime;
+						mCurAnimTime	=0;
+					}
+					else
+					{
+						if(mCurAnimTime > mAnimEndTime)
+						{
+							mCurAnimTime	%=mAnimEndTime;
+						}
+
+						if(mCurAnimTime < mAnimStartTime)
+						{
+							mCurAnimTime	=mAnimStartTime;
+						}
 					}
 
-					if(mCurAnimTime < mAnimStartTime)
-					{
-						mCurAnimTime	=mAnimStartTime;
-					}
+					Debug.Assert(!float.IsNaN(mCurAnimTime));
 
 					mChar.Animate(mSelectedAnim, mCurAnimTime);
 				}
@@ -1910,7 +1946,7 @@ namespace ColladaConvert
 		{
 			mOFD.DefaultExt		="*.dae";
 			mOFD.Filter			="DAE Collada files (*.dae)|*.dae|All files (*.*)|*.*";
-			mOFD.Multiselect	=false;
+			mOFD.Multiselect	=true;	//individual parts now
 			DialogResult	dr	=mOFD.ShowDialog();
 
 			if(dr == DialogResult.Cancel)
@@ -1918,7 +1954,10 @@ namespace ColladaConvert
 				return;
 			}
 
-			mChar	=LoadCharacterDAE(mOFD.FileName, mAnimLib);
+			foreach(string fileName in mOFD.FileNames)
+			{
+				LoadCharacterDAE(fileName, mAnimLib, mChar);
+			}
 
 			RefreshAnimList();
 

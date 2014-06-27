@@ -188,7 +188,7 @@
 			this.LoadModel.Name = "LoadModel";
 			this.LoadModel.Size = new System.Drawing.Size(130, 25);
 			this.LoadModel.TabIndex = 1;
-			this.LoadModel.Text = "Load DAE Char Model";
+			this.LoadModel.Text = "Load DAE Char Parts";
 			this.LoadModel.UseVisualStyleBackColor = true;
 			this.LoadModel.Click += new System.EventHandler(this.OnLoadCharacterDAE);
 			// 

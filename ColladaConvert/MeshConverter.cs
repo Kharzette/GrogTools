@@ -772,10 +772,8 @@ namespace ColladaConvert
 		//individual mesh parts index into a skin of bones
 		//that might not match the overall character...
 		//this will fix them so they do
-		internal void FixBoneIndexes(Dictionary<string, Matrix> invBindPoses, List<string> bnames)
+		internal void FixBoneIndexes(Skeleton skel, List<string> bnames)
 		{
-			List<string>	keys	=invBindPoses.Keys.ToList();
-
 			for(int i=0;i < mNumBaseVerts;i++)
 			{
 				Color	inds	=mBaseVerts[i].BoneIndex;
@@ -788,23 +786,20 @@ namespace ColladaConvert
 				Debug.Assert(idx0 >= 0);
 
 				string	bname	=bnames[idx0];
-				Debug.Assert(invBindPoses.ContainsKey(bname));
-				idx0	=keys.IndexOf(bname);
+
+				idx0	=skel.GetBoneIndex(bname);
 				Debug.Assert(idx0 >= 0);
 
 				bname	=bnames[idx1];
-				Debug.Assert(invBindPoses.ContainsKey(bname));
-				idx1	=keys.IndexOf(bname);
+				idx1	=skel.GetBoneIndex(bname);
 				Debug.Assert(idx1 >= 0);
 
 				bname	=bnames[idx2];
-				Debug.Assert(invBindPoses.ContainsKey(bname));
-				idx2	=keys.IndexOf(bname);
+				idx2	=skel.GetBoneIndex(bname);
 				Debug.Assert(idx2 >= 0);
 
 				bname	=bnames[idx3];
-				Debug.Assert(invBindPoses.ContainsKey(bname));
-				idx3	=keys.IndexOf(bname);
+				idx3	=skel.GetBoneIndex(bname);
 				Debug.Assert(idx3 >= 0);
 
 				mBaseVerts[i].BoneIndex	=new Color((byte)idx0, (byte)idx1, (byte)idx2, (byte)idx3);

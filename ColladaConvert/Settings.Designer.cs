@@ -73,7 +73,7 @@ namespace ColladaConvert {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("100, 100")]
         public global::System.Drawing.Size SkeletonEditorFormSize {
             get {
                 return ((global::System.Drawing.Size)(this["SkeletonEditorFormSize"]));
@@ -92,6 +92,30 @@ namespace ColladaConvert {
             }
             set {
                 this["CelTweakFormPos"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
+        public global::System.Drawing.Point SeamEditorFormPos {
+            get {
+                return ((global::System.Drawing.Point)(this["SeamEditorFormPos"]));
+            }
+            set {
+                this["SeamEditorFormPos"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100, 100")]
+        public global::System.Drawing.Size SeamEditorFormSize {
+            get {
+                return ((global::System.Drawing.Size)(this["SeamEditorFormSize"]));
+            }
+            set {
+                this["SeamEditorFormSize"] = value;
             }
         }
     }
