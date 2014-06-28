@@ -150,5 +150,11 @@ namespace ColladaConvert
 				SeamList.Items.Remove(lvi);
 			}
 		}
+
+
+		void OnFormClosed(object sender, FormClosedEventArgs e)
+		{
+			Clear();
+		}
 	}
 }

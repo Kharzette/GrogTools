@@ -283,7 +283,11 @@ namespace ColladaConvert
 				{	if(se.Visible){	return;	}
 					se.Populate(sender as List<MeshLib.Mesh>);	};
 			matForm.eFindSeams		+=(sender, args) =>
-				{	seam.Initialize(sender as List<Mesh>, gd);	};
+				{	if(seam.IsDisposed)
+					{
+						seam	=new SeamEditor();
+					}
+					seam.Initialize(sender as List<Mesh>, gd);	};
 			matForm.eSeamFound		+=(sender, args) =>
 				{	seam.AddSeam(sender as EditorMesh.WeightSeam);	};
 			matForm.eSeamsDone		+=(sender, args) =>

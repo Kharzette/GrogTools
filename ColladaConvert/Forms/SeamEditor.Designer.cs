@@ -86,13 +86,13 @@
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(284, 261);
-			this.ControlBox = false;
 			this.Controls.Add(this.SeamList);
 			this.Controls.Add(this.WeightAverage);
 			this.Controls.Add(this.WeightSecond);
 			this.Controls.Add(this.WeightFirst);
 			this.Name = "SeamEditor";
 			this.Text = "Seam Editor";
+			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.OnFormClosed);
 			this.ResumeLayout(false);
 
 		}
