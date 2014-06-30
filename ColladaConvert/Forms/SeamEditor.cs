@@ -19,7 +19,6 @@ namespace ColladaConvert
 	public partial class SeamEditor : Form
 	{
 		Device		mDevice;		
-		List<Mesh>	mPartList;
 
 
 		public SeamEditor()
@@ -35,14 +34,12 @@ namespace ColladaConvert
 		public void Clear()
 		{
 			SeamList.Clear();
-			mPartList	=null;
 			mDevice		=null;
 		}
 
 
-		public void Initialize(List<Mesh> partList, Device dev)
+		public void Initialize(Device dev)
 		{
-			mPartList	=partList;
 			mDevice		=dev;
 		}
 

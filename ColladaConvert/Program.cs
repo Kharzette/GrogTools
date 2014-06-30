@@ -243,7 +243,6 @@ namespace ColladaConvert
 			AnimForm		ss		=new AnimForm(gd, matLib, animLib);
 			StripElements	se		=new StripElements();
 			SkeletonEditor	skel	=new SkeletonEditor();
-			SeamEditor		seam	=new SeamEditor();
 
 			SharedForms.MaterialForm	matForm	=new SharedForms.MaterialForm(matLib, sk);
 			SharedForms.CelTweakForm	celForm	=new SharedForms.CelTweakForm(gd, matLib);
@@ -265,17 +264,12 @@ namespace ColladaConvert
 				Settings.Default, "SkeletonEditorFormSize", true,
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
-			seam.DataBindings.Add(new System.Windows.Forms.Binding("Location",
-				Settings.Default, "SeamEditorFormPos", true,
-				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-
-			seam.DataBindings.Add(new System.Windows.Forms.Binding("Size",
-				Settings.Default, "SeamEditorFormSize", true,
-				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-
 			celForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
 				Settings.Default, "CelTweakFormPos", true,
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+
+			SeamEditor	seam	=null;
+			MakeSeamForm(ref seam);
 
 			ss.eMeshChanged			+=(sender, args) => matForm.SetMesh(sender);
 			matForm.eNukedMeshPart	+=(sender, args) => ss.NukeMeshPart(sender as MeshLib.Mesh);
@@ -285,9 +279,9 @@ namespace ColladaConvert
 			matForm.eFindSeams		+=(sender, args) =>
 				{	if(seam.IsDisposed)
 					{
-						seam	=new SeamEditor();
+						MakeSeamForm(ref seam);
 					}
-					seam.Initialize(sender as List<Mesh>, gd);	};
+					seam.Initialize(gd);	};
 			matForm.eSeamFound		+=(sender, args) =>
 				{	seam.AddSeam(sender as EditorMesh.WeightSeam);	};
 			matForm.eSeamsDone		+=(sender, args) =>
@@ -359,6 +353,19 @@ namespace ColladaConvert
 			pSteering.Speed	=0.5f;
 
 			return	pSteering;
+		}
+
+		static void MakeSeamForm(ref SeamEditor seam)
+		{
+			seam	=new SeamEditor();
+
+			seam.DataBindings.Add(new System.Windows.Forms.Binding("Location",
+				Settings.Default, "SeamEditorFormPos", true,
+				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+
+			seam.DataBindings.Add(new System.Windows.Forms.Binding("Size",
+				Settings.Default, "SeamEditorFormSize", true,
+				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 		}
 
 		static void ChangeLight(List<Input.InputAction> acts, ref Vector3 lightDir)
