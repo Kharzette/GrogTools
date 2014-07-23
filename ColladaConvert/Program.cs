@@ -200,26 +200,26 @@ namespace ColladaConvert
 				post.SetParameter("mNormalTex", "SceneDepthMatNorm");
 				post.DrawStage(gd, "Outline");
 
-				post.SetTargets(gd, "Bleach", "null");
-				post.SetParameter("mColorTex", "SceneColor");
-				post.DrawStage(gd, "BleachBypass");
+//				post.SetTargets(gd, "Bleach", "null");
+//				post.SetParameter("mColorTex", "SceneColor");
+//				post.DrawStage(gd, "BleachBypass");
 
-				post.SetTargets(gd, "Bloom1", "null");
-				post.SetParameter("mBlurTargetTex", "Bleach");
-				post.DrawStage(gd, "BloomExtract");
+//				post.SetTargets(gd, "Bloom1", "null");
+//				post.SetParameter("mBlurTargetTex", "Bleach");
+//				post.DrawStage(gd, "BloomExtract");
 
-				post.SetTargets(gd, "Bloom2", "null");
-				post.SetParameter("mBlurTargetTex", "Bloom1");
-				post.DrawStage(gd, "GaussianBlurX");
+//				post.SetTargets(gd, "Bloom2", "null");
+//				post.SetParameter("mBlurTargetTex", "Bloom1");
+//				post.DrawStage(gd, "GaussianBlurX");
 
-				post.SetTargets(gd, "Bloom1", "null");
-				post.SetParameter("mBlurTargetTex", "Bloom2");
-				post.DrawStage(gd, "GaussianBlurY");
+//				post.SetTargets(gd, "Bloom1", "null");
+//				post.SetParameter("mBlurTargetTex", "Bloom2");
+//				post.DrawStage(gd, "GaussianBlurY");
 
-				post.SetTargets(gd, "SceneColor", "null");
-				post.SetParameter("mBlurTargetTex", "Bloom1");
-				post.SetParameter("mColorTex", "Bleach");
-				post.DrawStage(gd, "BloomCombine");
+//				post.SetTargets(gd, "SceneColor", "null");
+//				post.SetParameter("mBlurTargetTex", "Bloom1");
+//				post.SetParameter("mColorTex", "Bleach");
+//				post.DrawStage(gd, "BloomCombine");
 
 				post.SetTargets(gd, "BackColor", "BackDepth");
 				post.SetParameter("mBlurTargetTex", "Outline");
