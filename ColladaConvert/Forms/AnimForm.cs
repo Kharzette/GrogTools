@@ -199,22 +199,21 @@ namespace ColladaConvert
 				conv.SetTransform(mat * shiftMat);
 				chr.AddMeshPart(conv);
 
-				//temp
-				conv.Visible		=true;
-				conv.MaterialName	="TestMat";
-				conv.Name			+="Mesh";
+				conv.Name	+="Mesh";
 			}
 		}
 
 
-		internal StaticArch LoadStatic(string path)
+		internal StaticArch LoadStatic(string path, out StaticMesh sm)
 		{
 			COLLADA	colladaFile	=DeSerializeCOLLADA(path);
 
 			//don't have a way to test this
 			Debug.Assert(colladaFile.asset.up_axis != UpAxisType.X_UP);
 
-			StaticArch			sma		=new StaticArch();
+			StaticArch	sma	=new StaticArch();
+			sm				=new StaticMesh(sma);
+
 			List<MeshConverter>	chunks	=GetMeshChunks(colladaFile, false);
 
 			//adjust coordinate system
@@ -226,7 +225,7 @@ namespace ColladaConvert
 
 			//this needs to be identity so the game
 			//can mess with it without needing the axis info
-//			smo.SetTransform(Matrix.Identity);
+			sm.SetTransform(Matrix.Identity);
 
 			BuildFinalVerts(mGD, colladaFile, chunks);
 			foreach(MeshConverter mc in chunks)
@@ -238,11 +237,7 @@ namespace ColladaConvert
 
 				//set transform of each mesh
 				m.SetTransform(mat * shiftMat);
-				sma.AddMeshPart(m);
-
-				//temp
-				m.Visible		=true;
-				m.MaterialName	="TestMat";
+				sm.AddMeshPart(m, mMatLib);
 			}
 			return	sma;
 		}
@@ -1721,7 +1716,7 @@ namespace ColladaConvert
 
 			if(mStaticArch != null)
 			{
-				mStaticMesh.Draw(dc, mMatLib);
+				mStaticMesh.Draw(dc);
 			}
 			if(mChar != null)
 			{
@@ -1739,7 +1734,7 @@ namespace ColladaConvert
 
 			if(mStaticArch != null)
 			{
-				mStaticMesh.DrawDMN(dc, mMatLib);
+				mStaticMesh.DrawDMN(dc);
 			}
 			if(mChar != null)
 			{
@@ -1748,15 +1743,11 @@ namespace ColladaConvert
 		}
 
 
-		internal void NukeMeshPart(Mesh mesh)
+		internal void NukeMeshPart(int index)
 		{
-			if(mStaticArch != null)
+			if(mStaticMesh != null)
 			{
-				mStaticArch.NukeMesh(mesh);
-			}
-			if(mChar != null)
-			{
-				mChar.NukeMesh(mesh);
+				mStaticMesh.NukeMeshPart(index);
 			}
 		}
 
@@ -1908,7 +1899,7 @@ namespace ColladaConvert
 
 			mStaticMesh	=new StaticMesh(mStaticArch);
 
-			Misc.SafeInvoke(eMeshChanged, mStaticArch);
+			Misc.SafeInvoke(eMeshChanged, mStaticMesh);
 		}
 
 
@@ -1939,11 +1930,9 @@ namespace ColladaConvert
 				return;
 			}
 
-			mStaticArch	=LoadStatic(mOFD.FileName);
+			mStaticArch	=LoadStatic(mOFD.FileName, out mStaticMesh);
 
-			mStaticMesh	=new StaticMesh(mStaticArch);
-
-			Misc.SafeInvoke(eMeshChanged, mStaticArch);
+			Misc.SafeInvoke(eMeshChanged, mStaticMesh);
 		}
 
 

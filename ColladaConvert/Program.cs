@@ -272,10 +272,10 @@ namespace ColladaConvert
 			MakeSeamForm(ref seam);
 
 			ss.eMeshChanged			+=(sender, args) => matForm.SetMesh(sender);
-			matForm.eNukedMeshPart	+=(sender, args) => ss.NukeMeshPart(sender as MeshLib.Mesh);
+			matForm.eNukedMeshPart	+=(sender, args) => ss.NukeMeshPart((int)sender);
 			matForm.eStripElements	+=(sender, args) =>
 				{	if(se.Visible){	return;	}
-					se.Populate(sender as List<MeshLib.Mesh>);	};
+					se.Populate(sender as List<Mesh>);	};
 			matForm.eFindSeams		+=(sender, args) =>
 				{	if(seam.IsDisposed)
 					{
