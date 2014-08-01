@@ -276,6 +276,10 @@ namespace ColladaConvert
 			matForm.eStripElements	+=(sender, args) =>
 				{	if(se.Visible){	return;	}
 					se.Populate(sender as List<Mesh>);	};
+			matForm.eGenTangents	+=(sender, args) =>
+				{
+					GenTangents(gd, sender as List<Mesh>, matForm.GetTexCoordSet());
+				};
 			matForm.eFindSeams		+=(sender, args) =>
 				{	if(seam.IsDisposed)
 					{
@@ -390,6 +394,20 @@ namespace ColladaConvert
 					lightDir	=Vector3.TransformCoordinate(lightDir, rot);
 					lightDir.Normalize();
 				}
+			}
+		}
+
+		static void GenTangents(Device gd, List<Mesh> parts, int texCoordSet)
+		{
+			foreach(Mesh m in parts)
+			{
+				EditorMesh	em	=m as EditorMesh;
+				if(em == null)
+				{
+					continue;
+				}
+
+				em.GenTangents(gd, texCoordSet);
 			}
 		}
 
