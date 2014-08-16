@@ -1898,18 +1898,25 @@ namespace ColladaConvert
 
 			mArch	=new CharacterArch();
 			mChar	=new Character(mArch, mAnimLib);
-			mArch.ReadFromFile(mOFD.FileName, mGD, true);
 
 			Mesh.MeshAndArch	mea	=new Mesh.MeshAndArch();
 
 			mea.mMesh	=mChar;
 			mea.mArch	=mArch;
 
-			//make some materialmesh things
-			int	count	=mArch.GetPartCount();
-			for(int i=0;i < count;i++)
+			mArch.ReadFromFile(mOFD.FileName, mGD, true);
+			if(!mChar.ReadFromFile(mOFD.FileName + "Instance"))
 			{
-				mChar.AddPart(mMatLib);
+				//make some materialmesh things
+				int	count	=mArch.GetPartCount();
+				for(int i=0;i < count;i++)
+				{
+					mChar.AddPart(mMatLib);
+				}
+			}
+			else
+			{
+				mChar.SetMatLib(mMatLib);
 			}
 
 			Misc.SafeInvoke(eMeshChanged, mea);
@@ -1928,6 +1935,7 @@ namespace ColladaConvert
 			}
 
 			mArch.SaveToFile(mSFD.FileName);
+			mChar.SaveToFile(mSFD.FileName + "Instance");
 		}
 
 
@@ -1944,18 +1952,25 @@ namespace ColladaConvert
 
 			mArch		=new StaticArch();
 			mStatMesh	=new StaticMesh(mArch);
-			mArch.ReadFromFile(mOFD.FileName, mGD, true);
 
 			Mesh.MeshAndArch	mea	=new Mesh.MeshAndArch();
 
 			mea.mMesh	=mStatMesh;
 			mea.mArch	=mArch;
 
-			//make some materialmesh things
-			int	count	=mArch.GetPartCount();
-			for(int i=0;i < count;i++)
+			mArch.ReadFromFile(mOFD.FileName, mGD, true);
+			if(!mStatMesh.ReadFromFile(mOFD.FileName + "Instance"))
 			{
-				mStatMesh.AddPart(mMatLib);
+				//make some materialmesh things
+				int	count	=mArch.GetPartCount();
+				for(int i=0;i < count;i++)
+				{
+					mStatMesh.AddPart(mMatLib);
+				}
+			}
+			else
+			{
+				mStatMesh.SetMatLib(mMatLib);
 			}
 
 			Misc.SafeInvoke(eMeshChanged, mea);
@@ -1974,6 +1989,7 @@ namespace ColladaConvert
 			}
 
 			mArch.SaveToFile(mSFD.FileName);
+			mStatMesh.SaveToFile(mSFD.FileName + "Instance");
 		}
 
 
