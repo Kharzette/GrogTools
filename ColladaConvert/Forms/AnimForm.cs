@@ -1939,12 +1939,23 @@ namespace ColladaConvert
 				return;
 			}
 
-			mArch	=new StaticArch();
+			mArch		=new StaticArch();
+			mStatMesh	=new StaticMesh(mArch);
 			mArch.ReadFromFile(mOFD.FileName, mGD, true);
 
-			mStatMesh	=new StaticMesh(mArch);
+			Mesh.MeshAndArch	mea	=new Mesh.MeshAndArch();
 
-			Misc.SafeInvoke(eMeshChanged, mStatMesh);
+			mea.mMesh	=mStatMesh;
+			mea.mArch	=mArch;
+
+			//make some materialmesh things
+			int	count	=mArch.GetPartCount();
+			for(int i=0;i < count;i++)
+			{
+				mStatMesh.AddPart(mMatLib);
+			}
+
+			Misc.SafeInvoke(eMeshChanged, mea);
 		}
 
 
@@ -1959,7 +1970,7 @@ namespace ColladaConvert
 				return;
 			}
 
-//			mStatArch.SaveToFile(mSFD.FileName);
+			mArch.SaveToFile(mSFD.FileName);
 		}
 
 
