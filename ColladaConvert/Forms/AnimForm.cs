@@ -1737,7 +1737,8 @@ namespace ColladaConvert
 			{
 				mStatMesh.Draw(dc, mMatLib);
 			}
-			else
+
+			if(mChar != null)
 			{
 				mChar.Draw(dc, mMatLib);
 			}
@@ -1755,7 +1756,8 @@ namespace ColladaConvert
 			{
 				mStatMesh.DrawDMN(dc, mMatLib);
 			}
-			else
+
+			if(mChar != null)
 			{
 				mChar.DrawDMN(dc, mMatLib);
 			}
@@ -2091,15 +2093,24 @@ namespace ColladaConvert
 
 		void OnCalcBounds(object sender, EventArgs e)
 		{
+			mArch.UpdateBounds();
+
 			if(mStatMesh != null)
 			{
-				mStatMesh.UpdateBounds();
-				Misc.SafeInvoke(eBoundsChanged, mStatMesh);
+				if(!mStatMesh.IsEmpty())
+				{
+					mStatMesh.UpdateBounds();
+					Misc.SafeInvoke(eBoundsChanged, mStatMesh);
+				}
 			}
-			else if(mChar != null)
+
+			if(mChar != null)
 			{
-				mChar.UpdateBounds();
-				Misc.SafeInvoke(eBoundsChanged, mChar);
+				if(!mChar.IsEmpty())
+				{
+					mChar.UpdateBounds();
+					Misc.SafeInvoke(eBoundsChanged, mChar);
+				}
 			}
 		}
 
