@@ -1695,36 +1695,33 @@ namespace ColladaConvert
 				return;
 			}
 
-			if(mChar != null)
+			if(mSelectedAnim != null && mSelectedAnim != "")
 			{
-				if(mSelectedAnim != null && mSelectedAnim != "")
+				if(!mbPaused)
 				{
-					if(!mbPaused)
-					{
-						mCurAnimTime	+=msDelta * (float)AnimTimeScale.Value;
-					}
-
-					if(mAnimStartTime == 0f && mAnimEndTime == 0)
-					{
-						mCurAnimTime	=0;
-					}
-					else
-					{
-						if(mCurAnimTime > mAnimEndTime)
-						{
-							mCurAnimTime	%=mAnimEndTime;
-						}
-
-						if(mCurAnimTime < mAnimStartTime)
-						{
-							mCurAnimTime	=mAnimStartTime;
-						}
-					}
-
-					Debug.Assert(!float.IsNaN(mCurAnimTime));
-
-					mChar.Animate(mSelectedAnim, mCurAnimTime);
+					mCurAnimTime	+=msDelta * (float)AnimTimeScale.Value;
 				}
+
+				if(mAnimStartTime == 0f && mAnimEndTime == 0)
+				{
+					mCurAnimTime	=0;
+				}
+				else
+				{
+					if(mCurAnimTime > mAnimEndTime)
+					{
+						mCurAnimTime	%=mAnimEndTime;
+					}
+
+					if(mCurAnimTime < mAnimStartTime)
+					{
+						mCurAnimTime	=mAnimStartTime;
+					}
+				}
+
+				Debug.Assert(!float.IsNaN(mCurAnimTime));
+
+				mChar.Animate(mSelectedAnim, mCurAnimTime);
 			}
 		}
 
@@ -1740,7 +1737,7 @@ namespace ColladaConvert
 			{
 				mStatMesh.Draw(dc, mMatLib);
 			}
-			if(mChar != null)
+			else
 			{
 				mChar.Draw(dc, mMatLib);
 			}
@@ -1758,7 +1755,7 @@ namespace ColladaConvert
 			{
 				mStatMesh.DrawDMN(dc, mMatLib);
 			}
-			if(mChar != null)
+			else
 			{
 				mChar.DrawDMN(dc, mMatLib);
 			}
@@ -1777,7 +1774,11 @@ namespace ColladaConvert
 			{
 				mArch.NukeParts(indexes);
 			}
-			if(mChar != null)
+			if(mStatMesh != null)
+			{
+				mStatMesh.NukeParts(indexes);
+			}
+			else
 			{
 				mChar.NukeParts(indexes);
 			}
