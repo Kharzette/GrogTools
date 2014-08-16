@@ -126,7 +126,14 @@ namespace ColladaConvert
 			//strip off mesh, add name put mesh back on end
 			string	ret	=mGeomName.Substring(0, mGeomName.Length - 4);
 
-			ret	+=mName + "Mesh";
+			if(ret == mName)
+			{
+				ret	+="Mesh";
+			}
+			else
+			{
+				ret	+=mName + "Mesh";
+			}
 
 			return	ret;
 		}

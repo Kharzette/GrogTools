@@ -50,15 +50,18 @@ namespace ColladaConvert
 		}
 
 
-		public void AddSeam(EditorMesh.WeightSeam seam)
+		public void AddSeams(List<EditorMesh.WeightSeam> seams)
 		{
 			Action<ListView>	addItem	=lv =>
 			{
-				ListViewItem	lvi	=lv.Items.Add(seam.mMeshA.Name);
+				foreach(EditorMesh.WeightSeam ws in seams)
+				{
+					ListViewItem	lvi	=lv.Items.Add(ws.mMeshA.Name);
 
-				lv.Items[lvi.Index].SubItems.Add(seam.mMeshB.Name);
-				lv.Items[lvi.Index].SubItems.Add(seam.mSeam.Count.ToString());
-				lv.Items[lvi.Index].Tag	=seam;
+					lv.Items[lvi.Index].SubItems.Add(ws.mMeshB.Name);
+					lv.Items[lvi.Index].SubItems.Add(ws.mSeam.Count.ToString());
+					lv.Items[lvi.Index].Tag	=ws;
+				}
 			};
 
 			FormExtensions.Invoke(SeamList, addItem);

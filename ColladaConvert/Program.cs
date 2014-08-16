@@ -240,7 +240,7 @@ namespace ColladaConvert
 		static AnimForm SetUpForms(Device gd, MatLib matLib, StuffKeeper sk, CommonPrims ep)
 		{
 			MeshLib.AnimLib	animLib	=new MeshLib.AnimLib();
-			AnimForm		ss		=new AnimForm(gd, matLib, animLib);
+			AnimForm		af		=new AnimForm(gd, matLib, animLib);
 			StripElements	se		=new StripElements();
 			SkeletonEditor	skel	=new SkeletonEditor();
 
@@ -252,7 +252,7 @@ namespace ColladaConvert
 				Settings.Default, "MaterialFormPos", true,
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
-			ss.DataBindings.Add(new System.Windows.Forms.Binding("Location",
+			af.DataBindings.Add(new System.Windows.Forms.Binding("Location",
 				Settings.Default, "AnimFormPos", true,
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
@@ -271,41 +271,42 @@ namespace ColladaConvert
 			SeamEditor	seam	=null;
 			MakeSeamForm(ref seam);
 
-			ss.eMeshChanged			+=(sender, args) => matForm.SetMesh(sender);
-			matForm.eNukedMeshPart	+=(sender, args) => ss.NukeMeshPart((int)sender);
+			af.eMeshChanged			+=(sender, args) => matForm.SetMesh(sender);
+			matForm.eNukedMeshPart	+=(sender, args) => af.NukeMeshPart(sender as List<int>);
 			matForm.eStripElements	+=(sender, args) =>
 				{	if(se.Visible){	return;	}
-					se.Populate(sender as List<Mesh>);	};
+					se.Populate(args as ArchEventArgs);	};
 			matForm.eGenTangents	+=(sender, args) =>
-				{
-					GenTangents(gd, sender as List<Mesh>, matForm.GetTexCoordSet());
-				};
-			matForm.eFindSeams		+=(sender, args) =>
+				{	ArchEventArgs	aea	=args as ArchEventArgs;
+					if(aea != null)
+					{
+						aea.mArch.GenTangents(gd, aea.mIndexes, matForm.GetTexCoordSet());
+					}	};
+			matForm.eFoundSeams		+=(sender, args) =>
 				{	if(seam.IsDisposed)
 					{
 						MakeSeamForm(ref seam);
 					}
-					seam.Initialize(gd);	};
-			matForm.eSeamFound		+=(sender, args) =>
-				{	seam.AddSeam(sender as EditorMesh.WeightSeam);	};
-			matForm.eSeamsDone		+=(sender, args) =>
-				{	seam.SizeColumns();
+					seam.Initialize(gd);
+					seam.AddSeams(sender as List<EditorMesh.WeightSeam>);
+					seam.SizeColumns();
 					seam.Visible	=true;	};
 			se.eDeleteElement		+=(sender, args) =>
-				{	DeleteVertElement(gd, sender as List<int>, se.GetMeshes());
+				{	List<int>	elements	=sender as List<int>;
+					af.NukeVertexElement(se.GetIndexes(), elements);
 					se.Populate(null);	se.Visible	=false;
 					matForm.RefreshMeshPartList();	};
 			se.eEscape				+=(sender, args) =>
 				{	se.Populate(null);	se.Visible	=false;	};
-			ss.eSkeletonChanged		+=(sender, args) => skel.Initialize(sender as MeshLib.Skeleton);
-			ss.eBoundsChanged		+=(sender, args) => ep.ReBuildBoundsDrawData(gd, sender);			
+			af.eSkeletonChanged		+=(sender, args) => skel.Initialize(sender as MeshLib.Skeleton);
+			af.eBoundsChanged		+=(sender, args) => ep.ReBuildBoundsDrawData(gd, sender);			
 
-			ss.Visible		=true;
+			af.Visible		=true;
 			matForm.Visible	=true;
 			skel.Visible	=true;
 			celForm.Visible	=true;
 
-			return	ss;
+			return	af;
 		}
 
 		static Input SetUpInput()
@@ -394,20 +395,6 @@ namespace ColladaConvert
 					lightDir	=Vector3.TransformCoordinate(lightDir, rot);
 					lightDir.Normalize();
 				}
-			}
-		}
-
-		static void GenTangents(Device gd, List<Mesh> parts, int texCoordSet)
-		{
-			foreach(Mesh m in parts)
-			{
-				EditorMesh	em	=m as EditorMesh;
-				if(em == null)
-				{
-					continue;
-				}
-
-				em.GenTangents(gd, texCoordSet);
 			}
 		}
 

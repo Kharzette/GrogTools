@@ -14,7 +14,7 @@ namespace ColladaConvert
 {
 	public partial class StripElements : Form
 	{
-		List<Mesh>	mMeshes;
+		List<int>	mIndexes;
 
 		public event EventHandler	eDeleteElement;
 		public event EventHandler	eEscape;
@@ -26,26 +26,26 @@ namespace ColladaConvert
 		}
 
 
-		public List<Mesh> GetMeshes()
+		public List<int> GetIndexes()
 		{
-			return	mMeshes;
+			return	mIndexes;
 		}
 
 
-		public void Populate(List<Mesh> meshes)
+		public void Populate(ArchEventArgs aea)
 		{
-			mMeshes	=meshes;
-
-			if(meshes == null)
+			if(aea == null)
 			{
 				VertElements.Clear();
 				MeshName.Text	="";
 				return;
 			}
 
-			if(meshes.Count == 1)
+			mIndexes	=aea.mIndexes;
+
+			if(aea.mIndexes.Count == 1)
 			{
-				MeshName.Text	=meshes[0].Name;
+				MeshName.Text	=aea.mArch.GetPartName(aea.mIndexes[0]);
 			}
 			else
 			{
@@ -53,7 +53,7 @@ namespace ColladaConvert
 			}
 
 			//only affect those matching the first
-			Type	t	=meshes[0].VertexType;
+			Type	t	=aea.mArch.GetPartVertexType(aea.mIndexes[0]);
 
 			FieldInfo	[]fis	=t.GetFields();
 
