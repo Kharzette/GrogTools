@@ -150,7 +150,7 @@ namespace ColladaConvert
 			{
 				mBaseVerts[i / 3].Position0.X		=verts.Values[i];
 				mBaseVerts[i / 3].Position0.Y		=verts.Values[i + 1];
-				mBaseVerts[i / 3].Position0.Z		=verts.Values[i + 2];
+				mBaseVerts[i / 3].Position0.Z		=-verts.Values[i + 2];	//negate
 				mBaseVerts[i / 3].mOriginalIndex	=i / 3;
 			}
 
@@ -654,10 +654,9 @@ namespace ColladaConvert
 
 				for(int j=1;j < (vCount - 1);j++)
 				{
-					//backwards for new directx
-					newIdxs.Add(mIndexList[j + 1 + curIdx]);
-					newIdxs.Add(mIndexList[j + curIdx]);
 					newIdxs.Add(mIndexList[curIdx]);
+					newIdxs.Add(mIndexList[j + curIdx]);
+					newIdxs.Add(mIndexList[j + 1 + curIdx]);
 				}
 				curIdx	+=vCount;
 			}

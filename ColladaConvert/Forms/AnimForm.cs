@@ -109,6 +109,8 @@ namespace ColladaConvert
 			COLLADA	colladaFile	=DeSerializeCOLLADA(path);
 			Skeleton	skel	=BuildSkeleton(colladaFile);
 
+			skel.ConvertToLeftHanded();
+
 			//grab visual scenes
 			IEnumerable<library_visual_scenes>	lvss	=
 				colladaFile.Items.OfType<library_visual_scenes>();
@@ -152,10 +154,15 @@ namespace ColladaConvert
 
 			//adjust coordinate system
 			Matrix	shiftMat	=Matrix.Identity;
-			if(colladaFile.asset.up_axis == UpAxisType.Z_UP)
-			{
-				shiftMat	=Matrix.RotationX(-MathUtil.PiOverTwo);
-			}
+//			if(colladaFile.asset.up_axis == UpAxisType.Z_UP)
+//			{
+//				shiftMat	=Matrix.RotationZ(-MathUtil.Pi);
+//				shiftMat	*=Matrix.RotationX(-MathUtil.PiOverTwo);
+//			}
+//			else
+//			{
+//				shiftMat	=Matrix.RotationY(-MathUtil.PiOverTwo);
+//			}
 
 			List<MeshConverter>	allChunks	=GetMeshChunks(colladaFile, true);
 			List<MeshConverter>	chunks		=new List<MeshConverter>();
@@ -208,10 +215,23 @@ namespace ColladaConvert
 				Mesh	conv	=mc.GetConvertedMesh();
 				Matrix	mat		=GetSceneNodeTransform(colladaFile, mc);
 
+				Debug.Assert(mat.IsIdentity);
+
+				mat.M31	=-mat.M31;
+				mat.M32	=-mat.M32;
+				mat.M33	=-mat.M33;
+				mat.M34	=-mat.M34;
+
+				mat.M13	=-mat.M13;
+				mat.M23	=-mat.M23;
+				mat.M33	=-mat.M33;
+				mat.M43	=-mat.M43;
+
 				conv.Name	=mc.GetGeomName();
 
 				//set transform of each mesh
-				conv.SetTransform(mat * shiftMat);
+///				conv.SetTransform(mat * shiftMat);
+				conv.SetTransform(mat);
 				arch.AddPart(conv);
 				chr.AddPart(mMatLib);
 
@@ -430,6 +450,12 @@ namespace ColladaConvert
 		{
 			//create useful anims
 			List<SubAnim>	subs	=CreateSubAnims(colladaFile, skel);
+
+			foreach(SubAnim sub in subs)
+			{
+				sub.ConvertToLeftHanded();
+			}
+
 			Anim	anm	=new Anim(subs);
 
 			FixMultipleSkeletons(lvs, anm, skel);
@@ -531,10 +557,26 @@ namespace ColladaConvert
 							//inverse bind pose is the same for this skin
 							Debug.Assert(Mathery.CompareMatrix(ibp, invBindPoses[idx], Mathery.VCompareEpsilon));
 						}
-						invBindPoses[idx]	=ibp;
+//						invBindPoses[idx]	=ibp;
 					}
 					else
 					{
+						Matrix	gack	=ibp;
+
+						ibp.Invert();
+
+						ibp.M31	=-ibp.M31;
+						ibp.M32	=-ibp.M32;
+						ibp.M33	=-ibp.M33;
+						ibp.M34	=-ibp.M34;
+
+						ibp.M13	=-ibp.M13;
+						ibp.M23	=-ibp.M23;
+						ibp.M33	=-ibp.M33;
+						ibp.M43	=-ibp.M43;
+
+						ibp.Invert();
+
 						invBindPoses.Add(idx, ibp);
 					}
 				}
