@@ -148,6 +148,8 @@ namespace ColladaConvert
 
 			for(int i=0;i < (int)verts.count;i+=3)
 			{
+				//stuff coming from collada will be inside out
+				//so flip the z
 				mBaseVerts[i / 3].Position0.X		=verts.Values[i];
 				mBaseVerts[i / 3].Position0.Y		=verts.Values[i + 1];
 				mBaseVerts[i / 3].Position0.Z		=-verts.Values[i + 2];	//negate
@@ -508,11 +510,12 @@ namespace ColladaConvert
 				tv	=mBaseVerts[pidx];
 
 				//copy normal if exists
+				//Negate the Z here for right to left handed
 				if(normIdxs != null && norms != null)
 				{
 					tv.Normal0.X	=norms.Values[nidx * 3];
 					tv.Normal0.Y	=norms.Values[1 + nidx * 3];
-					tv.Normal0.Z	=norms.Values[2 + nidx * 3];
+					tv.Normal0.Z	=-norms.Values[2 + nidx * 3];	//note negation
 				}
 				//copy texcoords
 				if(texIdxs0 != null && texCoords0 != null)

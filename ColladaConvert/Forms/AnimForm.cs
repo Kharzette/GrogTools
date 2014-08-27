@@ -154,15 +154,16 @@ namespace ColladaConvert
 
 			//adjust coordinate system
 			Matrix	shiftMat	=Matrix.Identity;
-//			if(colladaFile.asset.up_axis == UpAxisType.Z_UP)
-//			{
-//				shiftMat	=Matrix.RotationZ(-MathUtil.Pi);
-//				shiftMat	*=Matrix.RotationX(-MathUtil.PiOverTwo);
-//			}
-//			else
-//			{
-//				shiftMat	=Matrix.RotationY(-MathUtil.PiOverTwo);
-//			}
+			if(colladaFile.asset.up_axis == UpAxisType.Z_UP)
+			{
+				shiftMat	*=Matrix.RotationX(MathUtil.PiOverTwo);
+			}
+			else
+			{
+				shiftMat	=Matrix.RotationY(-MathUtil.PiOverTwo);
+			}
+
+			chr.SetTransform(shiftMat);
 
 			List<MeshConverter>	allChunks	=GetMeshChunks(colladaFile, true);
 			List<MeshConverter>	chunks		=new List<MeshConverter>();
@@ -172,6 +173,8 @@ namespace ColladaConvert
 			{
 				if(!mc.GetName().Contains("DummyGeometry"))
 				{
+					mc.FlipNormals();
+
 					chunks.Add(mc);
 				}
 			}
@@ -217,21 +220,10 @@ namespace ColladaConvert
 
 				Debug.Assert(mat.IsIdentity);
 
-				mat.M31	=-mat.M31;
-				mat.M32	=-mat.M32;
-				mat.M33	=-mat.M33;
-				mat.M34	=-mat.M34;
-
-				mat.M13	=-mat.M13;
-				mat.M23	=-mat.M23;
-				mat.M33	=-mat.M33;
-				mat.M43	=-mat.M43;
-
 				conv.Name	=mc.GetGeomName();
 
-				//set transform of each mesh
-///				conv.SetTransform(mat * shiftMat);
-				conv.SetTransform(mat);
+				conv.SetTransform(Matrix.Identity);
+
 				arch.AddPart(conv);
 				chr.AddPart(mMatLib);
 
@@ -557,23 +549,13 @@ namespace ColladaConvert
 							//inverse bind pose is the same for this skin
 							Debug.Assert(Mathery.CompareMatrix(ibp, invBindPoses[idx], Mathery.VCompareEpsilon));
 						}
-//						invBindPoses[idx]	=ibp;
 					}
 					else
 					{
-						Matrix	gack	=ibp;
-
+						//coord system change the inverse bind poses
 						ibp.Invert();
 
-						ibp.M31	=-ibp.M31;
-						ibp.M32	=-ibp.M32;
-						ibp.M33	=-ibp.M33;
-						ibp.M34	=-ibp.M34;
-
-						ibp.M13	=-ibp.M13;
-						ibp.M23	=-ibp.M23;
-						ibp.M33	=-ibp.M33;
-						ibp.M43	=-ibp.M43;
+						KeyFrame.RightHandToLeft(ref ibp);
 
 						ibp.Invert();
 
