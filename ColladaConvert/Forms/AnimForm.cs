@@ -146,6 +146,10 @@ namespace ColladaConvert
 			//don't have a way to test this
 			Debug.Assert(colladaFile.asset.up_axis != UpAxisType.X_UP);
 
+			//do have a way to test this, but it causes
+			//the bind shape matrii to have a rotation
+			Debug.Assert(colladaFile.asset.up_axis != UpAxisType.Y_UP);
+
 			//grab visual scenes
 			IEnumerable<library_visual_scenes>	lvss	=
 				colladaFile.Items.OfType<library_visual_scenes>();
@@ -153,17 +157,7 @@ namespace ColladaConvert
 			library_visual_scenes	lvs	=lvss.First();
 
 			//adjust coordinate system
-			Matrix	shiftMat	=Matrix.Identity;
-			if(colladaFile.asset.up_axis == UpAxisType.Z_UP)
-			{
-				shiftMat	*=Matrix.RotationX(MathUtil.PiOverTwo);
-			}
-			else
-			{
-				shiftMat	=Matrix.RotationY(-MathUtil.PiOverTwo);
-			}
-
-			chr.SetTransform(shiftMat);
+			Matrix	shiftMat	=Matrix.RotationX(MathUtil.PiOverTwo);
 
 			List<MeshConverter>	allChunks	=GetMeshChunks(colladaFile, true);
 			List<MeshConverter>	chunks		=new List<MeshConverter>();
@@ -222,7 +216,7 @@ namespace ColladaConvert
 
 				conv.Name	=mc.GetGeomName();
 
-				conv.SetTransform(Matrix.Identity);
+				conv.SetTransform(shiftMat);
 
 				arch.AddPart(conv);
 				chr.AddPart(mMatLib);
@@ -253,10 +247,6 @@ namespace ColladaConvert
 			if(colladaFile.asset.up_axis == UpAxisType.Z_UP)
 			{
 				shiftMat	*=Matrix.RotationX(MathUtil.PiOverTwo);
-			}
-			else
-			{
-//				shiftMat	=Matrix.RotationY(-MathUtil.PiOverTwo);
 			}
 
 			//this needs to be identity so the game
@@ -500,6 +490,9 @@ namespace ColladaConvert
 
 				GetMatrixFromString(sk.bind_shape_matrix, out bindMat);
 
+				//if you hit this, either a reset xform is needed,
+				//or the mesh was exported with Y == up.  This causes
+				//the exporter to stick a rotation in the binds
 				Debug.Assert(Mathery.IsIdentity(bindMat, Mathery.VCompareEpsilon));
 
 				string	jointSrc	="";
