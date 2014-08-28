@@ -252,7 +252,11 @@ namespace ColladaConvert
 			Matrix	shiftMat	=Matrix.Identity;
 			if(colladaFile.asset.up_axis == UpAxisType.Z_UP)
 			{
-				shiftMat	=Matrix.RotationX(-MathUtil.PiOverTwo);
+				shiftMat	*=Matrix.RotationX(MathUtil.PiOverTwo);
+			}
+			else
+			{
+//				shiftMat	=Matrix.RotationY(-MathUtil.PiOverTwo);
 			}
 
 			//this needs to be identity so the game
@@ -1696,18 +1700,77 @@ namespace ColladaConvert
 					{
 						if(!CNodeHasKeyData(n))
 						{
-							continue;
+							//no transform needed
+							return	Matrix.Identity;
 						}
+
 						KeyFrame	kf	=GetKeyFromCNode(n);
 
 						Matrix	mat	=Matrix.Scaling(kf.mScale) *
 							Matrix.RotationQuaternion(kf.mRotation) *
 							Matrix.Translation(kf.mPosition);
+
+						KeyFrame.RightHandToLeft(ref mat);
 									
 						return	mat;
 					}
 				}
 			}
+
+			//might have a max pivot
+			geomNodes	=from lvs in colFile.Items.OfType<library_visual_scenes>().First().visual_scene
+							 from n in lvs.node
+							 where n.instance_geometry == null && n.node1 != null
+							 select n;
+
+			foreach(node n in geomNodes)
+			{
+				var subNodes	=from nd in n.node1 where nd.instance_geometry != null select nd;
+
+				foreach(node sn in subNodes)
+				{
+					foreach(instance_geometry ig in sn.instance_geometry)
+					{
+						if(ig.url.Substring(1) == g.id)
+						{
+							if(!CNodeHasKeyData(sn) && !CNodeHasKeyData(n))
+							{
+								//no transform needed
+								return	Matrix.Identity;
+							}
+
+							Matrix	parentMat	=Matrix.Identity;
+							Matrix	mat			=Matrix.Identity;
+
+							if(CNodeHasKeyData(n))
+							{
+								KeyFrame	kfParent	=GetKeyFromCNode(n);
+
+								parentMat	=Matrix.Scaling(kfParent.mScale) *
+									Matrix.RotationQuaternion(kfParent.mRotation) *
+									Matrix.Translation(kfParent.mPosition);
+
+								KeyFrame.RightHandToLeft(ref parentMat);
+							}
+
+							if(CNodeHasKeyData(sn))
+							{
+								KeyFrame	kf	=GetKeyFromCNode(sn);
+
+								mat	=Matrix.Scaling(kf.mScale) *
+									Matrix.RotationQuaternion(kf.mRotation) *
+									Matrix.Translation(kf.mPosition);
+
+								KeyFrame.RightHandToLeft(ref mat);
+							}
+							return	parentMat * mat;// * parentMat;
+						}
+					}
+				}
+			}
+
+			//none found, not necessarily bad
+			//skinned stuff doesn't have this
 			return	Matrix.Identity;
 		}
 
