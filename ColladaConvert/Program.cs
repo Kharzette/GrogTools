@@ -188,7 +188,7 @@ namespace ColladaConvert
 
 				if(ss.GetDrawBox())
 				{
-					comPrims.DrawBox(gd.DC);
+					comPrims.DrawBox(gd.DC, Matrix.Identity);
 				}
 
 				if(ss.GetDrawSphere())
