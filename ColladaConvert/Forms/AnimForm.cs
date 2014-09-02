@@ -107,6 +107,17 @@ namespace ColladaConvert
 		internal bool LoadAnimDAE(string path, AnimLib alib, bool bCheckSkeleton)
 		{
 			COLLADA	colladaFile	=DeSerializeCOLLADA(path);
+
+			//don't have a way to test this
+			Debug.Assert(colladaFile.asset.up_axis != UpAxisType.X_UP);
+
+			//do have a way to test this, but it causes
+			//the bind shape matrii to have a rotation
+			Debug.Assert(colladaFile.asset.up_axis != UpAxisType.Y_UP);
+
+			//adjust coordinate system
+			Matrix	shiftMat	=Matrix.RotationX(MathUtil.PiOverTwo);
+
 			Skeleton	skel	=BuildSkeleton(colladaFile);
 
 			skel.ConvertToLeftHanded();
@@ -180,6 +191,8 @@ namespace ColladaConvert
 			//build or get skeleton
 			Skeleton	skel	=BuildSkeleton(colladaFile);
 
+			skel.ConvertToLeftHanded();
+
 			//see if animlib has a skeleton yet
 			if(alib.GetSkeleton() == null)
 			{
@@ -198,8 +211,12 @@ namespace ColladaConvert
 				skel	=alib.GetSkeleton();
 			}
 
-			//bake scene node modifiers into controllers
-			BakeSceneNodesIntoVerts(colladaFile, skel, chunks);
+			//bake shiftmat into part verts
+//			foreach(MeshConverter mc in chunks)
+//			{
+//				mc.BakeTransformIntoVerts(shiftMat);
+//				mc.BakeTransformIntoNormals(shiftMat);
+//			}
 
 			alib.AddAnim(BuildAnim(colladaFile, skel, lvs, path));
 

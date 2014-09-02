@@ -193,7 +193,7 @@ namespace ColladaConvert
 
 				if(ss.GetDrawSphere())
 				{
-					comPrims.DrawSphere(gd.DC);
+					comPrims.DrawSphere(gd.DC, Matrix.Identity);
 				}
 
 				post.SetTargets(gd, "Outline", "null");
