@@ -115,9 +115,6 @@ namespace ColladaConvert
 			//the bind shape matrii to have a rotation
 			Debug.Assert(colladaFile.asset.up_axis != UpAxisType.Y_UP);
 
-			//adjust coordinate system
-			Matrix	shiftMat	=Matrix.RotationX(MathUtil.PiOverTwo);
-
 			Skeleton	skel	=BuildSkeleton(colladaFile);
 
 			skel.ConvertToLeftHanded();
@@ -143,7 +140,15 @@ namespace ColladaConvert
 				}
 			}
 
-			alib.AddAnim(BuildAnim(colladaFile, alib.GetSkeleton(), lvs, path));
+			Anim	anm	=BuildAnim(colladaFile, alib.GetSkeleton(), lvs, path);
+
+			alib.AddAnim(anm);
+
+			//adjust coordinate system
+			Matrix	shiftMat	=Matrix.RotationX(MathUtil.PiOverTwo);
+
+			//rotate the animation to match our coord system
+			anm.TransformBoneAnim("Bip01", shiftMat);
 
 			return	true;
 		}
@@ -178,8 +183,6 @@ namespace ColladaConvert
 			{
 				if(!mc.GetName().Contains("DummyGeometry"))
 				{
-					mc.FlipNormals();
-
 					chunks.Add(mc);
 				}
 			}
@@ -212,13 +215,17 @@ namespace ColladaConvert
 			}
 
 			//bake shiftmat into part verts
-//			foreach(MeshConverter mc in chunks)
-//			{
-//				mc.BakeTransformIntoVerts(shiftMat);
-//				mc.BakeTransformIntoNormals(shiftMat);
-//			}
+			foreach(MeshConverter mc in chunks)
+			{
+				mc.BakeTransformIntoVerts(shiftMat);
+			}
 
-			alib.AddAnim(BuildAnim(colladaFile, skel, lvs, path));
+			Anim	anm	=BuildAnim(colladaFile, alib.GetSkeleton(), lvs, path);
+
+			alib.AddAnim(anm);
+
+			//rotate the animation to match our coord system
+			anm.TransformBoneAnim("Bip01", shiftMat);
 
 			CreateSkin(colladaFile, arch, chunks, skel);
 
@@ -229,11 +236,13 @@ namespace ColladaConvert
 				Mesh	conv	=mc.GetConvertedMesh();
 				Matrix	mat		=GetSceneNodeTransform(colladaFile, mc);
 
+				//this might not be totally necessary
+				//but it is nice to have
 				Debug.Assert(mat.IsIdentity);
 
 				conv.Name	=mc.GetGeomName();
 
-				conv.SetTransform(shiftMat);
+				conv.SetTransform(Matrix.Identity);
 
 				arch.AddPart(conv);
 				chr.AddPart(mMatLib);
@@ -570,6 +579,11 @@ namespace ColladaConvert
 						ibp.Invert();
 
 						KeyFrame.RightHandToLeft(ref ibp);
+
+						//adjust coordinate system
+						Matrix	shiftMat	=Matrix.RotationX(MathUtil.PiOverTwo);
+
+						ibp	*=shiftMat;
 
 						ibp.Invert();
 

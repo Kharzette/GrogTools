@@ -450,6 +450,9 @@ namespace ColladaConvert
 
 			List<TrackedVert>	verts	=new List<TrackedVert>();
 
+			//adjust coordinate system for normals
+			Matrix	shiftMat	=Matrix.RotationX(MathUtil.PiOverTwo);
+
 			//track the polygon in use
 			int	polyIndex	=0;
 			int	curVert		=0;
@@ -513,9 +516,19 @@ namespace ColladaConvert
 				//Negate the Z here for right to left handed
 				if(normIdxs != null && norms != null)
 				{
-					tv.Normal0.X	=norms.Values[nidx * 3];
-					tv.Normal0.Y	=norms.Values[1 + nidx * 3];
-					tv.Normal0.Z	=-norms.Values[2 + nidx * 3];	//note negation
+					Vector3	norm;
+
+					//copy out of float array and switch handedness
+					norm.X	=norms.Values[nidx * 3];
+					norm.Y	=norms.Values[1 + nidx * 3];
+					norm.Z	=-norms.Values[2 + nidx * 3];	//note negation
+
+					//rotate
+					norm	=Vector3.TransformNormal(norm, shiftMat);
+
+					tv.Normal0.X	=norm.X;
+					tv.Normal0.Y	=norm.Y;
+					tv.Normal0.Z	=norm.Z;
 				}
 				//copy texcoords
 				if(texIdxs0 != null && texCoords0 != null)
