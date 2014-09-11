@@ -69,6 +69,12 @@ namespace ParticleEdit
 				}
 			}
 
+			if(mParticleTextures.Count <= 0)
+			{
+				TextureBox.Items.Add("Empty!");
+				return;
+			}
+
 			foreach(string tex in mParticleTextures)
 			{
 				//strip particles off the front

@@ -138,15 +138,15 @@ namespace ParticleEdit
 		{
 			Input	inp	=new InputLib.Input();
 			
-			inp.MapAction(MyActions.PitchUp, 16);
-			inp.MapAction(MyActions.MoveForward, 17);
-			inp.MapAction(MyActions.PitchDown, 18);
-			inp.MapAction(MyActions.MoveLeft, 30);
-			inp.MapAction(MyActions.MoveBack, 31);
-			inp.MapAction(MyActions.MoveRight, 32);
+			inp.MapAction(MyActions.PitchUp, ActionTypes.ContinuousHold, Modifiers.None, 16);
+			inp.MapAction(MyActions.MoveForward, ActionTypes.ContinuousHold, Modifiers.None, 17);
+			inp.MapAction(MyActions.PitchDown, ActionTypes.ContinuousHold, Modifiers.None, 18);
+			inp.MapAction(MyActions.MoveLeft, ActionTypes.ContinuousHold, Modifiers.None, 30);
+			inp.MapAction(MyActions.MoveBack, ActionTypes.ContinuousHold, Modifiers.None, 31);
+			inp.MapAction(MyActions.MoveRight, ActionTypes.ContinuousHold, Modifiers.None, 32);
 
 			inp.MapToggleAction(MyActions.ToggleMouseLookOn,
-				MyActions.ToggleMouseLookOff,
+				MyActions.ToggleMouseLookOff, Modifiers.None,
 				Input.VariousButtons.RightMouseButton);
 
 			inp.MapAxisAction(MyActions.Pitch, Input.MoveAxis.GamePadRightYAxis);
