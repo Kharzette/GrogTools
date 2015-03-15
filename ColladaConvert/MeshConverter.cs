@@ -8,7 +8,6 @@ using MeshLib;
 using SharpDX;
 using SharpDX.DXGI;
 using SharpDX.Direct3D11;
-using SharpDX.D3DCompiler;
 
 //ambiguous stuff
 using Buffer = SharpDX.Direct3D11.Buffer;

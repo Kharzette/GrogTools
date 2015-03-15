@@ -76,7 +76,7 @@ namespace BSPBuilder
 			backBuf	=gd.DC.OutputMerger.GetRenderTargets(1, out backDepth);
 
 			//set up post processing module
-			mPost	=new PostProcess(gd, mMatLib.GetEffect("Post.fx"));
+			mPost	=new PostProcess(gd, mMatLib, "Post.fx");
 
 			int	resx	=gd.RendForm.ClientRectangle.Width;
 			int	resy	=gd.RendForm.ClientRectangle.Height;

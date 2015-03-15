@@ -10,7 +10,6 @@ using UtilityLib;
 using MeshLib;
 
 using SharpDX;
-using SharpDX.D3DCompiler;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
@@ -68,7 +67,7 @@ namespace ColladaConvert
 			backBuf	=gd.DC.OutputMerger.GetRenderTargets(1, out backDepth);
 
 			//set up post processing module
-			PostProcess	post	=new PostProcess(gd, matLib.GetEffect("Post.fx"));
+			PostProcess	post	=new PostProcess(gd, matLib, "Post.fx");
 
 			PlayerSteering	pSteering	=SetUpSteering();
 			Input			inp			=SetUpInput();
