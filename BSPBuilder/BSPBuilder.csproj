@@ -53,6 +53,12 @@
   <PropertyGroup>
     <ProjectGuid>{2451C6B3-84BA-48D4-AA26-4B407F1C70AC}</ProjectGuid>
   </PropertyGroup>
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="SharpDX">
       <HintPath>$(SharpDXPackageBinDir)\SharpDX.dll</HintPath>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,8 +53,37 @@ namespace ColladaConvert
 					System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
 			gd.RendForm.Location	=Settings.Default.MainWindowPos;
+
+			SharedForms.ThreadedProgress	tprog	=null;
 			
-			StuffKeeper	sk		=new StuffKeeper(gd, "C:\\Games\\CurrentGame");
+			StuffKeeper	sk		=new StuffKeeper();
+
+			sk.eCompilesNeeded	+=(sender, args) => {
+				Thread	uiThread	=new Thread(() =>
+					{
+						tprog	=new SharedForms.ThreadedProgress("Compiling Shaders...");
+						Application.Run(tprog);
+					});
+
+				uiThread.SetApartmentState(ApartmentState.STA);
+				uiThread.Start();
+
+				while(tprog == null)
+				{
+					Thread.Sleep(0);
+				}
+
+				tprog.SetSizeInfo(0, (int)sender);	};
+
+			sk.eCompileDone	+=(sender, args) => {
+				tprog.SetCurrent((int)sender);
+				if((int)sender == tprog.GetMax())
+				{
+					tprog.Nuke();
+				} };
+
+			sk.Init(gd, "C:\\Games\\CurrentGame");
+
 			MatLib		matLib	=new MatLib(gd, sk);
 
 			matLib.InitCelShading(1);

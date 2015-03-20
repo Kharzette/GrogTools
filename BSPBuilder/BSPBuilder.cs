@@ -50,8 +50,9 @@ namespace BSPBuilder
 		Output		mOutForm	=new Output();
 
 		//shared forms
-		SharedForms.MaterialForm	mMatForm;
-		SharedForms.CelTweakForm	mCTForm;
+		SharedForms.MaterialForm		mMatForm;
+		SharedForms.CelTweakForm		mCTForm;
+		SharedForms.ThreadedProgress	mSProg;
 
 
 		internal BSPBuilder(GraphicsDevice gd, string gameRootDir)
@@ -59,7 +60,12 @@ namespace BSPBuilder
 			mGD				=gd;
 			mGameRootDir	=gameRootDir;
 
-			mSKeeper	=new StuffKeeper(mGD, gameRootDir);
+			mSKeeper	=new StuffKeeper();
+
+			mSKeeper.eCompilesNeeded	+=OnCompilesNeeded;
+			mSKeeper.eCompileDone		+=OnCompileDone;
+
+			mSKeeper.Init(mGD, gameRootDir);
 
 			mDebugDraw	=new DebugDraw(gd, mSKeeper);
 			mMatLib		=new MatLib(gd, mSKeeper);
@@ -828,6 +834,37 @@ namespace BSPBuilder
 
 				mMatLib.IgnoreMaterialVariables(m, matIgnores);
 				mMatLib.HideMaterialVariables(m, matHides);
+			}
+		}
+
+
+		void OnCompilesNeeded(object sender, EventArgs ea)
+		{
+			Thread	uiThread	=new Thread(() =>
+				{
+					mSProg	=new SharedForms.ThreadedProgress("Compiling Shaders...");
+					Application.Run(mSProg);
+				});
+
+			uiThread.SetApartmentState(ApartmentState.STA);
+			uiThread.Start();
+
+			while(mSProg == null)
+			{
+				Thread.Sleep(0);
+			}
+
+			mSProg.SetSizeInfo(0, (int)sender);
+		}
+
+
+		void OnCompileDone(object sender, EventArgs ea)
+		{
+			mSProg.SetCurrent((int)sender);
+
+			if((int)sender == mSProg.GetMax())
+			{
+				mSProg.Nuke();
 			}
 		}
 	}
