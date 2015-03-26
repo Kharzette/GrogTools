@@ -56,6 +56,12 @@ namespace BSPBuilder
 			Input			inp			=SetUpInput();
 			Random			rand		=new Random();
 
+			EventHandler	actHandler	=new EventHandler(
+				delegate(object s, EventArgs ea)
+				{	inp.ClearInputs();	});
+
+			gd.RendForm.Activated	+=actHandler;
+
 			BSPBuilder	bspBuild	=new BSPBuilder(gd, "C:\\Games\\CurrentGame");
 
 			Vector3	pos				=Vector3.One * 5f;
@@ -140,6 +146,11 @@ namespace BSPBuilder
 			}, true);	//true here is slow but needed for winforms events
 
 			Settings.Default.Save();
+
+			gd.RendForm.Activated	-=actHandler;
+
+			bspBuild.FreeAll();
+			inp.FreeAll();
 			
 			//Release all resources
 			gd.ReleaseAll();

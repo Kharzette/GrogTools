@@ -54,33 +54,12 @@ namespace ColladaConvert
 
 			gd.RendForm.Location	=Settings.Default.MainWindowPos;
 
-			SharedForms.ThreadedProgress	tprog	=null;
-			
+			SharedForms.ShaderCompileHelper.mTitle	="Compiling Shaders...";
+
 			StuffKeeper	sk		=new StuffKeeper();
 
-			sk.eCompilesNeeded	+=(sender, args) => {
-				Thread	uiThread	=new Thread(() =>
-					{
-						tprog	=new SharedForms.ThreadedProgress("Compiling Shaders...");
-						Application.Run(tprog);
-					});
-
-				uiThread.SetApartmentState(ApartmentState.STA);
-				uiThread.Start();
-
-				while(tprog == null)
-				{
-					Thread.Sleep(0);
-				}
-
-				tprog.SetSizeInfo(0, (int)sender);	};
-
-			sk.eCompileDone	+=(sender, args) => {
-				tprog.SetCurrent((int)sender);
-				if((int)sender == tprog.GetMax())
-				{
-					tprog.Nuke();
-				} };
+			sk.eCompileNeeded	+=SharedForms.ShaderCompileHelper.CompileNeededHandler;
+			sk.eCompileDone		+=SharedForms.ShaderCompileHelper.CompileDoneHandler;
 
 			sk.Init(gd, "C:\\Games\\CurrentGame");
 
@@ -91,11 +70,6 @@ namespace ColladaConvert
 				gd.GD.FeatureLevel == FeatureLevel.Level_9_3, false, 0);
 			matLib.SetCelTexture(0);
 
-			RenderTargetView	[]backBuf	=new RenderTargetView[1];
-			DepthStencilView	backDepth;
-
-			backBuf	=gd.DC.OutputMerger.GetRenderTargets(1, out backDepth);
-
 			//set up post processing module
 			PostProcess	post	=new PostProcess(gd, matLib, "Post.fx");
 
@@ -103,6 +77,12 @@ namespace ColladaConvert
 			Input			inp			=SetUpInput();
 			Random			rand		=new Random();
 			CommonPrims		comPrims	=new CommonPrims(gd, sk);
+
+			EventHandler	actHandler	=new EventHandler(
+				delegate(object s, EventArgs ea)
+				{	inp.ClearInputs();	});
+
+			gd.RendForm.Activated	+=actHandler;
 
 			int	resx	=gd.RendForm.ClientRectangle.Width;
 			int	resy	=gd.RendForm.ClientRectangle.Height;
@@ -261,6 +241,18 @@ namespace ColladaConvert
 			}, true);	//true here is slow but needed for winforms events
 
 			Settings.Default.Save();
+
+			gd.RendForm.Activated	-=actHandler;
+
+			comPrims.FreeAll();
+			inp.FreeAll();
+			post.FreeAll();
+			matLib.FreeAll();
+
+			sk.eCompileDone		-=SharedForms.ShaderCompileHelper.CompileDoneHandler;
+			sk.eCompileNeeded	-=SharedForms.ShaderCompileHelper.CompileNeededHandler;
+
+			sk.FreeAll();
 			
 			//Release all resources
 			gd.ReleaseAll();

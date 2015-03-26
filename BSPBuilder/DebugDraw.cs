@@ -83,6 +83,14 @@ namespace BSPBuilder
 		}
 
 
+		internal void FreeAll()
+		{
+			mMatLib.FreeAll();
+			mVB.Dispose();
+			mIB.Dispose();
+		}
+
+
 		internal void Draw(GraphicsDevice gd)
 		{
 			if(gd.DC == null)

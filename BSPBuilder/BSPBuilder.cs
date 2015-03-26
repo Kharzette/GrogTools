@@ -52,7 +52,6 @@ namespace BSPBuilder
 		//shared forms
 		SharedForms.MaterialForm		mMatForm;
 		SharedForms.CelTweakForm		mCTForm;
-		SharedForms.ThreadedProgress	mSProg;
 
 
 		internal BSPBuilder(GraphicsDevice gd, string gameRootDir)
@@ -62,8 +61,9 @@ namespace BSPBuilder
 
 			mSKeeper	=new StuffKeeper();
 
-			mSKeeper.eCompilesNeeded	+=OnCompilesNeeded;
-			mSKeeper.eCompileDone		+=OnCompileDone;
+			SharedForms.ShaderCompileHelper.mTitle	="Compiling Shaders...";
+			mSKeeper.eCompileNeeded	+=SharedForms.ShaderCompileHelper.CompileNeededHandler;
+			mSKeeper.eCompileDone	+=SharedForms.ShaderCompileHelper.CompileDoneHandler;
 
 			mSKeeper.Init(mGD, gameRootDir);
 
@@ -142,6 +142,33 @@ namespace BSPBuilder
 			CoreEvents.eNumClustersChanged	+=OnNumClustersChanged;
 			CoreEvents.eNumPlanesChanged	+=OnNumPlanesChanged;
 			CoreEvents.eNumVertsChanged		+=OnNumVertsChanged;
+		}
+
+
+		internal void FreeAll()
+		{
+			if(mMap != null)
+			{
+				mMap.FreeGBSPFile();
+			}
+
+			if(mVisMap != null)
+			{
+				mVisMap.FreeFileVisData();
+			}
+
+			if(mZoneDraw != null)
+			{
+				mZoneDraw.FreeAll();
+			}
+
+			mMatLib.FreeAll();
+			mPost.FreeAll();
+			mDebugDraw.FreeAll();
+
+			mSKeeper.eCompileNeeded	-=SharedForms.ShaderCompileHelper.CompileNeededHandler;
+			mSKeeper.eCompileDone	-=SharedForms.ShaderCompileHelper.CompileDoneHandler;
+			mSKeeper.FreeAll();
 		}
 
 
@@ -834,37 +861,6 @@ namespace BSPBuilder
 
 				mMatLib.IgnoreMaterialVariables(m, matIgnores);
 				mMatLib.HideMaterialVariables(m, matHides);
-			}
-		}
-
-
-		void OnCompilesNeeded(object sender, EventArgs ea)
-		{
-			Thread	uiThread	=new Thread(() =>
-				{
-					mSProg	=new SharedForms.ThreadedProgress("Compiling Shaders...");
-					Application.Run(mSProg);
-				});
-
-			uiThread.SetApartmentState(ApartmentState.STA);
-			uiThread.Start();
-
-			while(mSProg == null)
-			{
-				Thread.Sleep(0);
-			}
-
-			mSProg.SetSizeInfo(0, (int)sender);
-		}
-
-
-		void OnCompileDone(object sender, EventArgs ea)
-		{
-			mSProg.SetCurrent((int)sender);
-
-			if((int)sender == mSProg.GetMax())
-			{
-				mSProg.Nuke();
 			}
 		}
 	}
