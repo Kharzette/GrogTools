@@ -15,6 +15,7 @@ using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using SharpDX.Windows;
+
 using Buffer	=SharpDX.Direct3D11.Buffer;
 using Device	=SharpDX.Direct3D11.Device;
 using MapFlags	=SharpDX.Direct3D11.MapFlags;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,10 +31,18 @@ namespace ParticleEdit
 		{
 			MoveForwardBack, MoveForward, MoveBack,
 			MoveLeftRight, MoveLeft, MoveRight,
+			MoveForwardFast, MoveBackFast,
+			MoveLeftFast, MoveRightFast,
 			Turn, TurnLeft, TurnRight,
 			Pitch, PitchUp, PitchDown,
 			ToggleMouseLookOn, ToggleMouseLookOff
 		};
+
+		const float	MouseTurnMultiplier		=0.13f;
+		const float	AnalogTurnMultiplier	=0.5f;
+		const float	KeyTurnMultiplier		=0.5f;
+		const float	MaxTimeDelta			=0.1f;
+
 
 		[STAThread]
 		static void Main()
@@ -41,7 +50,8 @@ namespace ParticleEdit
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 
-			GraphicsDevice	gd	=new GraphicsDevice("Particle Editing Tool", FeatureLevel.Level_11_0);
+			GraphicsDevice	gd	=new GraphicsDevice("Particle Editing Tool",
+				FeatureLevel.Level_11_0);
 
 			//save renderform position
 			gd.RendForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
@@ -57,7 +67,15 @@ namespace ParticleEdit
 			string	rootDir	=AppDomain.CurrentDomain.BaseDirectory;
 #endif
 
-			StuffKeeper	sk		=new StuffKeeper(gd, rootDir);
+			SharedForms.ShaderCompileHelper.mTitle	="Compiling Shaders...";
+
+			StuffKeeper	sk		=new StuffKeeper();
+
+			sk.eCompileNeeded	+=SharedForms.ShaderCompileHelper.CompileNeededHandler;
+			sk.eCompileDone		+=SharedForms.ShaderCompileHelper.CompileDoneHandler;
+
+			sk.Init(gd, rootDir);
+
 			MatLib		matLib	=new MatLib(gd, sk);
 			CommonPrims	cprims	=new CommonPrims(gd, sk);
 
@@ -66,40 +84,67 @@ namespace ParticleEdit
 				gd.GD.FeatureLevel == FeatureLevel.Level_9_3, false, 0);
 			matLib.SetCelTexture(0);
 
-			PlayerSteering	pSteering	=SetUpSteering();
-			Input			inp			=SetUpInput();
-			Random			rand		=new Random();
-			ParticleForm	partForm	=SetUpForms(gd.GD, matLib, sk);
-			ParticleEditor	partEdit	=new ParticleEditor(gd, partForm, matLib);
+			PlayerSteering	pSteering		=SetUpSteering();
+			Input			inp				=SetUpInput();
+			Random			rand			=new Random();
+			ParticleForm	partForm		=SetUpForms(gd.GD, matLib, sk);
+			ParticleEditor	partEdit		=new ParticleEditor(gd, partForm, matLib);
+			bool			bMouseLookOn	=false;
+
+			EventHandler	actHandler	=new EventHandler(
+				delegate(object s, EventArgs ea)
+				{	inp.ClearInputs();	});
+
+			EventHandler<EventArgs>	deActHandler	=new EventHandler<EventArgs>(
+				delegate(object s, EventArgs ea)
+				{
+					gd.SetCapture(false);
+					bMouseLookOn	=false;
+				});
+
+			gd.RendForm.Activated		+=actHandler;
+			gd.RendForm.AppDeactivated	+=deActHandler;
 
 			Vector3	pos			=Vector3.One * 5f;
 			Vector3	lightDir	=-Vector3.UnitY;
 			long	lastTime	=Stopwatch.GetTimestamp();
+			long	freq		=Stopwatch.Frequency;
 
 			RenderLoop.Run(gd.RendForm, () =>
 			{
+				if(!gd.RendForm.Focused)
+				{
+					Thread.Sleep(33);
+				}
+
 				gd.CheckResize();
 
-				List<Input.InputAction>	actions	=UpdateInput(inp, gd);
-
-				pos	=pSteering.Update(pos, gd.GCam.Forward, gd.GCam.Left, gd.GCam.Up, actions);
-				
-				gd.GCam.Update(pos, pSteering.Pitch, pSteering.Yaw, pSteering.Roll);
-
-				matLib.SetParameterForAll("mView", gd.GCam.View);
-				matLib.SetParameterForAll("mEyePos", gd.GCam.Position);
-				matLib.SetParameterForAll("mProjection", gd.GCam.Projection);
-
-				cprims.Update(gd.GCam, lightDir);
+				if(bMouseLookOn)
+				{
+					gd.ResetCursorPos();
+				}
 
 				//Clear views
 				gd.ClearViews();
 
-				long	timeNow	=Stopwatch.GetTimestamp();
-				long	delta	=timeNow - lastTime;
-				float	msFreq	=Stopwatch.Frequency / 1000f;
+				long	timeNow		=Stopwatch.GetTimestamp();
+				long	delta		=timeNow - lastTime;
+				float	secDelta	=(float)delta / freq;
+				float	msDelta		=secDelta * 1000f;
 
-				float	msDelta	=((float)delta / msFreq);
+				List<Input.InputAction>	actions	=UpdateInput(inp, gd, msDelta, ref bMouseLookOn);
+				if(!gd.RendForm.Focused)
+				{
+					actions.Clear();
+				}
+
+				pos	-=pSteering.Update(pos, gd.GCam.Forward, gd.GCam.Left, gd.GCam.Up, actions);
+				
+				gd.GCam.Update(pos, pSteering.Pitch, pSteering.Yaw, pSteering.Roll);
+
+				matLib.UpdateWVP(Matrix.Identity, gd.GCam.View, gd.GCam.Projection, gd.GCam.Position);
+
+				cprims.Update(gd.GCam, lightDir);
 
 				cprims.DrawAxis(gd.DC);
 
@@ -115,6 +160,18 @@ namespace ParticleEdit
 
 			Settings.Default.Save();
 			
+			gd.RendForm.Activated		-=actHandler;
+			gd.RendForm.AppDeactivated	-=deActHandler;
+
+			cprims.FreeAll();
+			inp.FreeAll();
+			matLib.FreeAll();
+
+			sk.eCompileDone		-=SharedForms.ShaderCompileHelper.CompileDoneHandler;
+			sk.eCompileNeeded	-=SharedForms.ShaderCompileHelper.CompileNeededHandler;
+
+			sk.FreeAll();
+
 			//Release all resources
 			gd.ReleaseAll();
 		}
@@ -136,14 +193,45 @@ namespace ParticleEdit
 
 		static Input SetUpInput()
 		{
-			Input	inp	=new InputLib.Input();
+			Input	inp	=new InputLib.Input(1000f / Stopwatch.Frequency);
 			
+			inp.MapAction(MyActions.MoveForward, ActionTypes.ContinuousHold,
+				Modifiers.None, System.Windows.Forms.Keys.W);
+			inp.MapAction(MyActions.MoveLeft, ActionTypes.ContinuousHold,
+				Modifiers.None, System.Windows.Forms.Keys.A);
+			inp.MapAction(MyActions.MoveBack, ActionTypes.ContinuousHold,
+				Modifiers.None, System.Windows.Forms.Keys.S);
+			inp.MapAction(MyActions.MoveRight, ActionTypes.ContinuousHold,
+				Modifiers.None, System.Windows.Forms.Keys.D);
+			inp.MapAction(MyActions.MoveForwardFast, ActionTypes.ContinuousHold,
+				Modifiers.ShiftHeld, System.Windows.Forms.Keys.W);
+			inp.MapAction(MyActions.MoveBackFast, ActionTypes.ContinuousHold,
+				Modifiers.ShiftHeld, System.Windows.Forms.Keys.S);
+			inp.MapAction(MyActions.MoveLeftFast, ActionTypes.ContinuousHold,
+				Modifiers.ShiftHeld, System.Windows.Forms.Keys.A);
+			inp.MapAction(MyActions.MoveRightFast, ActionTypes.ContinuousHold,
+				Modifiers.ShiftHeld, System.Windows.Forms.Keys.D);
+
+			//arrow keys
+			inp.MapAction(MyActions.MoveForward, ActionTypes.ContinuousHold,
+				Modifiers.None, System.Windows.Forms.Keys.Up);
+			inp.MapAction(MyActions.MoveBack, ActionTypes.ContinuousHold,
+				Modifiers.None, System.Windows.Forms.Keys.Down);
+			inp.MapAction(MyActions.MoveForwardFast, ActionTypes.ContinuousHold,
+				Modifiers.ShiftHeld, System.Windows.Forms.Keys.Up);
+			inp.MapAction(MyActions.MoveBackFast, ActionTypes.ContinuousHold,
+				Modifiers.ShiftHeld, System.Windows.Forms.Keys.Down);
+			inp.MapAction(MyActions.TurnLeft, ActionTypes.ContinuousHold,
+				Modifiers.None, System.Windows.Forms.Keys.Left);
+			inp.MapAction(MyActions.TurnRight, ActionTypes.ContinuousHold,
+				Modifiers.None, System.Windows.Forms.Keys.Right);
+			inp.MapAction(MyActions.PitchUp, ActionTypes.ContinuousHold,
+				Modifiers.None, System.Windows.Forms.Keys.Q);
+			inp.MapAction(MyActions.PitchDown, ActionTypes.ContinuousHold,
+				Modifiers.None, System.Windows.Forms.Keys.E);
+
 			inp.MapAction(MyActions.PitchUp, ActionTypes.ContinuousHold, Modifiers.None, 16);
-			inp.MapAction(MyActions.MoveForward, ActionTypes.ContinuousHold, Modifiers.None, 17);
 			inp.MapAction(MyActions.PitchDown, ActionTypes.ContinuousHold, Modifiers.None, 18);
-			inp.MapAction(MyActions.MoveLeft, ActionTypes.ContinuousHold, Modifiers.None, 30);
-			inp.MapAction(MyActions.MoveBack, ActionTypes.ContinuousHold, Modifiers.None, 31);
-			inp.MapAction(MyActions.MoveRight, ActionTypes.ContinuousHold, Modifiers.None, 32);
 
 			inp.MapToggleAction(MyActions.ToggleMouseLookOn,
 				MyActions.ToggleMouseLookOff, Modifiers.None,
@@ -162,8 +250,10 @@ namespace ParticleEdit
 			PlayerSteering	pSteering	=new PlayerSteering();
 			pSteering.Method			=PlayerSteering.SteeringMethod.Fly;
 
-			pSteering.SetMoveEnums(MyActions.MoveLeftRight, MyActions.MoveLeft, MyActions.MoveRight,
-				MyActions.MoveForwardBack, MyActions.MoveForward, MyActions.MoveBack);
+			pSteering.SetMoveEnums(MyActions.MoveForwardBack, MyActions.MoveLeftRight,
+				MyActions.MoveForward, MyActions.MoveBack, MyActions.MoveLeft,
+				MyActions.MoveRight, MyActions.MoveForwardFast, MyActions.MoveBackFast,
+				MyActions.MoveLeftFast, MyActions.MoveRightFast);
 
 			pSteering.SetTurnEnums(MyActions.Turn, MyActions.TurnLeft, MyActions.TurnRight);
 
@@ -172,36 +262,26 @@ namespace ParticleEdit
 			return	pSteering;
 		}
 
-		static List<Input.InputAction> UpdateInput(Input inp, GraphicsDevice gd)
+		static List<Input.InputAction> UpdateInput(Input inp,
+			GraphicsDevice gd, float delta, ref bool bMouseLookOn)
 		{
-			if(gd.RendForm.Capture)
-			{
-				gd.ResetCursorPos();
-			}
-
 			List<Input.InputAction>	actions	=inp.GetAction();
-			if(!gd.RendForm.Focused)
+
+			foreach(Input.InputAction act in actions)
 			{
-				actions.Clear();
-			}
-			else
-			{
-				foreach(Input.InputAction act in actions)
+				if(act.mAction.Equals(MyActions.ToggleMouseLookOn))
 				{
-					if(act.mAction.Equals(MyActions.ToggleMouseLookOn))
-					{
-						gd.SetCapture(true);
+					gd.SetCapture(true);
 
-						inp.MapAxisAction(MyActions.Pitch, Input.MoveAxis.MouseYAxis);
-						inp.MapAxisAction(MyActions.Turn, Input.MoveAxis.MouseXAxis);
-					}
-					else if(act.mAction.Equals(MyActions.ToggleMouseLookOff))
-					{
-						gd.SetCapture(false);
+					inp.MapAxisAction(MyActions.Pitch, Input.MoveAxis.MouseYAxis);
+					inp.MapAxisAction(MyActions.Turn, Input.MoveAxis.MouseXAxis);
+				}
+				else if(act.mAction.Equals(MyActions.ToggleMouseLookOff))
+				{
+					gd.SetCapture(false);
 
-						inp.UnMapAxisAction(MyActions.Pitch, Input.MoveAxis.MouseYAxis);
-						inp.UnMapAxisAction(MyActions.Turn, Input.MoveAxis.MouseXAxis);
-					}
+					inp.UnMapAxisAction(MyActions.Pitch, Input.MoveAxis.MouseYAxis);
+					inp.UnMapAxisAction(MyActions.Turn, Input.MoveAxis.MouseXAxis);
 				}
 			}
 			return	actions;
