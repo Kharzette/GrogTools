@@ -38,7 +38,6 @@ namespace BSPBuilder
 
 		//gpu
 		GraphicsDevice	mGD;
-		PostProcess		mPost;
 
 		//debug draw stuff
 		DebugDraw	mDebugDraw;
@@ -81,21 +80,8 @@ namespace BSPBuilder
 
 			backBuf	=gd.DC.OutputMerger.GetRenderTargets(1, out backDepth);
 
-			//set up post processing module
-			mPost	=new PostProcess(gd, mMatLib, "Post.fx");
-
 			int	resx	=gd.RendForm.ClientRectangle.Width;
 			int	resy	=gd.RendForm.ClientRectangle.Height;
-
-			mPost.MakePostTarget(gd, "SceneColor", resx, resy, Format.R8G8B8A8_UNorm);
-			mPost.MakePostDepth(gd, "SceneDepth", resx, resy,
-				(gd.GD.FeatureLevel != FeatureLevel.Level_9_3)?
-					Format.D32_Float_S8X24_UInt : Format.D24_UNorm_S8_UInt);
-			mPost.MakePostTarget(gd, "SceneDepthMatNorm", resx, resy, Format.R16G16B16A16_Float);
-			mPost.MakePostTarget(gd, "Bleach", resx, resy, Format.R8G8B8A8_UNorm);
-			mPost.MakePostTarget(gd, "Outline", resx, resy, Format.R8G8B8A8_UNorm);
-			mPost.MakePostTarget(gd, "Bloom1", resx/2, resy/2, Format.R8G8B8A8_UNorm);
-			mPost.MakePostTarget(gd, "Bloom2", resx/2, resy/2, Format.R8G8B8A8_UNorm);
 
 			mMatForm	=new SharedForms.MaterialForm(mMatLib, mSKeeper);
 			mCTForm		=new SharedForms.CelTweakForm(gd.GD, mMatLib);
@@ -163,7 +149,6 @@ namespace BSPBuilder
 			}
 
 			mMatLib.FreeAll();
-			mPost.FreeAll();
 			mDebugDraw.FreeAll();
 
 			mSKeeper.eCompileNeeded	-=SharedForms.ShaderCompileHelper.CompileNeededHandler;
@@ -208,49 +193,8 @@ namespace BSPBuilder
 				return;
 			}
 
-/*			mPost.SetTargets(gd, "SceneDepthMatNorm", "SceneColor");
-
-			mPost.ClearTarget(gd, "SceneDepthMatNorm", Color.White);
-			mPost.ClearDepth(gd, "SceneColor");
-
-			mZoneDraw.DrawDMN(gd, mVisMap.IsMaterialVisibleFromPos, GetModelMatrix, RenderExternalDMN);
-
-			mPost.SetTargets(gd, "SceneColor", "SceneColor");
-
-			mPost.ClearTarget(gd, "SceneColor", Color.CornflowerBlue);
-			mPost.ClearDepth(gd, "SceneColor");*/
-
-			mZoneDraw.Draw(gd, 0, mVisMap.IsMaterialVisibleFromPos, GetModelMatrix, RenderExternal, RenderShadows);
-
-/*			mPost.SetTargets(gd, "Outline", "null");
-			mPost.SetParameter("mNormalTex", "SceneDepthMatNorm");
-			mPost.DrawStage(gd, "Outline");
-
-			mPost.SetTargets(gd, "Bleach", "null");
-			mPost.SetParameter("mColorTex", "SceneColor");
-			mPost.DrawStage(gd, "BleachBypass");
-
-			mPost.SetTargets(gd, "Bloom1", "null");
-			mPost.SetParameter("mBlurTargetTex", "Bleach");
-			mPost.DrawStage(gd, "BloomExtract");
-
-			mPost.SetTargets(gd, "Bloom2", "null");
-			mPost.SetParameter("mBlurTargetTex", "Bloom1");
-			mPost.DrawStage(gd, "GaussianBlurX");
-
-			mPost.SetTargets(gd, "Bloom1", "null");
-			mPost.SetParameter("mBlurTargetTex", "Bloom2");
-			mPost.DrawStage(gd, "GaussianBlurY");
-
-			mPost.SetTargets(gd, "SceneColor", "null");
-			mPost.SetParameter("mBlurTargetTex", "Bloom1");
-			mPost.SetParameter("mColorTex", "Bleach");
-			mPost.DrawStage(gd, "BloomCombine");
-
-			mPost.SetTargets(gd, "BackColor", "BackDepth");
-			mPost.SetParameter("mBlurTargetTex", "Outline");
-			mPost.SetParameter("mColorTex", "SceneColor");
-			mPost.DrawStage(gd, "Modulate");*/
+			mZoneDraw.Draw(gd, 0, mVisMap.IsMaterialVisibleFromPos,
+				GetModelMatrix, RenderExternal, RenderShadows);
 		}
 
 

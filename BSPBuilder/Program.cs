@@ -33,11 +33,13 @@ namespace BSPBuilder
 			MoveLeftFast, MoveRightFast,
 			Turn, TurnLeft, TurnRight,
 			Pitch, PitchUp, PitchDown,
-			LightX, LightY, LightZ,
 			ToggleMouseLookOn, ToggleMouseLookOff
 		};
 
-		const float	MouseTurnMultiplier	=.07f;
+		const float	MouseTurnMultiplier		=0.13f;
+		const float	AnalogTurnMultiplier	=0.5f;
+		const float	KeyTurnMultiplier		=0.5f;
+		const float	MaxTimeDelta			=0.1f;
 
 
 		[STAThread]
@@ -55,26 +57,38 @@ namespace BSPBuilder
 
 			gd.RendForm.Location	=Settings.Default.MainWindowPos;
 			
-			PlayerSteering	pSteering	=SetUpSteering();
-			Input			inp			=SetUpInput();
-			Random			rand		=new Random();
+			PlayerSteering	pSteering		=SetUpSteering();
+			Input			inp				=SetUpInput();
+			Random			rand			=new Random();
+			Vector3			pos				=Vector3.One * 5f;
+			Vector3			lightDir		=-Vector3.UnitY;
+			bool			bMouseLookOn	=false;
+			long			lastTime		=Stopwatch.GetTimestamp();
+			long			freq			=Stopwatch.Frequency;
 
 			EventHandler	actHandler	=new EventHandler(
 				delegate(object s, EventArgs ea)
 				{	inp.ClearInputs();	});
 
-			gd.RendForm.Activated	+=actHandler;
+			EventHandler<EventArgs>	deActHandler	=new EventHandler<EventArgs>(
+				delegate(object s, EventArgs ea)
+				{
+					gd.SetCapture(false);
+					bMouseLookOn	=false;
+				});
+
+			gd.RendForm.Activated		+=actHandler;
+			gd.RendForm.AppDeactivated	+=deActHandler;
 
 			BSPBuilder	bspBuild	=new BSPBuilder(gd, "C:\\Games\\CurrentGame");
 
-			Vector3	pos				=Vector3.One * 5f;
-			Vector3	lightDir		=-Vector3.UnitY;
-			bool	bMouseLookOn	=false;
-			long	lastTime		=Stopwatch.GetTimestamp();
-
 			RenderLoop.Run(gd.RendForm, () =>
 			{
-				if(bspBuild.Busy())
+				if(!gd.RendForm.Focused)
+				{
+					Thread.Sleep(33);
+				}
+				else if(bspBuild.Busy())
 				{
 					Thread.Sleep(5);
 					return;
@@ -87,51 +101,25 @@ namespace BSPBuilder
 					gd.ResetCursorPos();
 				}
 
-				List<Input.InputAction>	actions	=inp.GetAction();
+				//Clear views
+				gd.ClearViews();
+
+				long	timeNow		=Stopwatch.GetTimestamp();
+				long	delta		=timeNow - lastTime;
+				float	secDelta	=(float)delta / freq;
+				float	msDelta		=secDelta * 1000f;
+
+				List<Input.InputAction>	actions	=UpdateInput(inp, gd, msDelta, ref bMouseLookOn);
 				if(!gd.RendForm.Focused)
 				{
 					actions.Clear();
-				}
-				else
-				{
-					foreach(Input.InputAction act in actions)
-					{
-						if(act.mAction.Equals(MyActions.ToggleMouseLookOn))
-						{
-							bMouseLookOn	=true;
-							Debug.WriteLine("Mouse look: " + bMouseLookOn);
-
-							gd.SetCapture(true);
-
-							inp.MapAxisAction(MyActions.Pitch, Input.MoveAxis.MouseYAxis);
-							inp.MapAxisAction(MyActions.Turn, Input.MoveAxis.MouseXAxis);
-						}
-						else if(act.mAction.Equals(MyActions.ToggleMouseLookOff))
-						{
-							bMouseLookOn	=false;
-							Debug.WriteLine("Mouse look: " + bMouseLookOn);
-
-							gd.SetCapture(false);
-
-							inp.UnMapAxisAction(MyActions.Pitch, Input.MoveAxis.MouseYAxis);
-							inp.UnMapAxisAction(MyActions.Turn, Input.MoveAxis.MouseXAxis);
-						}
-					}
 				}
 
 				pos	-=pSteering.Update(pos, gd.GCam.Forward, gd.GCam.Left, gd.GCam.Up, actions);
 				
 				gd.GCam.Update(pos, pSteering.Pitch, pSteering.Yaw, pSteering.Roll);
 
-				//Clear views
-				gd.ClearViews();
-
-				long	timeNow	=Stopwatch.GetTimestamp();
-				long	delta	=timeNow - lastTime;
-				long	freq	=Stopwatch.Frequency;
-				long	freqMS	=freq / 1000;
-
-				bspBuild.Update((float)delta / (float)freqMS, gd);
+				bspBuild.Update(msDelta, gd);
 
 				bspBuild.Render(gd);
 				
@@ -142,7 +130,8 @@ namespace BSPBuilder
 
 			Settings.Default.Save();
 
-			gd.RendForm.Activated	-=actHandler;
+			gd.RendForm.Activated		-=actHandler;
+			gd.RendForm.AppDeactivated	-=deActHandler;
 
 			bspBuild.FreeAll();
 			inp.FreeAll();
@@ -152,10 +141,72 @@ namespace BSPBuilder
 		}
 
 
+		static List<Input.InputAction> UpdateInput(Input inp,
+			GraphicsDevice gd, float delta, ref bool bMouseLookOn)
+		{
+			List<Input.InputAction>	actions	=inp.GetAction();
+
+			foreach(Input.InputAction act in actions)
+			{
+				if(act.mAction.Equals(MyActions.ToggleMouseLookOn))
+				{
+					bMouseLookOn	=true;
+					gd.SetCapture(true);
+					inp.MapAxisAction(MyActions.Pitch, Input.MoveAxis.MouseYAxis);
+					inp.MapAxisAction(MyActions.Turn, Input.MoveAxis.MouseXAxis);
+				}
+				else if(act.mAction.Equals(MyActions.ToggleMouseLookOff))
+				{
+					bMouseLookOn	=false;
+					gd.SetCapture(false);
+					inp.UnMapAxisAction(MyActions.Pitch, Input.MoveAxis.MouseYAxis);
+					inp.UnMapAxisAction(MyActions.Turn, Input.MoveAxis.MouseXAxis);
+				}
+			}
+
+			//delta scale analogs, since there's no timestamp stuff in gamepad code
+			foreach(Input.InputAction act in actions)
+			{
+				if(!act.mbTime && act.mDevice == Input.InputAction.DeviceType.ANALOG)
+				{
+					//analog needs a time scale applied
+					act.mMultiplier	*=delta;
+				}
+			}
+
+			//scale inputs to user prefs
+			foreach(Input.InputAction act in actions)
+			{
+				if(act.mAction.Equals(MyActions.Turn)
+					|| act.mAction.Equals(MyActions.TurnLeft)
+					|| act.mAction.Equals(MyActions.TurnRight)
+					|| act.mAction.Equals(MyActions.Pitch)
+					|| act.mAction.Equals(MyActions.PitchDown)
+					|| act.mAction.Equals(MyActions.PitchUp))
+				{
+					if(act.mDevice == Input.InputAction.DeviceType.MOUSE)
+					{
+						act.mMultiplier	*=MouseTurnMultiplier;
+					}
+					else if(act.mDevice == Input.InputAction.DeviceType.ANALOG)
+					{
+						act.mMultiplier	*=AnalogTurnMultiplier;
+					}
+					else if(act.mDevice == Input.InputAction.DeviceType.KEYS)
+					{
+						act.mMultiplier	*=KeyTurnMultiplier;
+					}
+				}
+			}
+			return	actions;
+		}
+
+
 		static Input SetUpInput()
 		{
-			Input	inp	=new InputLib.Input(MouseTurnMultiplier, 1000f / Stopwatch.Frequency);
+			Input	inp	=new InputLib.Input(1000f / Stopwatch.Frequency);
 			
+			//wasd
 			inp.MapAction(MyActions.MoveForward, ActionTypes.ContinuousHold,
 				Modifiers.None, System.Windows.Forms.Keys.W);
 			inp.MapAction(MyActions.MoveLeft, ActionTypes.ContinuousHold,
@@ -173,9 +224,23 @@ namespace BSPBuilder
 			inp.MapAction(MyActions.MoveRightFast, ActionTypes.ContinuousHold,
 				Modifiers.ShiftHeld, System.Windows.Forms.Keys.D);
 
-			inp.MapAction(MyActions.LightX, ActionTypes.ContinuousHold, Modifiers.None, 36);
-			inp.MapAction(MyActions.LightY, ActionTypes.ContinuousHold, Modifiers.None, 37);
-			inp.MapAction(MyActions.LightZ, ActionTypes.ContinuousHold, Modifiers.None, 38);
+			//arrow keys
+			inp.MapAction(MyActions.MoveForward, ActionTypes.ContinuousHold,
+				Modifiers.None, System.Windows.Forms.Keys.Up);
+			inp.MapAction(MyActions.MoveBack, ActionTypes.ContinuousHold,
+				Modifiers.None, System.Windows.Forms.Keys.Down);
+			inp.MapAction(MyActions.MoveForwardFast, ActionTypes.ContinuousHold,
+				Modifiers.ShiftHeld, System.Windows.Forms.Keys.Up);
+			inp.MapAction(MyActions.MoveBackFast, ActionTypes.ContinuousHold,
+				Modifiers.ShiftHeld, System.Windows.Forms.Keys.Down);
+			inp.MapAction(MyActions.TurnLeft, ActionTypes.ContinuousHold,
+				Modifiers.None, System.Windows.Forms.Keys.Left);
+			inp.MapAction(MyActions.TurnRight, ActionTypes.ContinuousHold,
+				Modifiers.None, System.Windows.Forms.Keys.Right);
+			inp.MapAction(MyActions.PitchUp, ActionTypes.ContinuousHold,
+				Modifiers.None, System.Windows.Forms.Keys.Q);
+			inp.MapAction(MyActions.PitchDown, ActionTypes.ContinuousHold,
+				Modifiers.None, System.Windows.Forms.Keys.E);
 
 			inp.MapToggleAction(MyActions.ToggleMouseLookOn,
 				MyActions.ToggleMouseLookOff, Modifiers.None,
@@ -185,10 +250,6 @@ namespace BSPBuilder
 			inp.MapAxisAction(MyActions.Turn, Input.MoveAxis.GamePadRightXAxis);
 			inp.MapAxisAction(MyActions.MoveLeftRight, Input.MoveAxis.GamePadLeftXAxis);
 			inp.MapAxisAction(MyActions.MoveForwardBack, Input.MoveAxis.GamePadLeftYAxis);
-
-			inp.MapAction(MyActions.LightX, ActionTypes.ContinuousHold, Modifiers.None, Input.VariousButtons.GamePadDPadLeft);
-			inp.MapAction(MyActions.LightY, ActionTypes.ContinuousHold, Modifiers.None, Input.VariousButtons.GamePadDPadDown);
-			inp.MapAction(MyActions.LightZ, ActionTypes.ContinuousHold, Modifiers.None, Input.VariousButtons.GamePadDPadRight);
 
 			return	inp;
 		}
