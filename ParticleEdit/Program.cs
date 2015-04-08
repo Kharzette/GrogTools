@@ -35,7 +35,8 @@ namespace ParticleEdit
 			MoveLeftFast, MoveRightFast,
 			Turn, TurnLeft, TurnRight,
 			Pitch, PitchUp, PitchDown,
-			ToggleMouseLookOn, ToggleMouseLookOff
+			ToggleMouseLookOn, ToggleMouseLookOff,
+			Exit
 		};
 
 		const float	MouseTurnMultiplier		=0.13f;
@@ -242,6 +243,12 @@ namespace ParticleEdit
 			inp.MapAxisAction(MyActions.MoveLeftRight, Input.MoveAxis.GamePadLeftXAxis);
 			inp.MapAxisAction(MyActions.MoveForwardBack, Input.MoveAxis.GamePadLeftYAxis);
 
+			//exit
+			inp.MapAction(MyActions.Exit, ActionTypes.PressAndRelease,
+				Modifiers.None, System.Windows.Forms.Keys.Escape);
+			inp.MapAction(MyActions.Exit, ActionTypes.PressAndRelease,
+				Modifiers.None, Input.VariousButtons.GamePadBack);
+
 			return	inp;
 		}
 
@@ -266,6 +273,16 @@ namespace ParticleEdit
 			GraphicsDevice gd, float delta, ref bool bMouseLookOn)
 		{
 			List<Input.InputAction>	actions	=inp.GetAction();
+
+			//check for exit
+			foreach(Input.InputAction act in actions)
+			{
+				if(act.mAction.Equals(MyActions.Exit))
+				{
+					gd.RendForm.Close();
+					return	actions;
+				}
+			}
 
 			foreach(Input.InputAction act in actions)
 			{

@@ -86,8 +86,14 @@ namespace BSPBuilder
 		internal void FreeAll()
 		{
 			mMatLib.FreeAll();
-			mVB.Dispose();
-			mIB.Dispose();
+			if(mVB != null)
+			{
+				mVB.Dispose();
+			}
+			if(mIB != null)
+			{
+				mIB.Dispose();
+			}
 		}
 
 
