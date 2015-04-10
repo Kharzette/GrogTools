@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+
 using InputLib;
 using MaterialLib;
 using UtilityLib;
@@ -15,11 +16,6 @@ using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using SharpDX.Windows;
-
-using Buffer	=SharpDX.Direct3D11.Buffer;
-using Device	=SharpDX.Direct3D11.Device;
-using MapFlags	=SharpDX.Direct3D11.MapFlags;
-using MatLib	=MaterialLib.MaterialLib;
 
 
 namespace BSPBuilder
@@ -141,7 +137,6 @@ namespace BSPBuilder
 			//Release all resources
 			gd.ReleaseAll();
 		}
-
 
 		static List<Input.InputAction> UpdateInput(Input inp,
 			GraphicsDevice gd, float delta, ref bool bMouseLookOn)

@@ -102,20 +102,21 @@ namespace BSPBuilder
 			mCTForm.Visible		=true;
 
 			//form events
-			mZoneForm.eMaterialVis		+=OnMaterialVis;
-			mZoneForm.eSaveZone			+=OnSaveZone;
-			mZoneForm.eZoneGBSP			+=OnZoneGBSP;
-			mZoneForm.eLoadDebug		+=OnLoadDebug;
-			mZoneForm.eDumpTextures		+=OnDumpTextures;
-			mBSPForm.eBuild				+=OnBuild;
-			mBSPForm.eLight				+=OnLight;
-			mBSPForm.eOpenMap			+=OnOpenMap;
-			mBSPForm.eSave				+=OnSaveGBSP;
-			mBSPForm.eFullBuild			+=OnFullBuild;
-			mBSPForm.eUpdateEntities	+=OnUpdateEntities;
-			mVisForm.eResumeVis			+=OnResumeVis;
-			mVisForm.eStopVis			+=OnStopVis;
-			mVisForm.eVis				+=OnVis;
+			mZoneForm.eMaterialVis			+=OnMaterialVis;
+			mZoneForm.eSaveZone				+=OnSaveZone;
+			mZoneForm.eZoneGBSP				+=OnZoneGBSP;
+			mZoneForm.eLoadDebug			+=OnLoadDebug;
+			mZoneForm.eDumpTextures			+=OnDumpTextures;
+			mBSPForm.eBuild					+=OnBuild;
+			mBSPForm.eLight					+=OnLight;
+			mBSPForm.eOpenMap				+=OnOpenMap;
+			mBSPForm.eSave					+=OnSaveGBSP;
+			mBSPForm.eFullBuild				+=OnFullBuild;
+			mBSPForm.eUpdateEntities		+=OnUpdateEntities;
+			mVisForm.eResumeVis				+=OnResumeVis;
+			mVisForm.eStopVis				+=OnStopVis;
+			mVisForm.eVis					+=OnVis;
+			mMatForm.eMatLibNotReadyToSave	+=OnMatLibNotReadyToSave;
 
 			//core events
 			CoreEvents.eBuildDone		+=OnBuildDone;
@@ -697,6 +698,11 @@ namespace BSPBuilder
 			int	num	=(int)sender;
 
 //			mBSPForm.NumberOfPlanes	="" + num;
+		}
+
+		void OnMatLibNotReadyToSave(object sender, EventArgs ea)
+		{
+			mOutForm.Print("Material lib has some sort of problem that is preventing saving!\n");
 		}
 
 
