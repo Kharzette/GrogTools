@@ -164,7 +164,7 @@ namespace BSPBuilder
 		}
 
 
-		internal void Update(float msDelta, GraphicsDevice gd)
+		internal void Update(int msDelta, GraphicsDevice gd)
 		{
 			if(mbWorking)
 			{
