@@ -131,7 +131,7 @@ namespace ParticleEdit
 				long	timeNow		=Stopwatch.GetTimestamp();
 				long	delta		=timeNow - lastTime;
 				float	secDelta	=(float)delta / freq;
-				float	msDelta		=secDelta * 1000f;
+				int		msDelta		=Math.Max((int)(secDelta * 1000f), 1);			
 
 				List<Input.InputAction>	actions	=UpdateInput(inp, gd, msDelta, ref bMouseLookOn);
 				if(!gd.RendForm.Focused)

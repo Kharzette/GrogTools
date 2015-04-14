@@ -199,7 +199,7 @@ namespace ParticleEdit
 		}
 
 
-		internal void Update(float msDelta)
+		internal void Update(int msDelta)
 		{
 			mPB.Update(mGD.DC, msDelta);
 		}
