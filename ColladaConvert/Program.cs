@@ -37,10 +37,7 @@ namespace ColladaConvert
 			ToggleMouseLookOn, ToggleMouseLookOff
 		};
 
-		const float	MouseTurnMultiplier		=0.13f;
-		const float	AnalogTurnMultiplier	=0.5f;
-		const float	KeyTurnMultiplier		=0.5f;
-		const float	MaxTimeDelta			=0.1f;
+		const float	MaxTimeDelta	=0.1f;
 
 
 		[STAThread]
@@ -138,10 +135,10 @@ namespace ColladaConvert
 
 				long	timeNow		=Stopwatch.GetTimestamp();
 				long	delta		=timeNow - lastTime;
-				float	secDelta	=(float)delta / freq;
-				float	msDelta		=secDelta * 1000f;
+				float	secDelta	=Math.Min((float)delta / freq, 0.1f);
+				int		msDelta		=Math.Max((int)(secDelta * 1000f), 1);
 
-				List<Input.InputAction>	actions	=UpdateInput(inp, gd, msDelta, ref bMouseLookOn);
+				List<Input.InputAction>	actions	=UpdateInput(inp, gd, secDelta, ref bMouseLookOn);
 				if(!gd.RendForm.Focused)
 				{
 					actions.Clear();
@@ -152,7 +149,11 @@ namespace ColladaConvert
 				//light direction is backwards now for some strange reason
 				matLib.SetParameterForAll("mLightDirection", -lightDir);
 				
-				pos	-=pSteering.Update(pos, gd.GCam.Forward, gd.GCam.Left, gd.GCam.Up, actions);
+				Vector3	deltaMove	=pSteering.Update(pos, gd.GCam.Forward, gd.GCam.Left, gd.GCam.Up, actions);
+
+				deltaMove	*=200f;
+
+				pos	-=deltaMove;
 				
 				gd.GCam.Update(pos, pSteering.Pitch, pSteering.Yaw, pSteering.Roll);
 
@@ -319,7 +320,7 @@ namespace ColladaConvert
 
 		static Input SetUpInput()
 		{
-			Input	inp	=new InputLib.Input(1000f / Stopwatch.Frequency);
+			Input	inp	=new InputLib.Input(1f / Stopwatch.Frequency);
 			
 			inp.MapAction(MyActions.MoveForward, ActionTypes.ContinuousHold,
 				Modifiers.None, System.Windows.Forms.Keys.W);
@@ -426,8 +427,8 @@ namespace ColladaConvert
 				{
 					bMouseLookOn	=false;
 					gd.SetCapture(false);
-					inp.UnMapAxisAction(MyActions.Pitch, Input.MoveAxis.MouseYAxis);
-					inp.UnMapAxisAction(MyActions.Turn, Input.MoveAxis.MouseXAxis);
+					inp.UnMapAxisAction(Input.MoveAxis.MouseYAxis);
+					inp.UnMapAxisAction(Input.MoveAxis.MouseXAxis);
 				}
 			}
 
@@ -453,15 +454,15 @@ namespace ColladaConvert
 				{
 					if(act.mDevice == Input.InputAction.DeviceType.MOUSE)
 					{
-						act.mMultiplier	*=MouseTurnMultiplier;
+						act.mMultiplier	*=UserSettings.MouseTurnMultiplier;
 					}
 					else if(act.mDevice == Input.InputAction.DeviceType.ANALOG)
 					{
-						act.mMultiplier	*=AnalogTurnMultiplier;
+						act.mMultiplier	*=UserSettings.AnalogTurnMultiplier;
 					}
 					else if(act.mDevice == Input.InputAction.DeviceType.KEYS)
 					{
-						act.mMultiplier	*=KeyTurnMultiplier;
+						act.mMultiplier	*=UserSettings.KeyTurnMultiplier;
 					}
 				}
 			}

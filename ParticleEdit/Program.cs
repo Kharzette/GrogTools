@@ -39,10 +39,7 @@ namespace ParticleEdit
 			Exit
 		};
 
-		const float	MouseTurnMultiplier		=0.13f;
-		const float	AnalogTurnMultiplier	=0.5f;
-		const float	KeyTurnMultiplier		=0.5f;
-		const float	MaxTimeDelta			=0.1f;
+		const float	MaxTimeDelta	=0.1f;
 
 
 		[STAThread]
@@ -130,16 +127,20 @@ namespace ParticleEdit
 
 				long	timeNow		=Stopwatch.GetTimestamp();
 				long	delta		=timeNow - lastTime;
-				float	secDelta	=(float)delta / freq;
-				int		msDelta		=Math.Max((int)(secDelta * 1000f), 1);			
+				float	secDelta	=Math.Min((float)delta / freq, 0.1f);
+				int		msDelta		=Math.Max((int)(secDelta * 1000f), 1);
 
-				List<Input.InputAction>	actions	=UpdateInput(inp, gd, msDelta, ref bMouseLookOn);
+				List<Input.InputAction>	actions	=UpdateInput(inp, gd, secDelta, ref bMouseLookOn);
 				if(!gd.RendForm.Focused)
 				{
 					actions.Clear();
 				}
 
-				pos	-=pSteering.Update(pos, gd.GCam.Forward, gd.GCam.Left, gd.GCam.Up, actions);
+				Vector3	moveDelta	=pSteering.Update(pos, gd.GCam.Forward, gd.GCam.Left, gd.GCam.Up, actions);
+
+				moveDelta	*=300f;
+
+				pos	-=moveDelta;
 				
 				gd.GCam.Update(pos, pSteering.Pitch, pSteering.Yaw, pSteering.Roll);
 
@@ -194,7 +195,7 @@ namespace ParticleEdit
 
 		static Input SetUpInput()
 		{
-			Input	inp	=new InputLib.Input(1000f / Stopwatch.Frequency);
+			Input	inp	=new InputLib.Input(1f / Stopwatch.Frequency);
 			
 			inp.MapAction(MyActions.MoveForward, ActionTypes.ContinuousHold,
 				Modifiers.None, System.Windows.Forms.Keys.W);
@@ -284,6 +285,41 @@ namespace ParticleEdit
 				}
 			}
 
+			//delta scale analogs, since there's no timestamp stuff in gamepad code
+			foreach(Input.InputAction act in actions)
+			{
+				if(!act.mbTime && act.mDevice == Input.InputAction.DeviceType.ANALOG)
+				{
+					//analog needs a time scale applied
+					act.mMultiplier	*=delta;
+				}
+			}
+
+			//turn scaling
+			foreach(Input.InputAction act in actions)
+			{
+				if(act.mAction.Equals(MyActions.Turn)
+					|| act.mAction.Equals(MyActions.TurnLeft)
+					|| act.mAction.Equals(MyActions.TurnRight)
+					|| act.mAction.Equals(MyActions.PitchUp)
+					|| act.mAction.Equals(MyActions.PitchDown)
+					|| act.mAction.Equals(MyActions.Pitch))
+				{
+					if(act.mDevice == Input.InputAction.DeviceType.MOUSE)
+					{
+						act.mMultiplier	*=UserSettings.MouseTurnMultiplier;
+					}
+					else if(act.mDevice == Input.InputAction.DeviceType.ANALOG)
+					{
+						act.mMultiplier	*=UserSettings.AnalogTurnMultiplier;
+					}
+					else if(act.mDevice == Input.InputAction.DeviceType.KEYS)
+					{
+						act.mMultiplier	*=UserSettings.KeyTurnMultiplier;
+					}
+				}
+			}
+
 			foreach(Input.InputAction act in actions)
 			{
 				if(act.mAction.Equals(MyActions.ToggleMouseLookOn))
@@ -297,8 +333,8 @@ namespace ParticleEdit
 				{
 					gd.SetCapture(false);
 
-					inp.UnMapAxisAction(MyActions.Pitch, Input.MoveAxis.MouseYAxis);
-					inp.UnMapAxisAction(MyActions.Turn, Input.MoveAxis.MouseXAxis);
+					inp.UnMapAxisAction(Input.MoveAxis.MouseYAxis);
+					inp.UnMapAxisAction(Input.MoveAxis.MouseXAxis);
 				}
 			}
 			return	actions;
