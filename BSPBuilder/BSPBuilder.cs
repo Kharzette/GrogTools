@@ -110,6 +110,7 @@ namespace BSPBuilder
 			mBSPForm.eBuild					+=OnBuild;
 			mBSPForm.eLight					+=OnLight;
 			mBSPForm.eOpenMap				+=OnOpenMap;
+			mBSPForm.eOpenStatic			+=OnOpenStatic;
 			mBSPForm.eSave					+=OnSaveGBSP;
 			mBSPForm.eFullBuild				+=OnFullBuild;
 			mBSPForm.eUpdateEntities		+=OnUpdateEntities;
@@ -458,6 +459,49 @@ namespace BSPBuilder
 			mBSPForm.SetSaveEnabled(false);
 
 			BuildDebugDraw(Map.DebugDrawChoice.MapBrushes);
+		}
+
+		void OnOpenStatic(object sender, EventArgs ea)
+		{
+			string	fileName	=sender as string;
+			if(fileName == null)
+			{
+				return;
+			}
+
+			IArch	sa	=new StaticArch();
+
+			sa.ReadFromFile(fileName, mGD.GD, true);
+
+			mMap	=new Map();
+
+			int	count	=sa.GetPartCount();
+			for(int i=0;i < count;i++)
+			{
+				List<Vector3>	norms;
+				List<float>		dists;
+				sa.GetPartPlanes(i, out norms, out dists);
+
+				List<GFXPlane>	brushPlanes	=new List<GFXPlane>();
+
+				for(int j=0;j < norms.Count;j++)
+				{
+					GFXPlane	p	=new GFXPlane();
+					p.mNormal		=norms[j];
+					p.mDist			=dists[j];
+					p.mType			=GBSPPlane.PLANE_ANY;
+
+					brushPlanes.Add(p);
+				}
+
+				mMap.AddSingleBrush(brushPlanes);
+			}
+
+			mOutForm.Print(fileName + " opened and " + count + " brushes extracted.\n");
+
+			mMap.DumpBrushListToQuarkMap(FileUtil.StripExtension(fileName));
+
+			mMap	=null;
 		}
 
 		void OnSaveGBSP(object sender, EventArgs ea)

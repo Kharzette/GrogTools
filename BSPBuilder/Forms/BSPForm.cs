@@ -28,6 +28,7 @@ namespace BSPBuilder
 		public event EventHandler	eLight;
 		public event EventHandler	eFullBuild;
 		public event EventHandler	eUpdateEntities;
+		public event EventHandler	eOpenStatic;
 
 
 		public BSPBuildParams BSPParameters
@@ -187,6 +188,22 @@ namespace BSPBuilder
 			}
 
 			Misc.SafeInvoke(eFullBuild, mOFD.FileName);
+		}
+
+
+		void OnOpenStatic(object sender, EventArgs e)
+		{
+			mOFD.DefaultExt	="*.Static";
+			mOFD.Filter		="Static mesh files (*.Static)|*.Static|All files (*.*)|*.*";
+
+			DialogResult	dr	=mOFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			Misc.SafeInvoke(eOpenStatic, mOFD.FileName);
 		}
 	}
 }

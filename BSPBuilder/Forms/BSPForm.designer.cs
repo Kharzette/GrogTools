@@ -58,6 +58,7 @@
 			this.MinLightY = new System.Windows.Forms.NumericUpDown();
 			this.SeamCorrection = new System.Windows.Forms.CheckBox();
 			this.mTips = new System.Windows.Forms.ToolTip(this.components);
+			this.OpenStatic = new System.Windows.Forms.Button();
 			this.GroupFileIO.SuspendLayout();
 			this.GroupBuildSettings.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.MaxThreads)).BeginInit();
@@ -72,6 +73,7 @@
 			// 
 			// GroupFileIO
 			// 
+			this.GroupFileIO.Controls.Add(this.OpenStatic);
 			this.GroupFileIO.Controls.Add(this.FullBuild);
 			this.GroupFileIO.Controls.Add(this.UpdateEntities);
 			this.GroupFileIO.Controls.Add(this.LightGBSP);
@@ -445,6 +447,16 @@
 			this.mTips.SetToolTip(this.SeamCorrection, "Shifts light points around a bit to help points just inside solid");
 			this.SeamCorrection.UseVisualStyleBackColor = true;
 			// 
+			// OpenStatic
+			// 
+			this.OpenStatic.Location = new System.Drawing.Point(168, 63);
+			this.OpenStatic.Name = "OpenStatic";
+			this.OpenStatic.Size = new System.Drawing.Size(52, 23);
+			this.OpenStatic.TabIndex = 21;
+			this.OpenStatic.Text = "OStat";
+			this.OpenStatic.UseVisualStyleBackColor = true;
+			this.OpenStatic.Click += new System.EventHandler(this.OnOpenStatic);
+			// 
 			// BSPForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -503,5 +515,6 @@
 		private System.Windows.Forms.Button FullBuild;
 		private System.Windows.Forms.Button UpdateEntities;
 		private System.Windows.Forms.CheckBox DynamicLights;
+		private System.Windows.Forms.Button OpenStatic;
 	}
 }
