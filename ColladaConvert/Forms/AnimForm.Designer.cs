@@ -51,6 +51,7 @@
 			this.label1 = new System.Windows.Forms.Label();
 			this.groupBox4 = new System.Windows.Forms.GroupBox();
 			this.AnimList = new System.Windows.Forms.ListView();
+			this.ReCollada = new System.Windows.Forms.Button();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.groupBox3.SuspendLayout();
@@ -64,7 +65,7 @@
 			this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.groupBox1.Controls.Add(this.button2);
 			this.groupBox1.Controls.Add(this.SaveAnimLib);
-			this.groupBox1.Location = new System.Drawing.Point(380, 279);
+			this.groupBox1.Location = new System.Drawing.Point(380, 260);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(101, 84);
 			this.groupBox1.TabIndex = 17;
@@ -94,13 +95,14 @@
 			// groupBox2
 			// 
 			this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.groupBox2.Controls.Add(this.ReCollada);
 			this.groupBox2.Controls.Add(this.button1);
 			this.groupBox2.Controls.Add(this.LoadCharacter);
 			this.groupBox2.Controls.Add(this.SaveCharacter);
 			this.groupBox2.Controls.Add(this.SaveStatic);
-			this.groupBox2.Location = new System.Drawing.Point(160, 219);
+			this.groupBox2.Location = new System.Drawing.Point(160, 207);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(110, 144);
+			this.groupBox2.Size = new System.Drawing.Size(110, 177);
 			this.groupBox2.TabIndex = 18;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Converted Meshes";
@@ -148,14 +150,13 @@
 			// groupBox3
 			// 
 			this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.groupBox3.Controls.Add(this.DrawAxis);
 			this.groupBox3.Controls.Add(this.CheckSkeleton);
 			this.groupBox3.Controls.Add(this.LoadModel);
 			this.groupBox3.Controls.Add(this.LoadStaticModel);
 			this.groupBox3.Controls.Add(this.LoadAnim);
-			this.groupBox3.Location = new System.Drawing.Point(12, 201);
+			this.groupBox3.Location = new System.Drawing.Point(12, 207);
 			this.groupBox3.Name = "groupBox3";
-			this.groupBox3.Size = new System.Drawing.Size(142, 162);
+			this.groupBox3.Size = new System.Drawing.Size(142, 137);
 			this.groupBox3.TabIndex = 19;
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = "Collada Files";
@@ -165,7 +166,7 @@
 			this.DrawAxis.AutoSize = true;
 			this.DrawAxis.Checked = true;
 			this.DrawAxis.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.DrawAxis.Location = new System.Drawing.Point(6, 135);
+			this.DrawAxis.Location = new System.Drawing.Point(12, 359);
 			this.DrawAxis.Name = "DrawAxis";
 			this.DrawAxis.Size = new System.Drawing.Size(73, 17);
 			this.DrawAxis.TabIndex = 25;
@@ -218,7 +219,7 @@
 			this.BoundGroup.Controls.Add(this.ShowBox);
 			this.BoundGroup.Controls.Add(this.ShowSphere);
 			this.BoundGroup.Controls.Add(this.BoundMesh);
-			this.BoundGroup.Location = new System.Drawing.Point(276, 266);
+			this.BoundGroup.Location = new System.Drawing.Point(276, 260);
 			this.BoundGroup.Name = "BoundGroup";
 			this.BoundGroup.Size = new System.Drawing.Size(98, 97);
 			this.BoundGroup.TabIndex = 23;
@@ -305,7 +306,7 @@
 			this.groupBox4.Controls.Add(this.PauseButton);
 			this.groupBox4.Controls.Add(this.AnimTimeScale);
 			this.groupBox4.Controls.Add(this.label1);
-			this.groupBox4.Location = new System.Drawing.Point(276, 213);
+			this.groupBox4.Location = new System.Drawing.Point(276, 207);
 			this.groupBox4.Name = "groupBox4";
 			this.groupBox4.Size = new System.Drawing.Size(190, 47);
 			this.groupBox4.TabIndex = 21;
@@ -323,7 +324,7 @@
 			this.AnimList.LabelEdit = true;
 			this.AnimList.Location = new System.Drawing.Point(12, 12);
 			this.AnimList.Name = "AnimList";
-			this.AnimList.Size = new System.Drawing.Size(469, 183);
+			this.AnimList.Size = new System.Drawing.Size(469, 189);
 			this.AnimList.TabIndex = 24;
 			this.AnimList.UseCompatibleStateImageBehavior = false;
 			this.AnimList.View = System.Windows.Forms.View.Details;
@@ -331,12 +332,23 @@
 			this.AnimList.SelectedIndexChanged += new System.EventHandler(this.OnAnimListSelectionChanged);
 			this.AnimList.KeyUp += new System.Windows.Forms.KeyEventHandler(this.OnAnimListKeyUp);
 			// 
+			// ReCollada
+			// 
+			this.ReCollada.Location = new System.Drawing.Point(7, 144);
+			this.ReCollada.Name = "ReCollada";
+			this.ReCollada.Size = new System.Drawing.Size(96, 25);
+			this.ReCollada.TabIndex = 15;
+			this.ReCollada.Text = "ReCollada";
+			this.ReCollada.UseVisualStyleBackColor = true;
+			this.ReCollada.Click += new System.EventHandler(this.OnReCollada);
+			// 
 			// AnimForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(493, 375);
+			this.ClientSize = new System.Drawing.Size(493, 396);
 			this.ControlBox = false;
+			this.Controls.Add(this.DrawAxis);
 			this.Controls.Add(this.AnimList);
 			this.Controls.Add(this.BoundGroup);
 			this.Controls.Add(this.groupBox3);
@@ -358,6 +370,7 @@
 			this.groupBox4.ResumeLayout(false);
 			this.groupBox4.PerformLayout();
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 
@@ -386,6 +399,7 @@
 		private System.Windows.Forms.GroupBox groupBox4;
 		private System.Windows.Forms.CheckBox DrawAxis;
 		private System.Windows.Forms.ListView AnimList;
+		private System.Windows.Forms.Button ReCollada;
 
 	}
 }

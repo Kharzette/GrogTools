@@ -103,6 +103,156 @@ namespace ColladaConvert
 		}
 
 
+		internal void SerializeCOLLADA(COLLADA saveyThing, string path)
+		{
+			FileStream		fs	=new FileStream(path, FileMode.Create, FileAccess.Write);
+			XmlSerializer	xs	=new XmlSerializer(typeof(COLLADA));
+
+			xs.Serialize(fs, saveyThing);
+
+			fs.Close();
+		}
+
+
+		//crude dae export
+		internal void ConvertMesh(IArch ia, out COLLADA col)
+		{
+			col	=new COLLADA();
+
+			col.asset	=new asset();
+
+			col.asset.created		=DateTime.Now;
+			col.asset.unit			=new assetUnit();
+			col.asset.unit.meter	=0.1f;
+			col.asset.unit.name		="meter";
+			col.asset.up_axis		=UpAxisType.Y_UP;
+
+			col.Items	=new object[2];
+
+			library_geometries	geom	=new library_geometries();
+
+			int	partCount	=ia.GetPartCount();
+
+			geom.geometry	=new geometry[partCount];
+
+			for(int i=0;i < partCount;i++)
+			{
+				geometry	g	=new geometry();
+
+				g.name	=ia.GetPartName(i);
+				g.id	=g.name + "-mesh";
+
+				polylist	plist	=new polylist();
+
+				Type	vType	=ia.GetPartVertexType(i);
+
+				plist.input	=MakeInputs(g.id, vType);
+
+				plist.material	=g.id + "_mat";	//hax
+
+				string	polys, vcounts;
+				plist.count	=(ulong)ia.GetPartColladaPolys(i, out polys, out vcounts);
+
+				plist.p			=polys;
+				plist.vcount	=vcounts;
+
+				object	[]itemses	=new object[1];
+
+				itemses[0]	=plist;
+
+				mesh	m	=new mesh();
+
+				m.Items	=itemses;
+
+				m.source	=MakeSources(g.id, ia, i);
+
+				m.vertices	=new vertices();
+
+				m.vertices.id	=g.id + "-vertices";
+
+				m.vertices.input	=new InputLocal[1];
+
+				m.vertices.input[0]	=new InputLocal();
+
+				m.vertices.input[0].semantic	="POSITION";
+				m.vertices.input[0].source		="#" + g.id + "-positions";
+
+				g.Item	=m;
+
+				geom.geometry[i]	=g;
+			}
+
+			col.Items[0]	=geom;
+
+			library_visual_scenes	lvs	=new library_visual_scenes();
+
+			lvs.visual_scene	=new visual_scene[1];
+
+			lvs.visual_scene[0]	=new visual_scene();
+
+			lvs.visual_scene[0].id		="RootNode";
+			lvs.visual_scene[0].name	="RootNode";
+
+			node	[]nodes	=new node[partCount];
+			for(int i=0;i < partCount;i++)
+			{
+				nodes[i]	=new node();
+
+				nodes[i].id		=ia.GetPartName(i);
+				nodes[i].name	=ia.GetPartName(i);
+
+				Matrix	mat	=ia.GetPartTransform(i);
+
+				TargetableFloat3	trans	=new TargetableFloat3();
+
+				trans.sid		="translate";
+				trans.Values	=new float[3];
+
+				trans.Values[0]	=mat.TranslationVector.X;
+				trans.Values[1]	=mat.TranslationVector.Y;
+				trans.Values[2]	=mat.TranslationVector.Z;
+
+				rotate	rot	=new rotate();
+
+				rot.sid		="rotateX";
+				rot.Values	=new float[4];
+
+				rot.Values[0]	=1f;
+				rot.Values[1]	=0f;
+				rot.Values[2]	=0f;
+				rot.Values[3]	=180f;
+
+				nodes[i].Items	=new object[2];
+
+				nodes[i].ItemsElementName	=new ItemsChoiceType2[2];
+
+				nodes[i].ItemsElementName[0]	=ItemsChoiceType2.translate;
+				nodes[i].ItemsElementName[1]	=ItemsChoiceType2.rotate;
+
+				nodes[i].Items[0]	=trans;
+				nodes[i].Items[1]	=rot;
+
+				nodes[i].instance_geometry	=new instance_geometry[1];
+
+				nodes[i].instance_geometry[0]	=new instance_geometry();
+
+				nodes[i].instance_geometry[0].url	="#" + ia.GetPartName(i) + "-mesh";
+			}
+
+			lvs.visual_scene[0].node	=nodes;
+
+			col.Items[1]	=lvs;
+
+			COLLADAScene	scene	=new COLLADAScene();
+
+			scene.instance_visual_scene	=new InstanceWithExtra();
+
+			scene.instance_visual_scene.url	="#RootNode";
+
+			col.scene	=scene;
+		}
+
+
 		//loads an animation into an existing anim lib
 		internal bool LoadAnimDAE(string path, AnimLib alib, bool bCheckSkeleton)
 		{
@@ -1898,6 +2048,131 @@ namespace ColladaConvert
 		}
 
 
+		source	[]MakeSources(string sourcePrefix, IArch arch, int partIndex)
+		{
+			List<source>	ret	=new List<source>();
+
+			Type	vType	=arch.GetPartVertexType(partIndex);
+
+			FieldInfo	[]fi	=vType.GetFields();
+			for(int i=0;i < fi.Length;i++)
+			{
+				source	src	=new source();
+
+				if(fi[i].Name == "Position")
+				{
+					src.id	=sourcePrefix + "-positions";
+
+					float_array	fa	=new float_array();
+
+					float	[]positions;
+
+					arch.GetPartColladaPositions(partIndex, out positions);
+
+					fa.count		=(ulong)positions.Length;
+					fa.id			=src.id + "-array";
+					fa.magnitude	=38;	//default?
+					fa.Values		=positions;
+
+					src.Item	=fa;
+
+					src.technique_common			=new sourceTechnique_common();
+					src.technique_common.accessor	=MakeAccessor(fa.id, positions.Length);
+				}
+				else if(fi[i].Name == "Normal")
+				{
+					src.id	=sourcePrefix + "-normals";
+
+					float_array	fa	=new float_array();
+
+					float	[]normals;
+
+					arch.GetPartColladaNormals(partIndex, out normals);
+
+					fa.count		=(ulong)normals.Length;
+					fa.id			=src.id + "-array";
+					fa.magnitude	=38;	//default?
+					fa.Values		=normals;
+
+					src.Item	=fa;
+
+					src.technique_common			=new sourceTechnique_common();
+					src.technique_common.accessor	=MakeAccessor(fa.id, normals.Length);
+				}
+				else
+				{
+					continue;
+				}
+
+				ret.Add(src);
+			}
+			return	ret.ToArray();
+		}
+
+
+		accessor	MakeAccessor(string src, int count)
+		{
+			accessor	acc	=new accessor();
+
+			acc.count	=(ulong)(count / 3);
+			acc.stride	=3;
+			acc.source	="#" + src;
+
+			acc.param	=new param[3];
+
+			for(int i=0;i < 3;i++)
+			{
+				acc.param[i]		=new param();
+				acc.param[i].type	="float";
+			}
+			acc.param[0].name	="X";
+			acc.param[1].name	="Y";
+			acc.param[2].name	="Z";
+
+			return	acc;
+		}
+
+
+		InputLocalOffset	[]MakeInputs(string sourcePrefix, Type vType)
+		{
+			FieldInfo	[]fi	=vType.GetFields();
+
+			List<InputLocalOffset>	ret	=new List<InputLocalOffset>();
+
+			int	usedIndex	=0;
+			for(int i=0;i < fi.Length;i++)
+			{
+				InputLocalOffset	inp	=new InputLocalOffset();
+
+				inp.offset	=(ulong)usedIndex;
+
+				if(fi[i].Name == "Position")
+				{
+					inp.semantic	="VERTEX";
+					inp.source		="#" + sourcePrefix + "-vertices";
+					usedIndex++;
+				}
+				else if(fi[i].Name == "Normal")
+				{
+					inp.semantic	="NORMAL";
+					inp.source		="#" + sourcePrefix + "-normals";
+					usedIndex++;
+				}
+				else
+				{
+					continue;
+				}
+//				else if(fi[i].Name == "TexCoord0")
+//				{
+//					inp.semantic	="TEXCOORD";
+//					inp.source		=sourcePrefix + "-normals";
+//				}
+				ret.Add(inp);
+			}
+			return	ret.ToArray();
+		}
+
+
 		void SizeColumns(ListView lv)
 		{
 			//set to header size first
@@ -2191,6 +2466,24 @@ namespace ColladaConvert
 			mSelectedAnim	=anm.Name;
 			mAnimStartTime	=anm.StartTime;
 			mAnimEndTime	=anm.TotalTime + anm.StartTime;
+		}
+
+
+		void OnReCollada(object sender, EventArgs e)
+		{
+			mSFD.DefaultExt		="*.dae";
+			mSFD.Filter			="DAE Collada files (*.dae)|*.dae|All files (*.*)|*.*";
+			DialogResult	dr	=mSFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			COLLADA	col;
+			ConvertMesh(mArch, out col);
+
+			SerializeCOLLADA(col, mSFD.FileName);
 		}
 
 
