@@ -28,7 +28,8 @@ namespace BSPBuilder
 		public event EventHandler	eLight;
 		public event EventHandler	eFullBuild;
 		public event EventHandler	eUpdateEntities;
-		public event EventHandler	eOpenStatic;
+		public event EventHandler	eStaticToMap;
+		public event EventHandler	eMapToStatic;
 
 
 		public BSPBuildParams BSPParameters
@@ -203,7 +204,22 @@ namespace BSPBuilder
 				return;
 			}
 
-			Misc.SafeInvoke(eOpenStatic, mOFD.FileName);
+			Misc.SafeInvoke(eStaticToMap, mOFD.FileName);
+		}
+
+
+		void OnMapToStatic(object sender, EventArgs e)
+		{
+			mOFD.DefaultExt	="*.map";
+			mOFD.Filter		="QuArK map files (*.map)|*.map|All files (*.*)|*.*";
+
+			DialogResult	dr	=mOFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+			Misc.SafeInvoke(eMapToStatic, mOFD.FileName);
 		}
 	}
 }

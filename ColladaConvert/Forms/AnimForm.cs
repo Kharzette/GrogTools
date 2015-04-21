@@ -125,7 +125,7 @@ namespace ColladaConvert
 			col.asset.unit			=new assetUnit();
 			col.asset.unit.meter	=0.1f;
 			col.asset.unit.name		="meter";
-			col.asset.up_axis		=UpAxisType.Y_UP;
+			col.asset.up_axis		=UpAxisType.Z_UP;
 
 			col.Items	=new object[2];
 
@@ -220,7 +220,7 @@ namespace ColladaConvert
 				rot.Values[0]	=1f;
 				rot.Values[1]	=0f;
 				rot.Values[2]	=0f;
-				rot.Values[3]	=180f;
+				rot.Values[3]	=-90f;
 
 				nodes[i].Items	=new object[2];
 

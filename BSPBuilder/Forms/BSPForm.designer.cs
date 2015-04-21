@@ -30,6 +30,7 @@
 		{
 			this.components = new System.ComponentModel.Container();
 			this.GroupFileIO = new System.Windows.Forms.GroupBox();
+			this.OpenStatic = new System.Windows.Forms.Button();
 			this.FullBuild = new System.Windows.Forms.Button();
 			this.UpdateEntities = new System.Windows.Forms.Button();
 			this.LightGBSP = new System.Windows.Forms.Button();
@@ -58,7 +59,7 @@
 			this.MinLightY = new System.Windows.Forms.NumericUpDown();
 			this.SeamCorrection = new System.Windows.Forms.CheckBox();
 			this.mTips = new System.Windows.Forms.ToolTip(this.components);
-			this.OpenStatic = new System.Windows.Forms.Button();
+			this.MapToStatic = new System.Windows.Forms.Button();
 			this.GroupFileIO.SuspendLayout();
 			this.GroupBuildSettings.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.MaxThreads)).BeginInit();
@@ -73,6 +74,7 @@
 			// 
 			// GroupFileIO
 			// 
+			this.GroupFileIO.Controls.Add(this.MapToStatic);
 			this.GroupFileIO.Controls.Add(this.OpenStatic);
 			this.GroupFileIO.Controls.Add(this.FullBuild);
 			this.GroupFileIO.Controls.Add(this.UpdateEntities);
@@ -82,14 +84,24 @@
 			this.GroupFileIO.Controls.Add(this.SaveGBSP);
 			this.GroupFileIO.Location = new System.Drawing.Point(12, 12);
 			this.GroupFileIO.Name = "GroupFileIO";
-			this.GroupFileIO.Size = new System.Drawing.Size(226, 116);
+			this.GroupFileIO.Size = new System.Drawing.Size(180, 166);
 			this.GroupFileIO.TabIndex = 22;
 			this.GroupFileIO.TabStop = false;
 			this.GroupFileIO.Text = "File IO";
 			// 
+			// OpenStatic
+			// 
+			this.OpenStatic.Location = new System.Drawing.Point(6, 106);
+			this.OpenStatic.Name = "OpenStatic";
+			this.OpenStatic.Size = new System.Drawing.Size(87, 23);
+			this.OpenStatic.TabIndex = 21;
+			this.OpenStatic.Text = "Static to Map";
+			this.OpenStatic.UseVisualStyleBackColor = true;
+			this.OpenStatic.Click += new System.EventHandler(this.OnOpenStatic);
+			// 
 			// FullBuild
 			// 
-			this.FullBuild.Location = new System.Drawing.Point(168, 19);
+			this.FullBuild.Location = new System.Drawing.Point(99, 92);
 			this.FullBuild.Name = "FullBuild";
 			this.FullBuild.Size = new System.Drawing.Size(52, 38);
 			this.FullBuild.TabIndex = 20;
@@ -100,7 +112,7 @@
 			// 
 			// UpdateEntities
 			// 
-			this.UpdateEntities.Location = new System.Drawing.Point(87, 19);
+			this.UpdateEntities.Location = new System.Drawing.Point(99, 19);
 			this.UpdateEntities.Name = "UpdateEntities";
 			this.UpdateEntities.Size = new System.Drawing.Size(75, 38);
 			this.UpdateEntities.TabIndex = 19;
@@ -111,7 +123,7 @@
 			// 
 			// LightGBSP
 			// 
-			this.LightGBSP.Location = new System.Drawing.Point(87, 63);
+			this.LightGBSP.Location = new System.Drawing.Point(99, 63);
 			this.LightGBSP.Name = "LightGBSP";
 			this.LightGBSP.Size = new System.Drawing.Size(75, 23);
 			this.LightGBSP.TabIndex = 18;
@@ -162,7 +174,7 @@
 			this.GroupBuildSettings.Controls.Add(this.FixTJunctions);
 			this.GroupBuildSettings.Controls.Add(this.BuildAsBModel);
 			this.GroupBuildSettings.Controls.Add(this.VerboseBSP);
-			this.GroupBuildSettings.Location = new System.Drawing.Point(244, 12);
+			this.GroupBuildSettings.Location = new System.Drawing.Point(198, 12);
 			this.GroupBuildSettings.Name = "GroupBuildSettings";
 			this.GroupBuildSettings.Size = new System.Drawing.Size(137, 116);
 			this.GroupBuildSettings.TabIndex = 31;
@@ -253,7 +265,7 @@
 			this.LightSettingsGroupBox.Controls.Add(this.MinLightX);
 			this.LightSettingsGroupBox.Controls.Add(this.MinLightY);
 			this.LightSettingsGroupBox.Controls.Add(this.SeamCorrection);
-			this.LightSettingsGroupBox.Location = new System.Drawing.Point(12, 134);
+			this.LightSettingsGroupBox.Location = new System.Drawing.Point(12, 184);
 			this.LightSettingsGroupBox.Name = "LightSettingsGroupBox";
 			this.LightSettingsGroupBox.Size = new System.Drawing.Size(369, 100);
 			this.LightSettingsGroupBox.TabIndex = 32;
@@ -447,21 +459,21 @@
 			this.mTips.SetToolTip(this.SeamCorrection, "Shifts light points around a bit to help points just inside solid");
 			this.SeamCorrection.UseVisualStyleBackColor = true;
 			// 
-			// OpenStatic
+			// MapToStatic
 			// 
-			this.OpenStatic.Location = new System.Drawing.Point(168, 63);
-			this.OpenStatic.Name = "OpenStatic";
-			this.OpenStatic.Size = new System.Drawing.Size(52, 23);
-			this.OpenStatic.TabIndex = 21;
-			this.OpenStatic.Text = "OStat";
-			this.OpenStatic.UseVisualStyleBackColor = true;
-			this.OpenStatic.Click += new System.EventHandler(this.OnOpenStatic);
+			this.MapToStatic.Location = new System.Drawing.Point(6, 135);
+			this.MapToStatic.Name = "MapToStatic";
+			this.MapToStatic.Size = new System.Drawing.Size(87, 23);
+			this.MapToStatic.TabIndex = 22;
+			this.MapToStatic.Text = "Map to Static";
+			this.MapToStatic.UseVisualStyleBackColor = true;
+			this.MapToStatic.Click += new System.EventHandler(this.OnMapToStatic);
 			// 
 			// BSPForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(393, 243);
+			this.ClientSize = new System.Drawing.Size(393, 296);
 			this.ControlBox = false;
 			this.Controls.Add(this.LightSettingsGroupBox);
 			this.Controls.Add(this.GroupBuildSettings);
@@ -516,5 +528,6 @@
 		private System.Windows.Forms.Button UpdateEntities;
 		private System.Windows.Forms.CheckBox DynamicLights;
 		private System.Windows.Forms.Button OpenStatic;
+		private System.Windows.Forms.Button MapToStatic;
 	}
 }

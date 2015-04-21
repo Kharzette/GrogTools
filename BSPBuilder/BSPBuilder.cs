@@ -110,7 +110,8 @@ namespace BSPBuilder
 			mBSPForm.eBuild					+=OnBuild;
 			mBSPForm.eLight					+=OnLight;
 			mBSPForm.eOpenMap				+=OnOpenMap;
-			mBSPForm.eOpenStatic			+=OnOpenStatic;
+			mBSPForm.eStaticToMap			+=OnOpenStatic;
+			mBSPForm.eMapToStatic			+=OnMapToStatic;
 			mBSPForm.eSave					+=OnSaveGBSP;
 			mBSPForm.eFullBuild				+=OnFullBuild;
 			mBSPForm.eUpdateEntities		+=OnUpdateEntities;
@@ -475,6 +476,8 @@ namespace BSPBuilder
 
 			mMap	=new Map();
 
+			Bounds	bnd	=new Bounds();
+
 			int	count	=sa.GetPartCount();
 			for(int i=0;i < count;i++)
 			{
@@ -482,6 +485,27 @@ namespace BSPBuilder
 				List<float>		dists;
 				sa.GetPartPlanes(i, out norms, out dists);
 
+				List<Vector3>	pos;
+				List<int>		inds;
+				sa.GetPartPositions(i, out pos, out inds);
+
+				List<Vector3>	tri	=new List<Vector3>();
+				for(int j=0;j < inds.Count;j+=3)
+				{
+					tri.Add(pos[inds[j]]);
+					tri.Add(pos[inds[j + 1]]);
+					tri.Add(pos[inds[j + 2]]);
+
+					mMap.AddBSPTriangle(tri);
+
+					tri.Clear();
+
+					bnd.AddPointToBounds(pos[inds[j]]);
+					bnd.AddPointToBounds(pos[inds[j + 1]]);
+					bnd.AddPointToBounds(pos[inds[j + 2]]);
+				}
+
+				/*
 				List<GFXPlane>	brushPlanes	=new List<GFXPlane>();
 
 				for(int j=0;j < norms.Count;j++)
@@ -492,14 +516,120 @@ namespace BSPBuilder
 					p.mType			=GBSPPlane.PLANE_ANY;
 
 					brushPlanes.Add(p);
-				}
+				}*/
 
-				mMap.AddSingleBrush(brushPlanes);
+				//mMap.AddSingleBrush(brushPlanes);
 			}
 
-			mOutForm.Print(fileName + " opened and " + count + " brushes extracted.\n");
+			if(count <= 0)
+			{
+				mOutForm.Print(fileName + " didn't have anything usable.\n");
+				mMap	=null;
+				return;
+			}
 
-			mMap.DumpBrushListToQuarkMap(FileUtil.StripExtension(fileName));
+			mMap.AddBSPVolume(bnd);
+
+			int	numDumped	=mMap.DumpBSPVolumesToQuarkMap(FileUtil.StripExtension(fileName));
+
+			mOutForm.Print(fileName + " opened and " + numDumped + " brushes extracted.\n");
+
+			mMap	=null;
+		}
+
+		void OnMapToStatic(object sender, EventArgs ea)
+		{
+			string	fileName	=sender as string;
+			if(fileName == null)
+			{
+				return;
+			}
+
+			mMap	=new Map();
+
+			mMap.LoadBrushFile(fileName, mBSPForm.BSPParameters);
+
+			List<Vector3>	verts	=new List<Vector3>();
+			List<UInt16>	inds	=new List<UInt16>();
+			List<Vector3>	norms	=new List<Vector3>();
+			List<Color>		cols	=new List<Color>();
+
+			mMap.GetTriangles(verts, norms, cols, inds, Map.DebugDrawChoice.MapBrushes);
+
+			if(verts.Count <= 0)
+			{
+				mOutForm.Print(fileName + " didn't have anything usable.\n");
+				mMap	=null;
+				return;
+			}
+
+			//convert normals to half4
+			List<Half4>	h4norms	=new List<Half4>();
+			foreach(Vector3 norm in norms)
+			{
+				Half4	h4norm;
+
+				h4norm.X	=norm.X;
+				h4norm.Y	=norm.Y;
+				h4norm.Z	=norm.Z;
+				h4norm.W	=1f;
+
+				h4norms.Add(h4norm);
+			}
+
+			//convert to funky max coordinate system
+			List<Vector3>	maxVerts	=new List<Vector3>();
+			foreach(Vector3 vert in verts)
+			{
+				Vector3	maxVert;
+
+				maxVert.X	=vert.X;
+				maxVert.Y	=vert.Y;
+				maxVert.Z	=vert.Z;
+
+				maxVerts.Add(maxVert);
+			}
+
+			EditorMesh	em	=new EditorMesh("MapMesh");
+
+			Type	vtype	=VertexTypes.GetMatch(true, true, false, false, false, false, 0, 1);
+
+			Array	varray	=Array.CreateInstance(vtype, maxVerts.Count);
+
+			for(int i=0;i < maxVerts.Count;i++)
+			{
+				VertexTypes.SetArrayField(varray, i, "Position", maxVerts[i]);
+				VertexTypes.SetArrayField(varray, i, "Normal", h4norms[i]);
+				VertexTypes.SetArrayField(varray, i, "Color0", cols[i]);
+			}
+
+			SharpDX.Direct3D11.Buffer	vb	=VertexTypes.BuildABuffer(mGD.GD, varray, vtype);
+
+			int	vertSize	=VertexTypes.GetSizeForType(vtype);
+
+			em.SetVertSize(vertSize);
+			em.SetNumVerts(maxVerts.Count);
+			em.SetNumTriangles(inds.Count / 3);
+			em.SetTypeIndex(VertexTypes.GetIndex(vtype));
+			em.SetVertexBuffer(vb);
+
+			UInt16	[]iarray	=inds.ToArray();
+
+			SharpDX.Direct3D11.Buffer	ib	=VertexTypes.BuildAnIndexBuffer(mGD.GD, iarray);
+
+			em.SetIndexBuffer(ib);
+
+			em.SetData(varray, iarray);			
+
+			mOutForm.Print(fileName + " opened and " + maxVerts.Count + " verts converted.\n");
+
+			IArch	saveArch	=new StaticArch();
+
+			em.SetTransform(Matrix.RotationX((float)(Math.PI / 4)));
+
+			saveArch.AddPart(em);
+
+			saveArch.SaveToFile(FileUtil.StripExtension(fileName) + ".Static");
 
 			mMap	=null;
 		}
