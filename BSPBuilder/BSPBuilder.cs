@@ -476,18 +476,25 @@ namespace BSPBuilder
 
 			mMap	=new Map();
 
-			Bounds	bnd	=new Bounds();
-
 			int	count	=sa.GetPartCount();
 			for(int i=0;i < count;i++)
 			{
-				List<Vector3>	norms;
-				List<float>		dists;
-				sa.GetPartPlanes(i, out norms, out dists);
+				Bounds	bnd	=new Bounds();
 
 				List<Vector3>	pos;
 				List<int>		inds;
 				sa.GetPartPositions(i, out pos, out inds);
+
+				for(int j=0;j < inds.Count;j+=3)
+				{
+					bnd.AddPointToBounds(pos[inds[j]]);
+					bnd.AddPointToBounds(pos[inds[j + 1]]);
+					bnd.AddPointToBounds(pos[inds[j + 2]]);
+				}
+
+				mMap.PrepareTriTree(bnd);
+
+				mOutForm.Print("Convexizing part " + i + ": " + sa.GetPartName(i) + "\n");
 
 				List<Vector3>	tri	=new List<Vector3>();
 				for(int j=0;j < inds.Count;j+=3)
@@ -499,26 +506,11 @@ namespace BSPBuilder
 					mMap.AddBSPTriangle(tri);
 
 					tri.Clear();
-
-					bnd.AddPointToBounds(pos[inds[j]]);
-					bnd.AddPointToBounds(pos[inds[j + 1]]);
-					bnd.AddPointToBounds(pos[inds[j + 2]]);
 				}
 
-				/*
-				List<GFXPlane>	brushPlanes	=new List<GFXPlane>();
+				mMap.AddBSPVolume(bnd);
 
-				for(int j=0;j < norms.Count;j++)
-				{
-					GFXPlane	p	=new GFXPlane();
-					p.mNormal		=norms[j];
-					p.mDist			=dists[j];
-					p.mType			=GBSPPlane.PLANE_ANY;
-
-					brushPlanes.Add(p);
-				}*/
-
-				//mMap.AddSingleBrush(brushPlanes);
+				mMap.AccumulateVolumes();
 			}
 
 			if(count <= 0)
@@ -528,7 +520,7 @@ namespace BSPBuilder
 				return;
 			}
 
-			mMap.AddBSPVolume(bnd);
+			BuildDebugDraw(Map.DebugDrawChoice.TriTree);
 
 			int	numDumped	=mMap.DumpBSPVolumesToQuarkMap(FileUtil.StripExtension(fileName));
 
