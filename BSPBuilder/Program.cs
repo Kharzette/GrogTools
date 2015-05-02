@@ -58,8 +58,6 @@ namespace BSPBuilder
 			Vector3			pos				=Vector3.One * 5f;
 			Vector3			lightDir		=-Vector3.UnitY;
 			bool			bMouseLookOn	=false;
-			long			lastTime		=Stopwatch.GetTimestamp();
-			long			freq			=Stopwatch.Frequency;
 
 			EventHandler	actHandler	=new EventHandler(
 				delegate(object s, EventArgs ea)
@@ -76,6 +74,13 @@ namespace BSPBuilder
 			gd.RendForm.AppDeactivated	+=deActHandler;
 
 			BSPBuilder	bspBuild	=new BSPBuilder(gd, "C:\\Games\\CurrentGame");
+
+			UpdateTimer	time	=new UpdateTimer(true, false);
+
+			time.SetFixedTimeStepSeconds(1f / 60f);	//60fps update rate
+			time.SetMaxDeltaSeconds(MaxTimeDelta);
+
+			List<Input.InputAction>	acts	=new List<Input.InputAction>();
 
 			RenderLoop.Run(gd.RendForm, () =>
 			{
@@ -99,33 +104,35 @@ namespace BSPBuilder
 				//Clear views
 				gd.ClearViews();
 
-				long	timeNow		=Stopwatch.GetTimestamp();
-				long	delta		=timeNow - lastTime;
-				float	secDelta	=Math.Min((float)delta / freq, 0.1f);
-				int		msDelta		=Math.Max((int)(secDelta * 1000f), 1);
-
-				List<Input.InputAction>	actions	=UpdateInput(inp, gd, secDelta, ref bMouseLookOn);
-				if(!gd.RendForm.Focused)
+				time.Stamp();
+				while(time.GetUpdateDeltaSeconds() > 0f)
 				{
-					actions.Clear();
+					acts	=UpdateInput(inp, gd,
+						time.GetUpdateDeltaSeconds(), ref bMouseLookOn);
+					if(!gd.RendForm.Focused)
+					{
+						acts.Clear();
+					}
+
+					Vector3	moveDelta	=pSteering.Update(pos, gd.GCam.Forward,
+						gd.GCam.Left, gd.GCam.Up, acts);
+
+					//scale up movement a bit
+					moveDelta	*=200f;
+
+					pos	-=moveDelta;
+				
+					gd.GCam.Update(pos, pSteering.Pitch, pSteering.Yaw, pSteering.Roll);
+
+					time.UpdateDone();
 				}
 
-				Vector3	moveDelta	=pSteering.Update(pos, gd.GCam.Forward, gd.GCam.Left, gd.GCam.Up, actions);
-
-				//scale up movement a bit
-				moveDelta	*=200f;
-
-				pos	-=moveDelta;
-				
-				gd.GCam.Update(pos, pSteering.Pitch, pSteering.Yaw, pSteering.Roll);
-
-				bspBuild.Update(msDelta, gd);
-
+				bspBuild.Update(time.GetRenderUpdateDeltaMilliSeconds(), gd);
 				bspBuild.Render(gd);
 				
 				gd.Present();
 
-				lastTime	=timeNow;
+				acts.Clear();
 			}, true);	//true here is slow but needed for winforms events
 
 			Settings.Default.Save();

@@ -166,7 +166,7 @@ namespace BSPBuilder
 		}
 
 
-		internal void Update(int msDelta, GraphicsDevice gd)
+		internal void Update(float msDelta, GraphicsDevice gd)
 		{
 			if(mbWorking)
 			{
@@ -176,9 +176,8 @@ namespace BSPBuilder
 
 			mZoneDraw.Update(msDelta);
 
-			mMatLib.SetParameterForAll("mView", gd.GCam.View);
-			mMatLib.SetParameterForAll("mEyePos", gd.GCam.Position);
-			mMatLib.SetParameterForAll("mProjection", gd.GCam.Projection);
+			mMatLib.UpdateWVP(Matrix.Identity,
+				gd.GCam.View, gd.GCam.Projection, gd.GCam.Position);
 		}
 
 
