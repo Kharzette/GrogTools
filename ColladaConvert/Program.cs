@@ -99,22 +99,17 @@ namespace ColladaConvert
 			int	resx	=gd.RendForm.ClientRectangle.Width;
 			int	resy	=gd.RendForm.ClientRectangle.Height;
 
-			post.MakePostTarget(gd, "SceneColor", resx, resy, Format.R8G8B8A8_UNorm);
-			post.MakePostDepth(gd, "SceneDepth", resx, resy,
-				(gd.GD.FeatureLevel != FeatureLevel.Level_9_3)?
-					Format.D32_Float_S8X24_UInt : Format.D24_UNorm_S8_UInt);
-			post.MakePostTarget(gd, "SceneDepthMatNorm", resx, resy, Format.R16G16B16A16_Float);
-			post.MakePostTarget(gd, "Bleach", resx, resy, Format.R8G8B8A8_UNorm);
-			post.MakePostTarget(gd, "Outline", resx, resy, Format.R8G8B8A8_UNorm);
-			post.MakePostTarget(gd, "Bloom1", resx/2, resy/2, Format.R8G8B8A8_UNorm);
-			post.MakePostTarget(gd, "Bloom2", resx/2, resy/2, Format.R8G8B8A8_UNorm);
-
 			AnimForm	ss	=SetUpForms(gd.GD, matLib, sk, comPrims);
 
 			Vector3	pos			=Vector3.One * 5f;
 			Vector3	lightDir	=-Vector3.UnitY;
-			long	lastTime	=Stopwatch.GetTimestamp();
-			long	freq		=Stopwatch.Frequency;
+
+			UpdateTimer	time	=new UpdateTimer(true, false);
+
+			time.SetFixedTimeStepSeconds(1f / 60f);	//60fps update rate
+			time.SetMaxDeltaSeconds(MaxTimeDelta);
+
+			List<Input.InputAction>	acts	=new List<Input.InputAction>();
 
 			RenderLoop.Run(gd.RendForm, () =>
 			{
@@ -133,27 +128,29 @@ namespace ColladaConvert
 				//Clear views
 				gd.ClearViews();
 
-				long	timeNow		=Stopwatch.GetTimestamp();
-				long	delta		=timeNow - lastTime;
-				float	secDelta	=Math.Min((float)delta / freq, 0.1f);
-				int		msDelta		=Math.Max((int)(secDelta * 1000f), 1);
-
-				List<Input.InputAction>	actions	=UpdateInput(inp, gd, secDelta, ref bMouseLookOn);
-				if(!gd.RendForm.Focused)
+				time.Stamp();
+				while(time.GetUpdateDeltaSeconds() > 0f)
 				{
-					actions.Clear();
+					acts	=UpdateInput(inp, gd,
+						time.GetUpdateDeltaSeconds(), ref bMouseLookOn);
+					if(!gd.RendForm.Focused)
+					{
+						acts.Clear();
+					}
+
+					Vector3	deltaMove	=pSteering.Update(pos,
+						gd.GCam.Forward, gd.GCam.Left, gd.GCam.Up, acts);
+
+					deltaMove	*=200f;
+					pos			-=deltaMove;
+					
+					ChangeLight(acts, ref lightDir);
+
+					time.UpdateDone();
 				}
 
-				ChangeLight(actions, ref lightDir);
-
 				//light direction is backwards now for some strange reason
-				matLib.SetParameterForAll("mLightDirection", -lightDir);
-				
-				Vector3	deltaMove	=pSteering.Update(pos, gd.GCam.Forward, gd.GCam.Left, gd.GCam.Up, actions);
-
-				deltaMove	*=200f;
-
-				pos	-=deltaMove;
+				matLib.SetParameterForAll("mLightDirection", -lightDir);				
 				
 				gd.GCam.Update(pos, pSteering.Pitch, pSteering.Yaw, pSteering.Roll);
 
@@ -161,19 +158,12 @@ namespace ColladaConvert
 
 				comPrims.Update(gd.GCam, lightDir);
 
-				ss.RenderUpdate(secDelta);
+				ss.RenderUpdate(time.GetRenderUpdateDeltaSeconds());
 
-				post.SetTargets(gd, "SceneDepthMatNorm", "SceneDepth");
+				post.SetTargets(gd, "BackColor", "BackDepth");
 
-				post.ClearTarget(gd, "SceneDepthMatNorm", Color.White);
-				post.ClearDepth(gd, "SceneDepth");
-
-				ss.RenderDMN(gd.DC);
-
-				post.SetTargets(gd, "SceneColor", "SceneDepth");
-
-				post.ClearTarget(gd, "SceneColor", Color.CornflowerBlue);
-				post.ClearDepth(gd, "SceneDepth");
+				post.ClearTarget(gd, "BackColor", Color.CornflowerBlue);
+				post.ClearDepth(gd, "BackDepth");
 
 				ss.Render(gd.DC);
 
@@ -192,39 +182,9 @@ namespace ColladaConvert
 					comPrims.DrawSphere(gd.DC, Matrix.Identity);
 				}
 
-				post.SetTargets(gd, "Outline", "null");
-				post.SetParameter("mNormalTex", "SceneDepthMatNorm");
-				post.DrawStage(gd, "Outline");
-
-//				post.SetTargets(gd, "Bleach", "null");
-//				post.SetParameter("mColorTex", "SceneColor");
-//				post.DrawStage(gd, "BleachBypass");
-
-//				post.SetTargets(gd, "Bloom1", "null");
-//				post.SetParameter("mBlurTargetTex", "Bleach");
-//				post.DrawStage(gd, "BloomExtract");
-
-//				post.SetTargets(gd, "Bloom2", "null");
-//				post.SetParameter("mBlurTargetTex", "Bloom1");
-//				post.DrawStage(gd, "GaussianBlurX");
-
-//				post.SetTargets(gd, "Bloom1", "null");
-//				post.SetParameter("mBlurTargetTex", "Bloom2");
-//				post.DrawStage(gd, "GaussianBlurY");
-
-//				post.SetTargets(gd, "SceneColor", "null");
-//				post.SetParameter("mBlurTargetTex", "Bloom1");
-//				post.SetParameter("mColorTex", "Bleach");
-//				post.DrawStage(gd, "BloomCombine");
-
-				post.SetTargets(gd, "BackColor", "BackDepth");
-				post.SetParameter("mBlurTargetTex", "Outline");
-				post.SetParameter("mColorTex", "SceneColor");
-				post.DrawStage(gd, "Modulate");
-				
 				gd.Present();
 
-				lastTime	=timeNow;
+				acts.Clear();
 			}, true);	//true here is slow but needed for winforms events
 
 			Settings.Default.Save();
@@ -476,19 +436,19 @@ namespace ColladaConvert
 			{
 				if(act.mAction.Equals(MyActions.LightX))
 				{
-					Matrix	rot	=Matrix.RotationX(act.mMultiplier * 0.001f);
+					Matrix	rot	=Matrix.RotationX(act.mMultiplier);
 					lightDir	=Vector3.TransformCoordinate(lightDir, rot);
 					lightDir.Normalize();
 				}
 				else if(act.mAction.Equals(MyActions.LightY))
 				{
-					Matrix	rot	=Matrix.RotationY(act.mMultiplier * 0.001f);
+					Matrix	rot	=Matrix.RotationY(act.mMultiplier);
 					lightDir	=Vector3.TransformCoordinate(lightDir, rot);
 					lightDir.Normalize();
 				}
 				else if(act.mAction.Equals(MyActions.LightZ))
 				{
-					Matrix	rot	=Matrix.RotationZ(act.mMultiplier * 0.001f);
+					Matrix	rot	=Matrix.RotationZ(act.mMultiplier);
 					lightDir	=Vector3.TransformCoordinate(lightDir, rot);
 					lightDir.Normalize();
 				}
