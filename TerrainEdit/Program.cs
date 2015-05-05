@@ -10,6 +10,7 @@ using InputLib;
 using MaterialLib;
 using UtilityLib;
 using MeshLib;
+using TerrainLib;
 
 using SharpDX;
 using SharpDX.Direct3D;
@@ -62,8 +63,10 @@ namespace TerrainEdit
 
 			StuffKeeper	sk	=new StuffKeeper();
 
+			SharedForms.ShaderCompileHelper.mTitle	="Compiling Shaders...";
+
 			sk.eCompileNeeded	+=SharedForms.ShaderCompileHelper.CompileNeededHandler;
-			sk.eCompileDone	+=SharedForms.ShaderCompileHelper.CompileDoneHandler;
+			sk.eCompileDone		+=SharedForms.ShaderCompileHelper.CompileDoneHandler;
 
 			sk.Init(gd, rootDir);
 
@@ -102,6 +105,13 @@ namespace TerrainEdit
 			gd.RendForm.AppDeactivated	+=deActHandler;
 
 			GameLoop	gLoop	=new GameLoop(gd, sk, rootDir);
+
+			EventHandler	buildHandler	=new EventHandler(
+				delegate(object s, EventArgs ea)
+				{	ListEventArgs<HeightMap.TexData>	lea	=ea as ListEventArgs<HeightMap.TexData>;
+					gLoop.Build((TexAtlas)s, lea.mList);	});
+
+			ta.eReBuild	+=buildHandler;
 
 			UpdateTimer	time	=new UpdateTimer(true, false);
 
@@ -153,9 +163,12 @@ namespace TerrainEdit
 
 			gd.RendForm.Activated		-=actHandler;
 			gd.RendForm.AppDeactivated	-=deActHandler;
+			ta.eReBuild					-=buildHandler;
 
 			gLoop.FreeAll();
 			inp.FreeAll();
+			ta.FreeAll();
+			sk.FreeAll();
 			
 			//Release all resources
 			gd.ReleaseAll();

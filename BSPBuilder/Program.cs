@@ -52,6 +52,9 @@ namespace BSPBuilder
 
 			gd.RendForm.Location	=Settings.Default.MainWindowPos;
 			
+			//set title of progress window
+			SharedForms.ShaderCompileHelper.mTitle	="Compiling Shaders...";
+
 			PlayerSteering	pSteering		=SetUpSteering();
 			Input			inp				=SetUpInput();
 			Random			rand			=new Random();

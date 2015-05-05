@@ -60,7 +60,6 @@ namespace BSPBuilder
 
 			mSKeeper	=new StuffKeeper();
 
-			SharedForms.ShaderCompileHelper.mTitle	="Compiling Shaders...";
 			mSKeeper.eCompileNeeded	+=SharedForms.ShaderCompileHelper.CompileNeededHandler;
 			mSKeeper.eCompileDone	+=SharedForms.ShaderCompileHelper.CompileDoneHandler;
 

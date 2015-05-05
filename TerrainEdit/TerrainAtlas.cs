@@ -9,55 +9,23 @@ using System.Windows.Forms;
 
 using MaterialLib;
 using UtilityLib;
+using TerrainLib;
 
 
 namespace TerrainEdit
 {
-	public partial class TerrainAtlas : Form
+	internal partial class TerrainAtlas : Form
 	{
-		class GridData
-		{
-			float	mBottomElevation;
-			float	mTopElevation;
-			bool	mbSteep;
-			string	mTextureName;
-
-			internal double	mScaleU, mScaleV;
-			internal double mUOffs, mVOffs;
-
-			public float	BottomElevation
-			{
-				get {	return	mBottomElevation;	}
-				set {	mBottomElevation	=value;	}
-			}
-
-			public float	TopElevation
-			{
-				get {	return	mTopElevation;	}
-				set	{	mTopElevation	=value; }
-			}
-
-			public bool	Steep
-			{
-				get {	return mbSteep;	}
-				set {	mbSteep	=value;	}
-			}
-
-			public string	TextureName
-			{
-				get {	return mTextureName;	}
-				set {	mTextureName	=value;	}
-			}
-		}
-
 		GraphicsDevice	mGD;
 		StuffKeeper		mSK;
 		TexAtlas		mAtlas;
 
-		BindingList<GridData>	mGridData	=new BindingList<GridData>();
+		BindingList<HeightMap.TexData>	mGridData	=new BindingList<HeightMap.TexData>();
+
+		internal event EventHandler	eReBuild;
 
 
-		public TerrainAtlas(GraphicsDevice gd, StuffKeeper sk)
+		internal TerrainAtlas(GraphicsDevice gd, StuffKeeper sk)
 		{
 			mGD	=gd;
 			mSK	=sk;
@@ -78,6 +46,15 @@ namespace TerrainEdit
 		}
 
 
+		internal void FreeAll()
+		{
+			if(mAtlas != null)
+			{
+				mAtlas.FreeAll();
+			}
+		}
+
+
 		void AutoFill()
 		{
 			List<string>	textures	=mSK.GetTexture2DList();
@@ -86,7 +63,7 @@ namespace TerrainEdit
 			{
 				if(tex.StartsWith("Terrain\\"))
 				{
-					GridData	gd	=new GridData();
+					HeightMap.TexData	gd	=new HeightMap.TexData();
 
 					gd.TextureName	=tex;
 
@@ -110,7 +87,7 @@ namespace TerrainEdit
 			List<string>	textures	=mSK.GetTexture2DList();
 			for(int i=0;i < mGridData.Count;i++)
 			{
-				GridData	gd	=mGridData[i];
+				HeightMap.TexData	gd	=mGridData[i];
 				if(textures.Contains(gd.TextureName))
 				{
 					if(!mSK.AddTexToAtlas(mAtlas, gd.TextureName, mGD,
@@ -128,11 +105,16 @@ namespace TerrainEdit
 			}
 
 			AtlasPic01.Image	=mAtlas.GetAtlasImage(mGD.DC);
+
+			mAtlas.Finish(mGD);
 		}
 
-		private void OnReBuildAtlas(object sender, EventArgs e)
+
+		void OnReBuildAtlas(object sender, EventArgs e)
 		{
 			RebuildImage();
+
+			Misc.SafeInvoke(eReBuild, mAtlas, new ListEventArgs<HeightMap.TexData>(mGridData.ToList()));
 		}
 	}
 }

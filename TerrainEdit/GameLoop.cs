@@ -36,6 +36,7 @@ namespace TerrainEdit
 
 		//gpu
 		GraphicsDevice	mGD;
+		StuffKeeper		mSK;
 
 		//Fonts / UI
 		ScreenText		mST;
@@ -48,9 +49,10 @@ namespace TerrainEdit
 
 		internal GameLoop(GraphicsDevice gd, StuffKeeper sk, string gameRootDir)
 		{
-			mGD				=gd;
-			mResX			=gd.RendForm.ClientRectangle.Width;
-			mResY			=gd.RendForm.ClientRectangle.Height;
+			mGD		=gd;
+			mSK		=sk;
+			mResX	=gd.RendForm.ClientRectangle.Width;
+			mResY	=gd.RendForm.ClientRectangle.Height;
 
 			mFontMats	=new MatLib(gd, sk);
 
@@ -80,7 +82,8 @@ namespace TerrainEdit
 				}
 			}
 
-			mHeight	=new HeightMap(chunk, Point.Zero, 67, 67, 65, 65, 0, 0, 16f, mGD);
+			mHeight	=new HeightMap(chunk, Point.Zero, 67, 67, 65, 65, 0, 0, 16f,
+				new List<HeightMap.TexData>(), mGD);
 
 			mTerMats	=new MatLib(mGD, sk);
 
@@ -93,7 +96,7 @@ namespace TerrainEdit
 
 			mTerMats.CreateMaterial("Terrain");
 			mTerMats.SetMaterialEffect("Terrain", "Static.fx");
-			mTerMats.SetMaterialTechnique("Terrain", "TriSolid");
+			mTerMats.SetMaterialTechnique("Terrain", "TriTerrain");
 			mTerMats.SetMaterialParameter("Terrain", "mLightColor0", Vector4.One);
 			mTerMats.SetMaterialParameter("Terrain", "mLightColor1", lightColor2);
 			mTerMats.SetMaterialParameter("Terrain", "mLightColor2", lightColor3);
@@ -133,6 +136,28 @@ namespace TerrainEdit
 		internal void FreeAll()
 		{
 			mFontMats.FreeAll();
+		}
+
+
+		internal void Build(TexAtlas texAtlas, List<HeightMap.TexData> texInfo)
+		{
+			mHeight.FreeAll();
+
+			mSK.AddMap("TerrainAtlas", texAtlas.GetAtlasSRV());
+			mTerMats.SetMaterialTexture("Terrain", "mTexture0", "TerrainAtlas");
+
+			float	[,]chunk	=new float[67, 67];
+
+			for(int y=0;y < 67;y++)
+			{
+				for(int x=0;x < 67;x++)
+				{
+					chunk[y, x]	=Mathery.RandomFloatNext(mRand, -6f, 6f);
+				}
+			}
+
+			mHeight	=new HeightMap(chunk, Point.Zero, 67, 67, 65, 65, 1, 1, 16f,
+				texInfo, mGD);
 		}
 	}
 }
