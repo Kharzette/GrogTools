@@ -89,14 +89,14 @@ namespace TerrainEdit
 
 			Vector3	lightDir	=Mathery.RandomDirection(mRand);
 
-			Vector4	lightColor2	=Vector4.One * 0.6f;
-			Vector4	lightColor3	=Vector4.One * 0.3f;
+			Vector4	lightColor2	=Vector4.One * 0.4f;
+			Vector4	lightColor3	=Vector4.One * 0.1f;
 
 			lightColor2.W	=lightColor3.W	=1f;
 
 			mTerMats.CreateMaterial("Terrain");
 			mTerMats.SetMaterialEffect("Terrain", "Terrain.fx");
-			mTerMats.SetMaterialTechnique("Terrain", "TriTerrain");
+			mTerMats.SetMaterialTechnique("Terrain", "TriCelTerrain");
 			mTerMats.SetMaterialParameter("Terrain", "mLightColor0", Vector4.One);
 			mTerMats.SetMaterialParameter("Terrain", "mLightColor1", lightColor2);
 			mTerMats.SetMaterialParameter("Terrain", "mLightColor2", lightColor3);
@@ -105,6 +105,10 @@ namespace TerrainEdit
 			mTerMats.SetMaterialParameter("Terrain", "mSpecPower", 1);
 			mTerMats.SetMaterialParameter("Terrain", "mSpecColor", Vector4.One);
 			mTerMats.SetMaterialParameter("Terrain", "mWorld", Matrix.Identity);
+
+			mTerMats.InitCelShading(1);
+			mTerMats.GenerateCelTexturePreset(mGD.GD, mGD.GD.FeatureLevel == FeatureLevel.Level_9_3, false, 0);
+			mTerMats.SetCelTexture(0);
 		}
 
 
@@ -180,6 +184,9 @@ namespace TerrainEdit
 
 			mHeight	=new HeightMap(chunk, Point.Zero, 67, 67, 65, 65, 1, 1,
 				16f, transHeight, texInfo, mGD);
+
+			Vector3	lightDir	=Mathery.RandomDirection(mRand);
+			mTerMats.SetMaterialParameter("Terrain", "mLightDirection", lightDir);
 		}
 	}
 }
