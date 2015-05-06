@@ -82,7 +82,7 @@ namespace TerrainEdit
 				}
 			}
 
-			mHeight	=new HeightMap(chunk, Point.Zero, 67, 67, 65, 65, 0, 0, 16f,
+			mHeight	=new HeightMap(chunk, Point.Zero, 67, 67, 65, 65, 0, 0, 16f, 1f,
 				new List<HeightMap.TexData>(), mGD);
 
 			mTerMats	=new MatLib(mGD, sk);
@@ -95,7 +95,7 @@ namespace TerrainEdit
 			lightColor2.W	=lightColor3.W	=1f;
 
 			mTerMats.CreateMaterial("Terrain");
-			mTerMats.SetMaterialEffect("Terrain", "Static.fx");
+			mTerMats.SetMaterialEffect("Terrain", "Terrain.fx");
 			mTerMats.SetMaterialTechnique("Terrain", "TriTerrain");
 			mTerMats.SetMaterialParameter("Terrain", "mLightColor0", Vector4.One);
 			mTerMats.SetMaterialParameter("Terrain", "mLightColor1", lightColor2);
@@ -139,7 +139,7 @@ namespace TerrainEdit
 		}
 
 
-		internal void Build(TexAtlas texAtlas, List<HeightMap.TexData> texInfo)
+		internal void Build(TexAtlas texAtlas, List<HeightMap.TexData> texInfo, float transHeight)
 		{
 			mHeight.FreeAll();
 
@@ -178,8 +178,8 @@ namespace TerrainEdit
 			mTerMats.SetMaterialParameter("Terrain", "mAtlasUVData", scaleofs);
 			mTerMats.SetMaterialParameter("Terrain", "mAtlasTexScale", scale);
 
-			mHeight	=new HeightMap(chunk, Point.Zero, 67, 67, 65, 65, 1, 1, 16f,
-				texInfo, mGD);
+			mHeight	=new HeightMap(chunk, Point.Zero, 67, 67, 65, 65, 1, 1,
+				16f, transHeight, texInfo, mGD);
 		}
 	}
 }

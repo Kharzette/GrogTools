@@ -116,5 +116,11 @@ namespace TerrainEdit
 
 			Misc.SafeInvoke(eReBuild, mAtlas, new ListEventArgs<HeightMap.TexData>(mGridData.ToList()));
 		}
+
+
+		internal float GetTransitionHeight()
+		{
+			return	(float)TransitionHeight.Value;
+		}
 	}
 }

@@ -44,7 +44,7 @@ namespace TerrainEdit
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 			GraphicsDevice	gd	=new GraphicsDevice("Terrain Editor",
-				FeatureLevel.Level_11_0);
+				FeatureLevel.Level_9_3);
 
 			//save form positions
 			gd.RendForm.DataBindings.Add(new Binding("Location",
@@ -109,7 +109,7 @@ namespace TerrainEdit
 			EventHandler	buildHandler	=new EventHandler(
 				delegate(object s, EventArgs ea)
 				{	ListEventArgs<HeightMap.TexData>	lea	=ea as ListEventArgs<HeightMap.TexData>;
-					gLoop.Build((TexAtlas)s, lea.mList);	});
+					gLoop.Build((TexAtlas)s, lea.mList, ta.GetTransitionHeight());	});
 
 			ta.eReBuild	+=buildHandler;
 
