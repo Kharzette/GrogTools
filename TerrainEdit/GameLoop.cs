@@ -156,6 +156,24 @@ namespace TerrainEdit
 				}
 			}
 
+			Vector4	[]scaleofs	=new Vector4[16];
+
+			for(int i=0;i < texInfo.Count;i++)
+			{
+				if(i > 15)
+				{
+					break;
+				}
+
+				scaleofs[i]	=new Vector4(
+					(float)texInfo[i].mScaleU,
+					(float)texInfo[i].mScaleV,
+					(float)texInfo[i].mUOffs,
+					(float)texInfo[i].mVOffs);
+			}
+			mTerMats.SetMaterialParameter("Terrain", "mAtlasScalesOffsets", scaleofs);
+			mTerMats.SetMaterialParameter("Terrain", "mSolidColour", Vector4.One / 16f);
+
 			mHeight	=new HeightMap(chunk, Point.Zero, 67, 67, 65, 65, 1, 1, 16f,
 				texInfo, mGD);
 		}
