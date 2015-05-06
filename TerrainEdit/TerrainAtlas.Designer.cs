@@ -34,11 +34,14 @@
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.AtlasY = new System.Windows.Forms.NumericUpDown();
 			this.ReBuildAtlas = new System.Windows.Forms.Button();
+			this.TransitionHeight = new System.Windows.Forms.NumericUpDown();
+			this.label1 = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.AtlasPic01)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.AtlasGrid)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.AtlasX)).BeginInit();
 			this.groupBox1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.AtlasY)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.TransitionHeight)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// AtlasPic01
@@ -133,7 +136,7 @@
 			// ReBuildAtlas
 			// 
 			this.ReBuildAtlas.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.ReBuildAtlas.Location = new System.Drawing.Point(473, 96);
+			this.ReBuildAtlas.Location = new System.Drawing.Point(473, 227);
 			this.ReBuildAtlas.Name = "ReBuildAtlas";
 			this.ReBuildAtlas.Size = new System.Drawing.Size(90, 23);
 			this.ReBuildAtlas.TabIndex = 4;
@@ -141,12 +144,48 @@
 			this.ReBuildAtlas.UseVisualStyleBackColor = true;
 			this.ReBuildAtlas.Click += new System.EventHandler(this.OnReBuildAtlas);
 			// 
+			// TransitionHeight
+			// 
+			this.TransitionHeight.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.TransitionHeight.DecimalPlaces = 1;
+			this.TransitionHeight.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+			this.TransitionHeight.Location = new System.Drawing.Point(474, 126);
+			this.TransitionHeight.Maximum = new decimal(new int[] {
+            500,
+            0,
+            0,
+            0});
+			this.TransitionHeight.Name = "TransitionHeight";
+			this.TransitionHeight.Size = new System.Drawing.Size(89, 20);
+			this.TransitionHeight.TabIndex = 5;
+			this.TransitionHeight.Value = new decimal(new int[] {
+            2,
+            0,
+            0,
+            0});
+			// 
+			// label1
+			// 
+			this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.label1.AutoSize = true;
+			this.label1.Location = new System.Drawing.Point(473, 110);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(87, 13);
+			this.label1.TabIndex = 6;
+			this.label1.Text = "Transition Height";
+			// 
 			// TerrainAtlas
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(575, 439);
 			this.ControlBox = false;
+			this.Controls.Add(this.label1);
+			this.Controls.Add(this.TransitionHeight);
 			this.Controls.Add(this.ReBuildAtlas);
 			this.Controls.Add(this.groupBox1);
 			this.Controls.Add(this.AtlasGrid);
@@ -159,7 +198,9 @@
 			((System.ComponentModel.ISupportInitialize)(this.AtlasX)).EndInit();
 			this.groupBox1.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.AtlasY)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.TransitionHeight)).EndInit();
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 
@@ -171,5 +212,7 @@
 		private System.Windows.Forms.GroupBox groupBox1;
 		private System.Windows.Forms.NumericUpDown AtlasY;
 		private System.Windows.Forms.Button ReBuildAtlas;
+		private System.Windows.Forms.NumericUpDown TransitionHeight;
+		private System.Windows.Forms.Label label1;
 	}
 }

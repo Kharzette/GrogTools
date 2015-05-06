@@ -157,6 +157,7 @@ namespace TerrainEdit
 			}
 
 			Vector4	[]scaleofs	=new Vector4[16];
+			float	[]scale		=new float[16];
 
 			for(int i=0;i < texInfo.Count;i++)
 			{
@@ -170,9 +171,12 @@ namespace TerrainEdit
 					(float)texInfo[i].mScaleV,
 					(float)texInfo[i].mUOffs,
 					(float)texInfo[i].mVOffs);
+
+				//basically a divisor
+				scale[i]	=1.0f / texInfo[i].ScaleFactor;
 			}
-			mTerMats.SetMaterialParameter("Terrain", "mAtlasScalesOffsets", scaleofs);
-			mTerMats.SetMaterialParameter("Terrain", "mSolidColour", Vector4.One / 16f);
+			mTerMats.SetMaterialParameter("Terrain", "mAtlasUVData", scaleofs);
+			mTerMats.SetMaterialParameter("Terrain", "mAtlasTexScale", scale);
 
 			mHeight	=new HeightMap(chunk, Point.Zero, 67, 67, 65, 65, 1, 1, 16f,
 				texInfo, mGD);
