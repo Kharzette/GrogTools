@@ -83,6 +83,15 @@ namespace TerrainEdit
 			ta.Size			=Settings.Default.AtlasFormSize;
 			ta.Visible		=true;
 
+			TerrainForm	tf	=new TerrainForm();
+
+			tf.DataBindings.Add(new Binding("Location",
+				Settings.Default, "TerrainFormPos", true,
+				DataSourceUpdateMode.OnPropertyChanged));
+
+			tf.Location		=Settings.Default.TerrainFormPos;
+			tf.Visible		=true;
+
 			PlayerSteering	pSteering		=SetUpSteering();
 			Input			inp				=SetUpInput();
 			Random			rand			=new Random();
@@ -109,9 +118,22 @@ namespace TerrainEdit
 			EventHandler	buildHandler	=new EventHandler(
 				delegate(object s, EventArgs ea)
 				{	ListEventArgs<HeightMap.TexData>	lea	=ea as ListEventArgs<HeightMap.TexData>;
-					gLoop.Build((TexAtlas)s, lea.mList, ta.GetTransitionHeight());	});
+					gLoop.Texture((TexAtlas)s, lea.mList, ta.GetTransitionHeight());	});
 
 			ta.eReBuild	+=buildHandler;
+
+			EventHandler	tBuildHandler	=new EventHandler(
+				delegate(object s, EventArgs ea)
+				{	int		gridSize, chunkSize, tilingIterations, erosionIterations, polySize;
+					float	medianHeight, variance, borderSize, rainFall, solubility, evaporation;
+					tf.GetBuildData(out gridSize, out chunkSize, out medianHeight, out variance,
+						out polySize, out tilingIterations, out borderSize, out erosionIterations,
+						out rainFall, out solubility, out evaporation);
+					gLoop.TBuild(gridSize, chunkSize, medianHeight, variance,
+						polySize, tilingIterations, borderSize, erosionIterations,
+						rainFall, solubility, evaporation);	});
+
+			tf.eBuild	+=tBuildHandler;
 
 			UpdateTimer	time	=new UpdateTimer(true, false);
 
@@ -164,6 +186,7 @@ namespace TerrainEdit
 			gd.RendForm.Activated		-=actHandler;
 			gd.RendForm.AppDeactivated	-=deActHandler;
 			ta.eReBuild					-=buildHandler;
+			tf.eBuild					-=tBuildHandler;
 
 			gLoop.FreeAll();
 			inp.FreeAll();

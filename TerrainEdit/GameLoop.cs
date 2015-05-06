@@ -28,11 +28,18 @@ namespace TerrainEdit
 	{
 		MatLib		mTerMats;
 
-		Random	mRand	=new Random();
-		Vector3	mPos	=Vector3.Zero;
+		Random	mRand			=new Random();
+		Vector3	mPos			=Vector3.Zero;
+		Point	mGridCoordinate;
+		int		mCellGridMax, mBoundary;
+
+		BoundingFrustum	mFrust	=new BoundingFrustum(Matrix.Identity);
 
 		//terrain stuff
-		HeightMap	mHeight;
+		FractalFactory	mFracFact;
+		TerrainModel	mTModel;
+		Terrain			mTerrain;
+//		HeightMap		mHeight;
 
 		//gpu
 		GraphicsDevice	mGD;
@@ -45,6 +52,8 @@ namespace TerrainEdit
 		Mover2			mTextMover	=new Mover2();
 		int				mResX, mResY;
 		List<string>	mFonts	=new List<string>();
+
+		const int	Nearby		=7;
 
 
 		internal GameLoop(GraphicsDevice gd, StuffKeeper sk, string gameRootDir)
@@ -72,19 +81,6 @@ namespace TerrainEdit
 			mST.AddString(mFonts[0], "Stuffs", "PosStatus",
 				color, Vector2.UnitX * 20f + Vector2.UnitY * 640f, Vector2.One);
 
-			float	[,]chunk	=new float[67, 67];
-
-			for(int y=0;y < 67;y++)
-			{
-				for(int x=0;x < 67;x++)
-				{
-					chunk[y, x]	=Mathery.RandomFloatNext(mRand, -6f, 6f);
-				}
-			}
-
-			mHeight	=new HeightMap(chunk, Point.Zero, 67, 67, 65, 65, 0, 0, 16f, 1f,
-				new List<HeightMap.TexData>(), mGD);
-
 			mTerMats	=new MatLib(mGD, sk);
 
 			Vector3	lightDir	=Mathery.RandomDirection(mRand);
@@ -96,7 +92,7 @@ namespace TerrainEdit
 
 			mTerMats.CreateMaterial("Terrain");
 			mTerMats.SetMaterialEffect("Terrain", "Terrain.fx");
-			mTerMats.SetMaterialTechnique("Terrain", "TriCelTerrain");
+			mTerMats.SetMaterialTechnique("Terrain", "TriTerrain");
 			mTerMats.SetMaterialParameter("Terrain", "mLightColor0", Vector4.One);
 			mTerMats.SetMaterialParameter("Terrain", "mLightColor1", lightColor2);
 			mTerMats.SetMaterialParameter("Terrain", "mLightColor2", lightColor3);
@@ -116,9 +112,24 @@ namespace TerrainEdit
 		{
 			Vector3	moveVec		=ps.Update(mPos, mGD.GCam.Forward, mGD.GCam.Left, mGD.GCam.Up, acts);
 
-			mPos	-=(moveVec * 100f);
+			mPos	+=(moveVec * 100f);
 
-			mGD.GCam.Update(mPos, ps.Pitch, ps.Yaw, ps.Roll);
+			bool	bWrapped	=WrapPosition(ref mPos);
+
+			WrapGridCoordinates();
+
+			if(bWrapped && mTerrain != null)
+			{
+				mTerrain.BuildGrid(mGD, Nearby);
+			}
+
+			if(mTerrain != null)
+			{
+				mTerrain.SetCellCoord(mGridCoordinate);
+				mTerrain.UpdatePosition(mPos, mTerMats);
+			}
+
+			mGD.GCam.Update(-mPos, ps.Pitch, ps.Yaw, ps.Roll);
 
 			mST.ModifyStringText(mFonts[0], "Position: " + " : "
 				+ mGD.GCam.Position.IntStr(), "PosStatus");
@@ -129,11 +140,20 @@ namespace TerrainEdit
 		internal void RenderUpdate(float deltaMS)
 		{
 			mTerMats.UpdateWVP(Matrix.Identity, mGD.GCam.View, mGD.GCam.Projection, mGD.GCam.Position);
+
+			mFrust.Matrix	=mGD.GCam.View * mGD.GCam.Projection;
 		}
 
 		internal void Render()
 		{
-			mHeight.Draw(mGD.DC, mTerMats, Matrix.Identity, mGD.GCam.View, mGD.GCam.Projection);
+			if(mTerrain != null)
+			{
+				mTerrain.Draw(mGD, mTerMats, mFrust);
+			}
+//			if(mHeight != null)
+//			{
+//				mHeight.Draw(mGD.DC, mTerMats, Matrix.Identity, mGD.GCam.View, mGD.GCam.Projection);
+//			}
 			mST.Draw(mGD.DC, Matrix.Identity, mTextProj);
 		}
 
@@ -143,22 +163,12 @@ namespace TerrainEdit
 		}
 
 
-		internal void Build(TexAtlas texAtlas, List<HeightMap.TexData> texInfo, float transHeight)
+		internal void Texture(TexAtlas texAtlas, List<HeightMap.TexData> texInfo, float transHeight)
 		{
-			mHeight.FreeAll();
+			//mHeight.FreeAll();
 
 			mSK.AddMap("TerrainAtlas", texAtlas.GetAtlasSRV());
 			mTerMats.SetMaterialTexture("Terrain", "mTexture0", "TerrainAtlas");
-
-			float	[,]chunk	=new float[67, 67];
-
-			for(int y=0;y < 67;y++)
-			{
-				for(int x=0;x < 67;x++)
-				{
-					chunk[y, x]	=Mathery.RandomFloatNext(mRand, -6f, 6f);
-				}
-			}
 
 			Vector4	[]scaleofs	=new Vector4[16];
 			float	[]scale		=new float[16];
@@ -182,11 +192,117 @@ namespace TerrainEdit
 			mTerMats.SetMaterialParameter("Terrain", "mAtlasUVData", scaleofs);
 			mTerMats.SetMaterialParameter("Terrain", "mAtlasTexScale", scale);
 
-			mHeight	=new HeightMap(chunk, Point.Zero, 67, 67, 65, 65, 1, 1,
-				16f, transHeight, texInfo, mGD);
+			mTerrain.SetTextureData(texInfo, transHeight);
 
 			Vector3	lightDir	=Mathery.RandomDirection(mRand);
 			mTerMats.SetMaterialParameter("Terrain", "mLightDirection", lightDir);
+		}
+
+
+		internal void TBuild(int gridSize, int chunkSize, float medianHeight,
+			float variance, int polySize, int tilingIterations, float borderSize,
+			int erosionIterations, float rainFall, float solubility, float evaporation)
+		{
+			mFracFact	=new FractalFactory(variance, medianHeight, gridSize + 1, gridSize + 1);
+
+			int	seed	=69;
+
+			float[,]	fract	=mFracFact.CreateFractal(seed, gridSize + 1);
+
+			if(erosionIterations > 0)
+			{
+				int	realIterations	=FractalFactory.Erode(fract, mRand,
+					erosionIterations, rainFall, solubility, evaporation);
+			}
+
+			for(int i=0;i < tilingIterations;i++)
+			{
+				float	borderSlice	=borderSize / tilingIterations;
+
+				FractalFactory.MakeTiled(fract, borderSlice * (i + 1));
+			}
+
+			mTModel	=new TerrainModel(fract, polySize, gridSize + 1);
+
+			mCellGridMax	=gridSize / chunkSize;
+
+			mTerrain	=new Terrain(fract, polySize, chunkSize, mCellGridMax);
+
+			//start off in the middle
+			mGridCoordinate.X	=mCellGridMax / 2;
+			mGridCoordinate.Y	=mCellGridMax / 2;
+
+			mBoundary	=chunkSize * polySize;
+
+			mTerrain.SetCellCoord(mGridCoordinate);
+
+			mTerrain.BuildGrid(mGD, Nearby);
+
+			mTerrain.UpdatePosition(Vector3.Zero, mTerMats);
+		}
+
+
+		bool WrapPosition(ref Vector3 pos)
+		{
+			bool	bWrapped	=false;
+
+			if(pos.X > mBoundary)
+			{
+				pos.X	-=mBoundary;
+				mGridCoordinate.X++;
+				bWrapped	=true;
+			}
+			else if(pos.X < 0f)
+			{
+				pos.X	+=mBoundary;
+				mGridCoordinate.X--;
+				bWrapped	=true;
+			}
+
+			if(pos.Z > mBoundary)
+			{
+				pos.Z	-=mBoundary;
+				mGridCoordinate.Y++;
+				bWrapped	=true;
+			}
+			else if(pos.Z < 0f)
+			{
+				pos.Z	+=mBoundary;
+				mGridCoordinate.Y--;
+				bWrapped	=true;
+			}
+
+			return	bWrapped;
+		}
+
+
+		bool WrapGridCoordinates()
+		{
+			bool	bWrapped	=false;
+
+			if(mGridCoordinate.X >= mCellGridMax)
+			{
+				mGridCoordinate.X	=0;
+				bWrapped	=true;
+			}
+			else if(mGridCoordinate.X < 0)
+			{
+				mGridCoordinate.X	=mCellGridMax - 1;
+				bWrapped	=true;
+			}
+
+			if(mGridCoordinate.Y >= mCellGridMax)
+			{
+				mGridCoordinate.Y	=0;
+				bWrapped	=true;
+			}
+			else if(mGridCoordinate.Y < 0)
+			{
+				mGridCoordinate.Y	=mCellGridMax - 1;
+				bWrapped	=true;
+			}
+
+			return	bWrapped;
 		}
 	}
 }

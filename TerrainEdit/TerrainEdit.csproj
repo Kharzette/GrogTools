@@ -137,6 +137,12 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="TerrainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TerrainForm.Designer.cs">
+      <DependentUpon>TerrainForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="TerrainAtlas.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -145,6 +151,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="TerrainForm.resx">
+      <DependentUpon>TerrainForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="TerrainAtlas.resx">
       <DependentUpon>TerrainAtlas.cs</DependentUpon>
     </EmbeddedResource>
