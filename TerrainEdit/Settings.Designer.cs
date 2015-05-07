@@ -94,5 +94,161 @@ namespace TerrainEdit {
                 this["TerrainFormPos"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1024")]
+        public decimal GridSize {
+            get {
+                return ((decimal)(this["GridSize"]));
+            }
+            set {
+                this["GridSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("64")]
+        public decimal ChunkSize {
+            get {
+                return ((decimal)(this["ChunkSize"]));
+            }
+            set {
+                this["ChunkSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("64")]
+        public decimal MedianHeight {
+            get {
+                return ((decimal)(this["MedianHeight"]));
+            }
+            set {
+                this["MedianHeight"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public decimal Variance {
+            get {
+                return ((decimal)(this["Variance"]));
+            }
+            set {
+                this["Variance"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("16")]
+        public decimal PolySize {
+            get {
+                return ((decimal)(this["PolySize"]));
+            }
+            set {
+                this["PolySize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("4")]
+        public decimal TileIterations {
+            get {
+                return ((decimal)(this["TileIterations"]));
+            }
+            set {
+                this["TileIterations"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("64")]
+        public decimal BorderSize {
+            get {
+                return ((decimal)(this["BorderSize"]));
+            }
+            set {
+                this["BorderSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public decimal ErosionIterations {
+            get {
+                return ((decimal)(this["ErosionIterations"]));
+            }
+            set {
+                this["ErosionIterations"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("4")]
+        public decimal RainFall {
+            get {
+                return ((decimal)(this["RainFall"]));
+            }
+            set {
+                this["RainFall"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.1")]
+        public decimal Solubility {
+            get {
+                return ((decimal)(this["Solubility"]));
+            }
+            set {
+                this["Solubility"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.15")]
+        public decimal Evaporation {
+            get {
+                return ((decimal)(this["Evaporation"]));
+            }
+            set {
+                this["Evaporation"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("69")]
+        public decimal Seed {
+            get {
+                return ((decimal)(this["Seed"]));
+            }
+            set {
+                this["Seed"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public decimal SmoothPasses {
+            get {
+                return ((decimal)(this["SmoothPasses"]));
+            }
+            set {
+                this["SmoothPasses"] = value;
+            }
+        }
     }
 }

@@ -201,13 +201,17 @@ namespace TerrainEdit
 
 		internal void TBuild(int gridSize, int chunkSize, float medianHeight,
 			float variance, int polySize, int tilingIterations, float borderSize,
-			int erosionIterations, float rainFall, float solubility, float evaporation)
+			int smoothPasses, int seed, int erosionIterations,
+			float rainFall, float solubility, float evaporation)
 		{
 			mFracFact	=new FractalFactory(variance, medianHeight, gridSize + 1, gridSize + 1);
 
-			int	seed	=69;
-
 			float[,]	fract	=mFracFact.CreateFractal(seed, gridSize + 1);
+
+			for(int i=0;i < smoothPasses;i++)
+			{
+				FractalFactory.SmoothPass(fract);
+			}
 
 			if(erosionIterations > 0)
 			{

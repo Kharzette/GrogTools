@@ -37,8 +37,10 @@
 			this.label3 = new System.Windows.Forms.Label();
 			this.label4 = new System.Windows.Forms.Label();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.label13 = new System.Windows.Forms.Label();
 			this.label8 = new System.Windows.Forms.Label();
 			this.label7 = new System.Windows.Forms.Label();
+			this.SmoothPasses = new System.Windows.Forms.NumericUpDown();
 			this.Evaporation = new System.Windows.Forms.NumericUpDown();
 			this.Solubility = new System.Windows.Forms.NumericUpDown();
 			this.label6 = new System.Windows.Forms.Label();
@@ -46,6 +48,8 @@
 			this.label5 = new System.Windows.Forms.Label();
 			this.ErosionIterations = new System.Windows.Forms.NumericUpDown();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this.label12 = new System.Windows.Forms.Label();
+			this.Seed = new System.Windows.Forms.NumericUpDown();
 			this.label11 = new System.Windows.Forms.Label();
 			this.PolySize = new System.Windows.Forms.NumericUpDown();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
@@ -59,11 +63,13 @@
 			((System.ComponentModel.ISupportInitialize)(this.MedianHeight)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.Variance)).BeginInit();
 			this.groupBox1.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.SmoothPasses)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.Evaporation)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.Solubility)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.RainFall)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.ErosionIterations)).BeginInit();
 			this.groupBox2.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.Seed)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.PolySize)).BeginInit();
 			this.groupBox3.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.BorderSize)).BeginInit();
@@ -212,8 +218,10 @@
 			// 
 			// groupBox1
 			// 
+			this.groupBox1.Controls.Add(this.label13);
 			this.groupBox1.Controls.Add(this.label8);
 			this.groupBox1.Controls.Add(this.label7);
+			this.groupBox1.Controls.Add(this.SmoothPasses);
 			this.groupBox1.Controls.Add(this.Evaporation);
 			this.groupBox1.Controls.Add(this.Solubility);
 			this.groupBox1.Controls.Add(this.label6);
@@ -222,15 +230,24 @@
 			this.groupBox1.Controls.Add(this.ErosionIterations);
 			this.groupBox1.Location = new System.Drawing.Point(182, 12);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(154, 127);
+			this.groupBox1.Size = new System.Drawing.Size(165, 155);
 			this.groupBox1.TabIndex = 9;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Erosion";
 			// 
+			// label13
+			// 
+			this.label13.AutoSize = true;
+			this.label13.Location = new System.Drawing.Point(83, 21);
+			this.label13.Name = "label13";
+			this.label13.Size = new System.Drawing.Size(80, 13);
+			this.label13.TabIndex = 15;
+			this.label13.Text = "Smooth Passes";
+			// 
 			// label8
 			// 
 			this.label8.AutoSize = true;
-			this.label8.Location = new System.Drawing.Point(84, 99);
+			this.label8.Location = new System.Drawing.Point(84, 125);
 			this.label8.Name = "label8";
 			this.label8.Size = new System.Drawing.Size(64, 13);
 			this.label8.TabIndex = 14;
@@ -239,11 +256,23 @@
 			// label7
 			// 
 			this.label7.AutoSize = true;
-			this.label7.Location = new System.Drawing.Point(84, 73);
+			this.label7.Location = new System.Drawing.Point(84, 99);
 			this.label7.Name = "label7";
 			this.label7.Size = new System.Drawing.Size(48, 13);
 			this.label7.TabIndex = 13;
 			this.label7.Text = "Solubility";
+			// 
+			// SmoothPasses
+			// 
+			this.SmoothPasses.Location = new System.Drawing.Point(6, 19);
+			this.SmoothPasses.Name = "SmoothPasses";
+			this.SmoothPasses.Size = new System.Drawing.Size(71, 20);
+			this.SmoothPasses.TabIndex = 15;
+			this.SmoothPasses.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
 			// 
 			// Evaporation
 			// 
@@ -253,7 +282,7 @@
             0,
             0,
             131072});
-			this.Evaporation.Location = new System.Drawing.Point(6, 97);
+			this.Evaporation.Location = new System.Drawing.Point(6, 123);
 			this.Evaporation.Maximum = new decimal(new int[] {
             5,
             0,
@@ -276,7 +305,7 @@
             0,
             0,
             131072});
-			this.Solubility.Location = new System.Drawing.Point(6, 71);
+			this.Solubility.Location = new System.Drawing.Point(6, 97);
 			this.Solubility.Maximum = new decimal(new int[] {
             1,
             0,
@@ -294,7 +323,7 @@
 			// label6
 			// 
 			this.label6.AutoSize = true;
-			this.label6.Location = new System.Drawing.Point(84, 47);
+			this.label6.Location = new System.Drawing.Point(84, 73);
 			this.label6.Name = "label6";
 			this.label6.Size = new System.Drawing.Size(42, 13);
 			this.label6.TabIndex = 10;
@@ -308,7 +337,7 @@
             0,
             0,
             65536});
-			this.RainFall.Location = new System.Drawing.Point(6, 45);
+			this.RainFall.Location = new System.Drawing.Point(6, 71);
 			this.RainFall.Maximum = new decimal(new int[] {
             32,
             0,
@@ -326,7 +355,7 @@
 			// label5
 			// 
 			this.label5.AutoSize = true;
-			this.label5.Location = new System.Drawing.Point(84, 21);
+			this.label5.Location = new System.Drawing.Point(84, 47);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(50, 13);
 			this.label5.TabIndex = 8;
@@ -334,7 +363,7 @@
 			// 
 			// ErosionIterations
 			// 
-			this.ErosionIterations.Location = new System.Drawing.Point(6, 19);
+			this.ErosionIterations.Location = new System.Drawing.Point(6, 45);
 			this.ErosionIterations.Maximum = new decimal(new int[] {
             16,
             0,
@@ -343,14 +372,11 @@
 			this.ErosionIterations.Name = "ErosionIterations";
 			this.ErosionIterations.Size = new System.Drawing.Size(72, 20);
 			this.ErosionIterations.TabIndex = 6;
-			this.ErosionIterations.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
 			// 
 			// groupBox2
 			// 
+			this.groupBox2.Controls.Add(this.label12);
+			this.groupBox2.Controls.Add(this.Seed);
 			this.groupBox2.Controls.Add(this.label11);
 			this.groupBox2.Controls.Add(this.PolySize);
 			this.groupBox2.Controls.Add(this.GridSize);
@@ -363,10 +389,36 @@
 			this.groupBox2.Controls.Add(this.Variance);
 			this.groupBox2.Location = new System.Drawing.Point(12, 12);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(164, 153);
+			this.groupBox2.Size = new System.Drawing.Size(164, 182);
 			this.groupBox2.TabIndex = 10;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Dimensions";
+			// 
+			// label12
+			// 
+			this.label12.AutoSize = true;
+			this.label12.Location = new System.Drawing.Point(84, 151);
+			this.label12.Name = "label12";
+			this.label12.Size = new System.Drawing.Size(32, 13);
+			this.label12.TabIndex = 13;
+			this.label12.Text = "Seed";
+			// 
+			// Seed
+			// 
+			this.Seed.Location = new System.Drawing.Point(6, 149);
+			this.Seed.Maximum = new decimal(new int[] {
+            32768,
+            0,
+            0,
+            0});
+			this.Seed.Name = "Seed";
+			this.Seed.Size = new System.Drawing.Size(72, 20);
+			this.Seed.TabIndex = 10;
+			this.Seed.Value = new decimal(new int[] {
+            69,
+            0,
+            0,
+            0});
 			// 
 			// label11
 			// 
@@ -405,7 +457,7 @@
 			this.groupBox3.Controls.Add(this.BorderSize);
 			this.groupBox3.Controls.Add(this.label9);
 			this.groupBox3.Controls.Add(this.TileIterations);
-			this.groupBox3.Location = new System.Drawing.Point(12, 171);
+			this.groupBox3.Location = new System.Drawing.Point(182, 173);
 			this.groupBox3.Name = "groupBox3";
 			this.groupBox3.Size = new System.Drawing.Size(164, 75);
 			this.groupBox3.TabIndex = 11;
@@ -476,7 +528,7 @@
 			// 
 			// Build
 			// 
-			this.Build.Location = new System.Drawing.Point(233, 171);
+			this.Build.Location = new System.Drawing.Point(53, 210);
 			this.Build.Name = "Build";
 			this.Build.Size = new System.Drawing.Size(75, 23);
 			this.Build.TabIndex = 12;
@@ -488,7 +540,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(347, 258);
+			this.ClientSize = new System.Drawing.Size(358, 260);
 			this.ControlBox = false;
 			this.Controls.Add(this.Build);
 			this.Controls.Add(this.groupBox3);
@@ -502,12 +554,14 @@
 			((System.ComponentModel.ISupportInitialize)(this.Variance)).EndInit();
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.SmoothPasses)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.Evaporation)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.Solubility)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.RainFall)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.ErosionIterations)).EndInit();
 			this.groupBox2.ResumeLayout(false);
 			this.groupBox2.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.Seed)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.PolySize)).EndInit();
 			this.groupBox3.ResumeLayout(false);
 			this.groupBox3.PerformLayout();
@@ -545,5 +599,9 @@
 		private System.Windows.Forms.Button Build;
 		private System.Windows.Forms.Label label11;
 		private System.Windows.Forms.NumericUpDown PolySize;
+		private System.Windows.Forms.Label label13;
+		private System.Windows.Forms.NumericUpDown SmoothPasses;
+		private System.Windows.Forms.Label label12;
+		private System.Windows.Forms.NumericUpDown Seed;
 	}
 }
