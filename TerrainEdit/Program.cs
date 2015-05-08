@@ -316,6 +316,9 @@ namespace TerrainEdit
 			inp.MapToggleAction(MyActions.ToggleMouseLookOn,
 				MyActions.ToggleMouseLookOff, Modifiers.None,
 				Input.VariousButtons.RightMouseButton);
+			inp.MapToggleAction(MyActions.ToggleMouseLookOn,
+				MyActions.ToggleMouseLookOff, Modifiers.ShiftHeld,
+				Input.VariousButtons.RightMouseButton);
 
 			inp.MapAxisAction(MyActions.Pitch, Input.MoveAxis.GamePadRightYAxis);
 			inp.MapAxisAction(MyActions.Turn, Input.MoveAxis.GamePadRightXAxis);
