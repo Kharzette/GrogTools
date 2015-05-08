@@ -261,17 +261,15 @@ namespace TerrainEdit
 
 			mTerrain.SetTextureData(tdata, transHeight);
 
-			//start off in the middle
-			mGridCoordinate.X	=mCellGridMax / 2;
-			mGridCoordinate.Y	=mCellGridMax / 2;
-
 			mBoundary	=chunkSize * polySize;
 
 			mTerrain.SetCellCoord(mGridCoordinate);
 
 			mTerrain.BuildGrid(mGD, Nearby);
 
-			mTerrain.UpdatePosition(Vector3.Zero, mTerMats);
+			mPos.Y	=mTModel.GetHeight(mPos) + 200f;
+
+			mTerrain.UpdatePosition(mPos, mTerMats);
 		}
 
 
