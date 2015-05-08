@@ -79,7 +79,9 @@ namespace TerrainEdit
 
 			//string indicators for various statusy things
 			mST.AddString(mFonts[0], "Stuffs", "PosStatus",
-				color, Vector2.UnitX * 20f + Vector2.UnitY * 640f, Vector2.One);
+				color, Vector2.UnitX * 20f + Vector2.UnitY * 580f, Vector2.One);
+			mST.AddString(mFonts[0], "Thread Status...", "ThreadStatus",
+				color, Vector2.UnitX * 20f + Vector2.UnitY * 560f, Vector2.One);
 
 			mTerMats	=new MatLib(mGD, sk);
 
@@ -131,8 +133,15 @@ namespace TerrainEdit
 
 			mGD.GCam.Update(-mPos, ps.Pitch, ps.Yaw, ps.Roll);
 
-			mST.ModifyStringText(mFonts[0], "Position: " + " : "
+			mST.ModifyStringText(mFonts[0], "Grid: " + mGridCoordinate.ToString() +
+				", Position: " + " : "
 				+ mGD.GCam.Position.IntStr(), "PosStatus");
+
+			if(mTerrain != null)
+			{
+				mST.ModifyStringText(mFonts[0], "Threads Active: " + mTerrain.GetThreadsActive()
+					+ ", Thread Counter: " + mTerrain.GetThreadCounter(), "ThreadStatus");
+			}
 
 			mST.Update(mGD.DC);
 		}
@@ -150,10 +159,7 @@ namespace TerrainEdit
 			{
 				mTerrain.Draw(mGD, mTerMats, mFrust);
 			}
-//			if(mHeight != null)
-//			{
-//				mHeight.Draw(mGD.DC, mTerMats, Matrix.Identity, mGD.GCam.View, mGD.GCam.Projection);
-//			}
+
 			mST.Draw(mGD.DC, Matrix.Identity, mTextProj);
 		}
 
@@ -165,8 +171,6 @@ namespace TerrainEdit
 
 		internal void Texture(TexAtlas texAtlas, List<HeightMap.TexData> texInfo, float transHeight)
 		{
-			//mHeight.FreeAll();
-
 			mSK.AddMap("TerrainAtlas", texAtlas.GetAtlasSRV());
 			mTerMats.SetMaterialTexture("Terrain", "mTexture0", "TerrainAtlas");
 
@@ -192,7 +196,10 @@ namespace TerrainEdit
 			mTerMats.SetMaterialParameter("Terrain", "mAtlasUVData", scaleofs);
 			mTerMats.SetMaterialParameter("Terrain", "mAtlasTexScale", scale);
 
-			mTerrain.SetTextureData(texInfo, transHeight);
+			if(mTerrain != null)
+			{
+				mTerrain.SetTextureData(texInfo, transHeight);
+			}
 
 			Vector3	lightDir	=Mathery.RandomDirection(mRand);
 			mTerMats.SetMaterialParameter("Terrain", "mLightDirection", lightDir);
@@ -226,11 +233,33 @@ namespace TerrainEdit
 				FractalFactory.MakeTiled(fract, borderSlice * (i + 1));
 			}
 
+			if(mTModel != null)
+			{
+				mTModel.FreeAll();
+			}
 			mTModel	=new TerrainModel(fract, polySize, gridSize + 1);
 
 			mCellGridMax	=gridSize / chunkSize;
 
+			List<HeightMap.TexData>	tdata	=new List<HeightMap.TexData>();
+
+			float	transHeight	=0f;
+			if(mTerrain != null)
+			{
+				//grab a copy of the old texture data if any
+				List<HeightMap.TexData>	texOld	=mTerrain.GetTextureData(out transHeight);
+
+				//clone it because it is about to all get nuked
+				foreach(HeightMap.TexData td in texOld)
+				{
+					HeightMap.TexData	td2	=new HeightMap.TexData(td);
+					tdata.Add(td2);
+				}
+				mTerrain.FreeAll();
+			}
 			mTerrain	=new Terrain(fract, polySize, chunkSize, mCellGridMax);
+
+			mTerrain.SetTextureData(tdata, transHeight);
 
 			//start off in the middle
 			mGridCoordinate.X	=mCellGridMax / 2;

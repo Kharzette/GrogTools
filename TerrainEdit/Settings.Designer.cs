@@ -250,5 +250,17 @@ namespace TerrainEdit {
                 this["SmoothPasses"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("32")]
+        public decimal TransitionHeight {
+            get {
+                return ((decimal)(this["TransitionHeight"]));
+            }
+            set {
+                this["TransitionHeight"] = value;
+            }
+        }
     }
 }

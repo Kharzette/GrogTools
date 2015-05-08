@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -43,6 +44,9 @@ namespace TerrainEdit
 			AtlasY.DataBindings.Add(new Binding("Value",
 				Settings.Default, "AtlasY", true,
 				DataSourceUpdateMode.OnPropertyChanged));
+			TransitionHeight.DataBindings.Add(new Binding("Value",
+				Settings.Default, "TransitionHeight", true,
+				DataSourceUpdateMode.OnPropertyChanged));
 		}
 
 
@@ -57,19 +61,26 @@ namespace TerrainEdit
 
 		void AutoFill()
 		{
-			List<string>	textures	=mSK.GetTexture2DList();
-
-			foreach(string tex in textures)
+			//load last time's values
+			if(LoadValues())
 			{
-				if(tex.StartsWith("Terrain\\"))
-				{
-					HeightMap.TexData	gd	=new HeightMap.TexData();
-
-					gd.TextureName	=tex;
-
-					mGridData.Add(gd);
-				}
+				return;
 			}
+
+			//if no saved stuff, just fill in the textures
+            List<string>    textures    =mSK.GetTexture2DList();
+
+            foreach(string tex in textures)
+            {
+                if(tex.StartsWith("Terrain\\"))
+                {
+                    HeightMap.TexData    gd    =new HeightMap.TexData();
+
+                    gd.TextureName    =tex;
+
+                    mGridData.Add(gd);
+                }
+            }
 		}
 
 
@@ -112,6 +123,8 @@ namespace TerrainEdit
 
 		void OnReBuildAtlas(object sender, EventArgs e)
 		{
+			SaveValues();
+
 			RebuildImage();
 
 			Misc.SafeInvoke(eReBuild, mAtlas, new ListEventArgs<HeightMap.TexData>(mGridData.ToList()));
@@ -121,6 +134,106 @@ namespace TerrainEdit
 		internal float GetTransitionHeight()
 		{
 			return	(float)TransitionHeight.Value;
+		}
+
+
+		void SaveValues()
+		{
+			FileStream	fs	=new FileStream("GridValues.Save", FileMode.Create, FileAccess.Write);
+			if(fs == null)
+			{
+				//bummer?
+				return;
+			}
+
+			BinaryWriter	bw	=new BinaryWriter(fs);
+
+			//secret code for atlas griddy stuffs
+			UInt32	magic	=0xA71A5517;
+			bw.Write(magic);
+
+			bw.Write(mGridData.Count);
+
+			foreach(HeightMap.TexData td in mGridData)
+			{
+				bw.Write(td.BottomElevation);
+				bw.Write(td.TopElevation);
+				bw.Write(td.Steep);
+				bw.Write(td.ScaleFactor);
+				bw.Write(td.TextureName);
+
+				bw.Write(td.mScaleU);
+				bw.Write(td.mScaleV);
+				bw.Write(td.mUOffs);
+				bw.Write(td.mVOffs);
+			}
+
+			bw.Close();
+			fs.Close();
+		}
+
+		bool LoadValues()
+		{
+			if(!File.Exists("GridValues.Save"))
+			{
+				//no save yet, no big deal
+				return	false;
+			}
+
+			FileStream	fs	=new FileStream("GridValues.Save", FileMode.Open, FileAccess.Read);
+			if(fs == null)
+			{
+				return	false;
+			}
+
+			BinaryReader	br	=new BinaryReader(fs);
+
+			UInt32	magic	=br.ReadUInt32();
+			if(magic != 0xA71A5517)
+			{
+				br.Close();
+				fs.Close();
+				return	false;
+			}
+
+			//load into a temp list first
+			List<HeightMap.TexData>	gridStuffs	=new List<HeightMap.TexData>();
+
+			int	count	=br.ReadInt32();
+
+			for(int i=0;i < count;i++)
+			{
+				HeightMap.TexData	td	=new HeightMap.TexData();
+
+				td.BottomElevation	=br.ReadSingle();
+				td.TopElevation		=br.ReadSingle();
+				td.Steep			=br.ReadBoolean();
+				td.ScaleFactor		=br.ReadSingle();
+				td.TextureName		=br.ReadString();
+				td.mScaleU			=br.ReadDouble();
+				td.mScaleV			=br.ReadDouble();
+				td.mUOffs			=br.ReadDouble();
+				td.mVOffs			=br.ReadDouble();
+
+				gridStuffs.Add(td);
+			}
+
+			br.Close();
+			fs.Close();
+
+			//use data that matches existing stuffs
+			List<string>	textures	=mSK.GetTexture2DList();
+			foreach(HeightMap.TexData td in gridStuffs)
+			{
+				if(textures.Contains(td.TextureName))
+				{
+					mGridData.Add(td);
+				}
+			}
+
+			gridStuffs.Clear();
+
+			return	true;
 		}
 	}
 }
