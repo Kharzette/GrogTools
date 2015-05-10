@@ -211,9 +211,9 @@ namespace TerrainEdit
 			int smoothPasses, int seed, int erosionIterations,
 			float rainFall, float solubility, float evaporation)
 		{
-			mFracFact	=new FractalFactory(variance, medianHeight, gridSize + 1, gridSize + 1);
+			mFracFact	=new FractalFactory(variance, medianHeight, gridSize + 3, gridSize + 3);
 
-			float[,]	fract	=mFracFact.CreateFractal(seed, gridSize + 1);
+			float[,]	fract	=mFracFact.CreateFractal(seed, gridSize + 3);
 
 			for(int i=0;i < smoothPasses;i++)
 			{
@@ -237,7 +237,7 @@ namespace TerrainEdit
 			{
 				mTModel.FreeAll();
 			}
-			mTModel	=new TerrainModel(fract, polySize, gridSize + 1);
+			mTModel	=new TerrainModel(fract, polySize, gridSize + 3);
 
 			mCellGridMax	=gridSize / chunkSize;
 

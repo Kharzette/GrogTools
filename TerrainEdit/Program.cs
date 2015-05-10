@@ -44,7 +44,7 @@ namespace TerrainEdit
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 			GraphicsDevice	gd	=new GraphicsDevice("Terrain Editor",
-				FeatureLevel.Level_9_3);
+				FeatureLevel.Level_11_0);
 
 			//save form positions
 			gd.RendForm.DataBindings.Add(new Binding("Location",
