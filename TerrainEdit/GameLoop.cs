@@ -39,7 +39,6 @@ namespace TerrainEdit
 		FractalFactory	mFracFact;
 		TerrainModel	mTModel;
 		Terrain			mTerrain;
-//		HeightMap		mHeight;
 
 		//gpu
 		GraphicsDevice	mGD;
@@ -211,9 +210,9 @@ namespace TerrainEdit
 			int smoothPasses, int seed, int erosionIterations,
 			float rainFall, float solubility, float evaporation)
 		{
-			mFracFact	=new FractalFactory(variance, medianHeight, gridSize + 3, gridSize + 3);
+			mFracFact	=new FractalFactory(variance, medianHeight, gridSize + 1, gridSize + 1);
 
-			float[,]	fract	=mFracFact.CreateFractal(seed, gridSize + 3);
+			float	[,]fract	=mFracFact.CreateFractal(seed);
 
 			for(int i=0;i < smoothPasses;i++)
 			{
@@ -233,11 +232,13 @@ namespace TerrainEdit
 				FractalFactory.MakeTiled(fract, borderSlice * (i + 1));
 			}
 
+			Vector3	[,]norms	=mFracFact.BuildNormals(fract, polySize);
+
 			if(mTModel != null)
 			{
 				mTModel.FreeAll();
 			}
-			mTModel	=new TerrainModel(fract, polySize, gridSize + 3);
+			mTModel	=new TerrainModel(fract, polySize, gridSize);
 
 			mCellGridMax	=gridSize / chunkSize;
 
@@ -257,7 +258,7 @@ namespace TerrainEdit
 				}
 				mTerrain.FreeAll();
 			}
-			mTerrain	=new Terrain(fract, polySize, chunkSize, mCellGridMax);
+			mTerrain	=new Terrain(fract, norms, polySize, chunkSize, mCellGridMax);
 
 			mTerrain.SetTextureData(tdata, transHeight);
 
