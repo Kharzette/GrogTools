@@ -28,9 +28,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this.GridSize = new System.Windows.Forms.NumericUpDown();
 			this.label1 = new System.Windows.Forms.Label();
-			this.ChunkSize = new System.Windows.Forms.NumericUpDown();
 			this.label2 = new System.Windows.Forms.Label();
 			this.MedianHeight = new System.Windows.Forms.NumericUpDown();
 			this.Variance = new System.Windows.Forms.NumericUpDown();
@@ -48,6 +46,7 @@
 			this.label5 = new System.Windows.Forms.Label();
 			this.ErosionIterations = new System.Windows.Forms.NumericUpDown();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this.GridSize = new SharedForms.PowerOfTwoUpDown();
 			this.label12 = new System.Windows.Forms.Label();
 			this.Seed = new System.Windows.Forms.NumericUpDown();
 			this.label11 = new System.Windows.Forms.Label();
@@ -58,8 +57,7 @@
 			this.label9 = new System.Windows.Forms.Label();
 			this.TileIterations = new System.Windows.Forms.NumericUpDown();
 			this.Build = new System.Windows.Forms.Button();
-			((System.ComponentModel.ISupportInitialize)(this.GridSize)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.ChunkSize)).BeginInit();
+			this.ChunkSize = new SharedForms.PowerOfTwoUpDown();
 			((System.ComponentModel.ISupportInitialize)(this.MedianHeight)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.Variance)).BeginInit();
 			this.groupBox1.SuspendLayout();
@@ -69,39 +67,14 @@
 			((System.ComponentModel.ISupportInitialize)(this.RainFall)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.ErosionIterations)).BeginInit();
 			this.groupBox2.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.GridSize)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.Seed)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.PolySize)).BeginInit();
 			this.groupBox3.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.BorderSize)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.TileIterations)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.ChunkSize)).BeginInit();
 			this.SuspendLayout();
-			// 
-			// GridSize
-			// 
-			this.GridSize.Increment = new decimal(new int[] {
-            16,
-            0,
-            0,
-            0});
-			this.GridSize.Location = new System.Drawing.Point(6, 19);
-			this.GridSize.Maximum = new decimal(new int[] {
-            16384,
-            0,
-            0,
-            0});
-			this.GridSize.Minimum = new decimal(new int[] {
-            128,
-            0,
-            0,
-            0});
-			this.GridSize.Name = "GridSize";
-			this.GridSize.Size = new System.Drawing.Size(72, 20);
-			this.GridSize.TabIndex = 0;
-			this.GridSize.Value = new decimal(new int[] {
-            1024,
-            0,
-            0,
-            0});
 			// 
 			// label1
 			// 
@@ -111,33 +84,6 @@
 			this.label1.Size = new System.Drawing.Size(49, 13);
 			this.label1.TabIndex = 1;
 			this.label1.Text = "Grid Size";
-			// 
-			// ChunkSize
-			// 
-			this.ChunkSize.Increment = new decimal(new int[] {
-            16,
-            0,
-            0,
-            0});
-			this.ChunkSize.Location = new System.Drawing.Point(6, 45);
-			this.ChunkSize.Maximum = new decimal(new int[] {
-            1024,
-            0,
-            0,
-            0});
-			this.ChunkSize.Minimum = new decimal(new int[] {
-            16,
-            0,
-            0,
-            0});
-			this.ChunkSize.Name = "ChunkSize";
-			this.ChunkSize.Size = new System.Drawing.Size(72, 20);
-			this.ChunkSize.TabIndex = 2;
-			this.ChunkSize.Value = new decimal(new int[] {
-            64,
-            0,
-            0,
-            0});
 			// 
 			// label2
 			// 
@@ -375,13 +321,13 @@
 			// 
 			// groupBox2
 			// 
+			this.groupBox2.Controls.Add(this.ChunkSize);
+			this.groupBox2.Controls.Add(this.GridSize);
 			this.groupBox2.Controls.Add(this.label12);
 			this.groupBox2.Controls.Add(this.Seed);
 			this.groupBox2.Controls.Add(this.label11);
 			this.groupBox2.Controls.Add(this.PolySize);
-			this.groupBox2.Controls.Add(this.GridSize);
 			this.groupBox2.Controls.Add(this.label1);
-			this.groupBox2.Controls.Add(this.ChunkSize);
 			this.groupBox2.Controls.Add(this.label4);
 			this.groupBox2.Controls.Add(this.label2);
 			this.groupBox2.Controls.Add(this.label3);
@@ -393,6 +339,28 @@
 			this.groupBox2.TabIndex = 10;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Dimensions";
+			// 
+			// GridSize
+			// 
+			this.GridSize.Location = new System.Drawing.Point(6, 19);
+			this.GridSize.Maximum = new decimal(new int[] {
+            16384,
+            0,
+            0,
+            0});
+			this.GridSize.Minimum = new decimal(new int[] {
+            256,
+            0,
+            0,
+            0});
+			this.GridSize.Name = "GridSize";
+			this.GridSize.Size = new System.Drawing.Size(72, 20);
+			this.GridSize.TabIndex = 14;
+			this.GridSize.Value = new decimal(new int[] {
+            256,
+            0,
+            0,
+            0});
 			// 
 			// label12
 			// 
@@ -536,6 +504,28 @@
 			this.Build.UseVisualStyleBackColor = true;
 			this.Build.Click += new System.EventHandler(this.OnBuild);
 			// 
+			// ChunkSize
+			// 
+			this.ChunkSize.Location = new System.Drawing.Point(6, 45);
+			this.ChunkSize.Maximum = new decimal(new int[] {
+            1024,
+            0,
+            0,
+            0});
+			this.ChunkSize.Minimum = new decimal(new int[] {
+            16,
+            0,
+            0,
+            0});
+			this.ChunkSize.Name = "ChunkSize";
+			this.ChunkSize.Size = new System.Drawing.Size(72, 20);
+			this.ChunkSize.TabIndex = 15;
+			this.ChunkSize.Value = new decimal(new int[] {
+            16,
+            0,
+            0,
+            0});
+			// 
 			// TerrainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -548,8 +538,6 @@
 			this.Controls.Add(this.groupBox1);
 			this.Name = "TerrainForm";
 			this.Text = "Terrain Construction";
-			((System.ComponentModel.ISupportInitialize)(this.GridSize)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.ChunkSize)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.MedianHeight)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.Variance)).EndInit();
 			this.groupBox1.ResumeLayout(false);
@@ -561,21 +549,21 @@
 			((System.ComponentModel.ISupportInitialize)(this.ErosionIterations)).EndInit();
 			this.groupBox2.ResumeLayout(false);
 			this.groupBox2.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.GridSize)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.Seed)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.PolySize)).EndInit();
 			this.groupBox3.ResumeLayout(false);
 			this.groupBox3.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.BorderSize)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.TileIterations)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.ChunkSize)).EndInit();
 			this.ResumeLayout(false);
 
 		}
 
 		#endregion
 
-		private System.Windows.Forms.NumericUpDown GridSize;
 		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.NumericUpDown ChunkSize;
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.NumericUpDown MedianHeight;
 		private System.Windows.Forms.NumericUpDown Variance;
@@ -603,5 +591,7 @@
 		private System.Windows.Forms.NumericUpDown SmoothPasses;
 		private System.Windows.Forms.Label label12;
 		private System.Windows.Forms.NumericUpDown Seed;
+		private SharedForms.PowerOfTwoUpDown GridSize;
+		private SharedForms.PowerOfTwoUpDown ChunkSize;
 	}
 }

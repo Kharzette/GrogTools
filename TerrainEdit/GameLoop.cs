@@ -264,6 +264,8 @@ namespace TerrainEdit
 
 			mBoundary	=chunkSize * polySize;
 
+			WrapGridCoordinates();
+
 			mTerrain.SetCellCoord(mGridCoordinate);
 
 			mTerrain.BuildGrid(mGD, Nearby);
