@@ -262,5 +262,98 @@ namespace TerrainEdit {
                 this["TransitionHeight"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
+        public global::System.Drawing.Point ShadingFormPos {
+            get {
+                return ((global::System.Drawing.Point)(this["ShadingFormPos"]));
+            }
+            set {
+                this["ShadingFormPos"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Drawing.Color FogColor {
+            get {
+                return ((global::System.Drawing.Color)(this["FogColor"]));
+            }
+            set {
+                this["FogColor"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Drawing.Color SkyColor0 {
+            get {
+                return ((global::System.Drawing.Color)(this["SkyColor0"]));
+            }
+            set {
+                this["SkyColor0"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Drawing.Color SkyColor1 {
+            get {
+                return ((global::System.Drawing.Color)(this["SkyColor1"]));
+            }
+            set {
+                this["SkyColor1"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public float FogStart {
+            get {
+                return ((float)(this["FogStart"]));
+            }
+            set {
+                this["FogStart"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public float FogEnd {
+            get {
+                return ((float)(this["FogEnd"]));
+            }
+            set {
+                this["FogEnd"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool FogEnabled {
+            get {
+                return ((bool)(this["FogEnabled"]));
+            }
+            set {
+                this["FogEnabled"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int ChunkRange {
+            get {
+                return ((int)(this["ChunkRange"]));
+            }
+            set {
+                this["ChunkRange"] = value;
+            }
+        }
     }
 }

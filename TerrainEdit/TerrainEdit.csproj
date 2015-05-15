@@ -149,6 +149,12 @@
     <Compile Include="TerrainAtlas.Designer.cs">
       <DependentUpon>TerrainAtlas.cs</DependentUpon>
     </Compile>
+    <Compile Include="TerrainShading.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TerrainShading.Designer.cs">
+      <DependentUpon>TerrainShading.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="TerrainForm.resx">
@@ -156,6 +162,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="TerrainAtlas.resx">
       <DependentUpon>TerrainAtlas.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TerrainShading.resx">
+      <DependentUpon>TerrainShading.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

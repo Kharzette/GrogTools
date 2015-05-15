@@ -92,6 +92,15 @@ namespace TerrainEdit
 			tf.Location		=Settings.Default.TerrainFormPos;
 			tf.Visible		=true;
 
+			TerrainShading	ts	=new TerrainShading();
+
+			ts.DataBindings.Add(new Binding("Location",
+				Settings.Default, "ShadingFormPos", true,
+				DataSourceUpdateMode.OnPropertyChanged));
+
+			ts.Location	=Settings.Default.ShadingFormPos;
+			ts.Visible	=true;
+
 			PlayerSteering	pSteering		=SetUpSteering();
 			Input			inp				=SetUpInput();
 			Random			rand			=new Random();
@@ -120,7 +129,15 @@ namespace TerrainEdit
 				{	ListEventArgs<HeightMap.TexData>	lea	=ea as ListEventArgs<HeightMap.TexData>;
 					gLoop.Texture((TexAtlas)s, lea.mList, ta.GetTransitionHeight());	});
 
+			EventHandler	applyHandler	=new EventHandler(
+				delegate(object s, EventArgs ea)
+				{
+					TerrainShading.ShadingInfo	si	=s as TerrainShading.ShadingInfo;
+					gLoop.ApplyShadingInfo(si);
+				});
+
 			ta.eReBuild	+=buildHandler;
+			ts.eApply	+=applyHandler;
 
 			EventHandler	tBuildHandler	=new EventHandler(
 				delegate(object s, EventArgs ea)
@@ -196,6 +213,7 @@ namespace TerrainEdit
 			gd.RendForm.AppDeactivated	-=deActHandler;
 			ta.eReBuild					-=buildHandler;
 			tf.eBuild					-=tBuildHandler;
+			ts.eApply					-=applyHandler;
 
 			gLoop.FreeAll();
 			inp.FreeAll();

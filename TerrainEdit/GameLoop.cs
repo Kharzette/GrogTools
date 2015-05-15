@@ -30,8 +30,6 @@ namespace TerrainEdit
 
 		Random	mRand			=new Random();
 		Vector3	mPos			=Vector3.Zero;
-		Point	mGridCoordinate;
-		int		mCellGridMax, mBoundary;
 
 		BoundingFrustum	mFrust	=new BoundingFrustum(Matrix.Identity);
 
@@ -39,6 +37,10 @@ namespace TerrainEdit
 		FractalFactory	mFracFact;
 		TerrainModel	mTModel;
 		Terrain			mTerrain;
+		PrimObject		mSkyCube;
+		int				mChunkRange;
+		Point			mGridCoordinate;
+		int				mCellGridMax, mBoundary;
 
 		//gpu
 		GraphicsDevice	mGD;
@@ -103,9 +105,15 @@ namespace TerrainEdit
 			mTerMats.SetMaterialParameter("Terrain", "mSpecColor", Vector4.One);
 			mTerMats.SetMaterialParameter("Terrain", "mWorld", Matrix.Identity);
 
+			mTerMats.CreateMaterial("Sky");
+			mTerMats.SetMaterialEffect("Sky", "Terrain.fx");
+			mTerMats.SetMaterialTechnique("Sky", "SkyGradient");
+
 			mTerMats.InitCelShading(1);
 			mTerMats.GenerateCelTexturePreset(mGD.GD, mGD.GD.FeatureLevel == FeatureLevel.Level_9_3, false, 0);
 			mTerMats.SetCelTexture(0);
+
+			mSkyCube	=PrimFactory.CreateCube(gd.GD, -5f);
 		}
 
 
@@ -121,7 +129,7 @@ namespace TerrainEdit
 
 			if(bWrapped && mTerrain != null)
 			{
-				mTerrain.BuildGrid(mGD, Nearby);
+				mTerrain.BuildGrid(mGD, mChunkRange);
 			}
 
 			if(mTerrain != null)
@@ -150,10 +158,17 @@ namespace TerrainEdit
 			mTerMats.UpdateWVP(Matrix.Identity, mGD.GCam.View, mGD.GCam.Projection, mGD.GCam.Position);
 
 			mFrust.Matrix	=mGD.GCam.View * mGD.GCam.Projection;
+
+			mSkyCube.World	=Matrix.Translation(mGD.GCam.Position);
+
+			mTerMats.SetMaterialParameter("Sky", "mWorld", mSkyCube.World);
 		}
 
 		internal void Render()
 		{
+			mTerMats.ApplyMaterialPass("Sky", mGD.DC, 0);
+			mSkyCube.Draw(mGD.DC);
+
 			if(mTerrain != null)
 			{
 				mTerrain.Draw(mGD, mTerMats, mFrust);
@@ -268,11 +283,31 @@ namespace TerrainEdit
 
 			mTerrain.SetCellCoord(mGridCoordinate);
 
-			mTerrain.BuildGrid(mGD, Nearby);
+			mTerrain.BuildGrid(mGD, mChunkRange);
 
 			mPos.Y	=mTModel.GetHeight(mPos) + 200f;
 
 			mTerrain.UpdatePosition(mPos, mTerMats);
+		}
+
+
+		internal void ApplyShadingInfo(TerrainShading.ShadingInfo si)
+		{
+			mTerMats.SetMaterialParameter("Terrain", "mFogStart", si.mFogStart);
+			mTerMats.SetMaterialParameter("Terrain", "mFogEnd", si.mFogEnd);
+			mTerMats.SetMaterialParameter("Terrain", "mFogEnabled", si.mbFogEnabled? 1f : 0f);
+
+			mTerMats.SetMaterialParameter("Terrain", "mFogColor", si.mFogColor.ToVector3());
+			mTerMats.SetMaterialParameter("Sky", "mSkyGradient0", si.mSkyColor0.ToVector3());
+			mTerMats.SetMaterialParameter("Sky", "mSkyGradient1", si.mSkyColor1.ToVector3());
+
+			Viewport	vp	=mGD.GetScreenViewPort();
+
+			mGD.GCam.Projection	=Matrix.PerspectiveFovLH(
+				MathUtil.DegreesToRadians(45f),
+				vp.Width / vp.Height, 0.1f, si.mFogEnd);
+
+			mChunkRange	=si.mChunkRange;
 		}
 
 
