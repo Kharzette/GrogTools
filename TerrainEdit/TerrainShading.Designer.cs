@@ -29,10 +29,8 @@
 		private void InitializeComponent()
 		{
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
-			this.label3 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
 			this.label1 = new System.Windows.Forms.Label();
-			this.FogColor = new System.Windows.Forms.Panel();
 			this.FogEnd = new System.Windows.Forms.NumericUpDown();
 			this.FogStart = new System.Windows.Forms.NumericUpDown();
 			this.FogEnabled = new System.Windows.Forms.CheckBox();
@@ -53,28 +51,17 @@
 			// 
 			// groupBox2
 			// 
-			this.groupBox2.Controls.Add(this.label3);
 			this.groupBox2.Controls.Add(this.label2);
 			this.groupBox2.Controls.Add(this.label1);
-			this.groupBox2.Controls.Add(this.FogColor);
 			this.groupBox2.Controls.Add(this.FogEnd);
 			this.groupBox2.Controls.Add(this.FogStart);
 			this.groupBox2.Controls.Add(this.FogEnabled);
 			this.groupBox2.Location = new System.Drawing.Point(12, 12);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(163, 145);
+			this.groupBox2.Size = new System.Drawing.Size(163, 101);
 			this.groupBox2.TabIndex = 8;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Fog";
-			// 
-			// label3
-			// 
-			this.label3.AutoSize = true;
-			this.label3.Location = new System.Drawing.Point(44, 97);
-			this.label3.Name = "label3";
-			this.label3.Size = new System.Drawing.Size(31, 13);
-			this.label3.TabIndex = 6;
-			this.label3.Text = "Color";
 			// 
 			// label2
 			// 
@@ -93,15 +80,6 @@
 			this.label1.Size = new System.Drawing.Size(74, 13);
 			this.label1.TabIndex = 4;
 			this.label1.Text = "Start Distance";
-			// 
-			// FogColor
-			// 
-			this.FogColor.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.FogColor.Location = new System.Drawing.Point(6, 97);
-			this.FogColor.Name = "FogColor";
-			this.FogColor.Size = new System.Drawing.Size(32, 32);
-			this.FogColor.TabIndex = 3;
-			this.FogColor.Click += new System.EventHandler(this.OnFogColorClicked);
 			// 
 			// FogEnd
 			// 
@@ -165,7 +143,7 @@
 			this.groupBox1.Controls.Add(this.label4);
 			this.groupBox1.Controls.Add(this.SkyColor1);
 			this.groupBox1.Controls.Add(this.SkyColor0);
-			this.groupBox1.Location = new System.Drawing.Point(12, 163);
+			this.groupBox1.Location = new System.Drawing.Point(12, 119);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(94, 107);
 			this.groupBox1.TabIndex = 9;
@@ -210,7 +188,7 @@
 			// 
 			// Apply
 			// 
-			this.Apply.Location = new System.Drawing.Point(112, 247);
+			this.Apply.Location = new System.Drawing.Point(112, 203);
 			this.Apply.Name = "Apply";
 			this.Apply.Size = new System.Drawing.Size(63, 23);
 			this.Apply.TabIndex = 10;
@@ -220,7 +198,7 @@
 			// 
 			// ChunkRange
 			// 
-			this.ChunkRange.Location = new System.Drawing.Point(113, 193);
+			this.ChunkRange.Location = new System.Drawing.Point(112, 135);
 			this.ChunkRange.Minimum = new decimal(new int[] {
             4,
             0,
@@ -238,7 +216,7 @@
 			// label6
 			// 
 			this.label6.AutoSize = true;
-			this.label6.Location = new System.Drawing.Point(112, 177);
+			this.label6.Location = new System.Drawing.Point(112, 119);
 			this.label6.Name = "label6";
 			this.label6.Size = new System.Drawing.Size(73, 13);
 			this.label6.TabIndex = 12;
@@ -248,7 +226,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(188, 282);
+			this.ClientSize = new System.Drawing.Size(188, 234);
 			this.ControlBox = false;
 			this.Controls.Add(this.label6);
 			this.Controls.Add(this.ChunkRange);
@@ -275,8 +253,6 @@
 		private System.Windows.Forms.NumericUpDown FogEnd;
 		private System.Windows.Forms.NumericUpDown FogStart;
 		private System.Windows.Forms.CheckBox FogEnabled;
-		private System.Windows.Forms.Panel FogColor;
-		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.GroupBox groupBox1;

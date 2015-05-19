@@ -355,5 +355,17 @@ namespace TerrainEdit {
                 this["ChunkRange"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int StreamingThreads {
+            get {
+                return ((int)(this["StreamingThreads"]));
+            }
+            set {
+                this["StreamingThreads"] = value;
+            }
+        }
     }
 }

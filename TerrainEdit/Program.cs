@@ -141,19 +141,19 @@ namespace TerrainEdit
 
 			EventHandler	tBuildHandler	=new EventHandler(
 				delegate(object s, EventArgs ea)
-				{	int		gridSize, chunkSize, tilingIterations;
+				{	int		gridSize, chunkSize, tilingIterations, threads;
 					int		erosionIterations, polySize, smoothPasses, seed;
 					float	medianHeight, variance, borderSize;
 					float	rainFall, solubility, evaporation;
 					tf.GetBuildData(out gridSize, out chunkSize,
 						out medianHeight, out variance,	out polySize,
 						out tilingIterations, out borderSize, out smoothPasses,
-						out seed, out erosionIterations,
-						out rainFall, out solubility, out evaporation);
+						out seed, out erosionIterations, out rainFall,
+						out solubility, out evaporation, out threads);
 					gLoop.TBuild(gridSize, chunkSize, medianHeight, variance,
 						polySize, tilingIterations, borderSize,
 						smoothPasses, seed, erosionIterations,
-						rainFall, solubility, evaporation);	});
+						rainFall, solubility, evaporation, threads);	});
 
 			tf.eBuild	+=tBuildHandler;
 

@@ -47,7 +47,8 @@ namespace TerrainEdit
 			out int tilingIterations, out float borderSize,
 			out int smoothPasses, out int seed,
 			out int erosionIterations, out float rainFall,
-			out float solubility, out float evaporation)
+			out float solubility, out float evaporation,
+			out int streamingThreads)
 		{
 			gridSize			=(int)GridSize.Value;
 			chunkSize			=(int)ChunkSize.Value;
@@ -62,6 +63,7 @@ namespace TerrainEdit
 			evaporation			=(float)Evaporation.Value;
 			seed				=(int)Seed.Value;
 			smoothPasses		=(int)SmoothPasses.Value;
+			streamingThreads	=(int)StreamingThreads.Value;
 		}
 
 

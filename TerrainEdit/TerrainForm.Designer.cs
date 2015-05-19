@@ -46,6 +46,7 @@
 			this.label5 = new System.Windows.Forms.Label();
 			this.ErosionIterations = new System.Windows.Forms.NumericUpDown();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this.ChunkSize = new SharedForms.PowerOfTwoUpDown();
 			this.GridSize = new SharedForms.PowerOfTwoUpDown();
 			this.label12 = new System.Windows.Forms.Label();
 			this.Seed = new System.Windows.Forms.NumericUpDown();
@@ -57,7 +58,8 @@
 			this.label9 = new System.Windows.Forms.Label();
 			this.TileIterations = new System.Windows.Forms.NumericUpDown();
 			this.Build = new System.Windows.Forms.Button();
-			this.ChunkSize = new SharedForms.PowerOfTwoUpDown();
+			this.StreamingThreads = new System.Windows.Forms.NumericUpDown();
+			this.label14 = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.MedianHeight)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.Variance)).BeginInit();
 			this.groupBox1.SuspendLayout();
@@ -67,13 +69,14 @@
 			((System.ComponentModel.ISupportInitialize)(this.RainFall)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.ErosionIterations)).BeginInit();
 			this.groupBox2.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.ChunkSize)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.GridSize)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.Seed)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.PolySize)).BeginInit();
 			this.groupBox3.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.BorderSize)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.TileIterations)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.ChunkSize)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.StreamingThreads)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// label1
@@ -340,6 +343,28 @@
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Dimensions";
 			// 
+			// ChunkSize
+			// 
+			this.ChunkSize.Location = new System.Drawing.Point(6, 45);
+			this.ChunkSize.Maximum = new decimal(new int[] {
+            1024,
+            0,
+            0,
+            0});
+			this.ChunkSize.Minimum = new decimal(new int[] {
+            16,
+            0,
+            0,
+            0});
+			this.ChunkSize.Name = "ChunkSize";
+			this.ChunkSize.Size = new System.Drawing.Size(72, 20);
+			this.ChunkSize.TabIndex = 15;
+			this.ChunkSize.Value = new decimal(new int[] {
+            16,
+            0,
+            0,
+            0});
+			// 
 			// GridSize
 			// 
 			this.GridSize.Location = new System.Drawing.Point(6, 19);
@@ -496,42 +521,53 @@
 			// 
 			// Build
 			// 
-			this.Build.Location = new System.Drawing.Point(53, 210);
+			this.Build.Location = new System.Drawing.Point(12, 227);
 			this.Build.Name = "Build";
-			this.Build.Size = new System.Drawing.Size(75, 23);
+			this.Build.Size = new System.Drawing.Size(75, 24);
 			this.Build.TabIndex = 12;
 			this.Build.Text = "Build";
 			this.Build.UseVisualStyleBackColor = true;
 			this.Build.Click += new System.EventHandler(this.OnBuild);
 			// 
-			// ChunkSize
+			// StreamingThreads
 			// 
-			this.ChunkSize.Location = new System.Drawing.Point(6, 45);
-			this.ChunkSize.Maximum = new decimal(new int[] {
-            1024,
+			this.StreamingThreads.Location = new System.Drawing.Point(13, 201);
+			this.StreamingThreads.Maximum = new decimal(new int[] {
+            64,
             0,
             0,
             0});
-			this.ChunkSize.Minimum = new decimal(new int[] {
-            16,
+			this.StreamingThreads.Minimum = new decimal(new int[] {
+            1,
             0,
             0,
             0});
-			this.ChunkSize.Name = "ChunkSize";
-			this.ChunkSize.Size = new System.Drawing.Size(72, 20);
-			this.ChunkSize.TabIndex = 15;
-			this.ChunkSize.Value = new decimal(new int[] {
-            16,
+			this.StreamingThreads.Name = "StreamingThreads";
+			this.StreamingThreads.Size = new System.Drawing.Size(48, 20);
+			this.StreamingThreads.TabIndex = 13;
+			this.StreamingThreads.Value = new decimal(new int[] {
+            2,
             0,
             0,
             0});
+			// 
+			// label14
+			// 
+			this.label14.AutoSize = true;
+			this.label14.Location = new System.Drawing.Point(67, 203);
+			this.label14.Name = "label14";
+			this.label14.Size = new System.Drawing.Size(96, 13);
+			this.label14.TabIndex = 14;
+			this.label14.Text = "Streaming Threads";
 			// 
 			// TerrainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(358, 260);
+			this.ClientSize = new System.Drawing.Size(358, 263);
 			this.ControlBox = false;
+			this.Controls.Add(this.label14);
+			this.Controls.Add(this.StreamingThreads);
 			this.Controls.Add(this.Build);
 			this.Controls.Add(this.groupBox3);
 			this.Controls.Add(this.groupBox2);
@@ -549,6 +585,7 @@
 			((System.ComponentModel.ISupportInitialize)(this.ErosionIterations)).EndInit();
 			this.groupBox2.ResumeLayout(false);
 			this.groupBox2.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.ChunkSize)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.GridSize)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.Seed)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.PolySize)).EndInit();
@@ -556,8 +593,9 @@
 			this.groupBox3.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.BorderSize)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.TileIterations)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.ChunkSize)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.StreamingThreads)).EndInit();
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 
@@ -593,5 +631,7 @@
 		private System.Windows.Forms.NumericUpDown Seed;
 		private SharedForms.PowerOfTwoUpDown GridSize;
 		private SharedForms.PowerOfTwoUpDown ChunkSize;
+		private System.Windows.Forms.NumericUpDown StreamingThreads;
+		private System.Windows.Forms.Label label14;
 	}
 }

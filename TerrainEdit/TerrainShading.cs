@@ -19,7 +19,7 @@ namespace TerrainEdit
 			internal float	mFogStart, mFogEnd;
 			internal int	mChunkRange;
 
-			internal SharpDX.Color	mFogColor, mSkyColor0, mSkyColor1;
+			internal SharpDX.Color	mSkyColor0, mSkyColor1;
 		};
 
 		ColorDialog	mColor;
@@ -39,9 +39,6 @@ namespace TerrainEdit
 			mColor.FullOpen			=true;
 
 			//save colors
-			FogColor.DataBindings.Add(new Binding("BackColor",
-				Settings.Default, "FogColor", true,
-				DataSourceUpdateMode.OnPropertyChanged));
 			SkyColor0.DataBindings.Add(new Binding("BackColor",
 				Settings.Default, "SkyColor0", true,
 				DataSourceUpdateMode.OnPropertyChanged));
@@ -64,14 +61,6 @@ namespace TerrainEdit
 			FogEnabled.DataBindings.Add(new Binding("Checked",
 				Settings.Default, "FogEnabled", true,
 				DataSourceUpdateMode.OnPropertyChanged));
-		}
-
-
-		void OnFogColorClicked(object sender, EventArgs e)
-		{
-			mColor.ShowDialog();
-
-			FogColor.BackColor	=mColor.Color;
 		}
 
 
@@ -100,7 +89,6 @@ namespace TerrainEdit
 			si.mFogEnd		=(float)FogEnd.Value;
 			si.mChunkRange	=(int)ChunkRange.Value;
 
-			si.mFogColor	=Misc.SystemColorToDXColor(FogColor.BackColor);
 			si.mSkyColor0	=Misc.SystemColorToDXColor(SkyColor0.BackColor);
 			si.mSkyColor1	=Misc.SystemColorToDXColor(SkyColor1.BackColor);
 

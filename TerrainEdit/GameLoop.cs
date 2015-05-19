@@ -38,7 +38,7 @@ namespace TerrainEdit
 		TerrainModel	mTModel;
 		Terrain			mTerrain;
 		PrimObject		mSkyCube;
-		int				mChunkRange;
+		int				mChunkRange, mNumStreamThreads;
 		Point			mGridCoordinate;
 		int				mCellGridMax, mBoundary;
 
@@ -55,6 +55,7 @@ namespace TerrainEdit
 		List<string>	mFonts	=new List<string>();
 
 		const int	Nearby		=7;
+		const float	FlySpeed	=1000f;
 
 
 		internal GameLoop(GraphicsDevice gd, StuffKeeper sk, string gameRootDir)
@@ -121,7 +122,7 @@ namespace TerrainEdit
 		{
 			Vector3	moveVec		=ps.Update(mPos, mGD.GCam.Forward, mGD.GCam.Left, mGD.GCam.Up, acts);
 
-			mPos	+=(moveVec * 100f);
+			mPos	+=(moveVec * FlySpeed);
 
 			bool	bWrapped	=WrapPosition(ref mPos);
 
@@ -129,7 +130,7 @@ namespace TerrainEdit
 
 			if(bWrapped && mTerrain != null)
 			{
-				mTerrain.BuildGrid(mGD, mChunkRange);
+				mTerrain.BuildGrid(mGD, mChunkRange, mNumStreamThreads);
 			}
 
 			if(mTerrain != null)
@@ -223,9 +224,11 @@ namespace TerrainEdit
 		internal void TBuild(int gridSize, int chunkSize, float medianHeight,
 			float variance, int polySize, int tilingIterations, float borderSize,
 			int smoothPasses, int seed, int erosionIterations,
-			float rainFall, float solubility, float evaporation)
+			float rainFall, float solubility, float evaporation, int threads)
 		{
 			mFracFact	=new FractalFactory(variance, medianHeight, gridSize + 1, gridSize + 1);
+
+			mNumStreamThreads	=threads;
 
 			float	[,]fract	=mFracFact.CreateFractal(seed);
 
@@ -283,7 +286,7 @@ namespace TerrainEdit
 
 			mTerrain.SetCellCoord(mGridCoordinate);
 
-			mTerrain.BuildGrid(mGD, mChunkRange);
+			mTerrain.BuildGrid(mGD, mChunkRange, mNumStreamThreads);
 
 			mPos.Y	=mTModel.GetHeight(mPos) + 200f;
 
@@ -297,7 +300,6 @@ namespace TerrainEdit
 			mTerMats.SetMaterialParameter("Terrain", "mFogEnd", si.mFogEnd);
 			mTerMats.SetMaterialParameter("Terrain", "mFogEnabled", si.mbFogEnabled? 1f : 0f);
 
-			mTerMats.SetMaterialParameter("Terrain", "mFogColor", si.mFogColor.ToVector3());
 			mTerMats.SetMaterialParameter("Sky", "mSkyGradient0", si.mSkyColor0.ToVector3());
 			mTerMats.SetMaterialParameter("Sky", "mSkyGradient1", si.mSkyColor1.ToVector3());
 
