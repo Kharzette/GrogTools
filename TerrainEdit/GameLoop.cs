@@ -54,6 +54,10 @@ namespace TerrainEdit
 		int				mResX, mResY;
 		List<string>	mFonts	=new List<string>();
 
+		//debug draw
+		PrimObject	mQTreeBoxes;
+		MatLib		mDebugMats;
+
 		const int	Nearby		=7;
 		const float	FlySpeed	=1000f;
 
@@ -115,6 +119,25 @@ namespace TerrainEdit
 			mTerMats.SetCelTexture(0);
 
 			mSkyCube	=PrimFactory.CreateCube(gd.GD, -5f);
+
+			//debug draw
+			mDebugMats	=new MatLib(gd, sk);
+
+			Vector4	redColor	=Vector4.One;
+			Vector4	greenColor	=Vector4.One;
+			Vector4	blueColor	=Vector4.One;
+
+			redColor.Y	=redColor.Z	=greenColor.X	=greenColor.Z	=blueColor.X	=blueColor.Y	=0f;
+
+			mDebugMats.CreateMaterial("DebugBoxes");
+			mDebugMats.SetMaterialEffect("DebugBoxes", "Static.fx");
+			mDebugMats.SetMaterialTechnique("DebugBoxes", "TriSolidSpec");
+			mDebugMats.SetMaterialParameter("DebugBoxes", "mLightColor0", Vector4.One);
+			mDebugMats.SetMaterialParameter("DebugBoxes", "mLightColor1", lightColor2);
+			mDebugMats.SetMaterialParameter("DebugBoxes", "mLightColor2", lightColor3);
+			mDebugMats.SetMaterialParameter("DebugBoxes", "mSolidColour", blueColor);
+			mDebugMats.SetMaterialParameter("DebugBoxes", "mSpecPower", 1);
+			mDebugMats.SetMaterialParameter("DebugBoxes", "mSpecColor", Vector4.One);
 		}
 
 
@@ -163,6 +186,7 @@ namespace TerrainEdit
 			mSkyCube.World	=Matrix.Translation(mGD.GCam.Position);
 
 			mTerMats.SetMaterialParameter("Sky", "mWorld", mSkyCube.World);
+			mDebugMats.UpdateWVP(Matrix.Identity, mGD.GCam.View, mGD.GCam.Projection, mGD.GCam.Position);
 		}
 
 		internal void Render()
@@ -173,6 +197,12 @@ namespace TerrainEdit
 			if(mTerrain != null)
 			{
 				mTerrain.Draw(mGD, mTerMats, mFrust);
+			}
+
+			if(mQTreeBoxes != null)
+			{
+				mDebugMats.ApplyMaterialPass("DebugBoxes", mGD.DC, 0);
+				mQTreeBoxes.Draw(mGD.DC);
 			}
 
 			mST.Draw(mGD.DC, Matrix.Identity, mTextProj);
@@ -291,6 +321,18 @@ namespace TerrainEdit
 			mPos.Y	=mTModel.GetHeight(mPos) + 200f;
 
 			mTerrain.UpdatePosition(mPos, mTerMats);
+
+			//clamp box heights
+			mTModel.FixBoxHeights();
+
+			//clear existing
+			if(mQTreeBoxes != null)
+			{
+				mQTreeBoxes.Free();
+			}
+
+			List<BoundingBox>	boxes	=mTModel.GetAllBoxes();
+			mQTreeBoxes	=PrimFactory.CreateCubes(mGD.GD, boxes);
 		}
 
 
