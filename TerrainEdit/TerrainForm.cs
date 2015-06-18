@@ -14,7 +14,12 @@ namespace TerrainEdit
 {
 	internal partial class TerrainForm : Form
 	{
+		OpenFileDialog	mOFD	=new OpenFileDialog();
+		SaveFileDialog	mSFD	=new SaveFileDialog();
+
 		internal event EventHandler	eBuild;
+		internal event EventHandler	eLoad;
+		internal event EventHandler	eSave;
 
 
 		internal TerrainForm()
@@ -78,6 +83,38 @@ namespace TerrainEdit
 			numThing.DataBindings.Add(new Binding("Value",
 				Settings.Default, numThing.Name, true,
 				DataSourceUpdateMode.OnPropertyChanged));
+		}
+
+
+		void OnLoad(object sender, EventArgs e)
+		{
+			mOFD.DefaultExt	="*.Terrain";
+			mOFD.Filter		="Terrain files (*.Terrain)|*.Terrain|All files (*.*)|*.*";
+
+			DialogResult	dr	=mOFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			Misc.SafeInvoke(eLoad, mOFD.FileName);
+		}
+
+
+		void OnSave(object sender, EventArgs e)
+		{
+			mSFD.DefaultExt	="*.Terrain";
+			mSFD.Filter		="Terrain files (*.Terrain)|*.Terrain|All files (*.*)|*.*";
+
+			DialogResult	dr	=mSFD.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			Misc.SafeInvoke(eSave, mSFD.FileName);
 		}
 	}
 }

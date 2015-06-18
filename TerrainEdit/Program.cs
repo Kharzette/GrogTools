@@ -154,8 +154,20 @@ namespace TerrainEdit
 						polySize, tilingIterations, borderSize,
 						smoothPasses, seed, erosionIterations,
 						rainFall, solubility, evaporation, threads);	});
+			EventHandler	tLoadHandler	=new EventHandler(
+				delegate(object s, EventArgs ea)
+				{
+					gLoop.TLoad(s as string);
+				});
+			EventHandler	tSaveHandler	=new EventHandler(
+				delegate(object s, EventArgs ea)
+				{
+					gLoop.TSave(s as string);
+				});
 
 			tf.eBuild	+=tBuildHandler;
+			tf.eLoad	+=tLoadHandler;
+			tf.eSave	+=tSaveHandler;
 
 			UpdateTimer	time	=new UpdateTimer(true, false);
 
@@ -208,6 +220,9 @@ namespace TerrainEdit
 			}, true);	//true here is slow but needed for winforms events
 
 			Settings.Default.Save();
+
+			sk.eCompileNeeded	-=SharedForms.ShaderCompileHelper.CompileNeededHandler;
+			sk.eCompileDone		-=SharedForms.ShaderCompileHelper.CompileDoneHandler;
 
 			gd.RendForm.Activated		-=actHandler;
 			gd.RendForm.AppDeactivated	-=deActHandler;

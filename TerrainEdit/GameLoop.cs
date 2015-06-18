@@ -21,13 +21,10 @@ using SharpDX.Direct3D11;
 using MatLib	=MaterialLib.MaterialLib;
 
 
-
 namespace TerrainEdit
 {
 	class GameLoop
 	{
-		MatLib		mTerMats;
-
 		Random	mRand			=new Random();
 		Vector3	mPos			=Vector3.Zero;
 
@@ -38,6 +35,7 @@ namespace TerrainEdit
 		TerrainModel	mTModel;
 		Terrain			mTerrain;
 		PrimObject		mSkyCube;
+		MatLib			mTerMats;
 		int				mChunkRange, mNumStreamThreads;
 		Point			mGridCoordinate;
 		int				mCellGridMax, mBoundary;
@@ -331,8 +329,10 @@ namespace TerrainEdit
 				mQTreeBoxes.Free();
 			}
 
-			List<BoundingBox>	boxes	=mTModel.GetAllBoxes();
-			mQTreeBoxes	=PrimFactory.CreateCubes(mGD.GD, boxes);
+			//turn on to debug quadtree
+			//careful about big map sizes
+//			List<BoundingBox>	boxes	=mTModel.GetAllBoxes();
+//			mQTreeBoxes	=PrimFactory.CreateCubes(mGD.GD, boxes);
 		}
 
 
@@ -352,6 +352,23 @@ namespace TerrainEdit
 				vp.Width / vp.Height, 0.1f, si.mFogEnd);
 
 			mChunkRange	=si.mChunkRange;
+		}
+
+
+		internal void TLoad(string path)
+		{
+			mTerrain	=new Terrain(path);
+
+			mChunkRange			=10;	//todo fix
+			mNumStreamThreads	=2;
+
+			mTerrain.BuildGrid(mGD, mChunkRange, mNumStreamThreads);
+		}
+
+
+		internal void TSave(string path)
+		{
+			mTerrain.Save(path);
 		}
 
 

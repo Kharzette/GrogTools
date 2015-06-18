@@ -60,6 +60,8 @@
 			this.Build = new System.Windows.Forms.Button();
 			this.StreamingThreads = new System.Windows.Forms.NumericUpDown();
 			this.label14 = new System.Windows.Forms.Label();
+			this.LoadButton = new System.Windows.Forms.Button();
+			this.SaveButton = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.MedianHeight)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.Variance)).BeginInit();
 			this.groupBox1.SuspendLayout();
@@ -560,12 +562,34 @@
 			this.label14.TabIndex = 14;
 			this.label14.Text = "Streaming Threads";
 			// 
+			// LoadButton
+			// 
+			this.LoadButton.Location = new System.Drawing.Point(12, 257);
+			this.LoadButton.Name = "LoadButton";
+			this.LoadButton.Size = new System.Drawing.Size(75, 23);
+			this.LoadButton.TabIndex = 15;
+			this.LoadButton.Text = "Load";
+			this.LoadButton.UseVisualStyleBackColor = true;
+			this.LoadButton.Click += new System.EventHandler(this.OnLoad);
+			// 
+			// SaveButton
+			// 
+			this.SaveButton.Location = new System.Drawing.Point(93, 257);
+			this.SaveButton.Name = "SaveButton";
+			this.SaveButton.Size = new System.Drawing.Size(75, 23);
+			this.SaveButton.TabIndex = 16;
+			this.SaveButton.Text = "Save";
+			this.SaveButton.UseVisualStyleBackColor = true;
+			this.SaveButton.Click += new System.EventHandler(this.OnSave);
+			// 
 			// TerrainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(358, 263);
+			this.ClientSize = new System.Drawing.Size(358, 295);
 			this.ControlBox = false;
+			this.Controls.Add(this.SaveButton);
+			this.Controls.Add(this.LoadButton);
 			this.Controls.Add(this.label14);
 			this.Controls.Add(this.StreamingThreads);
 			this.Controls.Add(this.Build);
@@ -633,5 +657,7 @@
 		private SharedForms.PowerOfTwoUpDown ChunkSize;
 		private System.Windows.Forms.NumericUpDown StreamingThreads;
 		private System.Windows.Forms.Label label14;
+		private System.Windows.Forms.Button LoadButton;
+		private System.Windows.Forms.Button SaveButton;
 	}
 }
