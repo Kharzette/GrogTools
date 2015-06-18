@@ -49,7 +49,7 @@ namespace ParticleEdit
 			Application.SetCompatibleTextRenderingDefault(false);
 
 			GraphicsDevice	gd	=new GraphicsDevice("Particle Editing Tool",
-				FeatureLevel.Level_11_0);
+				FeatureLevel.Level_11_0, 0.1f, 3000f);
 
 			//save renderform position
 			gd.RendForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",

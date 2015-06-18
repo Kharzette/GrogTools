@@ -43,7 +43,7 @@ namespace BSPBuilder
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 			GraphicsDevice	gd	=new GraphicsDevice("BSP tree building tools",
-				FeatureLevel.Level_11_0);
+				FeatureLevel.Level_11_0, 0.1f, 3000f);
 
 			//save renderform position
 			gd.RendForm.DataBindings.Add(new Binding("Location",

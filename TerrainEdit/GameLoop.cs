@@ -349,7 +349,9 @@ namespace TerrainEdit
 
 			mGD.GCam.Projection	=Matrix.PerspectiveFovLH(
 				MathUtil.DegreesToRadians(45f),
-				vp.Width / vp.Height, 0.1f, si.mFogEnd);
+				vp.Width / (float)vp.Height, 0.1f, si.mFogEnd);
+
+			mGD.SetClip(0.1f, si.mFogEnd);
 
 			mChunkRange	=si.mChunkRange;
 		}
