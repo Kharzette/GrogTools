@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -93,6 +94,41 @@ namespace TerrainEdit
 			si.mSkyColor1	=Misc.SystemColorToDXColor(SkyColor1.BackColor);
 
 			Misc.SafeInvoke(eApply, si);
+		}
+
+
+		internal void SaveShadingInfo(string path)
+		{
+			string	noExt	=FileUtil.StripExtension(path);
+
+			string	fname	=noExt + ".TerShading";
+
+			FileStream	fs	=new FileStream(fname, FileMode.Create, FileAccess.Write);
+			if(fs == null)
+			{
+				//bummer?
+				return;
+			}
+
+			BinaryWriter	bw	=new BinaryWriter(fs);
+
+			//secret code for shading stuffs
+			UInt32	magic	=0x5ADE1BF0;
+			bw.Write(magic);
+
+			bw.Write(FogEnabled.Checked);
+			bw.Write((float)FogStart.Value);
+			bw.Write((float)FogEnd.Value);
+			bw.Write((int)ChunkRange.Value);
+
+			SharpDX.Color	col0	=Misc.SystemColorToDXColor(SkyColor0.BackColor);
+			SharpDX.Color	col1	=Misc.SystemColorToDXColor(SkyColor1.BackColor);			
+
+			bw.Write(col0.ToRgba());
+			bw.Write(col1.ToRgba());
+
+			bw.Close();
+			fs.Close();
 		}
 	}
 }

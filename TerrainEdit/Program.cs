@@ -158,11 +158,16 @@ namespace TerrainEdit
 				delegate(object s, EventArgs ea)
 				{
 					gLoop.TLoad(s as string);
+					ta.LoadAtlasInfo(s as string);
 				});
 			EventHandler	tSaveHandler	=new EventHandler(
 				delegate(object s, EventArgs ea)
 				{
-					gLoop.TSave(s as string);
+					if(gLoop.TSave(s as string))
+					{
+						ta.SaveAtlasInfo(s as string);
+						ts.SaveShadingInfo(s as string);
+					}
 				});
 
 			tf.eBuild	+=tBuildHandler;

@@ -368,9 +368,9 @@ namespace TerrainEdit
 		}
 
 
-		internal void TSave(string path)
+		internal bool TSave(string path)
 		{
-			mTerrain.Save(path);
+			return	mTerrain.Save(path);
 		}
 
 

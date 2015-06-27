@@ -136,6 +136,123 @@ namespace TerrainEdit
 			return	(float)TransitionHeight.Value;
 		}
 
+		internal void SaveAtlasInfo(string path)
+		{
+			if(mAtlas == null)
+			{
+				return;
+			}
+
+			string	noExt	=FileUtil.StripExtension(path);
+
+			string	fname	=noExt + ".TerTexData";
+
+			FileStream	fs	=new FileStream(fname, FileMode.Create, FileAccess.Write);
+			if(fs == null)
+			{
+				//bummer?
+				return;
+			}
+
+			BinaryWriter	bw	=new BinaryWriter(fs);
+
+			//secret code for atlas stuffs
+			UInt32	magic	=0x7EC5DA7A;
+			bw.Write(magic);
+
+			//atlas size
+			bw.Write(mAtlas.Width);
+			bw.Write(mAtlas.Height);
+
+			//transition height
+			bw.Write((int)TransitionHeight.Value);
+
+			bw.Write(mGridData.Count);
+
+			foreach(HeightMap.TexData td in mGridData)
+			{
+				bw.Write(td.BottomElevation);
+				bw.Write(td.TopElevation);
+				bw.Write(td.Steep);
+				bw.Write(td.ScaleFactor);
+				bw.Write(td.TextureName);
+
+				bw.Write(td.mScaleU);
+				bw.Write(td.mScaleV);
+				bw.Write(td.mUOffs);
+				bw.Write(td.mVOffs);
+			}
+
+			bw.Close();
+			fs.Close();
+		}
+
+		internal void LoadAtlasInfo(string path)
+		{
+			string	noExt	=FileUtil.StripExtension(path);
+
+			string	fname	=noExt + ".TerTexData";
+
+			FileStream	fs	=new FileStream(fname, FileMode.Open, FileAccess.Read);
+			if(fs == null)
+			{
+				//bummer?
+				return;
+			}
+
+			BinaryReader	br	=new BinaryReader(fs);
+
+			UInt32	magic	=br.ReadUInt32();
+			if(magic != 0x7EC5DA7A)
+			{
+				br.Close();
+				fs.Close();
+				return;
+			}
+
+			AtlasX.Value	=br.ReadInt32();
+			AtlasY.Value	=br.ReadInt32();
+
+			TransitionHeight.Value	=br.ReadInt32();
+
+			//load into a temp list first
+			List<HeightMap.TexData>	gridStuffs	=new List<HeightMap.TexData>();
+
+			int	count	=br.ReadInt32();
+
+			for(int i=0;i < count;i++)
+			{
+				HeightMap.TexData	td	=new HeightMap.TexData();
+
+				td.BottomElevation	=br.ReadSingle();
+				td.TopElevation		=br.ReadSingle();
+				td.Steep			=br.ReadBoolean();
+				td.ScaleFactor		=br.ReadSingle();
+				td.TextureName		=br.ReadString();
+				td.mScaleU			=br.ReadDouble();
+				td.mScaleV			=br.ReadDouble();
+				td.mUOffs			=br.ReadDouble();
+				td.mVOffs			=br.ReadDouble();
+
+				gridStuffs.Add(td);
+			}
+
+			br.Close();
+			fs.Close();
+
+			//use data that matches existing stuffs
+			List<string>	textures	=mSK.GetTexture2DList();
+			foreach(HeightMap.TexData td in gridStuffs)
+			{
+				if(textures.Contains(td.TextureName))
+				{
+					mGridData.Add(td);
+				}
+			}
+
+			gridStuffs.Clear();
+		}
+
 
 		void SaveValues()
 		{
