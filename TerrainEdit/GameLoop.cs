@@ -265,17 +265,25 @@ namespace TerrainEdit
 				FractalFactory.SmoothPass(fract);
 			}
 
-			if(erosionIterations > 0)
-			{
-				int	realIterations	=FractalFactory.Erode(fract, mRand,
-					erosionIterations, rainFall, solubility, evaporation);
-			}
-
 			for(int i=0;i < tilingIterations;i++)
 			{
 				float	borderSlice	=borderSize / tilingIterations;
 
 				FractalFactory.MakeTiled(fract, borderSlice * (i + 1));
+			}
+
+			if(erosionIterations > 0)
+			{
+				int	realIterations	=FractalFactory.Erode(fract, mRand,
+					erosionIterations, rainFall, solubility, evaporation);
+
+				//redo tiling if eroded
+				for(int i=0;i < tilingIterations;i++)
+				{
+					float	borderSlice	=borderSize / tilingIterations;
+
+					FractalFactory.MakeTiled(fract, borderSlice * (i + 1));
+				}
 			}
 
 			Vector3	[,]norms	=mFracFact.BuildNormals(fract, polySize);
