@@ -36,6 +36,10 @@ namespace BSPBuilder
 		Dictionary<int, Matrix>	mModelMats;
 		string					mGameRootDir;
 
+		//shader parameter stuff
+		List<string>	mCommonIgnores	=new List<string>();
+		List<string>	mCommonHides	=new List<string>();
+
 		//gpu
 		GraphicsDevice	mGD;
 
@@ -58,26 +62,14 @@ namespace BSPBuilder
 			mGD				=gd;
 			mGameRootDir	=gameRootDir;
 
+			mGD.eDeviceLost	+=OnDeviceLost;
+
 			mSKeeper	=new StuffKeeper();
 
 			mSKeeper.eCompileNeeded	+=SharedForms.ShaderCompileHelper.CompileNeededHandler;
 			mSKeeper.eCompileDone	+=SharedForms.ShaderCompileHelper.CompileDoneHandler;
 
-			mSKeeper.Init(mGD, gameRootDir);
-
-			mDebugDraw	=new DebugDraw(gd, mSKeeper);
-			mMatLib		=new MatLib(gd, mSKeeper);
-
-			mMatLib.InitCelShading(1);
-			mMatLib.GenerateCelTexturePreset(gd.GD,
-				gd.GD.FeatureLevel == FeatureLevel.Level_9_3, false, 0);
-
-			mZoneDraw	=new IndoorMesh(gd, mMatLib);
-
-			RenderTargetView	[]backBuf	=new RenderTargetView[1];
-			DepthStencilView	backDepth;
-
-			backBuf	=gd.DC.OutputMerger.GetRenderTargets(1, out backDepth);
+			LoadStuff();
 
 			int	resx	=gd.RendForm.ClientRectangle.Width;
 			int	resy	=gd.RendForm.ClientRectangle.Height;
@@ -118,6 +110,7 @@ namespace BSPBuilder
 			mVisForm.eStopVis				+=OnStopVis;
 			mVisForm.eVis					+=OnVis;
 			mMatForm.eMatLibNotReadyToSave	+=OnMatLibNotReadyToSave;
+			mMatForm.eMatTechniqueChanged	+=OnMatTechChanged;
 
 			//core events
 			CoreEvents.eBuildDone		+=OnBuildDone;
@@ -130,6 +123,8 @@ namespace BSPBuilder
 			CoreEvents.eNumClustersChanged	+=OnNumClustersChanged;
 			CoreEvents.eNumPlanesChanged	+=OnNumPlanesChanged;
 			CoreEvents.eNumVertsChanged		+=OnNumVertsChanged;
+
+			SetUpCommonIgnores();
 		}
 
 
@@ -254,6 +249,34 @@ namespace BSPBuilder
 				Settings.Default.PropertyValues[posName];
 
 			form.Location	=(System.Drawing.Point)val.PropertyValue;
+		}
+
+
+		void LoadStuff()
+		{
+			mSKeeper.Init(mGD, mGameRootDir);
+
+			mDebugDraw	=new DebugDraw(mGD, mSKeeper);
+			mMatLib		=new MatLib(mGD, mSKeeper);
+
+			mMatLib.InitCelShading(1);
+			mMatLib.GenerateCelTexturePreset(mGD.GD,
+				mGD.GD.FeatureLevel == FeatureLevel.Level_9_3, false, 0);
+
+			mZoneDraw	=new IndoorMesh(mGD, mMatLib);
+		}
+
+
+		void OnDeviceLost(object sender, EventArgs ea)
+		{
+			mOutForm.Print("Graphics device lost, rebuilding stuffs...\n");
+
+			mSKeeper.FreeAll();
+			mDebugDraw.FreeAll();
+			mMatLib.FreeAll();
+			mZoneDraw.FreeAll();
+
+			LoadStuff();
 		}
 
 
@@ -870,111 +893,139 @@ namespace BSPBuilder
 		}
 
 
+		void OnMatTechChanged(object sender, EventArgs ea)
+		{
+			string	matName	=sender as string;
+			if(matName == null || matName == "")
+			{
+				return;
+			}
+
+			mOutForm.Print("Material " + matName + " changed techniques...\n");
+
+			//reset hides
+			HideParameters(matName);
+		}
+
+
+		void SetUpCommonIgnores()
+		{
+			//some stuff isn't used by most bsp stuff
+			mCommonIgnores.Add("mSpecColor");
+			mCommonIgnores.Add("mSpecPower");
+			mCommonIgnores.Add("mSolidColour");
+
+			//renderstates are never used as a variable
+			mCommonIgnores.Add("AlphaBlending");
+			mCommonIgnores.Add("NoBlending");
+			mCommonIgnores.Add("ShadowBlending");
+			mCommonIgnores.Add("EnableDepth");
+			mCommonIgnores.Add("DisableDepth");
+			mCommonIgnores.Add("DisableDepthWrite");
+			mCommonIgnores.Add("DisableDepthTest");
+			mCommonIgnores.Add("NoCull");
+			mCommonIgnores.Add("LinearClamp");
+			mCommonIgnores.Add("LinearWrap");
+			mCommonIgnores.Add("PointClamp");
+			mCommonIgnores.Add("PointWrap");
+			mCommonIgnores.Add("LinearClampCube");
+			mCommonIgnores.Add("LinearWrapCube");
+			mCommonIgnores.Add("PointClampCube");
+			mCommonIgnores.Add("PointWrapCube");
+			mCommonIgnores.Add("PointClamp1D");
+
+			//common hidey stuff
+			mCommonHides.Add("mWorld");
+			mCommonHides.Add("mView");
+			mCommonHides.Add("mProjection");
+			mCommonHides.Add("mLightViewProj");
+			mCommonHides.Add("mEyePos");
+			mCommonHides.Add("mCelTable");
+			mCommonHides.Add("mShadowTexture");
+			mCommonHides.Add("mShadowCube");
+			mCommonHides.Add("mShadowLightPos");
+			mCommonHides.Add("mbDirectional");
+			mCommonHides.Add("mAniIntensities");
+			mCommonHides.Add("mDynLights");
+			mCommonHides.Add("mShadowAtten");
+			mCommonHides.Add("mSpecColor");	//eventually want these
+			mCommonHides.Add("mSpecPower");	//for future
+			mCommonHides.Add("mMaterialID");	//idkeeper takes care of this
+		}
+
+
+		void HideParameters(string matName)
+		{
+			//look for material specific stuff to hide / ignore
+			List<string>	matIgnores	=new List<string>();
+			List<string>	matHides	=new List<string>();
+
+			string	tech	=mMatLib.GetMaterialTechnique(matName);
+
+			if(tech == null)
+			{
+				return;	//no shaders loaded?
+			}
+
+			if(tech == "FullBright"
+				|| tech == "VertexLightingCel"
+				|| tech == "VertexLighting"
+				|| tech == "VertexLightingAlpha"
+				|| tech == "VertexLightingAlphaCel")
+			{
+				matIgnores.Add("mLightMap");
+				matIgnores.Add("mEyePos");
+				matIgnores.Add("mSkyGradient0");
+				matIgnores.Add("mSkyGradient1");
+				matHides.Add("mLightMap");
+				matHides.Add("mEyePos");
+				matHides.Add("mSkyGradient0");
+				matHides.Add("mSkyGradient1");
+			}
+			else if(tech.StartsWith("LightMap"))
+			{
+				matIgnores.Add("mEyePos");
+				matIgnores.Add("mSkyGradient0");
+				matIgnores.Add("mSkyGradient1");
+				matHides.Add("mSkyGradient0");
+				matHides.Add("mSkyGradient1");
+				matHides.Add("mEyePos");
+				matHides.Add("mLightMap");	//autohandled
+			}
+			else if(tech == "Sky")
+			{
+				matIgnores.Add("mLightMap");
+				matHides.Add("mLightMap");
+			}
+
+			if(!tech.Contains("Anim"))
+			{
+				matIgnores.Add("mAniIntensities");
+			}
+
+			if(!tech.Contains("Cel"))
+			{
+				matIgnores.Add("mCelTable");
+			}
+
+			//add common stuff
+			matHides.AddRange(mCommonHides);
+			matIgnores.AddRange(mCommonIgnores);
+
+			mMatLib.IgnoreMaterialVariables(matName, matIgnores, true);
+			mMatLib.HideMaterialVariables(matName, matHides, true);
+		}
+
+
 		void HideParametersByMaterial()
 		{
 			List<string>	mats	=mMatLib.GetMaterialNames();
-
-			//some stuff isn't used by most bsp stuff
-			List<string>	toIgnore	=new List<string>();
-			toIgnore.Add("mSpecColor");
-			toIgnore.Add("mSpecPower");
-			toIgnore.Add("mSolidColour");
-
-			//renderstates are never used as a variable
-			toIgnore.Add("AlphaBlending");
-			toIgnore.Add("NoBlending");
-			toIgnore.Add("ShadowBlending");
-			toIgnore.Add("EnableDepth");
-			toIgnore.Add("DisableDepth");
-			toIgnore.Add("DisableDepthWrite");
-			toIgnore.Add("DisableDepthTest");
-			toIgnore.Add("NoCull");
-			toIgnore.Add("LinearClamp");
-			toIgnore.Add("LinearWrap");
-			toIgnore.Add("PointClamp");
-			toIgnore.Add("PointWrap");
-			toIgnore.Add("LinearClampCube");
-			toIgnore.Add("LinearWrapCube");
-			toIgnore.Add("PointClampCube");
-			toIgnore.Add("PointWrapCube");
-			toIgnore.Add("PointClamp1D");
-
-			//common hidey stuff
-			List<string>	toHide	=new List<string>();
-			toHide.Add("mWorld");
-			toHide.Add("mView");
-			toHide.Add("mProjection");
-			toHide.Add("mLightViewProj");
-			toHide.Add("mEyePos");
-			toHide.Add("mCelTable");
-			toHide.Add("mShadowTexture");
-			toHide.Add("mShadowCube");
-			toHide.Add("mShadowLightPos");
-			toHide.Add("mbDirectional");
-			toHide.Add("mAniIntensities");
-			toHide.Add("mDynLights");
-			toHide.Add("mShadowAtten");
-			toHide.Add("mSpecColor");	//eventually want these
-			toHide.Add("mSpecPower");	//for future
-			toHide.Add("mMaterialID");	//idkeeper takes care of this
 
 			//hide stuff that the user doesn't care about
 			//these are for all indoormesh materials
 			foreach(string m in mats)
 			{
-				//look for material specific stuff to hide / ignore
-				List<string>	matIgnores	=new List<string>();
-				List<string>	matHides	=new List<string>();
-
-				string	tech	=mMatLib.GetMaterialTechnique(m);
-
-				if(tech == "FullBright"
-					|| tech == "VertexLightingCel"
-					|| tech == "VertexLighting"
-					|| tech == "VertexLightingAlpha"
-					|| tech == "VertexLightingAlphaCel")
-				{
-					matIgnores.Add("mLightMap");
-					matIgnores.Add("mEyePos");
-					matIgnores.Add("mSkyGradient0");
-					matIgnores.Add("mSkyGradient1");
-					matHides.Add("mLightMap");
-					matHides.Add("mEyePos");
-					matHides.Add("mSkyGradient0");
-					matHides.Add("mSkyGradient1");
-				}
-				else if(tech.StartsWith("LightMap"))
-				{
-					matIgnores.Add("mEyePos");
-					matIgnores.Add("mSkyGradient0");
-					matIgnores.Add("mSkyGradient1");
-					matHides.Add("mSkyGradient0");
-					matHides.Add("mSkyGradient1");
-					matHides.Add("mEyePos");
-					matHides.Add("mLightMap");	//autohandled
-				}
-				else if(tech == "Sky")
-				{
-					matIgnores.Add("mLightMap");
-					matHides.Add("mLightMap");
-				}
-
-				if(!tech.Contains("Anim"))
-				{
-					matIgnores.Add("mAniIntensities");
-				}
-
-				if(!tech.Contains("Cel"))
-				{
-					matIgnores.Add("mCelTable");
-				}
-
-				//add common stuff
-				matHides.AddRange(toHide);
-				matIgnores.AddRange(toIgnore);
-
-				mMatLib.IgnoreMaterialVariables(m, matIgnores);
-				mMatLib.HideMaterialVariables(m, matHides);
+				HideParameters(m);
 			}
 		}
 	}
