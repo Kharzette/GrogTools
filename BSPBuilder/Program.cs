@@ -76,7 +76,7 @@ namespace BSPBuilder
 			gd.RendForm.Activated		+=actHandler;
 			gd.RendForm.AppDeactivated	+=deActHandler;
 
-			BSPBuilder	bspBuild	=new BSPBuilder(gd, "F:\\Games\\GrogLibsGame");
+			BSPBuilder	bspBuild	=new BSPBuilder(gd, ".");
 
 			UpdateTimer	time	=new UpdateTimer(true, false);
 

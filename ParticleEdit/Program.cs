@@ -59,11 +59,9 @@ namespace ParticleEdit
 
 			gd.RendForm.Location	=Settings.Default.MainWindowPos;
 
-#if DEBUG
-			string	rootDir	="C:\\Games\\CurrentGame";
-#else
-			string	rootDir	=AppDomain.CurrentDomain.BaseDirectory;
-#endif
+			//used to have a hard coded path here for #debug
+			//but now can just use launch.json to provide it
+			string	rootDir	=".";
 
 			SharedForms.ShaderCompileHelper.mTitle	="Compiling Shaders...";
 

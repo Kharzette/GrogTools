@@ -53,13 +53,9 @@ namespace TerrainEdit
 
 			gd.RendForm.Location	=Settings.Default.MainWindowPos;
 
-			//set this to whereever the game data is stored during
-			//development.  Release ver will look in .
-#if DEBUG
-			string	rootDir	="C:\\Games\\CurrentGame";
-#else
+			//used to have a hard coded path here for #debug
+			//but now can just use launch.json to provide it
 			string	rootDir	=".";
-#endif
 
 			StuffKeeper	sk	=new StuffKeeper();
 

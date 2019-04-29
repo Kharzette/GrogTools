@@ -64,7 +64,7 @@ namespace ColladaConvert
 			sk.eCompileNeeded	+=SharedForms.ShaderCompileHelper.CompileNeededHandler;
 			sk.eCompileDone		+=SharedForms.ShaderCompileHelper.CompileDoneHandler;
 
-			sk.Init(gd, "C:\\Games\\CurrentGame");
+			sk.Init(gd, ".");
 
 			MatLib		matLib	=new MatLib(gd, sk);
 

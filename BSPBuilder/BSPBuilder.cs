@@ -475,6 +475,9 @@ namespace BSPBuilder
 
 			mMap	=new Map();
 
+			BSPBuildParams	bbp	=mBSPForm.BSPParameters;
+			bbp.mMapName		=Path.GetFileName(fileName);
+
 			mMap.LoadBrushFile(fileName, mBSPForm.BSPParameters);
 
 			mBSPForm.SetBuildEnabled(true);
