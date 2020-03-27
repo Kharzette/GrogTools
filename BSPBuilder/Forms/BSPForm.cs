@@ -1,14 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.IO;
 using System.Windows.Forms;
 using BSPCore;
 using UtilityLib;
-using SharpDX;
 
 
 namespace BSPBuilder

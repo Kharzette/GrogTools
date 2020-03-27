@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Xml;
-using System.Linq;
 using System.Diagnostics;
-using System.Reflection;
 using MeshLib;
 using SharpDX;
-using SharpDX.DXGI;
-using SharpDX.Direct3D11;
 
 //ambiguous stuff
 using Buffer = SharpDX.Direct3D11.Buffer;
@@ -140,7 +135,7 @@ namespace ColladaConvert
 
 		//this will build a base list of verts
 		//eventually these will need to expand
-		public void CreateBaseVerts(float_array verts, bool bSkinned)
+		public void CreateBaseVerts(float_array verts)
 		{
 			mNumBaseVerts	=(int)verts.count / 3;
 			mBaseVerts		=new TrackedVert[mNumBaseVerts];
@@ -153,6 +148,24 @@ namespace ColladaConvert
 				mBaseVerts[i / 3].Position0.Y		=verts.Values[i + 1];
 				mBaseVerts[i / 3].Position0.Z		=-verts.Values[i + 2];	//negate
 				mBaseVerts[i / 3].mOriginalIndex	=i / 3;
+			}
+
+			//create a new meshlib mesh
+			mConverted	=new EditorMesh(mName);
+		}
+
+
+		public void CreateBaseVerts(List<Vector3> verts)
+		{
+			mNumBaseVerts	=verts.Count;
+			mBaseVerts		=new TrackedVert[mNumBaseVerts];
+
+			for(int i=0;i < verts.Count;i++)
+			{
+				//stuff coming from collada will be inside out
+				//so flip the z
+				mBaseVerts[i / 3].Position0			=verts[i];
+				mBaseVerts[i / 3].mOriginalIndex	=i;
 			}
 
 			//create a new meshlib mesh
@@ -234,6 +247,34 @@ namespace ColladaConvert
 				mBaseVerts[i].Normal0.Y	=-mBaseVerts[i].Normal0.Y;
 				mBaseVerts[i].Normal0.Z	=-mBaseVerts[i].Normal0.Z;
 				mBaseVerts[i].Normal0.W	=-mBaseVerts[i].Normal0.W;
+			}
+		}
+
+
+		//fill baseverts with bone indices and weights
+		internal void AddWeightsToBaseVerts(List<UInt16> pieceVCounts,
+											List<UInt16> pieceIdxs)
+		{
+			for(int i=0;i < mBaseVerts.Length;i++)
+			{
+				int	refCount	=0;
+				for(int j=0;j < pieceIdxs.Count;j++)
+				{
+					if(pieceIdxs[j] == i)
+					{
+						refCount++;
+					}
+				}
+
+				if(refCount == 0)
+				{
+					continue;
+				}
+
+				Debug.Assert(refCount < 4);
+
+				float	weight	=1.0f / refCount;
+
 			}
 		}
 

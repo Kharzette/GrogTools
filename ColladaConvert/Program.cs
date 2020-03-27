@@ -1,9 +1,7 @@
 ﻿using System;
-using System.IO;
 using System.Threading;
 using System.Diagnostics;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Forms;
 using InputLib;
 using MaterialLib;
@@ -12,13 +10,9 @@ using MeshLib;
 
 using SharpDX;
 using SharpDX.Direct3D;
-using SharpDX.Direct3D11;
-using SharpDX.DXGI;
 using SharpDX.Windows;
-using Buffer	=SharpDX.Direct3D11.Buffer;
-using Device	=SharpDX.Direct3D11.Device;
-using MapFlags	=SharpDX.Direct3D11.MapFlags;
-using MatLib	=MaterialLib.MaterialLib;
+using Device = SharpDX.Direct3D11.Device;
+using MatLib = MaterialLib.MaterialLib;
 
 
 namespace ColladaConvert
@@ -245,6 +239,7 @@ namespace ColladaConvert
 			MakeSeamForm(ref seam);
 
 			af.eMeshChanged			+=(sender, args) => matForm.SetMesh(sender);
+			af.ePrint				+=(sender, args) => Console.WriteLine(sender as string);
 			matForm.eNukedMeshPart	+=(sender, args) => af.NukeMeshPart(sender as List<int>);
 			matForm.eStripElements	+=(sender, args) =>
 				{	if(se.Visible){	return;	}

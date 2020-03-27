@@ -2,11 +2,8 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Xml.Serialization;
-using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using MeshLib;
@@ -14,13 +11,10 @@ using UtilityLib;
 using SharedForms;
 
 using SharpDX;
-using SharpDX.DXGI;
 using SharpDX.Direct3D11;
 
 //ambiguous stuff
-using Buffer	=SharpDX.Direct3D11.Buffer;
-using Color		=SharpDX.Color;
-using Device	=SharpDX.Direct3D11.Device;
+using Device = SharpDX.Direct3D11.Device;
 
 
 namespace ColladaConvert
@@ -53,6 +47,7 @@ namespace ColladaConvert
 		public event EventHandler	eMeshChanged;
 		public event EventHandler	eSkeletonChanged;
 		public event EventHandler	eBoundsChanged;
+		public event EventHandler	ePrint;
 
 
 		public AnimForm(Device gd, MaterialLib.MaterialLib mats, AnimLib alib)
@@ -1490,7 +1485,7 @@ namespace ColladaConvert
 
 					cnk	=new MeshConverter(mat, geom.name);
 
-					cnk.CreateBaseVerts(verts, bSkinned);
+					cnk.CreateBaseVerts(verts);
 
 					cnk.mPartIndex	=-1;
 					cnk.SetGeometryID(geom.id);

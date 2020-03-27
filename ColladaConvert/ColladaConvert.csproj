@@ -3,6 +3,7 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <TargetFramework>net461</TargetFramework>
     <OutputType>exe</OutputType>
+    <GenerateFullPaths>true</GenerateFullPaths>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.Windows.Forms"/>

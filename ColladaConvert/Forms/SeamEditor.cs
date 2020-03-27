@@ -1,17 +1,9 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using MeshLib;
 using SharedForms;
-
-using SharpDX;
-using Buffer	=SharpDX.Direct3D11.Buffer;
-using Device	=SharpDX.Direct3D11.Device;
+using Device = SharpDX.Direct3D11.Device;
 
 
 namespace ColladaConvert

@@ -1,23 +1,17 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
-using System.Diagnostics;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using BSPCore;
 using BSPVis;
 using MeshLib;
 using UtilityLib;
 using MaterialLib;
-
 using SharpDX;
-using SharpDX.DXGI;
 using SharpDX.Direct3D;
-using SharpDX.Direct3D11;
 
-using MatLib	=MaterialLib.MaterialLib;
+using MatLib = MaterialLib.MaterialLib;
 
 
 namespace BSPBuilder
