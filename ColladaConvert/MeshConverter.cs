@@ -445,6 +445,12 @@ namespace ColladaConvert
 					}
 				}
 
+				//some rigs can get crazy with bone counts
+				Debug.Assert(index.X < 256);
+				Debug.Assert(index.Y < 256);
+				Debug.Assert(index.Z < 256);
+				Debug.Assert(index.W < 256);
+
 				mBaseVerts[i].BoneIndex		=new Color((byte)index.X, (byte)index.Y, (byte)index.Z, (byte)index.W);
 				mBaseVerts[i].BoneWeights	=weight;
 			}
