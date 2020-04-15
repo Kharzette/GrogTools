@@ -85,6 +85,12 @@ namespace ColladaConvert
 		}
 
 
+		internal void GetBoneNamesInUseByDraw(List<string> names)
+		{
+			mChar.GetBoneNamesInUseByDraw(names);
+		}
+
+
 		internal COLLADA DeSerializeCOLLADA(string path)
 		{
 			FileStream		fs	=new FileStream(path, FileMode.Open, FileAccess.Read);
@@ -1268,11 +1274,39 @@ namespace ColladaConvert
 		}
 
 
-		static void BuildSkeleton(node n, out GSNode gsn)
+		static string AdjustName(List<string> namesInUse, string name)
+		{
+			string	origName	=name;
+			int		postNum		=0;
+
+			while(namesInUse.Contains(name))
+			{
+				name	=origName + String.Format("{0,10:D6}", postNum);
+			}
+			return	name;
+		}
+
+
+		static void BuildSkeleton(node n, List<string> namesInUse, out GSNode gsn)
 		{
 			gsn	=new GSNode();
 
-			gsn.SetName(n.name);
+			if(namesInUse.Contains(n.name))
+			{
+				string	newName	=AdjustName(namesInUse, n.name);
+
+				gsn.SetName(newName);
+				namesInUse.Add(newName);
+
+				//also need to adjust the collada data so searches
+				//will spot the adjusted name
+				n.name	=newName;
+			}
+			else
+			{
+				gsn.SetName(n.name);
+				namesInUse.Add(n.name);
+			}
 
 			KeyFrame	kf	=GetKeyFromCNode(n);
 
@@ -1287,7 +1321,7 @@ namespace ColladaConvert
 			{
 				GSNode	kid	=new GSNode();
 
-				BuildSkeleton(child, out kid);
+				BuildSkeleton(child, namesInUse, out kid);
 
 				gsn.AddChild(kid);
 			}
@@ -1301,11 +1335,12 @@ namespace ColladaConvert
 			var	nodes	=from lvs in colMesh.Items.OfType<library_visual_scenes>().First().visual_scene
 						 from n in lvs.node select n;
 
+			List<string>	namesInUse	=new List<string>();
 			foreach(node n in nodes)
 			{
 				GSNode	gsnRoot	=new GSNode();
 
-				BuildSkeleton(n, out gsnRoot);
+				BuildSkeleton(n, namesInUse, out gsnRoot);
 
 				ret.AddRoot(gsnRoot);
 			}
@@ -1430,6 +1465,12 @@ namespace ColladaConvert
 			foreach(geometry geom in geoms)
 			{
 				mesh	m	=geom.Item as mesh;
+
+				//check for empty geoms
+				if(m.Items == null)
+				{
+					continue;
+				}
 
 				foreach(object polyObj in m.Items)
 				{

@@ -40,6 +40,8 @@ namespace ColladaConvert
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 
+			Configuration.EnableObjectTracking	=true;
+
 			GraphicsDevice	gd	=new GraphicsDevice("Collada Conversion Tool",
 				FeatureLevel.Level_9_3, 0.1f, 3000f);
 
@@ -67,15 +69,15 @@ namespace ColladaConvert
 				gd.GD.FeatureLevel == FeatureLevel.Level_9_3, false, 0);
 			matLib.SetCelTexture(0);
 
-			//set up post processing module
-			PostProcess	post	=new PostProcess(gd, matLib, "Post.fx");
-
 			PlayerSteering	pSteering		=SetUpSteering();
 			Input			inp				=SetUpInput();
 			Random			rand			=new Random();
 			CommonPrims		comPrims		=new CommonPrims(gd, sk);
 			bool			bMouseLookOn	=false;
 
+			//set up post processing module
+			PostProcess	post	=new PostProcess(gd, matLib, "Post.fx");
+			
 			EventHandler	actHandler	=new EventHandler(
 				delegate(object s, EventArgs ea)
 				{	inp.ClearInputs();	});
@@ -192,7 +194,7 @@ namespace ColladaConvert
 
 			comPrims.FreeAll();
 			inp.FreeAll();
-			post.FreeAll();
+			post.FreeAll(gd);
 			matLib.FreeAll();
 
 			sk.eCompileDone		-=SharedForms.ShaderCompileHelper.CompileDoneHandler;
@@ -268,6 +270,9 @@ namespace ColladaConvert
 				{	se.Populate(null);	se.Visible	=false;	};
 			af.eSkeletonChanged		+=(sender, args) => skel.Initialize(sender as MeshLib.Skeleton);
 			af.eBoundsChanged		+=(sender, args) => ep.ReBuildBoundsDrawData(gd, sender);			
+
+			skel.eSelectUnUsedBones	+=(sender, args) => af.GetBoneNamesInUseByDraw(sender as List<string>);
+
 
 			af.Visible		=true;
 			matForm.Visible	=true;

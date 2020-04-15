@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows.Forms;
 using MeshLib;
+using UtilityLib;
 
 
 namespace ColladaConvert
@@ -9,6 +11,8 @@ namespace ColladaConvert
 	public partial class SkeletonEditor : Form
 	{
 		Skeleton	mSkeleton;
+
+		internal event EventHandler	eSelectUnUsedBones;
 
 
 		public SkeletonEditor()
@@ -60,6 +64,32 @@ namespace ColladaConvert
 
 			//remove from tree
 			toNuke.Remove();
+
+			//TODO: recompute bone indexes in the verts
+		}
+
+
+		void OnSelectUnUsedBones(object sender, EventArgs ea)
+		{
+			List<string>	boneNames	=new List<string>();
+
+			Misc.SafeInvoke(eSelectUnUsedBones, boneNames);
+
+			SelectThese(SkeletonTree.TopNode, boneNames);			
+		}
+
+
+		void SelectThese(TreeNode n, List<string> names)
+		{
+			if(!names.Contains(n.Name))
+			{
+				n.BackColor	=System.Drawing.Color.Red;
+			}
+
+			foreach(TreeNode kid in n.Nodes)
+			{
+				SelectThese(kid, names);
+			}
 		}
 
 
