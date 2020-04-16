@@ -40,7 +40,8 @@ namespace ColladaConvert
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 
-			Configuration.EnableObjectTracking	=true;
+			//turn this on for help with leaky stuff
+			//Configuration.EnableObjectTracking	=true;
 
 			GraphicsDevice	gd	=new GraphicsDevice("Collada Conversion Tool",
 				FeatureLevel.Level_9_3, 0.1f, 3000f);
@@ -272,7 +273,7 @@ namespace ColladaConvert
 			af.eBoundsChanged		+=(sender, args) => ep.ReBuildBoundsDrawData(gd, sender);			
 
 			skel.eSelectUnUsedBones	+=(sender, args) => af.GetBoneNamesInUseByDraw(sender as List<string>);
-
+			skel.eBonesChanged		+=(sender, args) => af.BonesChanged();
 
 			af.Visible		=true;
 			matForm.Visible	=true;

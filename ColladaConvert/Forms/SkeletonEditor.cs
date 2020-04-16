@@ -13,6 +13,7 @@ namespace ColladaConvert
 		Skeleton	mSkeleton;
 
 		internal event EventHandler	eSelectUnUsedBones;
+		internal event EventHandler	eBonesChanged;
 
 
 		public SkeletonEditor()
@@ -65,7 +66,8 @@ namespace ColladaConvert
 			//remove from tree
 			toNuke.Remove();
 
-			//TODO: recompute bone indexes in the verts
+			//Need to make characters remake the bone array
+			Misc.SafeInvoke(eBonesChanged, null);
 		}
 
 

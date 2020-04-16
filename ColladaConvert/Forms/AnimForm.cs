@@ -91,6 +91,12 @@ namespace ColladaConvert
 		}
 
 
+		internal void BonesChanged()
+		{
+			mChar.ClearBones();
+		}
+
+
 		internal COLLADA DeSerializeCOLLADA(string path)
 		{
 			FileStream		fs	=new FileStream(path, FileMode.Open, FileAccess.Read);
