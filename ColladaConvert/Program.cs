@@ -222,6 +222,10 @@ namespace ColladaConvert
 				Settings.Default, "MaterialFormPos", true,
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
+			matForm.DataBindings.Add(new System.Windows.Forms.Binding("Size",
+				Settings.Default, "MaterialFormSize", true,
+				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+
 			af.DataBindings.Add(new System.Windows.Forms.Binding("Location",
 				Settings.Default, "AnimFormPos", true,
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));

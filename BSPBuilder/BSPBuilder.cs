@@ -77,6 +77,7 @@ namespace BSPBuilder
 			SetFormPos(mOutForm, "OutputFormPos");
 			SetFormPos(mMatForm, "MaterialFormPos");
 			SetFormPos(mCTForm, "CelTweakFormPos");
+			SetFormSize(mMatForm, "MaterialFormSize");
 
 			//show forms
 			mBSPForm.Visible	=true;
@@ -243,6 +244,14 @@ namespace BSPBuilder
 				Settings.Default.PropertyValues[posName];
 
 			form.Location	=(System.Drawing.Point)val.PropertyValue;
+		}
+
+
+		void SetFormSize(Form form, string sizeName)
+		{
+			form.DataBindings.Add(new Binding("Size",
+				Settings.Default, sizeName, true,
+				DataSourceUpdateMode.OnPropertyChanged));
 		}
 
 

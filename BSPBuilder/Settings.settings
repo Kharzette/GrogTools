@@ -8,6 +8,9 @@
     <Setting Name="MaterialFormPos" Type="System.Drawing.Point" Scope="User">
       <Value Profile="(Default)">0, 0</Value>
     </Setting>
+    <Setting Name="MaterialFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">525, 535</Value>
+    </Setting>
     <Setting Name="BSPFormPos" Type="System.Drawing.Point" Scope="User">
       <Value Profile="(Default)">0, 0</Value>
     </Setting>
