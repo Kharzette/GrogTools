@@ -58,8 +58,10 @@ namespace ColladaConvert
 		}
 
 
-		internal MeshLib.SubAnim	GetAnims(MeshLib.Skeleton skel, library_visual_scenes lvs, out KeyPartsUsed parts)
+		internal List<MeshLib.SubAnim>	GetAnims(MeshLib.Skeleton skel, library_visual_scenes lvs, out KeyPartsUsed parts)
 		{
+			List<MeshLib.SubAnim>	ret	=new List<MeshLib.SubAnim>();
+
 			parts	=0;
 
 			//grab full list of bones
@@ -118,10 +120,11 @@ namespace ColladaConvert
 
 					kf.mRotation	=Quaternion.RotationMatrix(mat);
 				}
-				return	new MeshLib.SubAnim(bone, times, keys);
+
+				ret.Add(new MeshLib.SubAnim(bone, times, keys));
 			}
 
-			return	null;
+			return	ret;
 		}
 	}
 }

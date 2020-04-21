@@ -76,7 +76,10 @@ namespace ColladaConvert
 				//to match via sid first and if that fails, use name?
 				node	n	=AnimForm.LookUpNode(lvs, sid);
 
-				Debug.Assert(n != null);
+				if(n == null)
+				{
+					continue;
+				}
 
 				if(bone != n.name)
 				{
@@ -176,7 +179,10 @@ namespace ColladaConvert
 
 				node	n	=AnimForm.LookUpNode(scenes, sid);
 
-				Debug.Assert(n != null);
+				if(n == null)
+				{
+					continue;
+				}
 
 				if(bone != n.name)
 				{
