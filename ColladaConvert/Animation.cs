@@ -9,6 +9,7 @@ namespace ColladaConvert
 	{
 		public enum KeyPartsUsed
 		{
+			None		=0,
 			TranslateX	=1,
 			TranslateY	=2,
 			TranslateZ	=4,

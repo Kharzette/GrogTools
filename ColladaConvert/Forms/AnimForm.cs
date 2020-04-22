@@ -93,7 +93,7 @@ namespace ColladaConvert
 
 		internal void BonesChanged()
 		{
-			mChar.ClearBones();
+			mChar.ReBuildBones(mGD);
 		}
 
 
@@ -301,11 +301,7 @@ namespace ColladaConvert
 
 			alib.AddAnim(anm);
 
-			//adjust coordinate system
-			Matrix	shiftMat	=Matrix.RotationX(MathUtil.PiOverTwo);
-
-			//rotate the animation to match our coord system
-			anm.TransformBoneAnim("Bip01", shiftMat);
+			TransformRoots(alib.GetSkeleton(), anm);
 
 			return	true;
 		}
@@ -328,9 +324,6 @@ namespace ColladaConvert
 				colladaFile.Items.OfType<library_visual_scenes>();
 
 			library_visual_scenes	lvs	=lvss.First();
-
-			//adjust coordinate system
-			Matrix	shiftMat	=Matrix.RotationX(MathUtil.PiOverTwo);
 
 			List<MeshConverter>	allChunks	=GetMeshChunks(colladaFile, true);
 			List<MeshConverter>	chunks		=new List<MeshConverter>();
@@ -371,6 +364,9 @@ namespace ColladaConvert
 				skel	=alib.GetSkeleton();
 			}
 
+			//adjust coordinate system
+			Matrix	shiftMat	=Matrix.RotationX(MathUtil.PiOverTwo);
+
 			//bake shiftmat into part verts
 			foreach(MeshConverter mc in chunks)
 			{
@@ -381,8 +377,7 @@ namespace ColladaConvert
 
 			alib.AddAnim(anm);
 
-			//rotate the animation to match our coord system
-			anm.TransformBoneAnim("Bip01", shiftMat);
+			TransformRoots(alib.GetSkeleton(), anm);
 
 			CreateSkin(colladaFile, arch, chunks, skel);
 
@@ -774,19 +769,16 @@ namespace ColladaConvert
 				return	subs;
 			}
 
-			List<Animation.KeyPartsUsed>	partsUsed	=new List<Animation.KeyPartsUsed>();
+			Animation.KeyPartsUsed	partsUsed	=Animation.KeyPartsUsed.None;
 			foreach(animation anim in anims.First().animation)
 			{
+				if(anim.Items == null)
+				{
+					continue;
+				}
 				Animation	an	=new Animation(anim);
 
-				Animation.KeyPartsUsed	parts;
-
-				SubAnim	sa	=an.GetAnims(skel, lvs.First(), out parts);
-				if(sa != null)
-				{
-					subs.Add(sa);
-					partsUsed.Add(parts);
-				}
+				subs.AddRange(an.GetAnims(skel, lvs.First(), out partsUsed));
 			}
 
 			//merge animations affecting a single bone
@@ -809,7 +801,7 @@ namespace ColladaConvert
 					if(sa.GetBoneName() == bone)
 					{
 						combine.Add(sa);
-						combineParts.Add(partsUsed[i]);
+						combineParts.Add(partsUsed);
 					}
 				}
 
@@ -1382,6 +1374,29 @@ namespace ColladaConvert
 		}
 
 
+		//some exporters set all the inputs to the same offset
+		//but some have them all different.  They end up being
+		//duplicated alot in the latter, but this stride helps
+		//extract just the input stuff desired
+		static int GetInputStride(InputLocalOffset []inputs)
+		{
+			int	inputStride	=0;
+
+			//check for differing offsets
+			for(int i=0;i < inputs.Length;i++)
+			{
+				InputLocalOffset	inp	=inputs[i];
+
+				//check other inputs for differing offsets
+				if(inp.offset != inputs[0].offset)
+				{
+					inputStride++;
+				}
+			}
+			return	inputStride;
+		}
+
+
 		static List<int> GetGeometryVertCount(geometry geom, string material)
 		{
 			List<int>	ret	=new List<int>();
@@ -1413,14 +1428,17 @@ namespace ColladaConvert
 						string	pols	=polyObj as string;
 						Debug.Assert(pols != null);
 
-						int	numSem	=polys.input.Length;
+						pols	=pols.Trim();
+
+						int	inpStride	=GetInputStride(polys.input);
 
 						string	[]tokens	=pols.Split(' ', '\n');
-						ret.Add(tokens.Length / numSem);
+						ret.Add(tokens.Length / (inpStride + 1));
 					}
 				}
 				else if(plist != null)
 				{
+					//this path is very untested now
 					if(plist.material != material)
 					{
 						continue;
@@ -1441,6 +1459,7 @@ namespace ColladaConvert
 				}
 				else if(tris != null)
 				{
+					//this path is very untested now
 					if(tris.material != material)
 					{
 						continue;
@@ -1544,7 +1563,7 @@ namespace ColladaConvert
 		}
 
 
-		void ParseIndexes(string []tokens, int offset, int numSemantics, List<int> indexes)
+		void ParseIndexes(string []tokens, int offset, int inputStride, List<int> indexes)
 		{
 			int	curIdx	=0;
 			foreach(string tok in tokens)
@@ -1558,7 +1577,7 @@ namespace ColladaConvert
 					}
 				}
 				curIdx++;
-				if(curIdx >= numSemantics)
+				if(curIdx >= inputStride)
 				{
 					curIdx	=0;
 				}
@@ -1617,6 +1636,7 @@ namespace ColladaConvert
 					}
 				}
 
+				//find the key, idx, and offset for passed in sem
 				for(int i=0;i < inputs.Length;i++)
 				{
 					InputLocalOffset	inp	=inputs[i];
@@ -1642,19 +1662,24 @@ namespace ColladaConvert
 						string	pols	=polyObj as string;
 						Debug.Assert(pols != null);
 
-						int		numSem		=polys.input.Length;
+						//better collada adds some annoying whitespace
+						pols	=pols.Trim();
+
+						int		inpStride	=GetInputStride(inputs);
 						string	[]tokens	=pols.Split(' ', '\n');
-						ParseIndexes(tokens, ofs, numSem, ret);
+						ParseIndexes(tokens, ofs, inpStride, ret);
 					}
 				}
 				else if(plist != null)
 				{
+					//this path is very untested now
 					int		numSem		=plist.input.Length;
 					string	[]tokens	=plist.p.Split(' ', '\n');
 					ParseIndexes(tokens, ofs, numSem, ret);
 				}
 				else if(tris != null)
 				{
+					//this path is very untested now
 					int		numSem		=tris.input.Length;
 					string	[]tokens	=tris.p.Split(' ', '\n');
 					ParseIndexes(tokens, ofs, numSem, ret);
@@ -2274,6 +2299,24 @@ namespace ColladaConvert
 			}
 
 			SizeColumns(AnimList);
+		}
+
+
+		//for adjusting coordinate systems
+		void TransformRoots(Skeleton skel, Anim anm)
+		{
+			//adjust coordinate system
+			Matrix	shiftMat	=Matrix.RotationX(MathUtil.PiOverTwo);
+
+			List<string>	roots	=new List<string>();
+
+			skel.GetRootNames(roots);
+
+			//rotate the animation to match our coord system
+			foreach(string root in roots)
+			{
+				anm.TransformBoneAnim(root, shiftMat);
+			}
 		}
 
 

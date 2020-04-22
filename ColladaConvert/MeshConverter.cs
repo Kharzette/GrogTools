@@ -155,59 +155,6 @@ namespace ColladaConvert
 		}
 
 
-		public void CreateBaseVerts(List<Vector3> verts)
-		{
-			mNumBaseVerts	=verts.Count;
-			mBaseVerts		=new TrackedVert[mNumBaseVerts];
-
-			for(int i=0;i < verts.Count;i++)
-			{
-				//stuff coming from collada will be inside out
-				//so flip the z
-				mBaseVerts[i / 3].Position0			=verts[i];
-				mBaseVerts[i / 3].mOriginalIndex	=i;
-			}
-
-			//create a new meshlib mesh
-			mConverted	=new EditorMesh(mName);
-		}
-
-
-		//this totally doesn't work at all
-		public void EliminateDuplicateVerts()
-		{
-			//throw these in a list to make it easier
-			//to throw some out
-			List<TrackedVert>	verts	=new List<TrackedVert>();
-			for(int i=0;i < mNumBaseVerts;i++)
-			{
-				verts.Add(mBaseVerts[i]);
-			}
-
-			restart:
-			for(int i=0;i < verts.Count;i++)
-			{
-				for(int j=0;j < verts.Count;j++)
-				{
-					if(i == j)
-					{
-						continue;
-					}
-					if(verts[i] == verts[j])
-					{
-						verts.RemoveAt(j);
-
-						//search through the polygon
-						//index list to remove any instances
-						//of j and replace them with i
-						ReplaceIndex((ushort)j, (ushort)i);
-						goto restart;
-					}
-				}
-			}
-		}
-
-
 		public void BakeTransformIntoVerts(Matrix mat)
 		{
 			for(int i=0;i < mBaseVerts.Length;i++)
@@ -235,18 +182,6 @@ namespace ColladaConvert
 				mBaseVerts[i].Normal0.Y	=norm.Y;
 				mBaseVerts[i].Normal0.Z	=norm.Z;
 				mBaseVerts[i].Normal0.W	=1f;
-			}
-		}
-
-
-		public void FlipNormals()
-		{
-			for(int i=0;i < mBaseVerts.Length;i++)
-			{
-				mBaseVerts[i].Normal0.X	=-mBaseVerts[i].Normal0.X;
-				mBaseVerts[i].Normal0.Y	=-mBaseVerts[i].Normal0.Y;
-				mBaseVerts[i].Normal0.Z	=-mBaseVerts[i].Normal0.Z;
-				mBaseVerts[i].Normal0.W	=-mBaseVerts[i].Normal0.W;
 			}
 		}
 
