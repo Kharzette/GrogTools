@@ -1791,6 +1791,27 @@ namespace ColladaConvert
 		}
 
 
+		static void	matrixToMatrix(ref matrix cMat, ref Matrix sdxMat)
+		{
+			sdxMat.M11	=cMat.Values[0];
+			sdxMat.M21	=cMat.Values[1];
+			sdxMat.M31	=cMat.Values[2];
+			sdxMat.M41	=cMat.Values[3];
+			sdxMat.M12	=cMat.Values[4];
+			sdxMat.M22	=cMat.Values[5];
+			sdxMat.M32	=cMat.Values[6];
+			sdxMat.M42	=cMat.Values[7];
+			sdxMat.M13	=cMat.Values[8];
+			sdxMat.M23	=cMat.Values[9];
+			sdxMat.M33	=cMat.Values[10];
+			sdxMat.M43	=cMat.Values[11];
+			sdxMat.M14	=cMat.Values[12];
+			sdxMat.M24	=cMat.Values[13];
+			sdxMat.M34	=cMat.Values[14];
+			sdxMat.M44	=cMat.Values[15];
+		}
+
+
 		static KeyFrame GetKeyFromCNode(node n)
 		{
 			KeyFrame	key	=new KeyFrame();
@@ -1803,7 +1824,15 @@ namespace ColladaConvert
 			Matrix	mat	=Matrix.Identity;
 			for(int i=0;i < n.Items.Length;i++)
 			{
-				if(n.ItemsElementName[i] == ItemsChoiceType2.rotate)
+				if(n.ItemsElementName[i] == ItemsChoiceType2.matrix)
+				{
+					matrix	cmat	=n.Items[i] as matrix;
+
+					Debug.Assert(cmat != null);
+
+					matrixToMatrix(ref cmat, ref mat);
+				}
+				else if(n.ItemsElementName[i] == ItemsChoiceType2.rotate)
 				{
 					rotate	rot	=n.Items[i] as rotate;
 
