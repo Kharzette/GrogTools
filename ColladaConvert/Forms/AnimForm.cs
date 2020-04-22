@@ -277,7 +277,7 @@ namespace ColladaConvert
 				PrintToOutput("Warning!  Y up axis sort of works but might cause problems sharing anims between mesh parts!\n");
 			}			
 
-			Skeleton	skel	=BuildSkeleton(colladaFile);
+			Skeleton	skel	=BuildSkeleton(colladaFile, ePrint);
 
 			skel.ConvertToLeftHanded();
 
@@ -303,7 +303,7 @@ namespace ColladaConvert
 				}
 			}
 
-			Anim	anm	=BuildAnim(colladaFile, alib.GetSkeleton(), lvs, path);
+			Anim	anm	=BuildAnim(colladaFile, alib.GetSkeleton(), lvs, path, ePrint);
 
 			alib.AddAnim(anm);
 
@@ -354,7 +354,7 @@ namespace ColladaConvert
 			AddVertexWeightsToChunks(colladaFile, chunks);
 
 			//build or get skeleton
-			Skeleton	skel	=BuildSkeleton(colladaFile);
+			Skeleton	skel	=BuildSkeleton(colladaFile, ePrint);
 
 			skel.ConvertToLeftHanded();
 
@@ -386,7 +386,7 @@ namespace ColladaConvert
 				mc.BakeTransformIntoVerts(shiftMat);
 			}
 
-			Anim	anm	=BuildAnim(colladaFile, alib.GetSkeleton(), lvs, path);
+			Anim	anm	=BuildAnim(colladaFile, alib.GetSkeleton(), lvs, path, ePrint);
 
 			alib.AddAnim(anm);
 
@@ -515,7 +515,7 @@ namespace ColladaConvert
 						List<int>	colIdxs1	=GetGeometryIndexesBySemantic(geom, "COLOR", 1, name);
 						List<int>	colIdxs2	=GetGeometryIndexesBySemantic(geom, "COLOR", 2, name);
 						List<int>	colIdxs3	=GetGeometryIndexesBySemantic(geom, "COLOR", 3, name);
-						List<int>	vertCounts	=GetGeometryVertCount(geom, name);
+						List<int>	vertCounts	=GetGeometryVertCount(geom, name, ePrint);
 
 						if(vertCounts.Count == 0)
 						{
@@ -635,10 +635,10 @@ namespace ColladaConvert
 		}
 
 
-		static Anim BuildAnim(COLLADA colladaFile, Skeleton skel, library_visual_scenes lvs, string path)
+		static Anim BuildAnim(COLLADA colladaFile, Skeleton skel, library_visual_scenes lvs, string path, EventHandler ePrint)
 		{
 			//create useful anims
-			List<SubAnim>	subs	=CreateSubAnims(colladaFile, skel);
+			List<SubAnim>	subs	=CreateSubAnims(colladaFile, skel, ePrint);
 
 			foreach(SubAnim sub in subs)
 			{
@@ -794,7 +794,7 @@ namespace ColladaConvert
 		}
 
 
-		static List<SubAnim> CreateSubAnims(COLLADA colladaFile, Skeleton skel)
+		static List<SubAnim> CreateSubAnims(COLLADA colladaFile, Skeleton skel, EventHandler ePrint)
 		{
 			//create useful anims
 			List<SubAnim>	subs	=new List<SubAnim>();
@@ -802,12 +802,14 @@ namespace ColladaConvert
 			IEnumerable<library_visual_scenes>	lvs	=colladaFile.Items.OfType<library_visual_scenes>();
 			if(lvs.Count() <= 0)
 			{
+				Misc.SafeInvoke(ePrint, "No library_visual_scenes in CreateSubAnims()!\n");
 				return	subs;
 			}
 
 			IEnumerable<library_animations>	anims	=colladaFile.Items.OfType<library_animations>();
 			if(anims.Count() <= 0)
 			{
+				Misc.SafeInvoke(ePrint, "No library_animations in CreateSubAnims()!\n");
 				return	subs;
 			}
 
@@ -822,6 +824,8 @@ namespace ColladaConvert
 
 				subs.AddRange(an.GetAnims(skel, lvs.First(), out partsUsed));
 			}
+
+			//TODO:  All of this merging stuff needs testing again
 
 			//merge animations affecting a single bone
 			List<SubAnim>					merged		=new List<SubAnim>();
@@ -1327,12 +1331,14 @@ namespace ColladaConvert
 		}
 
 
-		static void BuildSkeleton(node n, List<string> namesInUse, out GSNode gsn)
+		static void BuildSkeleton(node n, List<string> namesInUse, out GSNode gsn, EventHandler ePrint)
 		{
 			gsn	=new GSNode();
 
 			if(namesInUse.Contains(n.name))
 			{
+				Misc.SafeInvoke(ePrint, "Warning!  Non unique bone name: " + n.name + "!\n");
+
 				string	newName	=AdjustName(namesInUse, n.name);
 
 				gsn.SetName(newName);
@@ -1361,14 +1367,14 @@ namespace ColladaConvert
 			{
 				GSNode	kid	=new GSNode();
 
-				BuildSkeleton(child, namesInUse, out kid);
+				BuildSkeleton(child, namesInUse, out kid, ePrint);
 
 				gsn.AddChild(kid);
 			}
 		}
 
 
-		static Skeleton BuildSkeleton(COLLADA colMesh)
+		static Skeleton BuildSkeleton(COLLADA colMesh, EventHandler ePrint)
 		{
 			Skeleton	ret	=new Skeleton();
 
@@ -1380,7 +1386,7 @@ namespace ColladaConvert
 			{
 				GSNode	gsnRoot	=new GSNode();
 
-				BuildSkeleton(n, namesInUse, out gsnRoot);
+				BuildSkeleton(n, namesInUse, out gsnRoot, ePrint);
 
 				ret.AddRoot(gsnRoot);
 			}
@@ -1439,7 +1445,7 @@ namespace ColladaConvert
 		}
 
 
-		static List<int> GetGeometryVertCount(geometry geom, string material)
+		static List<int> GetGeometryVertCount(geometry geom, string material, EventHandler ePrint)
 		{
 			List<int>	ret	=new List<int>();
 
@@ -1456,13 +1462,20 @@ namespace ColladaConvert
 
 				if(polys == null && plist == null && tris == null)
 				{
+					Misc.SafeInvoke(ePrint, "Unknown polygon type: " + polObj + " in mesh: " + geom.name + "!\n");
 					continue;
 				}
 
 				if(polys != null)
 				{
-					if(polys.material != material || polys.Items == null)
+					if(polys.material != material)
 					{
+						Misc.SafeInvoke(ePrint, material + ", material mismatch!\n");
+						continue;
+					}
+					if(polys.Items == null)
+					{
+						Misc.SafeInvoke(ePrint, geom.name + ", null Items!\n");
 						continue;
 					}
 					foreach(object polyObj in polys.Items)
@@ -1485,6 +1498,7 @@ namespace ColladaConvert
 					{
 						continue;
 					}
+					Misc.SafeInvoke(ePrint, "Warning!  PolyLists are very untested at the moment!\n");
 					string	[]tokens	=plist.vcount.Split(' ', '\n');
 
 					int	numSem	=plist.input.Length;
@@ -1506,6 +1520,7 @@ namespace ColladaConvert
 					{
 						continue;
 					}
+					Misc.SafeInvoke(ePrint, "Warning!  Tris are very untested at the moment!\n");
 
 					for(int i=0;i < (int)tris.count;i++)
 					{
@@ -1536,6 +1551,7 @@ namespace ColladaConvert
 				//check for empty geoms
 				if(m.Items == null)
 				{
+					PrintToOutput("Empty mesh in GetMeshChunks()\n");
 					continue;
 				}
 
@@ -1547,6 +1563,7 @@ namespace ColladaConvert
 
 					if(polys == null && plist == null && tris == null)
 					{
+						PrintToOutput("Unknown polygon type: " + polyObj + " in mesh: " + geom.name + "!\n");
 						continue;
 					}
 
@@ -1570,6 +1587,7 @@ namespace ColladaConvert
 
 					if(count <= 0)
 					{
+						PrintToOutput("Empty polygon in GetMeshChunks!\n");
 						continue;
 					}
 
@@ -1580,13 +1598,15 @@ namespace ColladaConvert
 					verts	=GetGeometryFloatArrayBySemantic(geom, "VERTEX", 0, mat, out stride);
 					if(verts == null)
 					{
+						PrintToOutput("Empty verts for geom: " + geom.name + ", material: " + mat + "\n");
 						continue;
 					}
 
-					Debug.Assert(mat != null);
 
 					if(mat == null)
 					{
+						PrintToOutput("No material for geom: " + geom.name + "\n");
+
 						//return an empty list
 						return	new List<MeshConverter>();
 					}
@@ -1648,6 +1668,7 @@ namespace ColladaConvert
 
 				if(polys == null && plist == null && tris == null)
 				{
+					PrintToOutput("Unknown polygon type: " + polObj + " in mesh: " + geom.name + "!\n");
 					continue;
 				}
 
@@ -1694,6 +1715,9 @@ namespace ColladaConvert
 
 				if(key == "")
 				{
+					//this is not a big deal, just means this particular
+					//semantic doesn't exist, like if there's no vertex
+					//colors or texcoords etc
 					continue;
 				}
 
@@ -1715,6 +1739,7 @@ namespace ColladaConvert
 				else if(plist != null)
 				{
 					//this path is very untested now
+					PrintToOutput("Warning!  PolyLists are very untested at the moment!\n");
 					int		numSem		=plist.input.Length;
 					string	[]tokens	=plist.p.Split(' ', '\n');
 					ParseIndexes(tokens, ofs, numSem, ret);
@@ -1722,6 +1747,7 @@ namespace ColladaConvert
 				else if(tris != null)
 				{
 					//this path is very untested now
+					PrintToOutput("Warning!  Tris are very untested at the moment!\n");
 					int		numSem		=tris.input.Length;
 					string	[]tokens	=tris.p.Split(' ', '\n');
 					ParseIndexes(tokens, ofs, numSem, ret);
@@ -1753,6 +1779,7 @@ namespace ColladaConvert
 
 				if(polys == null && plist == null && tris == null)
 				{
+					PrintToOutput("Unknown polygon type: " + polObj + " in mesh: " + geom.name + "!\n");
 					continue;
 				}
 
@@ -1797,6 +1824,9 @@ namespace ColladaConvert
 
 			if(key == "")
 			{
+				//this is not a big deal, just means this particular
+				//semantic doesn't exist, like if there's no vertex
+				//colors or texcoords etc
 				return	null;
 			}
 
@@ -1974,6 +2004,10 @@ namespace ColladaConvert
 			Matrix	mat	=Matrix.Identity;
 			for(int i=0;i < n.Items.Length;i++)
 			{
+				if(n.ItemsElementName[i] == ItemsChoiceType2.matrix)
+				{
+					return	true;
+				}
 				if(n.ItemsElementName[i] == ItemsChoiceType2.rotate)
 				{
 					return	true;
