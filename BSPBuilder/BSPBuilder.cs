@@ -44,11 +44,11 @@ namespace BSPBuilder
 		BSPForm		mBSPForm	=new BSPForm();
 		VisForm		mVisForm	=new VisForm();
 		ZoneForm	mZoneForm	=new ZoneForm();
-		Output		mOutForm	=new Output();
 
 		//shared forms
-		SharedForms.MaterialForm		mMatForm;
-		SharedForms.CelTweakForm		mCTForm;
+		SharedForms.MaterialForm	mMatForm;
+		SharedForms.CelTweakForm	mCTForm;
+		SharedForms.Output			mOutForm	=new SharedForms.Output();
 
 
 		internal BSPBuilder(GraphicsDevice gd, string gameRootDir)
@@ -112,6 +112,7 @@ namespace BSPBuilder
 			CoreEvents.eLightDone		+=OnLightDone;
 			CoreEvents.eGBSPSaveDone	+=OnGBSPSaveDone;
 			CoreEvents.eVisDone			+=OnVisDone;
+			CoreEvents.ePrint			+=OnPrint;
 
 			//stats
 			CoreEvents.eNumPortalsChanged	+=OnNumPortalsChanged;
@@ -267,6 +268,16 @@ namespace BSPBuilder
 				mGD.GD.FeatureLevel == FeatureLevel.Level_9_3, false, 0);
 
 			mZoneDraw	=new IndoorMesh(mGD, mMatLib);
+		}
+
+
+		void OnPrint(object sender, EventArgs ea)
+		{
+			string	sz	=sender as string;
+			if(sz != null)
+			{
+				mOutForm.Print(sz);
+			}
 		}
 
 
