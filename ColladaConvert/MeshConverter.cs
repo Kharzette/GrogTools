@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using MeshLib;
 using SharpDX;
+using UtilityLib;
 
 //ambiguous stuff
 using Buffer = SharpDX.Direct3D11.Buffer;
@@ -12,75 +13,27 @@ using Device = SharpDX.Direct3D11.Device;
 
 namespace ColladaConvert
 {
-	public class MeshConverter
+	internal class MeshConverter
 	{
 		//keeps track of original pos index
 		struct TrackedVert
 		{
-			public Vector3		Position0;
-			public Half4		Normal0;
-			public Color		BoneIndex;
-			public Half4		BoneWeights;
-			public Vector2		TexCoord0;
-			public Vector2		TexCoord1;
-			public Vector2		TexCoord2;
-			public Vector2		TexCoord3;
-			public Vector4		Color0;
-			public Vector4		Color1;
-			public Vector4		Color2;
-			public Vector4		Color3;
+			internal Vector3	Position0;
+			internal Half4		Normal0;
+			internal Color		BoneIndex;
+			internal Half4		BoneWeights;
+			internal Vector2	TexCoord0;
+			internal Vector2	TexCoord1;
+			internal Vector2	TexCoord2;
+			internal Vector2	TexCoord3;
+			internal Vector4	Color0;
+			internal Vector4	Color1;
+			internal Vector4	Color2;
+			internal Vector4	Color3;
 
-			public int		mOriginalIndex;
-
-
-			public static bool operator==(TrackedVert a, TrackedVert b)
-			{
-				return	(
-					(a.BoneIndex == b.BoneIndex) &&
-					(a.BoneWeights == b.BoneWeights) &&
-					(a.Position0 == b.Position0) &&
-					(a.Normal0 == b.Normal0) &&
-					(a.TexCoord0 == b.TexCoord0) &&
-					(a.TexCoord1 == b.TexCoord1) &&
-					(a.TexCoord2 == b.TexCoord2) &&
-					(a.TexCoord3 == b.TexCoord3) &&
-					(a.Color0 == b.Color0) &&
-					(a.Color1 == b.Color1) &&
-					(a.Color2 == b.Color2) &&
-					(a.Color3 == b.Color3) &&
-					(a.mOriginalIndex == b.mOriginalIndex));
-			}
+			internal int		mOriginalIndex;
 
 
-			public static bool operator!=(TrackedVert a, TrackedVert b)
-			{
-				return	(
-					(a.BoneIndex != b.BoneIndex) ||
-					(a.BoneWeights != b.BoneWeights) ||
-					(a.Position0 != b.Position0) ||
-					(a.Normal0 != b.Normal0) ||
-					(a.TexCoord0 != b.TexCoord0) ||
-					(a.TexCoord1 != b.TexCoord1) ||
-					(a.TexCoord2 != b.TexCoord2) ||
-					(a.TexCoord3 != b.TexCoord3) ||
-					(a.Color0 != b.Color0) ||
-					(a.Color1 != b.Color1) ||
-					(a.Color2 != b.Color2) ||
-					(a.Color3 != b.Color3) ||
-					(a.mOriginalIndex != b.mOriginalIndex));
-			}
-
-
-			public override bool Equals(object obj)
-			{
-				return	base.Equals(obj);
-			}
-
-
-			public override int GetHashCode()
-			{
-				return	base.GetHashCode();
-			}
 		}
 
 		string			mName, mGeomName;
@@ -88,34 +41,36 @@ namespace ColladaConvert
 		int				mNumBaseVerts;
 		List<ushort>	mIndexList	=new List<ushort>();
 
-		public string	mGeometryID;
-		public int		mNumVerts, mNumTriangles, mVertSize;
-		public int		mPartIndex;
+		internal string	mGeometryID;
+		internal int	mNumVerts, mNumTriangles;
+		internal int	mPartIndex;
 
 		//the converted meshes
 		EditorMesh	mConverted;
 
+		internal event EventHandler	ePrint;
 
-		public MeshConverter(string name, string geoName)
+
+		internal MeshConverter(string name, string geoName)
 		{
 			mName		=name;
 			mGeomName	=geoName;
 		}
 
 
-		public Mesh	GetConvertedMesh()
+		internal Mesh	GetConvertedMesh()
 		{
 			return	mConverted;
 		}
 
 
-		public string GetName()
+		internal string GetName()
 		{
 			return	mName;
 		}
 
 
-		public string GetGeomName()
+		internal string GetGeomName()
 		{
 			//strip off mesh, add name put mesh back on end
 			string	ret	=mGeomName.Substring(0, mGeomName.Length - 4);
@@ -135,7 +90,7 @@ namespace ColladaConvert
 
 		//this will build a base list of verts
 		//eventually these will need to expand
-		public void CreateBaseVerts(float_array verts)
+		internal void CreateBaseVerts(float_array verts)
 		{
 			mNumBaseVerts	=(int)verts.count / 3;
 			mBaseVerts		=new TrackedVert[mNumBaseVerts];
@@ -155,7 +110,7 @@ namespace ColladaConvert
 		}
 
 
-		public void BakeTransformIntoVerts(Matrix mat)
+		internal void BakeTransformIntoVerts(Matrix mat)
 		{
 			for(int i=0;i < mBaseVerts.Length;i++)
 			{
@@ -165,7 +120,7 @@ namespace ColladaConvert
 		}
 
 
-		public void BakeTransformIntoNormals(Matrix mat)
+		internal void BakeTransformIntoNormals(Matrix mat)
 		{
 			for(int i=0;i < mBaseVerts.Length;i++)
 			{
@@ -182,34 +137,6 @@ namespace ColladaConvert
 				mBaseVerts[i].Normal0.Y	=norm.Y;
 				mBaseVerts[i].Normal0.Z	=norm.Z;
 				mBaseVerts[i].Normal0.W	=1f;
-			}
-		}
-
-
-		//fill baseverts with bone indices and weights
-		internal void AddWeightsToBaseVerts(List<UInt16> pieceVCounts,
-											List<UInt16> pieceIdxs)
-		{
-			for(int i=0;i < mBaseVerts.Length;i++)
-			{
-				int	refCount	=0;
-				for(int j=0;j < pieceIdxs.Count;j++)
-				{
-					if(pieceIdxs[j] == i)
-					{
-						refCount++;
-					}
-				}
-
-				if(refCount == 0)
-				{
-					continue;
-				}
-
-				Debug.Assert(refCount < 4);
-
-				float	weight	=1.0f / refCount;
-
 			}
 		}
 
@@ -266,6 +193,12 @@ namespace ColladaConvert
 					continue;
 				}
 			}
+
+			if(weightArray == null)
+			{
+				Print("No weights in skin " + sk.source1 + "!\n");
+				return;
+			}
 			
 			//copy vertex weight bones
 			foreach(string tok in tokens)
@@ -315,6 +248,11 @@ namespace ColladaConvert
 					weights.Add(boneWeight);
 				}
 
+				if(weights.Count > 4)
+				{
+					Print("BaseVert: " + i + " has " + weights.Count + " weights.  Will fix by dropping lowest\n");
+				}
+
 				while(weights.Count > 4)
 				{
 					//find smallest weight
@@ -328,6 +266,8 @@ namespace ColladaConvert
 							smallest	=weights[wt];
 						}
 					}
+
+					Print("Fixing weight index " + smIdx + " of value " + smallest + " in baseVert " + i + "\n");
 
 					//drop smallest weight
 					weights.RemoveAt(smIdx);
@@ -381,10 +321,10 @@ namespace ColladaConvert
 				}
 
 				//some rigs can get crazy with bone counts
-				Debug.Assert(index.X < 256);
-				Debug.Assert(index.Y < 256);
-				Debug.Assert(index.Z < 256);
-				Debug.Assert(index.W < 256);
+				if(index.X >= 256 || index.Y >= 256 || index.Z >= 256 || index.W >= 256)
+				{
+					Print("Warning!  Base Vertex " + i + " indexes bones beyond the 8 bit range!\n");
+				}
 
 				mBaseVerts[i].BoneIndex		=new Color((byte)index.X, (byte)index.Y, (byte)index.Z, (byte)index.W);
 				mBaseVerts[i].BoneWeights	=weight;
@@ -612,7 +552,6 @@ namespace ColladaConvert
 			{
 				mBaseVerts[i]	=verts[i];
 			}
-			//EliminateDuplicateVerts();
 
 			Triangulate(vertCounts);
 
@@ -621,9 +560,15 @@ namespace ColladaConvert
 		}
 
 
-		public void SetGeometryID(string id)
+		internal void SetGeometryID(string id)
 		{
 			mGeometryID	=id;
+		}
+
+
+		void Print(string val)
+		{
+			Misc.SafeInvoke(ePrint, val);
 		}
 
 
@@ -669,7 +614,7 @@ namespace ColladaConvert
 
 		//take the munged data and stuff it into
 		//the vertex and index buffers
-		public void BuildBuffers(Device gd,
+		internal void BuildBuffers(Device gd,
 			bool bPositions, bool bNormals, bool bBoneIndices,
 			bool bBoneWeights, bool bTexCoord0, bool bTexCoord1,
 			bool bTexCoord2, bool bTexCoord3, bool bColor0,
@@ -786,24 +731,43 @@ namespace ColladaConvert
 				int	idx2	=(int)inds.B;
 				int	idx3	=(int)inds.A;
 
-				Debug.Assert(idx0 >= 0);
+				if(idx0 < 0)
+				{
+					Print("Bad bone index: " + idx0 + " on base vertex " + i + "!\n");
+					continue;
+				}
 
 				string	bname	=bnames[idx0];
-
-				idx0	=skel.GetBoneIndex(bname);
-				Debug.Assert(idx0 >= 0);
+				idx0			=skel.GetBoneIndex(bname);
+				if(idx0 < 0)
+				{
+					Print("Bad bone index returned for bone " + bname + " on base vertex " + i + "!\n");
+					continue;
+				}
 
 				bname	=bnames[idx1];
 				idx1	=skel.GetBoneIndex(bname);
-				Debug.Assert(idx1 >= 0);
+				if(idx1 < 0)
+				{
+					Print("Bad bone index returned for bone " + bname + " on base vertex " + i + "!\n");
+					continue;
+				}
 
 				bname	=bnames[idx2];
 				idx2	=skel.GetBoneIndex(bname);
-				Debug.Assert(idx2 >= 0);
+				if(idx2 < 0)
+				{
+					Print("Bad bone index returned for bone " + bname + " on base vertex " + i + "!\n");
+					continue;
+				}
 
 				bname	=bnames[idx3];
 				idx3	=skel.GetBoneIndex(bname);
-				Debug.Assert(idx3 >= 0);
+				if(idx3 < 0)
+				{
+					Print("Bad bone index returned for bone " + bname + " on base vertex " + i + "!\n");
+					continue;
+				}
 
 				mBaseVerts[i].BoneIndex	=new Color((byte)idx0, (byte)idx1, (byte)idx2, (byte)idx3);
 			}

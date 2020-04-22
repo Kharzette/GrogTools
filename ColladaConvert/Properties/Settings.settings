@@ -29,5 +29,11 @@
     <Setting Name="SeamEditorFormSize" Type="System.Drawing.Size" Scope="User">
       <Value Profile="(Default)">100, 100</Value>
     </Setting>
+    <Setting Name="OutputFormPos" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="OutputFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">525, 535</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -98,6 +98,30 @@ namespace ColladaConvert {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
+        public global::System.Drawing.Point OutputFormPos {
+            get {
+                return ((global::System.Drawing.Point)(this["OutputFormPos"]));
+            }
+            set {
+                this["OutputFormPos"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100, 100")]
+        public global::System.Drawing.Size OutputFormSize {
+            get {
+                return ((global::System.Drawing.Size)(this["OutputFormSize"]));
+            }
+            set {
+                this["OutputFormSize"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
         public global::System.Drawing.Point CelTweakFormPos {
             get {
                 return ((global::System.Drawing.Point)(this["CelTweakFormPos"]));

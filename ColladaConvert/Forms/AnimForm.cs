@@ -266,11 +266,16 @@ namespace ColladaConvert
 			COLLADA	colladaFile	=DeSerializeCOLLADA(path);
 
 			//don't have a way to test this
-			Debug.Assert(colladaFile.asset.up_axis != UpAxisType.X_UP);
-
+			if(colladaFile.asset.up_axis == UpAxisType.X_UP)
+			{
+				PrintToOutput("Warning!  X up axis not supported.  Strange things may happen!\n");
+			}
 			//do have a way to test this, but it causes
 			//the bind shape matrii to have a rotation
-			Debug.Assert(colladaFile.asset.up_axis != UpAxisType.Y_UP);
+			else if(colladaFile.asset.up_axis == UpAxisType.Y_UP)
+			{
+				PrintToOutput("Warning!  Y up axis sort of works but might cause problems sharing anims between mesh parts!\n");
+			}			
 
 			Skeleton	skel	=BuildSkeleton(colladaFile);
 
@@ -293,6 +298,7 @@ namespace ColladaConvert
 				//make sure they match
 				if(!alib.CheckSkeleton(skel))
 				{
+					PrintToOutput("Warning!  Skeleton check failed, anim load aborted!\n");
 					return	false;
 				}
 			}
@@ -313,11 +319,16 @@ namespace ColladaConvert
 			COLLADA	colladaFile	=DeSerializeCOLLADA(path);
 
 			//don't have a way to test this
-			Debug.Assert(colladaFile.asset.up_axis != UpAxisType.X_UP);
-
+			if(colladaFile.asset.up_axis == UpAxisType.X_UP)
+			{
+				PrintToOutput("Warning!  X up axis not supported.  Strange things may happen!\n");
+			}
 			//do have a way to test this, but it causes
 			//the bind shape matrii to have a rotation
-			Debug.Assert(colladaFile.asset.up_axis != UpAxisType.Y_UP);
+			else if(colladaFile.asset.up_axis == UpAxisType.Y_UP)
+			{
+				PrintToOutput("Warning!  Y up axis sort of works but might cause problems sharing anims between mesh parts!\n");
+			}			
 
 			//grab visual scenes
 			IEnumerable<library_visual_scenes>	lvss	=
@@ -334,6 +345,7 @@ namespace ColladaConvert
 				if(!mc.GetName().Contains("DummyGeometry"))
 				{
 					chunks.Add(mc);
+					mc.ePrint	+=OnPrintString;
 				}
 			}
 
@@ -357,6 +369,7 @@ namespace ColladaConvert
 				//make sure they match
 				if(!alib.CheckSkeleton(skel))
 				{
+					PrintToOutput("Warning!  Skeleton check failed!  Might need to restart to clear the animation library skeleton.\n");
 					return;
 				}
 
@@ -379,7 +392,7 @@ namespace ColladaConvert
 
 			TransformRoots(alib.GetSkeleton(), anm);
 
-			CreateSkin(colladaFile, arch, chunks, skel);
+			CreateSkin(colladaFile, arch, chunks, skel, ePrint);
 
 			BuildFinalVerts(mGD, colladaFile, chunks);
 
@@ -390,7 +403,10 @@ namespace ColladaConvert
 
 				//this might not be totally necessary
 				//but it is nice to have
-				Debug.Assert(mat.IsIdentity);
+				if(!mat.IsIdentity)
+				{
+					PrintToOutput("Warning!  Mesh chunk " + conv.Name + "'s scene node is not identity!  This can make it tricksy to orient and move them in a game.\n");
+				}
 
 				conv.Name	=mc.GetGeomName();
 
@@ -403,6 +419,7 @@ namespace ColladaConvert
 				{
 					conv.Name	+="Mesh";
 				}
+				mc.ePrint	-=OnPrintString;
 			}
 		}
 
@@ -412,7 +429,10 @@ namespace ColladaConvert
 			COLLADA	colladaFile	=DeSerializeCOLLADA(path);
 
 			//don't have a way to test this
-			Debug.Assert(colladaFile.asset.up_axis != UpAxisType.X_UP);
+			if(colladaFile.asset.up_axis == UpAxisType.X_UP)
+			{
+				PrintToOutput("Warning!  X up axis not supported.  Strange things may happen!\n");
+			}
 
 			IArch	arch	=new StaticArch();
 
@@ -454,13 +474,14 @@ namespace ColladaConvert
 			IEnumerable<library_geometries>		geoms	=colladaFile.Items.OfType<library_geometries>();
 			IEnumerable<library_controllers>	conts	=colladaFile.Items.OfType<library_controllers>();
 
-			Debug.Assert(geoms.Count() == 1);
+			PrintToOutput("geoms.Count() is: " + geoms.Count() + " in BuildFinalVerts()\n");
 
 			foreach(object geomItem in geoms.First().geometry)
 			{
 				geometry	geom	=geomItem as geometry;
 				if(geom == null)
 				{
+					PrintToOutput("Null geometry in BuildFinalVerts()!\n");
 					continue;
 				}
 
@@ -498,6 +519,7 @@ namespace ColladaConvert
 
 						if(vertCounts.Count == 0)
 						{
+							PrintToOutput("Empty geometry chunk in BuildFinalVerts()!\n");
 							toNuke.Add(cnk);
 							continue;
 						}
@@ -563,7 +585,8 @@ namespace ColladaConvert
 
 		static void BakeSceneNodesIntoVerts(COLLADA				colladaFile,
 											Skeleton			skel,
-											List<MeshConverter>	chunks)
+											List<MeshConverter>	chunks,
+											EventHandler		ePrint)
 		{
 			if(colladaFile.Items.OfType<library_controllers>().Count() <= 0)
 			{
@@ -590,11 +613,13 @@ namespace ColladaConvert
 					string	nname	=GetNodeNameForInstanceController(n, cont.id);
 					if(nname == "")
 					{
+						Misc.SafeInvoke(ePrint, "Empty node name for instance controller: " + cont.id + "!\n");
 						continue;
 					}
 					Matrix	mat	=Matrix.Identity;
 					if(!skel.GetMatrixForBone(nname, out mat))
 					{
+						Misc.SafeInvoke(ePrint, "Node: " + nname + " not found in skeleton!\n");
 						continue;
 					}
 
@@ -634,11 +659,13 @@ namespace ColladaConvert
 		static void CreateSkin(COLLADA				colladaFile,
 							   IArch				arch,
 							   List<MeshConverter>	chunks,
-							   Skeleton				skel)
+							   Skeleton				skel,
+							   EventHandler			ePrint)
 		{
 			IEnumerable<library_controllers>	lcs	=colladaFile.Items.OfType<library_controllers>();
 			if(lcs.Count() <= 0)
 			{
+				Misc.SafeInvoke(ePrint, "No library_controllers in CreateSkin()!\n");
 				return;
 			}
 
@@ -671,7 +698,10 @@ namespace ColladaConvert
 				//if you hit this, either a reset xform is needed,
 				//or the mesh was exported with Y == up.  This causes
 				//the exporter to stick a rotation in the binds
-				Debug.Assert(Mathery.IsIdentity(bindMat, Mathery.VCompareEpsilon));
+				if(!Mathery.IsIdentity(bindMat, Mathery.VCompareEpsilon))
+				{
+					Misc.SafeInvoke(ePrint, "Non identity bind pose in skin: " + sk.source1 + "\n");
+				}
 
 				string	jointSrc	="";
 				string	invSrc		="";
@@ -714,7 +744,16 @@ namespace ColladaConvert
 					Matrix	ibp		=mats[i];
 					int		idx		=skel.GetBoneIndex(bname);
 
-					Debug.Assert(!invBindPoses.ContainsKey(idx));
+					if(idx == -1)
+					{
+						Misc.SafeInvoke(ePrint, "Warning!  No index in skeleton for bone: " + bname + "!\n");
+						continue;
+					}
+					if(invBindPoses.ContainsKey(idx))
+					{
+						Misc.SafeInvoke(ePrint, "Warning!  Duplicate bind pose for bone: " + bname + "!\n");
+						continue;
+					}
 
 					if(invBindPoses.ContainsKey(idx))
 					{
@@ -722,7 +761,10 @@ namespace ColladaConvert
 						{
 							//if bone name already added, make sure the
 							//inverse bind pose is the same for this skin
-							Debug.Assert(Mathery.CompareMatrix(ibp, invBindPoses[idx], Mathery.VCompareEpsilon));
+							if(!Mathery.CompareMatrix(ibp, invBindPoses[idx], Mathery.VCompareEpsilon))
+							{
+								Misc.SafeInvoke(ePrint, "Warning!  Non matching bind pose for bone: " + bname + "!\n");
+							}
 						}
 					}
 					else
@@ -2349,7 +2391,20 @@ namespace ColladaConvert
 		}
 
 
+		void PrintToOutput(string stuff)
+		{
+			OnPrintString(stuff, null);
+		}
+
+
 		#region FormEvents
+		void OnPrintString(object sender, EventArgs ea)
+		{
+			//pass it along
+			Misc.SafeInvoke(ePrint, sender, ea);
+		}
+
+
 		void OnSaveAnimLib(object sender, EventArgs e)
 		{
 			mSFD.DefaultExt		="*.AnimLib";

@@ -212,10 +212,11 @@ namespace ColladaConvert
 			MeshLib.AnimLib	animLib	=new MeshLib.AnimLib();
 			AnimForm		af		=new AnimForm(gd, matLib, animLib);
 			StripElements	se		=new StripElements();
-			SkeletonEditor	skel	=new SkeletonEditor();
+			SkeletonEditor	skel	=new SkeletonEditor();			
 
 			SharedForms.MaterialForm	matForm	=new SharedForms.MaterialForm(matLib, sk);
 			SharedForms.CelTweakForm	celForm	=new SharedForms.CelTweakForm(gd, matLib);
+			SharedForms.Output			outForm	=new SharedForms.Output();
 
 			//save positions
 			matForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
@@ -242,11 +243,19 @@ namespace ColladaConvert
 				Settings.Default, "CelTweakFormPos", true,
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
+			outForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
+				Settings.Default, "OutputFormPos", true,
+				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+
+			outForm.DataBindings.Add(new System.Windows.Forms.Binding("Size",
+				Settings.Default, "OutputFormSize", true,
+				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+
 			SeamEditor	seam	=null;
 			MakeSeamForm(ref seam);
 
 			af.eMeshChanged			+=(sender, args) => matForm.SetMesh(sender);
-			af.ePrint				+=(sender, args) => Console.WriteLine(sender as string);
+			af.ePrint				+=(sender, args) => outForm.Print(sender as string);
 			matForm.eNukedMeshPart	+=(sender, args) => af.NukeMeshPart(sender as List<int>);
 			matForm.eStripElements	+=(sender, args) =>
 				{	if(se.Visible){	return;	}
@@ -283,6 +292,7 @@ namespace ColladaConvert
 			matForm.Visible	=true;
 			skel.Visible	=true;
 			celForm.Visible	=true;
+			outForm.Visible	=true;
 
 			return	af;
 		}
