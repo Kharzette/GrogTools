@@ -247,7 +247,7 @@ namespace ColladaConvert
 					List<Matrix>	mats	=AnimForm.GetMatrixListFromFloatList(outValues);
 					for(int v=0;v < mats.Count;v++)
 					{
-						mats[v].Decompose(out keys[v].mScale, out keys[v].mRotation, out keys[v].mScale);
+						mats[v].Decompose(out keys[v].mScale, out keys[v].mRotation, out keys[v].mPosition);
 					}
 					ret	|=Animation.KeyPartsUsed.All;
 				}
