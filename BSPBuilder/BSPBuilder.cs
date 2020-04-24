@@ -497,7 +497,10 @@ namespace BSPBuilder
 			mBSPForm.SetBuildEnabled(true);
 			mBSPForm.SetSaveEnabled(false);
 
-			BuildDebugDraw(Map.DebugDrawChoice.MapBrushes);
+			if(!mbFullBuilding)
+			{
+				BuildDebugDraw(Map.DebugDrawChoice.MapBrushes);
+			}
 		}
 
 		void OnOpenStatic(object sender, EventArgs ea)
