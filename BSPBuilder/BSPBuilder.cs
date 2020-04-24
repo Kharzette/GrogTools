@@ -120,6 +120,8 @@ namespace BSPBuilder
 			CoreEvents.eNumPlanesChanged	+=OnNumPlanesChanged;
 			CoreEvents.eNumVertsChanged		+=OnNumVertsChanged;
 
+			ProgressWatcher.eProgressUpdated	+=OnProgress;
+
 			SetUpCommonIgnores();
 		}
 
@@ -268,6 +270,17 @@ namespace BSPBuilder
 				mGD.GD.FeatureLevel == FeatureLevel.Level_9_3, false, 0);
 
 			mZoneDraw	=new IndoorMesh(mGD, mMatLib);
+		}
+
+
+		void OnProgress(object sender, EventArgs ea)
+		{
+			ProgressEventArgs pea	=ea as ProgressEventArgs;
+
+			if(pea != null)
+			{
+				mOutForm.UpdateProgress(pea.mMin, pea.mMax, pea.mCurrent);
+			}
 		}
 
 

@@ -36,6 +36,10 @@ namespace BSPBuilder
 		{
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
+
+			//turn this on for help with leaky stuff
+			Configuration.EnableObjectTracking	=true;
+
 			GraphicsDevice	gd	=new GraphicsDevice("BSP tree building tools",
 				FeatureLevel.Level_11_0, 0.1f, 3000f);
 
