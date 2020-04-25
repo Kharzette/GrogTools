@@ -188,7 +188,7 @@ namespace BSPBuilder
 			}
 
 			mZoneDraw.Draw(gd, 0, mVisMap.IsMaterialVisibleFromPos,
-				GetModelMatrix, RenderExternal, RenderShadows);
+				GetModelMatrix, RenderExternal, RenderShadows, SetUpAlphaRenderTargets);
 		}
 
 
@@ -202,6 +202,11 @@ namespace BSPBuilder
 			mMap.GetTriangles(verts, norms, cols, inds, choice);
 			
 			mDebugDraw.MakeDrawStuff(mGD.GD, verts, norms, cols, inds);
+		}
+
+
+		void SetUpAlphaRenderTargets()
+		{
 		}
 
 
@@ -504,6 +509,8 @@ namespace BSPBuilder
 
 			BSPBuildParams	bbp	=mBSPForm.BSPParameters;
 			bbp.mMapName		=Path.GetFileName(fileName);
+
+			bbp.mMapType	=MapType.Quake1;
 
 			mMap.LoadBrushFile(fileName, mBSPForm.BSPParameters);
 
