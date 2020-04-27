@@ -394,6 +394,7 @@ namespace BSPBuilder
 					mZoneDraw.BuildSky(mGD, mSKeeper, mMap.BuildSkyRenderData, mMap.GetPlanes());
 
 					mZoneDraw.FinishAtlas(mGD, mSKeeper);
+					mZoneDraw.FixAlphaDrawCalls();
 
 					mModelMats	=mMap.GetModelTransforms();
 
