@@ -33,6 +33,7 @@ namespace BSPBuilder
 				mBSPParams.mbVerbose			=VerboseBSP.Checked;
 				mBSPParams.mbBuildAsBModel		=BuildAsBModel.Checked;
 				mBSPParams.mbFixTJunctions		=FixTJunctions.Checked;
+				mBSPParams.mMapType				=GetMapType();
 
 				return	mBSPParams;
 			}
@@ -63,6 +64,32 @@ namespace BSPBuilder
 		}
 
 
+		MapType	GetMapType()
+		{
+			if(GrogEnts.Checked)
+			{
+				return	MapType.GrogLibs;	
+			}
+			else if(Quake1Ents.Checked)
+			{
+				return	MapType.Quake1;	
+			}
+			else if(Quake2Ents.Checked)
+			{
+				return	MapType.Quake2;	
+			}
+			else if(Quake3Ents.Checked)
+			{
+				return	MapType.Quake3;	
+			}
+			else if(ValveEnts.Checked)
+			{
+				return	MapType.Valve;	
+			}
+			return	MapType.GrogLibs;
+		}
+
+
 		void OnOpenMap(object sender, EventArgs e)
 		{
 			mOFD.DefaultExt	="*.map";
@@ -76,6 +103,7 @@ namespace BSPBuilder
 			}
 
 			CoreEvents.Print("Opening map " + mOFD.FileName + "\n");
+			CoreEvents.Print("Map is a " + BSPParameters.mMapType + " map.\n");
 
 			Misc.SafeInvoke(eOpenMap, mOFD.FileName);
 		}

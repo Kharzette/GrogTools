@@ -513,8 +513,6 @@ namespace BSPBuilder
 			BSPBuildParams	bbp	=mBSPForm.BSPParameters;
 			bbp.mMapName		=Path.GetFileName(fileName);
 
-			bbp.mMapType	=MapType.Quake1;
-
 			mMap.LoadBrushFile(fileName, mBSPForm.BSPParameters);
 
 			mBSPForm.SetBuildEnabled(true);
