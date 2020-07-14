@@ -145,7 +145,7 @@
             0});
 			this.AtlasSize.Location = new System.Drawing.Point(207, 12);
 			this.AtlasSize.Maximum = new decimal(new int[] {
-            4096,
+            8192,
             0,
             0,
             0});
