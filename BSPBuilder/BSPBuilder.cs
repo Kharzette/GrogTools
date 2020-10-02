@@ -38,7 +38,7 @@ namespace BSPBuilder
 		GraphicsDevice	mGD;
 
 		//debug draw stuff
-		DebugDraw	mDebugDraw;
+		SharedForms.DebugDraw	mDebugDraw;
 
 		//forms
 		BSPForm		mBSPForm	=new BSPForm();
@@ -267,7 +267,7 @@ namespace BSPBuilder
 		{
 			mSKeeper.Init(mGD, mGameRootDir);
 
-			mDebugDraw	=new DebugDraw(mGD, mSKeeper);
+			mDebugDraw	=new SharedForms.DebugDraw(mGD, mSKeeper);
 			mMatLib		=new MatLib(mGD, mSKeeper);
 
 			mMatLib.InitCelShading(1);

@@ -64,8 +64,9 @@
             this.Quake1Ents = new System.Windows.Forms.RadioButton();
             this.Quake2Ents = new System.Windows.Forms.RadioButton();
             this.GroupEntTypes = new System.Windows.Forms.GroupBox();
-            this.Quake3Ents = new System.Windows.Forms.RadioButton();
             this.ValveEnts = new System.Windows.Forms.RadioButton();
+            this.Quake3Ents = new System.Windows.Forms.RadioButton();
+            this.RecordLighting = new System.Windows.Forms.CheckBox();
             this.GroupFileIO.SuspendLayout();
             this.GroupBuildSettings.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.MaxThreads)).BeginInit();
@@ -285,6 +286,7 @@
             // 
             // LightSettingsGroupBox
             // 
+            this.LightSettingsGroupBox.Controls.Add(this.RecordLighting);
             this.LightSettingsGroupBox.Controls.Add(this.DynamicLights);
             this.LightSettingsGroupBox.Controls.Add(this.label10);
             this.LightSettingsGroupBox.Controls.Add(this.NumSamples);
@@ -557,6 +559,17 @@
             this.GroupEntTypes.TabStop = false;
             this.GroupEntTypes.Text = "Map/Entity Types";
             // 
+            // ValveEnts
+            // 
+            this.ValveEnts.AutoSize = true;
+            this.ValveEnts.Location = new System.Drawing.Point(6, 122);
+            this.ValveEnts.Name = "ValveEnts";
+            this.ValveEnts.Size = new System.Drawing.Size(53, 19);
+            this.ValveEnts.TabIndex = 35;
+            this.ValveEnts.TabStop = true;
+            this.ValveEnts.Text = "Valve";
+            this.ValveEnts.UseVisualStyleBackColor = true;
+            // 
             // Quake3Ents
             // 
             this.Quake3Ents.AutoSize = true;
@@ -568,16 +581,17 @@
             this.Quake3Ents.Text = "Quake3";
             this.Quake3Ents.UseVisualStyleBackColor = true;
             // 
-            // ValveEnts
+            // RecordLighting
             // 
-            this.ValveEnts.AutoSize = true;
-            this.ValveEnts.Location = new System.Drawing.Point(6, 122);
-            this.ValveEnts.Name = "ValveEnts";
-            this.ValveEnts.Size = new System.Drawing.Size(53, 19);
-            this.ValveEnts.TabIndex = 35;
-            this.ValveEnts.TabStop = true;
-            this.ValveEnts.Text = "Valve";
-            this.ValveEnts.UseVisualStyleBackColor = true;
+            this.RecordLighting.AutoSize = true;
+            this.RecordLighting.Location = new System.Drawing.Point(8, 75);
+            this.RecordLighting.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.RecordLighting.Name = "RecordLighting";
+            this.RecordLighting.Size = new System.Drawing.Size(63, 19);
+            this.RecordLighting.TabIndex = 44;
+            this.RecordLighting.Text = "Record";
+            this.mTips.SetToolTip(this.RecordLighting, "Record ray origins for light explorer");
+            this.RecordLighting.UseVisualStyleBackColor = true;
             // 
             // BSPForm
             // 
@@ -649,5 +663,6 @@
         private System.Windows.Forms.GroupBox GroupEntTypes;
         private System.Windows.Forms.RadioButton ValveEnts;
         private System.Windows.Forms.RadioButton Quake3Ents;
+        private System.Windows.Forms.CheckBox RecordLighting;
     }
 }
