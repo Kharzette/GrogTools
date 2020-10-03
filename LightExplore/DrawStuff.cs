@@ -23,8 +23,13 @@ namespace LightExplore
 		Vector3				mLightDir;
 		Random				mRand	=new Random();
 		PrimObject			mLMPlane;
+		PrimObject			mTexU, mTexV;
+		Matrix				mCenter;
+		Matrix				mPlaneProj, mPlaneWorld;
 
 		MatLib	mMatLib;
+
+		const float	AxisSize	=50f;
 
 
 		public DrawStuff(GraphicsDevice gd, MaterialLib.StuffKeeper sk)
@@ -56,13 +61,66 @@ namespace LightExplore
 			mMatLib.SetMaterialParameter("LMPlane", "mLightColor1", lightColor2);
 			mMatLib.SetMaterialParameter("LMPlane", "mLightColor2", lightColor3);
 
-			mLMPlane	=PrimFactory.CreatePlane(gd.GD, 100f);
+			mPlaneProj	=Matrix.OrthoOffCenterLH(0, gd.RendForm.Width, gd.RendForm.Height, 0, 0.1f, 5f);
+			mPlaneWorld	=Matrix.RotationY(MathF.PI);
+			mPlaneWorld	*=Matrix.Translation(Vector3.ForwardLH
+				+ Vector3.UnitX * 105f + Vector3.UnitY * 530f);
+
+			mLMPlane	=PrimFactory.CreatePlane(gd.GD, 200f);
+
+			//axis boxes
+			BoundingBox	xBox	=Misc.MakeBox(AxisSize, 1f, 1f);
+			BoundingBox	yBox	=Misc.MakeBox(1f, AxisSize, 1f);
+			BoundingBox	zBox	=Misc.MakeBox(1f, 1f, AxisSize);
+
+			xBox.Minimum.X	=0;
+			yBox.Minimum.Y	=0;
+
+			mTexU	=PrimFactory.CreateCube(gd.GD, xBox);
+			mTexV	=PrimFactory.CreateCube(gd.GD, yBox);
+
+			Vector4	redColor	=Vector4.One;
+			Vector4	greenColor	=Vector4.One;
+			Vector4	blueColor	=Vector4.One;
+
+			redColor.Y	=redColor.Z	=greenColor.X	=greenColor.Z	=blueColor.X	=blueColor.Y	=0f;
+
+			//materials for axis
+			mMatLib.CreateMaterial("RedAxis");
+			mMatLib.SetMaterialEffect("RedAxis", "Static.fx");
+			mMatLib.SetMaterialTechnique("RedAxis", "TriSolidSpec");
+			mMatLib.SetMaterialParameter("RedAxis", "mLightColor0", Vector4.One);
+			mMatLib.SetMaterialParameter("RedAxis", "mLightColor1", lightColor2);
+			mMatLib.SetMaterialParameter("RedAxis", "mLightColor2", lightColor3);
+			mMatLib.SetMaterialParameter("RedAxis", "mSolidColour", redColor);
+			mMatLib.SetMaterialParameter("RedAxis", "mSpecPower", 1);
+			mMatLib.SetMaterialParameter("RedAxis", "mSpecColor", Vector4.One);
+
+			mMatLib.CloneMaterial("RedAxis", "GreenAxis");
+			mMatLib.CloneMaterial("RedAxis", "BlueAxis");
+
+			mMatLib.SetMaterialParameter("GreenAxis", "mSolidColour", blueColor);
+			mMatLib.SetMaterialParameter("BlueAxis", "mSolidColour", greenColor);
 		}
 
 
 		public void SetLMTexture(string texName)
 		{
 			mMatLib.SetMaterialTexture("LMPlane", "mTexture0", texName);
+		}
+
+
+		public void SetTexVecs(Vector3 texOrg, Vector3 t2WU, Vector3 t2WV, Vector3 start)
+		{
+			Vector3	cross	=Vector3.Cross(t2WV, t2WU);
+
+			Matrix	gack	=Matrix.Identity;
+
+			mCenter	=new Matrix(
+				t2WU.X, t2WU.Y, t2WU.Z, 0f,
+				t2WV.X, t2WV.Y, t2WV.Z, 0f,
+				cross.X, cross.Y, cross.Z, 0f,
+				start.X, start.Y, start.Z, 1);
 		}
 
 
@@ -118,6 +176,14 @@ namespace LightExplore
 			{
 				mLMPlane.Free();
 			}
+			if(mTexU != null)
+			{
+				mTexU.Free();
+			}
+			if(mTexV != null)
+			{
+				mTexV.Free();
+			}
 		}
 
 
@@ -144,10 +210,23 @@ namespace LightExplore
 
 			gd.DC.Draw(mVertCount, 0);
 
-			mMatLib.ApplyMaterialPass("LMPlane", gd.DC, 0);
-
 			gd.DC.InputAssembler.PrimitiveTopology	=SharpDX.Direct3D.PrimitiveTopology.TriangleList;
 
+			mMatLib.SetMaterialParameter("RedAxis", "mWorld", mCenter);
+			mMatLib.SetMaterialParameter("GreenAxis", "mWorld", mCenter);
+
+			//X axis red
+			mMatLib.ApplyMaterialPass("RedAxis", gd.DC, 0);
+			mTexU.Draw(gd.DC);
+
+			//Y axis green
+			mMatLib.ApplyMaterialPass("GreenAxis", gd.DC, 0);
+			mTexV.Draw(gd.DC);
+
+			mMatLib.SetMaterialParameter("LMPlane", "mWorld", mPlaneWorld);
+			mMatLib.SetMaterialParameter("LMPlane", "mView", Matrix.Identity);
+			mMatLib.SetMaterialParameter("LMPlane", "mProjection", mPlaneProj);
+			mMatLib.ApplyMaterialPass("LMPlane", gd.DC, 0);
 			mLMPlane.Draw(gd.DC);
 		}
 	}

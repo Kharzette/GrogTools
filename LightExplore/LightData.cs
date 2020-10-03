@@ -12,6 +12,7 @@ namespace LightExplore
 	{
 		Vector3		[][]mLightPoints;
 		GFXPlane	[]mPlanes;
+		FInfo		[]mFInfos;
 
 
 		internal LightData(BinaryReader br)
@@ -20,6 +21,7 @@ namespace LightExplore
 
 			mLightPoints	=new Vector3[numFaces][];
 			mPlanes			=new GFXPlane[numFaces];
+			mFInfos			=new FInfo[numFaces];
 
 			for(int i=0;i < numFaces;i++)
 			{
@@ -34,7 +36,31 @@ namespace LightExplore
 
 				mPlanes[i]	=new GFXPlane();
 				mPlanes[i].Read(br);
+
+				bool	bFInfo	=br.ReadBoolean();
+				if(bFInfo)
+				{
+					mFInfos[i]	=new FInfo();
+					mFInfos[i].ReadVecs(br);
+				}
 			}
+		}
+
+
+		internal void GetFInfoVecs(int fIdx, out Vector3 texOrg,
+			out Vector3 t2WU, out Vector3 t2WV, out Vector3 start)
+		{
+			FInfo	fi	=mFInfos[fIdx];
+			if(fi == null)
+			{
+				texOrg	=t2WU	=t2WV	=start	=Vector3.One;
+				return;
+			}
+
+			Vector3	center;
+			mFInfos[fIdx].GetVecs(out texOrg, out t2WU, out t2WV, out center);
+
+			start	=mLightPoints[fIdx][0];	//should be reasonably close
 		}
 
 

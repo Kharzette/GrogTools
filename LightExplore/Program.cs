@@ -31,7 +31,7 @@ namespace LightExplore
 			ToggleMouseLookOn, ToggleMouseLookOff,
 			IncrementFaceIndex, DecrementFaceIndex,
 			BigIncrementFaceIndex, BigDecrementFaceIndex,
-			ToggleWorld
+			ToggleWorld, Close
 		};
 
 		const float	MaxTimeDelta	=0.1f;
@@ -133,10 +133,28 @@ namespace LightExplore
 						inp.UnMapAxisAction(Input.MoveAxis.MouseXAxis);
 					}
 
+					//check for speediness
+					//psteering only allows speedy ground sprinting
+					bool	bFast	=false;
+					for(int i=0;i < acts.Count;i++)
+					{
+						if(acts[i].mAction.Equals(MyActions.MoveForwardFast))
+						{
+							bFast	=true;
+						}
+					}
+
 					Vector3	deltaMove	=pSteering.Update(pos,
 						gd.GCam.Forward, gd.GCam.Left, gd.GCam.Up, acts);
 
-					deltaMove	*=200f;
+					if(bFast)
+					{
+						deltaMove	*=400f;
+					}
+					else
+					{
+						deltaMove	*=200f;
+					}
 					pos			-=deltaMove;
 					
 					ChangeLight(acts, ref lightDir);
@@ -188,6 +206,16 @@ namespace LightExplore
 			GraphicsDevice gd, float delta, ref bool bMouseLookOn)
 		{
 			List<Input.InputAction>	actions	=inp.GetAction();
+
+			//check for exit
+			foreach(Input.InputAction act in actions)
+			{
+				if(act.mAction.Equals(MyActions.Close))
+				{
+					gd.RendForm.Close();
+					return	actions;
+				}
+			}
 
 			foreach(Input.InputAction act in actions)
 			{
@@ -335,6 +363,8 @@ namespace LightExplore
 			inp.MapAction(MyActions.BigDecrementFaceIndex, ActionTypes.PressAndRelease, Modifiers.ShiftHeld, Keys.PageDown);
 
 			inp.MapAction(MyActions.ToggleWorld, ActionTypes.PressAndRelease, Modifiers.None, Keys.X);
+
+			inp.MapAction(MyActions.Close, ActionTypes.PressAndRelease, Modifiers.None, Keys.Escape);
 
 			return	inp;
 		}

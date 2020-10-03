@@ -113,6 +113,14 @@ namespace LightExplore
 				mST.ModifyStringText(mFonts[0], "Face Index: " + mFaceIndex, "FaceIndex");
 
 				BuildFaceDrawData();
+
+				mDS.SetLMTexture("LightMap" + mFaceIndex.ToString("D8"));
+
+				//vecs
+				Vector3	texOrg, t2WU, t2WV, start;
+				mLD.GetFInfoVecs(mFaceIndex, out texOrg, out t2WU, out t2WV, out start);
+
+				mDS.SetTexVecs(texOrg, t2WU, t2WV, start);
 			}
 		}
 
@@ -145,7 +153,6 @@ namespace LightExplore
 			}
 			if(mDS != null)
 			{
-				mDS.SetLMTexture("LightMap" + mFaceIndex.ToString("D8"));
 				mDS.Draw(gd);
 			}
 			mST.Draw(mGD.DC, Matrix.Identity, mTextProj);
