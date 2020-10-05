@@ -16,6 +16,7 @@ namespace LightExplore
 {
 	internal class LightExplorer
 	{
+		//bsp stuff
 		Map			mMap;
 		LightData	mLD;
 
@@ -26,7 +27,7 @@ namespace LightExplore
 		//draw stuff
 		DebugDraw	mDBDraw;
 		DrawStuff	mDS;
-		int			mFaceIndex;
+		int			mFaceIndex, mFaceAimedAt;
 		bool		mbDrawWorld	=true;
 
 		//text
@@ -37,7 +38,10 @@ namespace LightExplore
 		int				mResX, mResY;
 		List<string>	mFonts	=new List<string>();
 
+		//UI
+		ScreenUI	mSUI;
 
+		//winforms
 		ExploreForm	mEForm	=new ExploreForm();
 		Output		mOForm	=new Output();
 
@@ -65,14 +69,22 @@ namespace LightExplore
 
 			mFonts	=sk.GetFontList();
 
-			mST	=new ScreenText(gd.GD, mFontMats, mFonts[0], 1000);
+			mST		=new ScreenText(gd.GD, mFontMats, mFonts[0], 1000);
+			mSUI	=new ScreenUI(gd.GD, mFontMats, 100);
 
 			mTextProj	=Matrix.OrthoOffCenterLH(0, mResX, mResY, 0, 0.1f, 5f);
 
 			Vector4	color	=Vector4.UnitY + (Vector4.UnitW * 0.15f);
 
+			mSUI.AddGump("UI\\CrossHair", "CrossHair", Vector4.One,
+				Vector2.UnitX * ((mResX / 2) - 16)
+				+ Vector2.UnitY * ((mResY / 2) - 16),
+				Vector2.One);
+
 			mST.AddString(mFonts[0], "Face Index: " + mFaceIndex, "FaceIndex",
 				color, Vector2.UnitX * 20f + Vector2.UnitY * 400f, Vector2.One);
+			mST.AddString(mFonts[0], "Face aimed at: " + mFaceAimedAt, "FaceAimedAt",
+				color, Vector2.UnitX * 20f + Vector2.UnitY * 420f, Vector2.One);
 		}
 
 
@@ -127,12 +139,33 @@ namespace LightExplore
 
 		internal void Update(float msDelta, GraphicsDevice gd)
 		{
+			int	aimFace	=mFaceAimedAt;
+
 //			mZoneDraw.Update(msDelta);
 
 //			mMatLib.UpdateWVP(Matrix.Identity,
 //				gd.GCam.View, gd.GCam.Projection, gd.GCam.Position);
+			Vector3	startPos	=mGD.GCam.Position;
+			Vector3	endPos		=startPos + mGD.GCam.Forward * -2000f;
+			Vector3	hitPos		=Vector3.Zero;
+			bool	bHitLeaf	=false;
+			GFXFace	HitFace		=null;
+			int		faceIdx		=0;
+
+			if(mMap != null &&
+				mMap.RayIntersectFace(startPos, endPos, 0, ref hitPos,
+				ref bHitLeaf, ref HitFace, ref faceIdx))
+			{
+				mFaceAimedAt	=faceIdx;
+			}
+
+			if(aimFace != mFaceAimedAt)
+			{
+				mST.ModifyStringText(mFonts[0], "Face Aimed At: " + mFaceAimedAt, "FaceAimedAt");
+			}
 
 			mST.Update(gd.DC);
+			mSUI.Update(gd.DC);
 		}
 
 
@@ -155,6 +188,8 @@ namespace LightExplore
 			{
 				mDS.Draw(gd);
 			}
+
+			mSUI.Draw(mGD.DC, Matrix.Identity, mTextProj); 
 			mST.Draw(mGD.DC, Matrix.Identity, mTextProj);
 		}
 
@@ -176,6 +211,10 @@ namespace LightExplore
 			if(mDS != null)
 			{
 				mDS.FreeAll();
+			}
+			if(mSUI != null)
+			{
+				mSUI.FreeAll();
 			}
 		}
 
