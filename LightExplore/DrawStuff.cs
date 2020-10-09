@@ -126,7 +126,8 @@ namespace LightExplore
 
 		public void MakeDrawStuff(Device dev,
 			Vector3		[]facePoints,
-			GFXPlane	facePlane)
+			GFXPlane	facePlane,
+			int			numSamples)
 		{
 			if(facePoints.Length <= 0)
 			{
@@ -141,7 +142,11 @@ namespace LightExplore
 
 			VPosNormCol0	[]vpc	=new VPosNormCol0[facePoints.Length * 2];
 
-			int	j=0;
+			int	sampIdx		=0;
+			int	j			=0;
+			int	sampPoints	=facePoints.Length / numSamples;
+			int	sampCounter	=0;
+
 			for(int i=0;i < facePoints.Length;i++)
 			{
 				vpc[j].Position	=facePoints[i];
@@ -149,14 +154,32 @@ namespace LightExplore
 				vpc[j].Normal.Y	=facePlane.mNormal.Y;
 				vpc[j].Normal.Z	=facePlane.mNormal.Z;
 				vpc[j].Normal.W	=1f;
-				vpc[j++].Color0	=Color.Red;
 
-				vpc[j].Position	=facePoints[i] + facePlane.mNormal * 3f;
-				vpc[j].Normal.X	=facePlane.mNormal.X;
-				vpc[j].Normal.Y	=facePlane.mNormal.Y;
-				vpc[j].Normal.Z	=facePlane.mNormal.Z;
-				vpc[j].Normal.W	=1f;
-				vpc[j++].Color0	=Color.Green;
+				if(sampIdx == 0)
+				{
+					vpc[j++].Color0	=Color.Red;
+					vpc[j].Position	=facePoints[i] + facePlane.mNormal * 3f;
+					vpc[j].Color0	=Color.Red;
+				}
+				else
+				{
+					vpc[j++].Color0	=Color.Blue;
+					vpc[j].Position	=facePoints[i] + facePlane.mNormal * 1f;
+					vpc[j].Color0	=Color.Blue;
+				}
+
+				vpc[j].Normal.X		=facePlane.mNormal.X;
+				vpc[j].Normal.Y		=facePlane.mNormal.Y;
+				vpc[j].Normal.Z		=facePlane.mNormal.Z;
+				vpc[j++].Normal.W	=1f;
+
+				sampCounter++;
+
+				if(sampCounter >= sampPoints)
+				{
+					sampIdx++;
+					sampCounter	=0;
+				}
 			}
 
 			mVertCount	=j;

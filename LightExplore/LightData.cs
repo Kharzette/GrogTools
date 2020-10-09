@@ -13,10 +13,12 @@ namespace LightExplore
 		Vector3		[][]mLightPoints;
 		GFXPlane	[]mPlanes;
 		FInfo		[]mFInfos;
+		int			mNumSamples;
 
 
 		internal LightData(BinaryReader br)
 		{
+			mNumSamples		=br.ReadInt32();
 			int	numFaces	=br.ReadInt32();
 
 			mLightPoints	=new Vector3[numFaces][];
@@ -99,7 +101,7 @@ namespace LightExplore
 		{
 			Debug.Assert(index >= 0 && index < mLightPoints.Length);
 
-			ds.MakeDrawStuff(gd.GD, mLightPoints[index], mPlanes[index]);
+			ds.MakeDrawStuff(gd.GD, mLightPoints[index], mPlanes[index], mNumSamples);
 		}
 	}
 }
