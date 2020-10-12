@@ -126,6 +126,7 @@ namespace LightExplore
 
 		public void MakeDrawStuff(Device dev,
 			Vector3		[]facePoints,
+			bool		[]inSolid,
 			GFXPlane	facePlane,
 			int			numSamples)
 		{
@@ -157,15 +158,15 @@ namespace LightExplore
 
 				if(sampIdx == 0)
 				{
-					vpc[j++].Color0	=Color.Red;
+					vpc[j++].Color0	=inSolid[i]?	Color.Red : Color.Green;
 					vpc[j].Position	=facePoints[i] + facePlane.mNormal * 3f;
-					vpc[j].Color0	=Color.Red;
+					vpc[j].Color0	=inSolid[i]?	Color.Red : Color.Green;
 				}
 				else
 				{
 					vpc[j++].Color0	=Color.Blue;
 					vpc[j].Position	=facePoints[i] + facePlane.mNormal * 1f;
-					vpc[j].Color0	=Color.Blue;
+					vpc[j].Color0	=inSolid[i]?	Color.Red : Color.Blue;
 				}
 
 				vpc[j].Normal.X		=facePlane.mNormal.X;

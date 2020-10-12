@@ -11,29 +11,39 @@ namespace LightExplore
 	internal class LightData
 	{
 		Vector3		[][]mLightPoints;
+		bool		[][]mInSolid;
 		GFXPlane	[]mPlanes;
 		FInfo		[]mFInfos;
 		int			mNumSamples;
 
 
-		internal LightData(BinaryReader br)
+		internal LightData(BinaryReader br, Map map, SharedForms.Output outForm)
 		{
 			mNumSamples		=br.ReadInt32();
 			int	numFaces	=br.ReadInt32();
 
 			mLightPoints	=new Vector3[numFaces][];
+			mInSolid		=new bool[numFaces][];
 			mPlanes			=new GFXPlane[numFaces];
 			mFInfos			=new FInfo[numFaces];
+
+			outForm.Print("Reading " + numFaces + " faces...\n");
+			outForm.UpdateProgress(0, numFaces, 0);
+
+			int	numPointsTotal	=0;
 
 			for(int i=0;i < numFaces;i++)
 			{
 				int	numPoints	=br.ReadInt32();
 
 				mLightPoints[i]	=new Vector3[numPoints];
+				mInSolid[i]		=new bool[numPoints];
 
 				for(int j=0;j < numPoints;j++)
 				{
 					mLightPoints[i][j]	=FileUtil.ReadVector3(br);
+					mInSolid[i][j]		=map.IsPointInSolidSpace(mLightPoints[i][j]);
+					numPointsTotal++;
 				}
 
 				mPlanes[i]	=new GFXPlane();
@@ -45,7 +55,11 @@ namespace LightExplore
 					mFInfos[i]	=new FInfo();
 					mFInfos[i].ReadVecs(br);
 				}
+				outForm.UpdateProgress(0, numFaces, i);
 			}
+
+			outForm.UpdateProgress(0, numFaces, 0);
+			outForm.Print("Read " + numPointsTotal + " total points.\n");
 		}
 
 
@@ -71,9 +85,11 @@ namespace LightExplore
 			for(int i=0;i < mLightPoints.Length;i++)
 			{
 				mLightPoints[i]	=null;
+				mInSolid[i]		=null;
 			}
 
 			mLightPoints	=null;
+			mInSolid		=null;
 			mPlanes			=null;
 		}
 
@@ -101,7 +117,7 @@ namespace LightExplore
 		{
 			Debug.Assert(index >= 0 && index < mLightPoints.Length);
 
-			ds.MakeDrawStuff(gd.GD, mLightPoints[index], mPlanes[index], mNumSamples);
+			ds.MakeDrawStuff(gd.GD, mLightPoints[index], mInSolid[index], mPlanes[index], mNumSamples);
 		}
 	}
 }

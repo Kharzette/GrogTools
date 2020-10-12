@@ -275,7 +275,7 @@ namespace LightExplore
 				return;
 			}
 
-			mLD	=new LightData(br);
+			mLD	=new LightData(br, mMap, mOForm);
 
 			mOForm.Print(expFile + " loaded...\n");
 
