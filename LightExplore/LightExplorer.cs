@@ -113,6 +113,10 @@ namespace LightExplore
 				{
 					mFaceIndex	-=100;
 				}
+				else if(act.mAction.Equals(Program.MyActions.SnapIndexToAimed))
+				{
+					mFaceIndex	=mFaceAimedAt;
+				}
 			}
 
 			if(mLD != null)
@@ -171,15 +175,6 @@ namespace LightExplore
 
 		internal void Render(GraphicsDevice gd)
 		{
-//			if(mZoneDraw == null || mVisMap == null)
-//			{
-//				mDebugDraw.Draw(mGD);
-//				return;
-//			}
-
-//			mZoneDraw.Draw(gd, 0, mVisMap.IsMaterialVisibleFromPos,
-//				GetModelMatrix, RenderExternal, RenderShadows, SetUpAlphaRenderTargets);
-
 			if(mDBDraw != null && mbDrawWorld)
 			{
 				mDBDraw.Draw(gd);
@@ -288,6 +283,12 @@ namespace LightExplore
 			}
 
 			BuildFaceDrawData();
+
+			mEForm.DataLoaded(expFile);
+
+			mOForm.Print("\nUse PageUp / PageDown to change face index.\n");
+			mOForm.Print("Hold shift to fly faster and skip faces by 100s.\n");
+			mOForm.Print("E will snap the face index to the aimed at face.");
 		}
 
 
@@ -306,6 +307,8 @@ namespace LightExplore
 			}
 
 			mSK.AddTex(mGD.GD, "LightMap" + mFaceIndex.ToString("D8"), lm, w, h);
+
+			mEForm.SetFaceIndex(mFaceIndex);
 		}
 	}
 }

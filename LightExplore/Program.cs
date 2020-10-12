@@ -31,7 +31,7 @@ namespace LightExplore
 			ToggleMouseLookOn, ToggleMouseLookOff,
 			IncrementFaceIndex, DecrementFaceIndex,
 			BigIncrementFaceIndex, BigDecrementFaceIndex,
-			ToggleWorld, Close
+			ToggleWorld, SnapIndexToAimed, Close
 		};
 
 		const float	MaxTimeDelta	=0.1f;
@@ -333,10 +333,6 @@ namespace LightExplore
 				Modifiers.None, System.Windows.Forms.Keys.Left);
 			inp.MapAction(MyActions.TurnRight, ActionTypes.ContinuousHold,
 				Modifiers.None, System.Windows.Forms.Keys.Right);
-			inp.MapAction(MyActions.PitchUp, ActionTypes.ContinuousHold,
-				Modifiers.None, System.Windows.Forms.Keys.Q);
-			inp.MapAction(MyActions.PitchDown, ActionTypes.ContinuousHold,
-				Modifiers.None, System.Windows.Forms.Keys.E);
 
 			inp.MapAction(MyActions.PitchUp, ActionTypes.ContinuousHold, Modifiers.None, 16);
 			inp.MapAction(MyActions.PitchDown, ActionTypes.ContinuousHold, Modifiers.None, 18);
@@ -361,6 +357,7 @@ namespace LightExplore
 			inp.MapAction(MyActions.DecrementFaceIndex, ActionTypes.PressAndRelease, Modifiers.None, Keys.PageDown);
 			inp.MapAction(MyActions.BigIncrementFaceIndex, ActionTypes.PressAndRelease, Modifiers.ShiftHeld, Keys.PageUp);
 			inp.MapAction(MyActions.BigDecrementFaceIndex, ActionTypes.PressAndRelease, Modifiers.ShiftHeld, Keys.PageDown);
+			inp.MapAction(MyActions.SnapIndexToAimed, ActionTypes.PressAndRelease, Modifiers.None, Keys.E);
 
 			inp.MapAction(MyActions.ToggleWorld, ActionTypes.PressAndRelease, Modifiers.None, Keys.X);
 

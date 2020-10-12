@@ -17,6 +17,18 @@ namespace LightExplore
 		{
 			InitializeComponent();
 		}
+
+
+		public void DataLoaded(string fileName)
+		{
+			GBSPFileName.Text	=fileName;
+		}
+
+
+		public void SetFaceIndex(int idx)
+		{
+			FaceNumber.Text	="" + idx;
+		}
 		
 		
 		void OnOpenGBSP(object sender, EventArgs e)
