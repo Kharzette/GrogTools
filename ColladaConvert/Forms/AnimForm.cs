@@ -1422,29 +1422,6 @@ namespace ColladaConvert
 		}
 
 
-		//some exporters set all the inputs to the same offset
-		//but some have them all different.  They end up being
-		//duplicated alot in the latter, but this stride helps
-		//extract just the input stuff desired
-		static int GetInputStride(InputLocalOffset []inputs)
-		{
-			int	inputStride	=0;
-
-			//check for differing offsets
-			for(int i=0;i < inputs.Length;i++)
-			{
-				InputLocalOffset	inp	=inputs[i];
-
-				//check other inputs for differing offsets
-				if(inp.offset != inputs[0].offset)
-				{
-					inputStride++;
-				}
-			}
-			return	inputStride;
-		}
-
-
 		static List<int> GetGeometryVertCount(geometry geom, string material, EventHandler ePrint)
 		{
 			List<int>	ret	=new List<int>();
@@ -1485,10 +1462,8 @@ namespace ColladaConvert
 
 						pols	=pols.Trim();
 
-						int	inpStride	=GetInputStride(polys.input);
-
 						string	[]tokens	=pols.Split(' ', '\n');
-						ret.Add(tokens.Length / (inpStride + 1));
+						ret.Add(tokens.Length / (polys.input.Length));
 					}
 				}
 				else if(plist != null)
@@ -1731,26 +1706,23 @@ namespace ColladaConvert
 						//better collada adds some annoying whitespace
 						pols	=pols.Trim();
 
-						int		inpStride	=GetInputStride(inputs);
 						string	[]tokens	=pols.Split(' ', '\n');
-						ParseIndexes(tokens, ofs, inpStride, ret);
+						ParseIndexes(tokens, ofs, inputs.Length, ret);
 					}
 				}
 				else if(plist != null)
 				{
 					//this path is very untested now
 					PrintToOutput("Warning!  PolyLists are very untested at the moment!\n");
-					int		numSem		=plist.input.Length;
 					string	[]tokens	=plist.p.Split(' ', '\n');
-					ParseIndexes(tokens, ofs, numSem, ret);
+					ParseIndexes(tokens, ofs, inputs.Length, ret);
 				}
 				else if(tris != null)
 				{
 					//this path is very untested now
 					PrintToOutput("Warning!  Tris are very untested at the moment!\n");
-					int		numSem		=tris.input.Length;
 					string	[]tokens	=tris.p.Split(' ', '\n');
-					ParseIndexes(tokens, ofs, numSem, ret);
+					ParseIndexes(tokens, ofs, inputs.Length, ret);
 				}
 			}
 			return	ret;
