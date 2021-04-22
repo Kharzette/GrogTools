@@ -1033,6 +1033,11 @@ namespace ColladaConvert
 
 		internal static int GetNodeItemIndex(node n, string sid)
 		{
+			if(n.Items == null)
+			{
+				return	-1;
+			}
+
 			for(int i=0;i < n.Items.Length;i++)
 			{
 				object	item	=n.Items[i];
@@ -1447,7 +1452,6 @@ namespace ColladaConvert
 				{
 					if(polys.material != material)
 					{
-						Misc.SafeInvoke(ePrint, material + ", material mismatch!\n");
 						continue;
 					}
 					if(polys.Items == null)
@@ -1455,6 +1459,18 @@ namespace ColladaConvert
 						Misc.SafeInvoke(ePrint, geom.name + ", null Items!\n");
 						continue;
 					}
+
+					//find the stride
+					int	stride	=0;
+					for(int i=0;i < polys.input.Length;i++)
+					{
+						InputLocalOffset	inp	=polys.input[i];
+						if((int)inp.offset > stride)
+						{
+							stride	=(int)inp.offset;
+						}
+					}
+
 					foreach(object polyObj in polys.Items)
 					{
 						string	pols	=polyObj as string;
@@ -1463,7 +1479,9 @@ namespace ColladaConvert
 						pols	=pols.Trim();
 
 						string	[]tokens	=pols.Split(' ', '\n');
-						ret.Add(tokens.Length / (polys.input.Length));
+
+						//sometimes inputs share an index, sometimes they are all separated
+						ret.Add(tokens.Length / (stride + 1));
 					}
 				}
 				else if(plist != null)
@@ -1562,7 +1580,14 @@ namespace ColladaConvert
 
 					if(count <= 0)
 					{
-						PrintToOutput("Empty polygon in GetMeshChunks!\n");
+						if(mat != null)
+						{
+							PrintToOutput("Empty polygon in GetMeshChunks for material: " + mat + "\n");
+						}
+						else
+						{
+							PrintToOutput("Empty polygon in GetMeshChunks!\n");
+						}
 						continue;
 					}
 
@@ -1614,7 +1639,7 @@ namespace ColladaConvert
 					}
 				}
 				curIdx++;
-				if(curIdx >= inputStride)
+				if(curIdx > inputStride)
 				{
 					curIdx	=0;
 				}
@@ -1696,6 +1721,17 @@ namespace ColladaConvert
 					continue;
 				}
 
+				//find the stride to the matched sem, by checking max offset
+				int	stride	=0;
+				for(int i=0;i < inputs.Length;i++)
+				{
+					InputLocalOffset	inp	=inputs[i];
+					if((int)inp.offset > stride)
+					{
+						stride	=(int)inp.offset;
+					}
+				}
+
 				if(polys != null && polys.Items != null)
 				{
 					foreach(object polyObj in polys.Items)
@@ -1707,7 +1743,7 @@ namespace ColladaConvert
 						pols	=pols.Trim();
 
 						string	[]tokens	=pols.Split(' ', '\n');
-						ParseIndexes(tokens, ofs, inputs.Length, ret);
+						ParseIndexes(tokens, ofs, stride, ret);
 					}
 				}
 				else if(plist != null)
@@ -1715,14 +1751,14 @@ namespace ColladaConvert
 					//this path is very untested now
 					PrintToOutput("Warning!  PolyLists are very untested at the moment!\n");
 					string	[]tokens	=plist.p.Split(' ', '\n');
-					ParseIndexes(tokens, ofs, inputs.Length, ret);
+					ParseIndexes(tokens, ofs, stride, ret);
 				}
 				else if(tris != null)
 				{
 					//this path is very untested now
 					PrintToOutput("Warning!  Tris are very untested at the moment!\n");
 					string	[]tokens	=tris.p.Split(' ', '\n');
-					ParseIndexes(tokens, ofs, inputs.Length, ret);
+					ParseIndexes(tokens, ofs, stride, ret);
 				}
 			}
 			return	ret;

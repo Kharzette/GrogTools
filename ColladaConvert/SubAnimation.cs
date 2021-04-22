@@ -237,6 +237,11 @@ namespace ColladaConvert
 				node	targeted	=AnimForm.LookUpNode(scenes, nodeID);
 				int		idx			=AnimForm.GetNodeItemIndex(targeted, nodeElement);
 
+				if(idx == -1)
+				{
+					continue;	//bad anim stuffs?
+				}
+
 				if(targeted.ItemsElementName[idx] == ItemsChoiceType2.lookat)
 				{
 					Debug.Assert(false);	//haven't dealt with this one yet
