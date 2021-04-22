@@ -77,7 +77,10 @@ namespace ColladaConvert
 
 			Misc.SafeInvoke(eSelectUnUsedBones, boneNames);
 
-			SelectThese(SkeletonTree.TopNode, boneNames);			
+			foreach(TreeNode n in SkeletonTree.Nodes)
+			{
+				SelectThese(n, boneNames);
+			}
 		}
 
 
