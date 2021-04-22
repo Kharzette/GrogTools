@@ -274,15 +274,21 @@ namespace ColladaConvert
 					indexes.RemoveAt(smIdx);
 
 					numInfluences--;
+				}
 
-					//boost other weights by the amount
-					//diminished by the loss of the
-					//smallest weight
-					float	boost	=smallest / weights.Count;
+				//ensure weights add up to 1
+				float	total	=0f;
+				for(int j=0;j < numInfluences;j++)
+				{
+					total	+=weights[j];
+				}
 
-					for(int wt=0;wt < weights.Count;wt++)
+				if(total < 0.99f || total > 1.01f)
+				{
+					float	scaler	=1f / total;
+					for(int j=0;j < numInfluences;j++)
 					{
-						weights[wt]	+=boost;
+						weights[j]	*=scaler;
 					}
 				}
 
@@ -374,10 +380,6 @@ namespace ColladaConvert
 			//adjust coordinate system for normals
 			Matrix	shiftMat	=Matrix.RotationX(MathUtil.PiOverTwo);
 
-			//track the polygon in use
-			int	polyIndex	=0;
-			int	curVert		=0;
-			int	vCnt		=vertCounts[polyIndex];
 			for(int i=0;i < posIdxs.Count;i++)
 			{
 				int	pidx, nidx;
@@ -530,19 +532,6 @@ namespace ColladaConvert
 				}
 
 				verts.Add(tv);
-				mIndexList.Add((ushort)(verts.Count - 1));
-				curVert++;
-
-				if(curVert >= vCnt)
-				{
-					polyIndex++;
-					if(polyIndex >= vertCounts.Count)
-					{
-						break;
-					}
-					vCnt	=vertCounts[polyIndex];
-					curVert	=0;
-				}
 			}
 
 			//dump verts back into baseverts
@@ -588,6 +577,13 @@ namespace ColladaConvert
 		{
 			List<ushort>	newIdxs	=new List<ushort>();
 
+			//count vert indexes
+			int	numIdx	=0;
+			for(int i=0;i < vertCounts.Count;i++)
+			{
+				numIdx	+=vertCounts[i];
+			}
+
 			int	curIdx	=0;
 			for(int i=0;i < vertCounts.Count;i++)
 			{
@@ -596,9 +592,9 @@ namespace ColladaConvert
 
 				for(int j=1;j < (vCount - 1);j++)
 				{
-					newIdxs.Add(mIndexList[curIdx]);
-					newIdxs.Add(mIndexList[j + curIdx]);
-					newIdxs.Add(mIndexList[j + 1 + curIdx]);
+					newIdxs.Add((ushort)curIdx);
+					newIdxs.Add((ushort)(j + curIdx));
+					newIdxs.Add((ushort)(j + 1 + curIdx));
 				}
 				curIdx	+=vCount;
 			}
