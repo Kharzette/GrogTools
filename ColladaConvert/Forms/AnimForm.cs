@@ -275,7 +275,12 @@ namespace ColladaConvert
 			else if(colladaFile.asset.up_axis == UpAxisType.Y_UP)
 			{
 				PrintToOutput("Warning!  Y up axis sort of works but might cause problems sharing anims between mesh parts!\n");
-			}			
+			}
+
+			//unit conversion
+			float	scaleFactor	=colladaFile.asset.unit.meter;
+
+			scaleFactor	*=MeshConverter.GetScaleFactor(GetScaleFactor());
 
 			Skeleton	skel	=BuildSkeleton(colladaFile, ePrint);
 
@@ -307,9 +312,38 @@ namespace ColladaConvert
 
 			alib.AddAnim(anm);
 
-			TransformRoots(alib.GetSkeleton(), anm);
+			TransformRoots(alib.GetSkeleton(), anm, scaleFactor);
 
 			return	true;
+		}
+
+
+		internal MeshConverter.ScaleFactor	GetScaleFactor()
+		{
+			if(UnitsCentimeters.Checked)
+			{
+				return	MeshConverter.ScaleFactor.Centimeters;
+			}
+			else if(UnitsGrog.Checked)
+			{
+				return	MeshConverter.ScaleFactor.Grog;
+			}
+			else if(UnitsMeters.Checked)
+			{
+				return	MeshConverter.ScaleFactor.Meters;
+			}
+			else if(UnitsQuake.Checked)
+			{
+				return	MeshConverter.ScaleFactor.Quake;
+			}
+			else if(UnitsValve.Checked)
+			{
+				return	MeshConverter.ScaleFactor.Valve;
+			}
+
+			PrintToOutput("Warning!  Desired Units could not be determined, using meters...\n");
+
+			return	MeshConverter.ScaleFactor.Meters;
 		}
 
 
@@ -328,15 +362,22 @@ namespace ColladaConvert
 			else if(colladaFile.asset.up_axis == UpAxisType.Y_UP)
 			{
 				PrintToOutput("Warning!  Y up axis sort of works but might cause problems sharing anims between mesh parts!\n");
-			}			
+			}
 
+			//unit conversion
+			float	scaleFactor	=colladaFile.asset.unit.meter;
+
+			scaleFactor	*=MeshConverter.GetScaleFactor(GetScaleFactor());
+
+			Matrix	scaleMat	=Matrix.Scaling(Vector3.One * (1f / scaleFactor));
+			
 			//grab visual scenes
 			IEnumerable<library_visual_scenes>	lvss	=
 				colladaFile.Items.OfType<library_visual_scenes>();
 
 			library_visual_scenes	lvs	=lvss.First();
 
-			List<MeshConverter>	allChunks	=GetMeshChunks(colladaFile, true);
+			List<MeshConverter>	allChunks	=GetMeshChunks(colladaFile, true, GetScaleFactor());
 			List<MeshConverter>	chunks		=new List<MeshConverter>();
 
 			//skip dummies
@@ -390,9 +431,9 @@ namespace ColladaConvert
 
 			alib.AddAnim(anm);
 
-			TransformRoots(alib.GetSkeleton(), anm);
+			TransformRoots(alib.GetSkeleton(), anm, scaleFactor);
 
-			CreateSkin(colladaFile, arch, chunks, skel, ePrint);
+			CreateSkin(colladaFile, arch, chunks, skel, scaleFactor, ePrint);
 
 			BuildFinalVerts(mGD, colladaFile, chunks);
 
@@ -438,7 +479,7 @@ namespace ColladaConvert
 
 			sm	=new StaticMesh(arch);
 
-			List<MeshConverter>	chunks	=GetMeshChunks(colladaFile, false);
+			List<MeshConverter>	chunks	=GetMeshChunks(colladaFile, false, GetScaleFactor());
 
 			//adjust coordinate system
 			Matrix	shiftMat	=Matrix.Identity;
@@ -660,6 +701,7 @@ namespace ColladaConvert
 							   IArch				arch,
 							   List<MeshConverter>	chunks,
 							   Skeleton				skel,
+							   float				scaleFactor,
 							   EventHandler			ePrint)
 		{
 			IEnumerable<library_controllers>	lcs	=colladaFile.Items.OfType<library_controllers>();
@@ -776,6 +818,8 @@ namespace ColladaConvert
 
 						//adjust coordinate system
 						Matrix	shiftMat	=Matrix.RotationX(MathUtil.PiOverTwo);
+
+						shiftMat	*=Matrix.Scaling(scaleFactor);
 
 						ibp	*=shiftMat;
 
@@ -1497,6 +1541,11 @@ namespace ColladaConvert
 					int	numSem	=plist.input.Length;
 					foreach(string tok in tokens)
 					{
+						if(tok == "")
+						{
+							continue;	//blender exporter wierdness
+						}
+						
 						int	vertCount;
 						
 						bool	bGood	=Int32.TryParse(tok, out vertCount);
@@ -1525,7 +1574,7 @@ namespace ColladaConvert
 		}
 
 
-		List<MeshConverter> GetMeshChunks(COLLADA colladaFile, bool bSkinned)
+		List<MeshConverter> GetMeshChunks(COLLADA colladaFile, bool bSkinned, MeshConverter.ScaleFactor sf)
 		{
 			List<MeshConverter>	chunks	=new List<MeshConverter>();
 
@@ -1613,7 +1662,7 @@ namespace ColladaConvert
 
 					cnk	=new MeshConverter(mat, geom.name);
 
-					cnk.CreateBaseVerts(verts);
+					cnk.CreateBaseVerts(verts, colladaFile.asset.unit.meter, sf);
 
 					cnk.mPartIndex	=-1;
 					cnk.SetGeometryID(geom.id);
@@ -2416,10 +2465,12 @@ namespace ColladaConvert
 
 
 		//for adjusting coordinate systems
-		void TransformRoots(Skeleton skel, Anim anm)
+		void TransformRoots(Skeleton skel, Anim anm, float scaleFactor)
 		{
 			//adjust coordinate system
 			Matrix	shiftMat	=Matrix.RotationX(MathUtil.PiOverTwo);
+
+			shiftMat	*=Matrix.Scaling(Vector3.One * scaleFactor);
 
 			List<string>	roots	=new List<string>();
 

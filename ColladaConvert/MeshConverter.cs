@@ -32,8 +32,15 @@ namespace ColladaConvert
 			internal Vector4	Color3;
 
 			internal int		mOriginalIndex;
+		}
 
-
+		internal enum ScaleFactor
+		{
+			Meters,			//unity?
+			Centimeters,	//unreal?
+			Quake,
+			Valve,
+			Grog
 		}
 
 		string			mName, mGeomName;
@@ -49,6 +56,11 @@ namespace ColladaConvert
 		EditorMesh	mConverted;
 
 		internal event EventHandler	ePrint;
+
+		//scale factors, collada always in meterish scale
+		const float	MetersToQuakeUnits	=37.6471f;
+		const float	MetersToValveUnits	=39.37001f;
+		const float	MetersToGrogUnits	=MetersToValveUnits;
 
 
 		internal MeshConverter(string name, string geoName)
@@ -88,9 +100,37 @@ namespace ColladaConvert
 		}
 
 
+		internal static float GetScaleFactor(ScaleFactor sf)
+		{
+			float	scaleFactor	=1f;
+
+			if(sf == ScaleFactor.Centimeters)
+			{
+				scaleFactor	*=100f;
+			}
+			else if(sf == ScaleFactor.Grog)
+			{
+				scaleFactor	*=MetersToGrogUnits;
+			}
+			else if(sf == ScaleFactor.Meters)
+			{
+			}
+			else if(sf == ScaleFactor.Quake)
+			{
+				scaleFactor	*=MetersToQuakeUnits;
+			}
+			else if(sf == ScaleFactor.Valve)
+			{
+				scaleFactor	*=MetersToValveUnits;
+			}
+
+			return	scaleFactor;
+		}
+
+
 		//this will build a base list of verts
 		//eventually these will need to expand
-		internal void CreateBaseVerts(float_array verts)
+		internal void CreateBaseVerts(float_array verts, float meterScale, ScaleFactor sf)
 		{
 			mNumBaseVerts	=(int)verts.count / 3;
 			mBaseVerts		=new TrackedVert[mNumBaseVerts];
@@ -103,6 +143,18 @@ namespace ColladaConvert
 				mBaseVerts[i / 3].Position0.Y		=verts.Values[i + 1];
 				mBaseVerts[i / 3].Position0.Z		=-verts.Values[i + 2];	//negate
 				mBaseVerts[i / 3].mOriginalIndex	=i / 3;
+			}
+
+			//get users desired size
+			float	scaleFactor	=GetScaleFactor(sf);
+
+			//scale by the to-meters scale of the collada file
+			scaleFactor	*=meterScale;
+
+			//convert sizes
+			for(int i=0;i < mNumBaseVerts;i++)
+			{
+				mBaseVerts[i].Position0	*=scaleFactor;
 			}
 
 			//create a new meshlib mesh

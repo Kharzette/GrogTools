@@ -32,7 +32,7 @@ namespace LightExplore
 
 		//text
 		ScreenText		mST;
-		MatLib			mFontMats;
+		MatLib			mFontMats, mGumpMats;
 		Matrix			mTextProj;
 		Mover2			mTextMover	=new Mover2();
 		int				mResX, mResY;
@@ -67,16 +67,20 @@ namespace LightExplore
 			mFontMats.SetMaterialEffect("Text", "2D.fx");
 			mFontMats.SetMaterialTechnique("Text", "Text");
 
+			mGumpMats.CreateMaterial("Gump");
+			mGumpMats.SetMaterialEffect("Gump", "2D.fx");
+			mGumpMats.SetMaterialTechnique("Gump", "Gump");
+
 			mFonts	=sk.GetFontList();
 
 			mST		=new ScreenText(gd.GD, mFontMats, mFonts[0], 1000);
-			mSUI	=new ScreenUI(gd.GD, mFontMats, 100);
+			mSUI	=new ScreenUI(gd.GD, mGumpMats, 100);
 
 			mTextProj	=Matrix.OrthoOffCenterLH(0, mResX, mResY, 0, 0.1f, 5f);
 
 			Vector4	color	=Vector4.UnitY + (Vector4.UnitW * 0.15f);
 
-			mSUI.AddGump("UI\\CrossHair", "CrossHair", Vector4.One,
+			mSUI.AddGump("Gump", "UI\\CrossHair", "", "CrossHair", Vector4.One,
 				Vector2.UnitX * ((mResX / 2) - 16)
 				+ Vector2.UnitY * ((mResY / 2) - 16),
 				Vector2.One);
