@@ -1,0 +1,59 @@
+Character art notes:
+
+Make your character mesh in Blender with normal character sizes.  I use 1.7ish meters.
+
+Use https://github.com/SAM-tak/BlenderGameRig for rigging.  Default collada exporter.
+
+In object mode:  add->armature->gamerig->unity mechanim->human meta rig
+Zero out the transform in the transform panel or whatever.
+
+Delete extra finger bones, but don't delete the heel.
+
+Adjust the sizes of the bones to fit your mesh in edit mode.  This is best done by
+using the move tool with the spherical joints.  Pulling those adjusts the overall bone.
+Do one side, then select the adjusted bones and do Armature->Symmetrize to copy to the other side.
+
+Knees must be slightly bent!
+
+For extra bones, Add->single bone, then move where you want it.
+Select the new bone, then the bone you want to be its parent, then:
+Armature->Parent->Make->Keep Offset
+
+You can Armature->Symmetrize with the new bone selected if you need another on the other side.
+
+When it looks about right, go back to object mode:
+
+Select the mesh, then the metarig, then Object->Parent->Armature Deform->With Auto Weights.
+
+When the weights look right do: Object Data Properties panel->GameRig->Generate New Rig
+
+Note that this generated rig has a 90 degree X rotation in the root node.  This will cause the
+bind poses to have rotation which is annoying since the exporters axis stuff is broken (z always up).
+Select it and do Object->Apply->Rotation
+
+Unparent the mesh from the metarig and parent it to the generated rig.
+
+Make sure a material is assigned, even if you don't use it.
+
+Export the base DAE.  Select just the mesh, then in export:
+
+Main tab:
+	Selection only
+	Include Armatures
+Geom tab:
+	No triangulate
+	Transform: Matrix
+Arm tab:
+	Deform bones only
+Anim Tab:
+	Include Animations
+	Samples (would prefer curves but they just give you blank anims)
+	Include all Actions
+	Transform Matrix
+
+Animating:
+
+So you HAVE to use the hotkey to generate keys.  Everything you see on the web
+will say I, but in industry standard mode this is S.  Remember this and save
+yourself hours of fruitless googling.  The various key related menus do NOTHING.
+

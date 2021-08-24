@@ -419,9 +419,14 @@ namespace ColladaConvert
 			}
 
 			//adjust coordinate system
-			Matrix	shiftMat	=Matrix.RotationX(MathUtil.PiOverTwo);
+			//currently blender won't do anything but Z_UP
+			Matrix	shiftMat	=Matrix.Identity;
+			if(colladaFile.asset.up_axis == UpAxisType.Z_UP)
+			{
+				shiftMat	*=Matrix.RotationX(MathUtil.PiOverTwo);
+			}
 
-			//bake shiftmat into part verts
+			//bake shiftmat into part verts and normals
 			foreach(MeshConverter mc in chunks)
 			{
 				mc.BakeTransformIntoVerts(shiftMat);
@@ -432,6 +437,10 @@ namespace ColladaConvert
 			alib.AddAnim(anm);
 
 			TransformRoots(alib.GetSkeleton(), anm, scaleFactor);
+
+			//need to do this again in case keyframes were added
+			//for the root bone.
+			anm.SetBoneRefs(skel);
 
 			CreateSkin(colladaFile, arch, chunks, skel, scaleFactor, ePrint);
 
@@ -737,9 +746,9 @@ namespace ColladaConvert
 
 				GetMatrixFromString(sk.bind_shape_matrix, out bindMat);
 
-				//if you hit this, either a reset xform is needed,
-				//or the mesh was exported with Y == up.  This causes
-				//the exporter to stick a rotation in the binds
+				//Blender now seems to always have a rotation stuck in here,
+				//and there seems no way to get rid of it, so I compensate
+				//for it elsewhere
 				if(!Mathery.IsIdentity(bindMat, Mathery.VCompareEpsilon))
 				{
 					Misc.SafeInvoke(ePrint, "Non identity bind pose in skin: " + sk.source1 + "\n");
@@ -817,8 +826,11 @@ namespace ColladaConvert
 						KeyFrame.RightHandToLeft(ref ibp);
 
 						//adjust coordinate system
+						//There always seems to be a rotation in blenders stuff these days
 						Matrix	shiftMat	=Matrix.RotationX(MathUtil.PiOverTwo);
 
+						//this will put the model verts back into the space
+						//where the animation happens, which is usually meter space
 						shiftMat	*=Matrix.Scaling(scaleFactor);
 
 						ibp	*=shiftMat;
@@ -1578,6 +1590,7 @@ namespace ColladaConvert
 		{
 			List<MeshConverter>	chunks	=new List<MeshConverter>();
 
+			//if you crash and land here, there are no geoms in the file
 			var	geoms	=from g in colladaFile.Items.OfType<library_geometries>().First().geometry
 						 where g.Item is mesh select g;
 
@@ -2470,6 +2483,7 @@ namespace ColladaConvert
 			//adjust coordinate system
 			Matrix	shiftMat	=Matrix.RotationX(MathUtil.PiOverTwo);
 
+			//this will undo the scaling from the bind shape
 			shiftMat	*=Matrix.Scaling(Vector3.One * scaleFactor);
 
 			List<string>	roots	=new List<string>();
