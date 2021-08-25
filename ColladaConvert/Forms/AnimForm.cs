@@ -369,7 +369,11 @@ namespace ColladaConvert
 			}
 
 			//unit conversion
-			float	scaleFactor	=colladaFile.asset.unit.meter;
+			float	scaleFactor		=1f;
+			if(colladaFile.asset.unit != null)
+			{
+				scaleFactor	=colladaFile.asset.unit.meter;
+			}
 
 			scaleFactor	*=MeshConverter.GetScaleFactor(GetScaleFactor());
 
@@ -1679,7 +1683,13 @@ namespace ColladaConvert
 
 					cnk	=new MeshConverter(mat, geom.name);
 
-					cnk.CreateBaseVerts(verts, colladaFile.asset.unit.meter, sf);
+					float	fileUnitSize	=1f;
+					if(colladaFile.asset.unit != null)
+					{
+						fileUnitSize	=colladaFile.asset.unit.meter;
+					}
+
+					cnk.CreateBaseVerts(verts, fileUnitSize, sf);
 
 					cnk.mPartIndex	=-1;
 					cnk.SetGeometryID(geom.id);

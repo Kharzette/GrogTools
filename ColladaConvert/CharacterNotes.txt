@@ -62,3 +62,23 @@ hips) that won't export so if you are leaning into a run it looks like your
 character is floating backward when exported.  There seems no way to fix this
 other than trash the entire anim and start over.  Hey, it's free!
 
+Materials: (should probably do this step before rigging)
+
+3DCoat->Import object for pixel painting:  Your base mesh DAE
+	UV auto mapping
+	swap Y and Z
+
+Go to the UV tab and adjust the islands the way you want.  Then go to paint
+and start painting away.  Use layers!
+
+When finished do File->Export model:  (this will have the new UVs)
+Export low-poly mesh
+Swap Y and Z
+Export Color
+
+Save as FBX.  This will have to go back into blender as 3DCoat's collada is
+a bit mangled.  When importing back into blender the scale is super small.
+Fix it in the little transform tab.
+
+Rotate Z 90 degrees positive to align it the usual way, then Object->Apply->
+Rotation.
