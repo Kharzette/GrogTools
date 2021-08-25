@@ -314,6 +314,10 @@ namespace ColladaConvert
 
 			TransformRoots(alib.GetSkeleton(), anm, scaleFactor);
 
+			//need to do this again in case keyframes were added
+			//for the root bone.
+			anm.SetBoneRefs(alib.GetSkeleton());
+
 			return	true;
 		}
 

@@ -29,7 +29,7 @@ When the weights look right do: Object Data Properties panel->GameRig->Generate 
 
 Note that this generated rig has a 90 degree X rotation in the root node.  This will cause the
 bind poses to have rotation which is annoying since the exporters axis stuff is broken (z always up).
-Select it and do Object->Apply->Rotation
+Select it and do Object->Apply->Rotation (not that this will fix the bind pose)
 
 Unparent the mesh from the metarig and parent it to the generated rig.
 
@@ -56,4 +56,9 @@ Animating:
 So you HAVE to use the hotkey to generate keys.  Everything you see on the web
 will say I, but in industry standard mode this is S.  Remember this and save
 yourself hours of fruitless googling.  The various key related menus do NOTHING.
+
+Watch for keys not exporting.  Sometimes there will be a problem bone (usually
+hips) that won't export so if you are leaning into a run it looks like your
+character is floating backward when exported.  There seems no way to fix this
+other than trash the entire anim and start over.  Hey, it's free!
 
