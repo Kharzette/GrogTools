@@ -1,13 +1,12 @@
 ﻿using System;
-using System.IO;
-using System.Drawing;
 using System.Numerics;
+using System.Diagnostics;
 using UtilityLib;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
 using Vortice.D3DCompiler;
-using Vortice.Dxc;
 using SharpGen.Runtime;
+using InputLib;
 
 //renderform and renderloop
 using SharpDX.Windows;
@@ -70,6 +69,9 @@ internal class Program
 	[STAThread]
 	static unsafe void Main(string []args)
 	{
+		//I have no idea what this does
+		Application.EnableVisualStyles();
+
 		Console.WriteLine("Hello, World!");
 
 		Icon	testIcon	=new Icon("1281737606553.ico");
@@ -78,8 +80,7 @@ internal class Program
 
 		GraphicsDevice	gd	=new GraphicsDevice("Goblin Test", testIcon, f, 0.1f, 2000f);
 
-		//I have no idea what this does
-		Application.EnableVisualStyles();
+		Input	inp	=new Input(1f / Stopwatch.Frequency, gd.RendForm);
 
 		IncludeFX	inc	=new IncludeFX(".");
 
@@ -181,9 +182,28 @@ internal class Program
 		
 		RenderLoop.Run(gd.RendForm, () =>
 		{
+			if(!gd.RendForm.Focused)
+			{
+				Thread.Sleep(33);
+			}
+
 			gd.CheckResize();
 
 			gd.ClearViews();
+			if(gd.RendForm.WindowState == FormWindowState.Minimized)
+			{
+				return;
+			}
+
+			//these can get unset if there's a resize/minimize/etc
+			gd.DC.VSSetShader(vs);
+			gd.DC.PSSetShader(ps);
+			gd.DC.VSSetConstantBuffer(0, perObjectBuf);
+			gd.DC.PSSetConstantBuffer(0, perObjectBuf);
+			gd.DC.VSSetConstantBuffer(1, perFrameBuf);
+			gd.DC.PSSetConstantBuffer(1, perFrameBuf);
+			gd.DC.VSSetConstantBuffer(2, changeLessBuf);
+			gd.DC.PSSetConstantBuffer(2, changeLessBuf);
 
 			yawPitchRoll.X	+=0.0001f;
 			yawPitchRoll.Y	+=0.00005f;
@@ -230,6 +250,8 @@ internal class Program
 
 			gd.Present();
 		});
+
+		inp.FreeAll(gd.RendForm);
 
 		gd.ReleaseAll();
 	}
