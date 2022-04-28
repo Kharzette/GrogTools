@@ -24,7 +24,8 @@ internal class Program
 		Turn, TurnLeft, TurnRight,
 		Pitch, PitchUp, PitchDown,
 		LightX, LightY, LightZ,
-		ToggleMouseLookOn, ToggleMouseLookOff
+		ToggleMouseLookOn, ToggleMouseLookOff,
+		Exit
 	};
 
 	const float	MaxTimeDelta	=0.1f;
@@ -242,6 +243,7 @@ internal class Program
 			{
 				acts	=UpdateInput(inp, gd,
 					time.GetUpdateDeltaSeconds(), ref bMouseLookOn);
+
 				if(!gd.RendForm.Focused)
 				{
 					acts.Clear();
@@ -256,6 +258,8 @@ internal class Program
 
 				deltaMove	*=200f;
 				pos			+=deltaMove;
+
+				ChangeLight(acts, ref perObject.mLightDirection);
 				
 				time.UpdateDone();
 			}
@@ -270,6 +274,8 @@ internal class Program
 			gd.DC.VSSetConstantBuffer(2, changeLessBuf);
 			gd.DC.PSSetConstantBuffer(2, changeLessBuf);
 
+			//for automatic spinny light
+			/*
 			yawPitchRoll.X	+=0.0001f;
 			yawPitchRoll.Y	+=0.00005f;
 			yawPitchRoll.Z	+=0.00007f;
@@ -280,7 +286,7 @@ internal class Program
 
 			perObject.mLightDirection	=Vector3.TransformNormal(Vector3.UnitX,
 				Matrix4x4.CreateFromYawPitchRoll(yawPitchRoll.X,
-					yawPitchRoll.Y, yawPitchRoll.Z));
+					yawPitchRoll.Y, yawPitchRoll.Z));*/
 
 			gd.GCam.Update(pos, pSteering.Pitch, pSteering.Yaw, pSteering.Roll);
 
@@ -395,6 +401,8 @@ internal class Program
 		inp.MapAction(MyActions.LightY, ActionTypes.ContinuousHold, Modifiers.None, Input.VariousButtons.GamePadDPadDown);
 		inp.MapAction(MyActions.LightZ, ActionTypes.ContinuousHold, Modifiers.None, Input.VariousButtons.GamePadDPadRight);
 
+		inp.MapAction(MyActions.Exit, ActionTypes.ActivateOnce, Modifiers.None, Keys.Escape);
+
 		return	inp;
 	}
 
@@ -419,6 +427,16 @@ internal class Program
 		GraphicsDevice gd, float delta, ref bool bMouseLookOn)
 	{
 		List<Input.InputAction>	actions	=inp.GetAction();
+
+		//check for exit
+		foreach(Input.InputAction act in actions)
+		{
+			if(act.mAction.Equals(MyActions.Exit))
+			{
+				gd.RendForm.Close();
+				return	actions;
+			}
+		}
 
 		foreach(Input.InputAction act in actions)
 		{
@@ -473,5 +491,27 @@ internal class Program
 			}
 		}
 		return	actions;
+	}
+
+	static void ChangeLight(List<Input.InputAction> acts, ref Vector3 lightDir)
+	{
+		foreach(Input.InputAction act in acts)
+		{
+			if(act.mAction.Equals(MyActions.LightX))
+			{
+				Matrix4x4	rot	=Matrix4x4.CreateRotationX(act.mMultiplier);
+				lightDir	=Vector3.TransformNormal(lightDir, rot);
+			}
+			else if(act.mAction.Equals(MyActions.LightY))
+			{
+				Matrix4x4	rot	=Matrix4x4.CreateRotationY(act.mMultiplier);
+				lightDir	=Vector3.TransformNormal(lightDir, rot);
+			}
+			else if(act.mAction.Equals(MyActions.LightZ))
+			{
+				Matrix4x4	rot	=Matrix4x4.CreateRotationZ(act.mMultiplier);
+				lightDir	=Vector3.TransformNormal(lightDir, rot);
+			}
+		}
 	}
 }
