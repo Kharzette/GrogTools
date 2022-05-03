@@ -7,6 +7,7 @@ using Vortice.Direct3D11;
 using Vortice.D3DCompiler;
 using SharpGen.Runtime;
 using InputLib;
+using MaterialLib;
 
 //renderform and renderloop
 using SharpDX.Windows;
@@ -152,6 +153,10 @@ internal class Program
 		System.Span<byte>	psBytes	=codeBlob.AsSpan();
 
 		ID3D11PixelShader	ps	=gd.GD.CreatePixelShader(psBytes);
+
+		StuffKeeper	sk	=new StuffKeeper();
+
+		sk.Init(gd, ".");
 
 		//make some prims to draw
 		PrimObject	prism	=PrimFactory.CreatePrism(gd.GD, vsBytes, 5f);
