@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Numerics;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using UtilityLib;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
@@ -31,29 +32,18 @@ internal class Program
 
 	const float	MaxTimeDelta	=0.1f;
 
-	//for shader includes
-	internal class IncludeFX : CallbackBase, Include
+	//CommonFunctions.hlsli
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	struct PerFrame
 	{
-		string	mRootDir;
-
-		internal IncludeFX(string rootDir)
-		{
-			mRootDir	=rootDir;
-		}
-
-		static string includeDirectory = "Shaders\\";
-		public void Close(Stream stream)
-		{
-			stream.Close();
-			stream.Dispose();
-		}
-
-		public Stream Open(IncludeType type, string fileName, Stream ?parentStream)
-		{
-			return	new FileStream(mRootDir + "\\" + includeDirectory + fileName, FileMode.Open);
-		}
+		internal Matrix4x4	mView;
+		internal Matrix4x4	mLightViewProj;	//for shadows
+		internal Vector3	mEyePos;
+		internal UInt32		mPadding;		//pad to 16 boundary
 	}
 
+	//CommonFunctions.hlsli
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
 	struct PerObject
 	{
 		internal Matrix4x4	mWorld;
@@ -67,16 +57,16 @@ internal class Program
 
 		internal Vector3	mLightDirection;
 		internal float		mSpecPower;
+
+		//material id for borders etc
+		internal int		mMaterialID;
+		internal UInt32		mPadding0;
+		internal UInt32		mPadding1;
+		internal UInt32		mPadding2;	//pad to 16
 	}
 
-	struct PerFrame
-	{
-		internal Matrix4x4	mView;
-		internal Matrix4x4	mLightViewProj;	//for shadows
-		internal Vector3	mEyePos;
-		internal UInt32		mPadding;
-	}
-
+	//CommonFunctions.hlsli
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
 	struct ChangeLess
 	{
 		internal Matrix4x4	mProjection;
@@ -114,49 +104,11 @@ internal class Program
 		gd.RendForm.Activated		+=actHandler;
 		gd.RendForm.AppDeactivated	+=deActHandler;
 
-		IncludeFX	inc	=new IncludeFX(".");
-
-		ShaderMacro	[]macs	=new ShaderMacro[2];
-
-		macs[0]	=new ShaderMacro("SM5", 1);
-
-		Blob	codeBlob, errBlob;
-
-		//vert shader
-		Result	res	=Compiler.CompileFromFile("Shaders/Static.hlsl",
-			macs, inc, "WNormWPosTexVS",
-			"vs_5_0", ShaderFlags.None,
-			EffectFlags.None, out codeBlob, out errBlob);
-
-		if(res != Result.Ok)
-		{
-			Console.WriteLine(errBlob.AsString());
-			return;
-		}
-
-		System.Span<byte>	vsBytes	=codeBlob.AsSpan();
-
-		ID3D11VertexShader	vs	=gd.GD.CreateVertexShader(vsBytes);
-
-		//pixel shader
-		res	=Compiler.CompileFromFile("Shaders/Static.hlsl",
-			macs, inc, "TriTex0SpecPS",
-			"ps_5_0", ShaderFlags.None,
-			EffectFlags.None, out codeBlob, out errBlob);
-
-		if(res != Result.Ok)
-		{
-			Console.WriteLine(errBlob.AsString());
-			return;
-		}
-
-		System.Span<byte>	psBytes	=codeBlob.AsSpan();
-
-		ID3D11PixelShader	ps	=gd.GD.CreatePixelShader(psBytes);
-
 		StuffKeeper	sk	=new StuffKeeper();
 
 		sk.Init(gd, ".");
+
+		byte	[]vsBytes	=sk.GetVSCompiledCode("WNormWPosTexVS");
 
 		//make some prims to draw
 		PrimObject	prism	=PrimFactory.CreatePrism(gd.GD, vsBytes, 5f);
@@ -198,8 +150,16 @@ internal class Program
 		gd.DC.VSSetConstantBuffer(2, changeLessBuf);
 		gd.DC.PSSetConstantBuffer(2, changeLessBuf);
 
+		//grab shaders
+		ID3D11VertexShader	vs	=sk.GetVertexShader("WNormWPosTexVS");
+		ID3D11PixelShader	ps	=sk.GetPixelShader("TriTex0SpecPS");
+
+		//grab a texture
+		ID3D11ShaderResourceView	srv	=sk.GetSRV("RoughStone");
+
 		gd.DC.VSSetShader(vs);
 		gd.DC.PSSetShader(ps);
+		gd.DC.PSSetShaderResource(0, srv);
 
 		Random	rnd	=new Random();
 
@@ -208,6 +168,9 @@ internal class Program
 		Vector4	sphereColour	=Mathery.RandomColorVector4(rnd);
 		Vector4	boxColour		=Mathery.RandomColorVector4(rnd);
 		Vector4	cylColour		=Mathery.RandomColorVector4(rnd);
+
+		//set A to 1
+		prismColour.W	=sphereColour.W	=boxColour.W	=cylColour.W	=1f;
 
 		Vector3	yawPitchRoll	=Vector3.Zero;
 		Vector3	pos				=Vector3.One * 5f;
@@ -279,6 +242,8 @@ internal class Program
 			gd.DC.VSSetConstantBuffer(2, changeLessBuf);
 			gd.DC.PSSetConstantBuffer(2, changeLessBuf);
 
+			gd.DC.PSSetShaderResource(0, srv);			
+
 			//for automatic spinny light
 			/*
 			yawPitchRoll.X	+=0.0001f;
@@ -330,7 +295,7 @@ internal class Program
 		});
 
 		inp.FreeAll(gd.RendForm);
-
+		sk.FreeAll();
 		gd.ReleaseAll();
 	}
 
@@ -338,11 +303,13 @@ internal class Program
 	{
 		BufferDescription	cbDesc	=new BufferDescription();
 
+		//these are kind of odd, but change any one and it breaks		
 		cbDesc.BindFlags			=BindFlags.ConstantBuffer;
 		cbDesc.ByteWidth			=size;
-		cbDesc.CPUAccessFlags		=CpuAccessFlags.None;
+		cbDesc.CPUAccessFlags		=CpuAccessFlags.None;	//you'd think write, but nope
 		cbDesc.MiscFlags			=ResourceOptionFlags.None;
-		cbDesc.Usage				=ResourceUsage.Default;
+		cbDesc.Usage				=ResourceUsage.Default;	//you'd think dynamic here but nope
+		cbDesc.StructureByteStride	=0;
 
 		//alloc
 		return	gd.GD.CreateBuffer(cbDesc);
