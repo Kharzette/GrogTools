@@ -91,11 +91,11 @@ internal class Program
 		bool			bMouseLookOn	=false;
 
 		EventHandler	actHandler	=new EventHandler(
-			delegate(object s, EventArgs ea)
+			delegate(object ?s, EventArgs ea)
 			{	inp.ClearInputs();	});
 
 		EventHandler<EventArgs>	deActHandler	=new EventHandler<EventArgs>(
-			delegate(object s, EventArgs ea)
+			delegate(object ?s, EventArgs ea)
 			{
 				gd.SetCapture(false);
 				bMouseLookOn	=false;
@@ -108,6 +108,13 @@ internal class Program
 
 		sk.Init(gd, ".");
 
+		List<string>	fonts	=sk.GetFontList();
+
+		ScreenText	st	=new ScreenText(gd, sk, fonts[1], fonts[1], 512);
+
+		Matrix4x4	textProj	=Matrix4x4.CreateOrthographicOffCenter(
+			0, gd.RendForm.Width, gd.RendForm.Height, 0, -5f, 5f);
+
 		byte	[]vsBytes	=sk.GetVSCompiledCode("WNormWPosTexVS");
 
 		//make some prims to draw
@@ -117,9 +124,9 @@ internal class Program
 		PrimObject	cyl		=PrimFactory.CreateCylinder(gd.GD, vsBytes, 2f, 5f);
 
 		//create constant buffers
-		ID3D11Buffer	perObjectBuf	=MakeConstantBuffer(gd, sizeof(PerObject));
-		ID3D11Buffer	perFrameBuf		=MakeConstantBuffer(gd, sizeof(PerFrame));
-		ID3D11Buffer	changeLessBuf	=MakeConstantBuffer(gd, sizeof(ChangeLess));
+		ID3D11Buffer	perObjectBuf	=StuffKeeper.MakeConstantBuffer(gd.GD, sizeof(PerObject));
+		ID3D11Buffer	perFrameBuf		=StuffKeeper.MakeConstantBuffer(gd.GD, sizeof(PerFrame));
+		ID3D11Buffer	changeLessBuf	=StuffKeeper.MakeConstantBuffer(gd.GD, sizeof(ChangeLess));
 
 		//alloc C# side constant buffer data
 		PerObject	perObject	=new PerObject();
@@ -175,10 +182,49 @@ internal class Program
 		Vector3	yawPitchRoll	=Vector3.Zero;
 		Vector3	pos				=Vector3.One * 5f;
 
+		st.AddString("Camera Location: " + pos, "Position", Vector4.UnitY + Vector4.UnitW, Vector2.UnitX * 20f + Vector2.UnitY * 400f, Vector2.One);
+
 		prism.World		=Matrix4x4.CreateTranslation(Vector3.UnitX * 15f);
 		sphere.World	=Matrix4x4.CreateTranslation(Vector3.UnitX * -15f);
 		box.World		=Matrix4x4.CreateTranslation(Vector3.UnitZ * 15f);
 		cyl.World		=Matrix4x4.CreateTranslation(Vector3.UnitZ * -15f);
+
+		//make samplers for 3d and 2d
+		SamplerDescription	sd	=new SamplerDescription(
+			Filter.MinMagMipPoint,
+			TextureAddressMode.Wrap,
+			TextureAddressMode.Wrap,
+			TextureAddressMode.Wrap,
+			0f, 16,
+			ComparisonFunction.Less,
+			0, float.MaxValue);
+
+		ID3D11SamplerState	ss3D	=gd.GD.CreateSamplerState(sd);
+
+		sd.Filter				=Filter.MinMagMipLinear;
+		sd.AddressU				=TextureAddressMode.Clamp;
+		sd.AddressV				=TextureAddressMode.Clamp;
+		sd.ComparisonFunction	=ComparisonFunction.Never;
+
+		ID3D11SamplerState	ss2D	=gd.GD.CreateSamplerState(sd);
+
+		//depth stencil 3D
+		DepthStencilDescription	dsd	=new DepthStencilDescription(true, DepthWriteMask.All, ComparisonFunction.Less);
+		ID3D11DepthStencilState	dss3D	=gd.GD.CreateDepthStencilState(dsd);
+
+		//2D
+		dsd	=new DepthStencilDescription(false, DepthWriteMask.All, ComparisonFunction.Always);
+		ID3D11DepthStencilState	dss2D	=gd.GD.CreateDepthStencilState(dsd);
+
+		//blendstate
+		BlendDescription	bd	=new BlendDescription(Blend.One, Blend.Zero);
+		ID3D11BlendState	bsOpaque	=gd.GD.CreateBlendState(bd);
+
+		bd	=new BlendDescription(Blend.One, Blend.InverseSourceAlpha, Blend.Zero, Blend.Zero);
+		ID3D11BlendState	bsAlpha		=gd.GD.CreateBlendState(bd);
+
+		Vortice.Mathematics.Color	zeroCol	=new Vortice.Mathematics.Color(0);
+		Vortice.Mathematics.Color	oneCol	=new Vortice.Mathematics.Color(0xff);
 		
 		UpdateTimer	time	=new UpdateTimer(true, false);
 
@@ -227,6 +273,9 @@ internal class Program
 				deltaMove	*=200f;
 				pos			+=deltaMove;
 
+				st.ModifyStringText("Camera Location: " + pos, "Position");
+				st.Update();
+
 				ChangeLight(acts, ref perObject.mLightDirection);
 				
 				time.UpdateDone();
@@ -235,6 +284,10 @@ internal class Program
 			//these can get unset if there's a resize/minimize/etc
 			gd.DC.VSSetShader(vs);
 			gd.DC.PSSetShader(ps);
+
+			gd.DC.PSSetSampler(0, ss3D);
+			gd.DC.OMSetDepthStencilState(dss3D);
+
 			gd.DC.VSSetConstantBuffer(0, perObjectBuf);
 			gd.DC.PSSetConstantBuffer(0, perObjectBuf);
 			gd.DC.VSSetConstantBuffer(1, perFrameBuf);
@@ -242,7 +295,9 @@ internal class Program
 			gd.DC.VSSetConstantBuffer(2, changeLessBuf);
 			gd.DC.PSSetConstantBuffer(2, changeLessBuf);
 
-			gd.DC.PSSetShaderResource(0, srv);			
+			gd.DC.PSSetShaderResource(0, srv);
+			gd.DC.OMSetBlendState(bsOpaque, zeroCol);
+
 
 			//for automatic spinny light
 			/*
@@ -289,6 +344,23 @@ internal class Program
 			gd.DC.UpdateSubresource<PerObject>(perObject, perObjectBuf);
 			cyl.Draw(gd);
 
+			//set up for 2D
+			changeLess.mProjection	=Matrix4x4.Transpose(textProj);
+			gd.DC.UpdateSubresource<ChangeLess>(changeLess, changeLessBuf);
+
+			perFrame.mView	=Matrix4x4.Transpose(Matrix4x4.Identity);
+			gd.DC.UpdateSubresource<PerFrame>(perFrame, perFrameBuf);
+
+			gd.DC.PSSetSampler(0, ss2D);
+			gd.DC.OMSetDepthStencilState(dss2D);
+			gd.DC.OMSetBlendState(bsAlpha, oneCol);
+
+			st.Draw(Matrix4x4.Identity, textProj);
+
+			//change back to 3D
+			changeLess.mProjection	=Matrix4x4.Transpose(gd.GCam.Projection);
+			gd.DC.UpdateSubresource<ChangeLess>(changeLess, changeLessBuf);
+
 			gd.Present();
 
 			acts.Clear();
@@ -299,21 +371,6 @@ internal class Program
 		gd.ReleaseAll();
 	}
 
-	static ID3D11Buffer	MakeConstantBuffer(GraphicsDevice gd, int size)
-	{
-		BufferDescription	cbDesc	=new BufferDescription();
-
-		//these are kind of odd, but change any one and it breaks		
-		cbDesc.BindFlags			=BindFlags.ConstantBuffer;
-		cbDesc.ByteWidth			=size;
-		cbDesc.CPUAccessFlags		=CpuAccessFlags.None;	//you'd think write, but nope
-		cbDesc.MiscFlags			=ResourceOptionFlags.None;
-		cbDesc.Usage				=ResourceUsage.Default;	//you'd think dynamic here but nope
-		cbDesc.StructureByteStride	=0;
-
-		//alloc
-		return	gd.GD.CreateBuffer(cbDesc);
-	}
 
 	static Input SetUpInput(RenderForm rForm)
 	{
