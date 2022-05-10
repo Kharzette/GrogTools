@@ -1,12 +1,9 @@
-﻿using System;
-using System.Numerics;
+﻿using System.Numerics;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using UtilityLib;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
-using Vortice.D3DCompiler;
-using SharpGen.Runtime;
 using InputLib;
 using MaterialLib;
 
@@ -32,45 +29,6 @@ internal class Program
 
 	const float	MaxTimeDelta	=0.1f;
 
-	//CommonFunctions.hlsli
-	[StructLayout(LayoutKind.Sequential, Pack = 4)]
-	struct PerFrame
-	{
-		internal Matrix4x4	mView;
-		internal Matrix4x4	mLightViewProj;	//for shadows
-		internal Vector3	mEyePos;
-		internal UInt32		mPadding;		//pad to 16 boundary
-	}
-
-	//CommonFunctions.hlsli
-	[StructLayout(LayoutKind.Sequential, Pack = 4)]
-	struct PerObject
-	{
-		internal Matrix4x4	mWorld;
-		internal Vector4	mSolidColour;
-		internal Vector4	mSpecColor;
-
-		//These are considered directional (no falloff)
-		internal Vector4	mLightColor0;		//trilights need 3 colors
-		internal Vector4	mLightColor1;		//trilights need 3 colors
-		internal Vector4	mLightColor2;		//trilights need 3 colors
-
-		internal Vector3	mLightDirection;
-		internal float		mSpecPower;
-
-		//material id for borders etc
-		internal int		mMaterialID;
-		internal UInt32		mPadding0;
-		internal UInt32		mPadding1;
-		internal UInt32		mPadding2;	//pad to 16
-	}
-
-	//CommonFunctions.hlsli
-	[StructLayout(LayoutKind.Sequential, Pack = 4)]
-	struct ChangeLess
-	{
-		internal Matrix4x4	mProjection;
-	}
 
 	[STAThread]
 	static unsafe void Main(string []args)
@@ -123,39 +81,14 @@ internal class Program
 		PrimObject	box		=PrimFactory.CreateCube(gd.GD, vsBytes, 5f);
 		PrimObject	cyl		=PrimFactory.CreateCylinder(gd.GD, vsBytes, 2f, 5f);
 
-		//create constant buffers
-		ID3D11Buffer	perObjectBuf	=StuffKeeper.MakeConstantBuffer(gd.GD, sizeof(PerObject));
-		ID3D11Buffer	perFrameBuf		=StuffKeeper.MakeConstantBuffer(gd.GD, sizeof(PerFrame));
-		ID3D11Buffer	changeLessBuf	=StuffKeeper.MakeConstantBuffer(gd.GD, sizeof(ChangeLess));
+		CBKeeper	skcb	=sk.GetCBKeeper();
 
-		//alloc C# side constant buffer data
-		PerObject	perObject	=new PerObject();
-		PerFrame	perFrame	=new PerFrame();
-		ChangeLess	changeLess	=new ChangeLess();
+		Vector3	lightDir	=-Vector3.UnitY;
 
-		perObject.mLightColor0	=Vector4.One;
-		perObject.mLightColor1	=Vector4.One * 0.3f;
-		perObject.mLightColor2	=Vector4.One * 0.2f;
+		skcb.SetTrilights(Vector3.One, Vector3.One * 0.3f,
+			Vector3.One * 0.2f, lightDir);
 
-		perObject.mLightColor1.W	=perObject.mLightColor2.W	=1f;
-
-		perObject.mLightDirection	=-Vector3.UnitY;
-		perObject.mSolidColour		=Vector4.One;
-		perObject.mSpecColor		=Vector4.One;
-		perObject.mSpecPower		=5f;
-
-		changeLess.mProjection		=Matrix4x4.Transpose(gd.GCam.Projection);
-
-		//put values in changeLess
-		gd.DC.UpdateSubresource<ChangeLess>(changeLess, changeLessBuf);
-
-		//assign cbuffers to shaders
-		gd.DC.VSSetConstantBuffer(0, perObjectBuf);
-		gd.DC.PSSetConstantBuffer(0, perObjectBuf);
-		gd.DC.VSSetConstantBuffer(1, perFrameBuf);
-		gd.DC.PSSetConstantBuffer(1, perFrameBuf);
-		gd.DC.VSSetConstantBuffer(2, changeLessBuf);
-		gd.DC.PSSetConstantBuffer(2, changeLessBuf);
+		skcb.SetSpecular(Vector4.One, 5f);
 
 		//grab shaders
 		ID3D11VertexShader	vs	=sk.GetVertexShader("WNormWPosTexVS");
@@ -276,7 +209,11 @@ internal class Program
 				st.ModifyStringText("Camera Location: " + pos, "Position");
 				st.Update();
 
-				ChangeLight(acts, ref perObject.mLightDirection);
+				if(ChangeLight(acts, ref lightDir))
+				{
+					skcb.SetTrilights(Vector3.One, Vector3.One * 0.3f,
+						Vector3.One * 0.2f, lightDir);
+				}
 				
 				time.UpdateDone();
 			}
@@ -288,12 +225,7 @@ internal class Program
 			gd.DC.PSSetSampler(0, ss3D);
 			gd.DC.OMSetDepthStencilState(dss3D);
 
-			gd.DC.VSSetConstantBuffer(0, perObjectBuf);
-			gd.DC.PSSetConstantBuffer(0, perObjectBuf);
-			gd.DC.VSSetConstantBuffer(1, perFrameBuf);
-			gd.DC.PSSetConstantBuffer(1, perFrameBuf);
-			gd.DC.VSSetConstantBuffer(2, changeLessBuf);
-			gd.DC.PSSetConstantBuffer(2, changeLessBuf);
+			skcb.SetCommonCBToShaders(gd.DC);
 
 			gd.DC.PSSetShaderResource(0, srv);
 			gd.DC.OMSetBlendState(bsOpaque, zeroCol);
@@ -316,40 +248,33 @@ internal class Program
 			gd.GCam.Update(pos, pSteering.Pitch, pSteering.Yaw, pSteering.Roll);
 
 			//update perframe data
-			perFrame.mEyePos		=gd.GCam.Position;
-			perFrame.mLightViewProj	=Matrix4x4.Transpose(Matrix4x4.Identity);
-			perFrame.mView			=Matrix4x4.Transpose(gd.GCam.View);
-
-			//update values in perFrame
-			gd.DC.UpdateSubresource<PerFrame>(perFrame, perFrameBuf);
+			skcb.SetView(Matrix4x4.Transpose(gd.GCam.View), gd.GCam.Position);
+			skcb.UpdateFrame(gd.DC);
 
 			//per object shader vars
-			perObject.mWorld		=Matrix4x4.Transpose(prism.World);
-			perObject.mSolidColour	=prismColour;
-			gd.DC.UpdateSubresource<PerObject>(perObject, perObjectBuf);
+			skcb.SetWorldMat(Matrix4x4.Transpose(prism.World));
+			skcb.SetSolidColour(prismColour);
+			skcb.UpdateObject(gd.DC);
 			prism.Draw(gd);
 
-			perObject.mWorld		=Matrix4x4.Transpose(sphere.World);
-			perObject.mSolidColour	=sphereColour;
-			gd.DC.UpdateSubresource<PerObject>(perObject, perObjectBuf);
+			skcb.SetWorldMat(Matrix4x4.Transpose(sphere.World));
+			skcb.SetSolidColour(sphereColour);
+			skcb.UpdateObject(gd.DC);
 			sphere.Draw(gd);
 
-			perObject.mWorld		=Matrix4x4.Transpose(box.World);
-			perObject.mSolidColour	=boxColour;
-			gd.DC.UpdateSubresource<PerObject>(perObject, perObjectBuf);
+			skcb.SetWorldMat(Matrix4x4.Transpose(box.World));
+			skcb.SetSolidColour(boxColour);
+			skcb.UpdateObject(gd.DC);
 			box.Draw(gd);
 
-			perObject.mWorld		=Matrix4x4.Transpose(cyl.World);
-			perObject.mSolidColour	=cylColour;
-			gd.DC.UpdateSubresource<PerObject>(perObject, perObjectBuf);
+			skcb.SetWorldMat(Matrix4x4.Transpose(cyl.World));
+			skcb.SetSolidColour(cylColour);
+			skcb.UpdateObject(gd.DC);
 			cyl.Draw(gd);
 
 			//set up for 2D
-			changeLess.mProjection	=Matrix4x4.Transpose(textProj);
-			gd.DC.UpdateSubresource<ChangeLess>(changeLess, changeLessBuf);
-
-			perFrame.mView	=Matrix4x4.Transpose(Matrix4x4.Identity);
-			gd.DC.UpdateSubresource<PerFrame>(perFrame, perFrameBuf);
+			skcb.SetProjection(Matrix4x4.Transpose(textProj));
+			skcb.UpdateChangeLess(gd.DC);
 
 			gd.DC.PSSetSampler(0, ss2D);
 			gd.DC.OMSetDepthStencilState(dss2D);
@@ -358,8 +283,8 @@ internal class Program
 			st.Draw(Matrix4x4.Identity, textProj);
 
 			//change back to 3D
-			changeLess.mProjection	=Matrix4x4.Transpose(gd.GCam.Projection);
-			gd.DC.UpdateSubresource<ChangeLess>(changeLess, changeLessBuf);
+			skcb.SetProjection(Matrix4x4.Transpose(gd.GCam.Projection));
+			skcb.UpdateChangeLess(gd.DC);
 
 			gd.Present();
 
@@ -522,25 +447,30 @@ internal class Program
 		return	actions;
 	}
 
-	static void ChangeLight(List<Input.InputAction> acts, ref Vector3 lightDir)
+	static bool ChangeLight(List<Input.InputAction> acts, ref Vector3 lightDir)
 	{
+		bool	bChanged	=false;
 		foreach(Input.InputAction act in acts)
 		{
 			if(act.mAction.Equals(MyActions.LightX))
 			{
 				Matrix4x4	rot	=Matrix4x4.CreateRotationX(act.mMultiplier);
 				lightDir	=Vector3.TransformNormal(lightDir, rot);
+				bChanged	=true;
 			}
 			else if(act.mAction.Equals(MyActions.LightY))
 			{
 				Matrix4x4	rot	=Matrix4x4.CreateRotationY(act.mMultiplier);
 				lightDir	=Vector3.TransformNormal(lightDir, rot);
+				bChanged	=true;
 			}
 			else if(act.mAction.Equals(MyActions.LightZ))
 			{
 				Matrix4x4	rot	=Matrix4x4.CreateRotationZ(act.mMultiplier);
 				lightDir	=Vector3.TransformNormal(lightDir, rot);
+				bChanged	=true;
 			}
 		}
+		return	bChanged;
 	}
 }
