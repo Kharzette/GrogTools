@@ -3,150 +3,149 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using MeshLib;
 using SharedForms;
-using Device = SharpDX.Direct3D11.Device;
+using Vortice.Direct3D11;
 
 
-namespace ColladaConvert
+namespace ColladaConvert;
+
+public partial class SeamEditor : Form
 {
-	public partial class SeamEditor : Form
+	ID3D11Device		mDevice;		
+
+
+	public SeamEditor()
 	{
-		Device		mDevice;		
+		InitializeComponent();
+
+		SeamList.Columns.Add("First Mesh");
+		SeamList.Columns.Add("Second Mesh");
+		SeamList.Columns.Add("Verts");
+	}
 
 
-		public SeamEditor()
+	public void Clear()
+	{
+		SeamList.Clear();
+		mDevice		=null;
+	}
+
+
+	public void Initialize(ID3D11Device dev)
+	{
+		mDevice		=dev;
+	}
+
+
+	public void SizeColumns()
+	{
+		FormExtensions.SizeColumns(SeamList);
+	}
+
+
+	public void AddSeams(List<EditorMesh.WeightSeam> seams)
+	{
+		Action<ListView>	addItem	=lv =>
 		{
-			InitializeComponent();
+			foreach(EditorMesh.WeightSeam ws in seams)
+			{
+				ListViewItem	lvi	=lv.Items.Add(ws.mMeshA.Name);
 
-			SeamList.Columns.Add("First Mesh");
-			SeamList.Columns.Add("Second Mesh");
-			SeamList.Columns.Add("Verts");
+				lv.Items[lvi.Index].SubItems.Add(ws.mMeshB.Name);
+				lv.Items[lvi.Index].SubItems.Add(ws.mSeam.Count.ToString());
+				lv.Items[lvi.Index].Tag	=ws;
+			}
+		};
+
+		FormExtensions.Invoke(SeamList, addItem);
+	}
+
+
+	void OnUseFirst(object sender, EventArgs e)
+	{
+		if(SeamList.SelectedItems.Count <= 0)
+		{
+			return;
 		}
 
+		List<ListViewItem>	toNuke	=new List<ListViewItem>();
 
-		public void Clear()
+		for(int i=0;i < SeamList.SelectedItems.Count;i++)
 		{
-			SeamList.Clear();
-			mDevice		=null;
+			ListViewItem	lvi	=SeamList.SelectedItems[i];
+
+			EditorMesh.WeightSeam	ws	=
+				lvi.Tag as EditorMesh.WeightSeam;
+
+			ws.mMeshA.WeldOtherWeights(mDevice, ws);
+
+			toNuke.Add(lvi);
 		}
 
-
-		public void Initialize(Device dev)
+		foreach(ListViewItem lvi in toNuke)
 		{
-			mDevice		=dev;
+			SeamList.Items.Remove(lvi);
+		}
+	}
+
+
+	void OnUseSecond(object sender, EventArgs e)
+	{
+		if(SeamList.SelectedItems.Count <= 0)
+		{
+			return;
 		}
 
+		List<ListViewItem>	toNuke	=new List<ListViewItem>();
 
-		public void SizeColumns()
+		for(int i=0;i < SeamList.SelectedItems.Count;i++)
 		{
-			FormExtensions.SizeColumns(SeamList);
+			ListViewItem	lvi	=SeamList.SelectedItems[i];
+
+			EditorMesh.WeightSeam	ws	=
+				lvi.Tag as EditorMesh.WeightSeam;
+
+			ws.mMeshA.WeldMyWeights(mDevice, ws);
+
+			toNuke.Add(lvi);
 		}
 
-
-		public void AddSeams(List<EditorMesh.WeightSeam> seams)
+		foreach(ListViewItem lvi in toNuke)
 		{
-			Action<ListView>	addItem	=lv =>
-			{
-				foreach(EditorMesh.WeightSeam ws in seams)
-				{
-					ListViewItem	lvi	=lv.Items.Add(ws.mMeshA.Name);
+			SeamList.Items.Remove(lvi);
+		}
+	}
 
-					lv.Items[lvi.Index].SubItems.Add(ws.mMeshB.Name);
-					lv.Items[lvi.Index].SubItems.Add(ws.mSeam.Count.ToString());
-					lv.Items[lvi.Index].Tag	=ws;
-				}
-			};
 
-			FormExtensions.Invoke(SeamList, addItem);
+	void OnAverage(object sender, EventArgs e)
+	{
+		if(SeamList.SelectedItems.Count <= 0)
+		{
+			return;
 		}
 
+		List<ListViewItem>	toNuke	=new List<ListViewItem>();
 
-		void OnUseFirst(object sender, EventArgs e)
+		for(int i=0;i < SeamList.SelectedItems.Count;i++)
 		{
-			if(SeamList.SelectedItems.Count <= 0)
-			{
-				return;
-			}
+			ListViewItem	lvi	=SeamList.SelectedItems[i];
 
-			List<ListViewItem>	toNuke	=new List<ListViewItem>();
+			EditorMesh.WeightSeam	ws	=
+				lvi.Tag as EditorMesh.WeightSeam;
 
-			for(int i=0;i < SeamList.SelectedItems.Count;i++)
-			{
-				ListViewItem	lvi	=SeamList.SelectedItems[i];
+			ws.mMeshA.WeldAverage(mDevice, ws);
 
-				EditorMesh.WeightSeam	ws	=
-					lvi.Tag as EditorMesh.WeightSeam;
-
-				ws.mMeshA.WeldOtherWeights(mDevice, ws);
-
-				toNuke.Add(lvi);
-			}
-
-			foreach(ListViewItem lvi in toNuke)
-			{
-				SeamList.Items.Remove(lvi);
-			}
+			toNuke.Add(lvi);
 		}
 
-
-		void OnUseSecond(object sender, EventArgs e)
+		foreach(ListViewItem lvi in toNuke)
 		{
-			if(SeamList.SelectedItems.Count <= 0)
-			{
-				return;
-			}
-
-			List<ListViewItem>	toNuke	=new List<ListViewItem>();
-
-			for(int i=0;i < SeamList.SelectedItems.Count;i++)
-			{
-				ListViewItem	lvi	=SeamList.SelectedItems[i];
-
-				EditorMesh.WeightSeam	ws	=
-					lvi.Tag as EditorMesh.WeightSeam;
-
-				ws.mMeshA.WeldMyWeights(mDevice, ws);
-
-				toNuke.Add(lvi);
-			}
-
-			foreach(ListViewItem lvi in toNuke)
-			{
-				SeamList.Items.Remove(lvi);
-			}
+			SeamList.Items.Remove(lvi);
 		}
+	}
 
 
-		void OnAverage(object sender, EventArgs e)
-		{
-			if(SeamList.SelectedItems.Count <= 0)
-			{
-				return;
-			}
-
-			List<ListViewItem>	toNuke	=new List<ListViewItem>();
-
-			for(int i=0;i < SeamList.SelectedItems.Count;i++)
-			{
-				ListViewItem	lvi	=SeamList.SelectedItems[i];
-
-				EditorMesh.WeightSeam	ws	=
-					lvi.Tag as EditorMesh.WeightSeam;
-
-				ws.mMeshA.WeldAverage(mDevice, ws);
-
-				toNuke.Add(lvi);
-			}
-
-			foreach(ListViewItem lvi in toNuke)
-			{
-				SeamList.Items.Remove(lvi);
-			}
-		}
-
-
-		void OnFormClosed(object sender, FormClosedEventArgs e)
-		{
-			Clear();
-		}
+	void OnFormClosed(object sender, FormClosedEventArgs e)
+	{
+		Clear();
 	}
 }

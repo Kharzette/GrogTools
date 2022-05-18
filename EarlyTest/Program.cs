@@ -1,6 +1,5 @@
 ﻿using System.Numerics;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using UtilityLib;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
@@ -248,29 +247,29 @@ internal class Program
 			gd.GCam.Update(pos, pSteering.Pitch, pSteering.Yaw, pSteering.Roll);
 
 			//update perframe data
-			skcb.SetView(Matrix4x4.Transpose(gd.GCam.View), gd.GCam.Position);
+			skcb.SetView(gd.GCam.ViewTransposed, gd.GCam.Position);
 			skcb.UpdateFrame(gd.DC);
 
 			//per object shader vars
 			skcb.SetWorldMat(Matrix4x4.Transpose(prism.World));
 			skcb.SetSolidColour(prismColour);
 			skcb.UpdateObject(gd.DC);
-			prism.Draw(gd);
+			prism.Draw(gd.DC);
 
 			skcb.SetWorldMat(Matrix4x4.Transpose(sphere.World));
 			skcb.SetSolidColour(sphereColour);
 			skcb.UpdateObject(gd.DC);
-			sphere.Draw(gd);
+			sphere.Draw(gd.DC);
 
 			skcb.SetWorldMat(Matrix4x4.Transpose(box.World));
 			skcb.SetSolidColour(boxColour);
 			skcb.UpdateObject(gd.DC);
-			box.Draw(gd);
+			box.Draw(gd.DC);
 
 			skcb.SetWorldMat(Matrix4x4.Transpose(cyl.World));
 			skcb.SetSolidColour(cylColour);
 			skcb.UpdateObject(gd.DC);
-			cyl.Draw(gd);
+			cyl.Draw(gd.DC);
 
 			//set up for 2D
 			skcb.SetProjection(Matrix4x4.Transpose(textProj));
@@ -283,7 +282,7 @@ internal class Program
 			st.Draw(Matrix4x4.Identity, textProj);
 
 			//change back to 3D
-			skcb.SetProjection(Matrix4x4.Transpose(gd.GCam.Projection));
+			skcb.SetProjection(gd.GCam.ProjectionTransposed);
 			skcb.UpdateChangeLess(gd.DC);
 
 			gd.Present();
