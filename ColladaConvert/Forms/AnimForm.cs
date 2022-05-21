@@ -2594,7 +2594,7 @@ public partial class AnimForm : Form
 		}
 		else
 		{
-			mChar.SetMatLib(mMatLib);
+			mChar.SetMatLib(mMatLib, mSKeeper);
 		}
 
 		Misc.SafeInvoke(eMeshChanged, mea);
@@ -2648,7 +2648,7 @@ public partial class AnimForm : Form
 		}
 		else
 		{
-			mStatMesh.SetMatLib(mMatLib);
+			mStatMesh.SetMatLib(mMatLib, mSKeeper);
 		}
 
 		Misc.SafeInvoke(eMeshChanged, mea);

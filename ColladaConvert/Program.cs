@@ -50,11 +50,11 @@ internal static class Program
 
 		//save renderform position
 		gd.RendForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
-				Settings.Default,
+				Properties.Settings.Default,
 				"MainWindowPos", true,
 				System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
-		gd.RendForm.Location	=Settings.Default.MainWindowPos;
+		gd.RendForm.Location	=Properties.Settings.Default.MainWindowPos;
 
 		SharedForms.ShaderCompileHelper.mTitle	="Compiling Shaders...";
 
@@ -202,9 +202,9 @@ internal static class Program
 			gd.Present();
 
 			acts.Clear();
-		}, true);	//true here is slow but needed for winforms events
+		}, true);   //true here is slow but needed for winforms events
 
-		Settings.Default.Save();
+		Properties.Settings.Default.Save();
 
 		gd.RendForm.Activated		-=actHandler;
 		gd.RendForm.AppDeactivated	-=deActHandler;
@@ -236,35 +236,35 @@ internal static class Program
 
 		//save positions
 		matForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
-			Settings.Default, "MaterialFormPos", true,
+			Properties.Settings.Default, "MaterialFormPos", true,
 			System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
 		matForm.DataBindings.Add(new System.Windows.Forms.Binding("Size",
-			Settings.Default, "MaterialFormSize", true,
+			Properties.Settings.Default, "MaterialFormSize", true,
 			System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
 		af.DataBindings.Add(new System.Windows.Forms.Binding("Location",
-			Settings.Default, "AnimFormPos", true,
+			Properties.Settings.Default, "AnimFormPos", true,
 			System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
 		skel.DataBindings.Add(new System.Windows.Forms.Binding("Location",
-			Settings.Default, "SkeletonEditorFormPos", true,
+			Properties.Settings.Default, "SkeletonEditorFormPos", true,
 			System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
 		skel.DataBindings.Add(new System.Windows.Forms.Binding("Size",
-			Settings.Default, "SkeletonEditorFormSize", true,
+			Properties.Settings.Default, "SkeletonEditorFormSize", true,
 			System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
 		celForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
-			Settings.Default, "CelTweakFormPos", true,
+			Properties.Settings.Default, "CelTweakFormPos", true,
 			System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
 		outForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
-			Settings.Default, "OutputFormPos", true,
+			Properties.Settings.Default, "OutputFormPos", true,
 			System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
 		outForm.DataBindings.Add(new System.Windows.Forms.Binding("Size",
-			Settings.Default, "OutputFormSize", true,
+			Properties.Settings.Default, "OutputFormSize", true,
 			System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
 		SeamEditor	seam	=null;
@@ -396,11 +396,11 @@ internal static class Program
 		seam	=new SeamEditor();
 
 		seam.DataBindings.Add(new System.Windows.Forms.Binding("Location",
-			Settings.Default, "SeamEditorFormPos", true,
+			Properties.Settings.Default, "SeamEditorFormPos", true,
 			System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 
 		seam.DataBindings.Add(new System.Windows.Forms.Binding("Size",
-			Settings.Default, "SeamEditorFormSize", true,
+			Properties.Settings.Default, "SeamEditorFormSize", true,
 			System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 	}
 
