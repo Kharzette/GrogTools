@@ -41,7 +41,8 @@ internal class Program
 
 		FeatureLevel	f	=FeatureLevel.Level_11_0;
 
-		GraphicsDevice	gd	=new GraphicsDevice("Goblin Test", testIcon, f, 0.1f, 2000f);
+		GraphicsDevice	gd	=new GraphicsDevice("Goblin Test",
+			testIcon, f, 0.1f, 2000f);
 
 		PlayerSteering	pSteering		=SetUpSteering();
 		Input			inp				=SetUpInput(gd.RendForm);
@@ -70,7 +71,7 @@ internal class Program
 		ScreenText	st	=new ScreenText(gd, sk, fonts[1], fonts[1], 512);
 
 		Matrix4x4	textProj	=Matrix4x4.CreateOrthographicOffCenter(
-			0, gd.RendForm.Width, gd.RendForm.Height, 0, -5f, 5f);
+			0, gd.RendForm.Width, gd.RendForm.Height, 0, 0f, 1f);
 
 		byte	[]vsBytes	=sk.GetVSCompiledCode("WNormWPosTexVS");
 
@@ -114,7 +115,27 @@ internal class Program
 		Vector3	yawPitchRoll	=Vector3.Zero;
 		Vector3	pos				=Vector3.One * 5f;
 
-		st.AddString("Camera Location: " + pos, "Position", Vector4.UnitY + Vector4.UnitW, Vector2.UnitX * 20f + Vector2.UnitY * 400f, Vector2.One);
+		st.AddString("Camera Location: " + pos,
+			"Position",									//id
+			Vector4.UnitX + Vector4.UnitW,				//color
+			Vector2.UnitX * 20f + Vector2.UnitY * 400f,	//position
+			Vector2.One);								//scale
+
+		st.AddString("Blort: " + yawPitchRoll.X,
+			"DummyJunx00",								//id
+			Vector4.UnitX + Vector4.UnitW,				//color
+			Vector2.UnitX * 20f + Vector2.UnitY * 420f,	//position
+			Vector2.One);								//scale
+		st.AddString("Blort: " + yawPitchRoll.Y,
+			"DummyJunx01",								//id
+			Vector4.UnitX + Vector4.UnitW,				//color
+			Vector2.UnitX * 20f + Vector2.UnitY * 440f,	//position
+			Vector2.One);								//scale
+		st.AddString("Blort: " + yawPitchRoll.Z,
+			"DummyJunx02",								//id
+			Vector4.UnitX + Vector4.UnitW,				//color
+			Vector2.UnitX * 20f + Vector2.UnitY * 460f,	//position
+			Vector2.One);								//scale
 
 		prism.World		=Matrix4x4.CreateTranslation(Vector3.UnitX * 15f);
 		sphere.World	=Matrix4x4.CreateTranslation(Vector3.UnitX * -15f);
@@ -141,7 +162,7 @@ internal class Program
 		ID3D11SamplerState	ss2D	=gd.GD.CreateSamplerState(sd);
 
 		//depth stencil 3D
-		DepthStencilDescription	dsd	=new DepthStencilDescription(true, DepthWriteMask.All, ComparisonFunction.Less);
+		DepthStencilDescription	dsd		=new DepthStencilDescription(true, DepthWriteMask.All, ComparisonFunction.Less);
 		ID3D11DepthStencilState	dss3D	=gd.GD.CreateDepthStencilState(dsd);
 
 		//2D
@@ -149,10 +170,10 @@ internal class Program
 		ID3D11DepthStencilState	dss2D	=gd.GD.CreateDepthStencilState(dsd);
 
 		//blendstate
-		BlendDescription	bd	=new BlendDescription(Blend.One, Blend.Zero);
+		BlendDescription	bd			=new BlendDescription(Blend.One, Blend.Zero);
 		ID3D11BlendState	bsOpaque	=gd.GD.CreateBlendState(bd);
 
-		bd	=new BlendDescription(Blend.One, Blend.InverseSourceAlpha, Blend.Zero, Blend.Zero);
+		bd	=new BlendDescription(Blend.One, Blend.InverseSourceAlpha, Blend.One, Blend.One);
 		ID3D11BlendState	bsAlpha		=gd.GD.CreateBlendState(bd);
 
 		Vortice.Mathematics.Color	zeroCol	=new Vortice.Mathematics.Color(0);
@@ -206,6 +227,9 @@ internal class Program
 				pos			+=deltaMove;
 
 				st.ModifyStringText("Camera Location: " + pos, "Position");
+				st.ModifyStringText("Yaw	: " + pSteering.Yaw, "DummyJunx00");
+				st.ModifyStringText("Pitch	: " + pSteering.Pitch, "DummyJunx01");
+				st.ModifyStringText("Roll	: " + pSteering.Roll, "DummyJunx02");
 				st.Update();
 
 				if(ChangeLight(acts, ref lightDir))
@@ -221,7 +245,10 @@ internal class Program
 			gd.DC.VSSetShader(vs);
 			gd.DC.PSSetShader(ps);
 
-			gd.DC.PSSetSampler(0, ss3D);
+			//samplers
+			gd.DC.PSSetSampler(0, ss2D);
+			gd.DC.PSSetSampler(3, ss3D);
+
 			gd.DC.OMSetDepthStencilState(dss3D);
 
 			skcb.SetCommonCBToShaders(gd.DC);
@@ -247,7 +274,7 @@ internal class Program
 			gd.GCam.Update(pos, pSteering.Pitch, pSteering.Yaw, pSteering.Roll);
 
 			//update perframe data
-			skcb.SetView(gd.GCam.ViewTransposed, gd.GCam.Position);
+			skcb.SetView(gd.GCam.ViewTransposed, pos);
 			skcb.UpdateFrame(gd.DC);
 
 			//per object shader vars
@@ -275,7 +302,6 @@ internal class Program
 			skcb.SetProjection(Matrix4x4.Transpose(textProj));
 			skcb.UpdateChangeLess(gd.DC);
 
-			gd.DC.PSSetSampler(0, ss2D);
 			gd.DC.OMSetDepthStencilState(dss2D);
 			gd.DC.OMSetBlendState(bsAlpha, oneCol);
 
