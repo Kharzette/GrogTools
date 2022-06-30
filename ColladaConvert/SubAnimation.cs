@@ -165,7 +165,7 @@ public class SubAnimation
 
 	internal Animation.KeyPartsUsed SetKeys(string bone,
 		List<float> times, List<MeshLib.KeyFrame> keys,
-		library_visual_scenes scenes,
+		library_visual_scenes scenes, EventHandler ePrint,
 		List<MeshLib.KeyFrame> axisAngleKeys)
 	{
 		Animation.KeyPartsUsed	ret	=0;
@@ -255,7 +255,12 @@ public class SubAnimation
 							out keys[v].mScale, out keys[v].mRotation,
 							out keys[v].mPosition);
 
-					Debug.Assert(bWorked);
+					//I used to assert for this, but the data isn't entirely bad.
+					//The scale and position were ok at least.  The results were hilarious.
+					if(!bWorked)
+					{
+						ePrint?.Invoke("Keyframe: " + v + " failed to decompose in anim " + sampKey + "\n", null);
+					}
 				}
 				ret	|=Animation.KeyPartsUsed.All;
 			}

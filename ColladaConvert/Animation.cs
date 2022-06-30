@@ -59,7 +59,8 @@ public class Animation
 	}
 
 
-	internal List<MeshLib.SubAnim>	GetAnims(MeshLib.Skeleton skel, library_visual_scenes lvs, out KeyPartsUsed parts)
+	internal List<MeshLib.SubAnim>	GetAnims(MeshLib.Skeleton skel, library_visual_scenes lvs,
+		EventHandler ePrint, out KeyPartsUsed parts)
 	{
 		List<MeshLib.SubAnim>	ret	=new List<MeshLib.SubAnim>();
 
@@ -109,7 +110,7 @@ public class Animation
 			//set keys
 			foreach(SubAnimation sa in mSubAnims)
 			{
-				parts	|=sa.SetKeys(bone, times, keys, lvs, axisAngleKeys);
+				parts	|=sa.SetKeys(bone, times, keys, lvs, ePrint, axisAngleKeys);
 			}
 
 			//fix axis angle keyframes

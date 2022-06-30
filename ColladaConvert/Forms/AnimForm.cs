@@ -885,7 +885,7 @@ public partial class AnimForm : Form
 			}
 			Animation	an	=new Animation(anim);
 
-			subs.AddRange(an.GetAnims(skel, lvs.First(), out partsUsed));
+			subs.AddRange(an.GetAnims(skel, lvs.First(), ePrint, out partsUsed));
 		}
 
 		//TODO:  All of this merging stuff needs testing again

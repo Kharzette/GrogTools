@@ -83,18 +83,18 @@ internal static class Program
 		PostProcess	post	=new PostProcess(gd, sk);
 		
 		EventHandler	actHandler	=new EventHandler(
-			delegate(object s, EventArgs ea)
+			delegate(object ?s, EventArgs ea)
 			{	inp.ClearInputs();	});
 
 		EventHandler<EventArgs>	deActHandler	=new EventHandler<EventArgs>(
-			delegate(object s, EventArgs ea)
+			delegate(object ?s, EventArgs ea)
 			{
 				gd.SetCapture(false);
 				bMouseLookOn	=false;
 			});
 
 		EventHandler	lostHandler	=new EventHandler(
-			delegate(object s, EventArgs ea)
+			delegate(object ?s, EventArgs ea)
 			{
 				post.FreeAll(gd);
 				post	=new PostProcess(gd, sk);
@@ -154,7 +154,7 @@ internal static class Program
 					gd.GCam.Forward, gd.GCam.Left, gd.GCam.Up, acts);
 
 				deltaMove	*=200f;
-				pos			-=deltaMove;
+				pos			+=deltaMove;
 				
 				ChangeLight(acts, ref lightDir);
 
