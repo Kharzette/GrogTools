@@ -134,11 +134,9 @@ internal class MeshConverter
 
 		for(int i=0;i < (int)verts.count;i+=3)
 		{
-			//stuff coming from collada will be inside out
-			//so flip the z
 			mBaseVerts[i / 3].Position0.X		=verts.Values[i];
 			mBaseVerts[i / 3].Position0.Y		=verts.Values[i + 1];
-			mBaseVerts[i / 3].Position0.Z		=-verts.Values[i + 2];	//negate
+			mBaseVerts[i / 3].Position0.Z		=verts.Values[i + 2];
 			mBaseVerts[i / 3].mOriginalIndex	=i / 3;
 		}
 
@@ -225,7 +223,7 @@ internal class MeshConverter
 				weightKey	=ilo.source.Substring(1);
 			}
 		}
-		float_array	weightArray	=null;
+		float_array	?weightArray	=null;
 		foreach(source src in sk.source)
 		{
 			if(src.id != weightKey)
@@ -423,7 +421,7 @@ internal class MeshConverter
 		List<TrackedVert>	verts	=new List<TrackedVert>();
 
 		//adjust coordinate system for normals
-		Matrix4x4	shiftMat	=Matrix4x4.CreateRotationX(MathHelper.PiOver2);
+		//Matrix4x4	shiftMat	=Matrix4x4.CreateRotationX(MathHelper.PiOver2);
 
 		for(int i=0;i < posIdxs.Count;i++)
 		{
@@ -481,7 +479,6 @@ internal class MeshConverter
 			tv	=mBaseVerts[pidx];
 
 			//copy normal if exists
-			//Negate the Z here for right to left handed
 			if(normIdxs != null && norms != null)
 			{
 				Vector3	norm;
@@ -489,10 +486,10 @@ internal class MeshConverter
 				//copy out of float array and switch handedness
 				norm.X	=norms.Values[nidx * 3];
 				norm.Y	=norms.Values[1 + nidx * 3];
-				norm.Z	=-norms.Values[2 + nidx * 3];	//note negation
+				norm.Z	=norms.Values[2 + nidx * 3];
 
 				//rotate
-				norm	=Vector3.TransformNormal(norm, shiftMat);
+				//norm	=Vector3.TransformNormal(norm, shiftMat);
 
 				tv.Normal0	=new Half4(norm.X, norm.Y, norm.Z, 1f);
 			}

@@ -33,19 +33,19 @@ public partial class AnimForm : Form
 	AnimLib	mAnimLib;
 
 	//selected anim info
-	string	mSelectedAnim;
+	string	?mSelectedAnim;
 	float	mAnimStartTime, mAnimEndTime;
 	float	mCurAnimTime;
 	bool	mbPaused;
 
-	StaticMesh		mStatMesh;
+	StaticMesh		?mStatMesh;
 	Character		mChar;
 	IArch			mArch;
 
-	public event EventHandler	eMeshChanged;
-	public event EventHandler	eSkeletonChanged;
-	public event EventHandler	eBoundsChanged;
-	public event EventHandler	ePrint;
+	public event EventHandler	?eMeshChanged;
+	public event EventHandler	?eSkeletonChanged;
+	public event EventHandler	?eBoundsChanged;
+	public event EventHandler	?ePrint;
 
 
 	public AnimForm(ID3D11Device gd, MatLib mats, AnimLib alib, StuffKeeper sk)
@@ -535,7 +535,7 @@ public partial class AnimForm : Form
 
 		foreach(object geomItem in geoms.First().geometry)
 		{
-			geometry	geom	=geomItem as geometry;
+			geometry	?geom	=geomItem as geometry;
 			if(geom == null)
 			{
 				PrintToOutput("Null geometry in BuildFinalVerts()!\n");
@@ -605,7 +605,7 @@ public partial class AnimForm : Form
 					{
 						foreach(controller cont in conts.First().controller)
 						{
-							skin	sk	=cont.Item as skin;
+							skin	?sk	=cont.Item as skin;
 							if(sk == null)
 							{
 								continue;
@@ -661,7 +661,7 @@ public partial class AnimForm : Form
 		{
 			string	contID	=cont.id;
 
-			skin	sk	=cont.Item as skin;
+			skin	?sk	=cont.Item as skin;
 
 			string	skinSource	=sk.source1.Substring(1);
 
@@ -738,7 +738,7 @@ public partial class AnimForm : Form
 
 		foreach(controller cont in lcs.First().controller)
 		{
-			skin	sk	=cont.Item as skin;
+			skin	?sk	=cont.Item as skin;
 			if(sk == null)
 			{
 				continue;
@@ -775,8 +775,8 @@ public partial class AnimForm : Form
 				}
 			}
 
-			Name_array	na	=null;
-			float_array	ma	=null;
+			Name_array	?na	=null;
+			float_array	?ma	=null;
 
 			foreach(source src in sk.source)
 			{

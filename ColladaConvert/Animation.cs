@@ -47,6 +47,8 @@ public class Animation
 		{
 			SubAnimation	sa	=new SubAnimation(anim);
 			mSubAnims.Add(sa);
+
+			mName	="Empty";
 		}
 	}
 
