@@ -40,6 +40,10 @@ Export the base DAE.  Select just the mesh, then in export:
 Main tab:
 	Selection only
 	Include Armatures
+	Global Orientation
+		Forward Z
+		Up		Y
+		Check Apply
 Geom tab:
 	No triangulate
 	Transform: Matrix

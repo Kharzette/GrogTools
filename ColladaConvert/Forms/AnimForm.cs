@@ -283,8 +283,6 @@ public partial class AnimForm : Form
 
 		Skeleton	skel	=BuildSkeleton(colladaFile, ePrint);
 
-		skel.ConvertToLeftHanded();
-
 		//grab visual scenes
 		IEnumerable<library_visual_scenes>	lvss	=
 			colladaFile.Items.OfType<library_visual_scenes>();
@@ -404,8 +402,6 @@ public partial class AnimForm : Form
 		//build or get skeleton
 		Skeleton	skel	=BuildSkeleton(colladaFile, ePrint);
 
-		skel.ConvertToLeftHanded();
-
 		//see if animlib has a skeleton yet
 		if(alib.GetSkeleton() == null)
 		{
@@ -425,20 +421,6 @@ public partial class AnimForm : Form
 			skel	=alib.GetSkeleton();
 		}
 
-		//adjust coordinate system
-		//currently blender won't do anything but Z_UP
-		Matrix4x4	shiftMat	=Matrix4x4.Identity;
-		if(colladaFile.asset.up_axis == UpAxisType.Z_UP)
-		{
-			shiftMat	*=Matrix4x4.CreateRotationX(MathHelper.PiOver2);
-		}
-
-		//bake shiftmat into part verts and normals
-		foreach(MeshConverter mc in chunks)
-		{
-			mc.BakeTransformIntoVerts(shiftMat);
-		}
-
 		Anim	anm	=BuildAnim(colladaFile, alib.GetSkeleton(), lvs, path, ePrint);
 
 		alib.AddAnim(anm);
@@ -455,7 +437,7 @@ public partial class AnimForm : Form
 
 		foreach(MeshConverter mc in chunks)
 		{
-			Mesh	conv	=mc.GetConvertedMesh();
+			Mesh		conv	=mc.GetConvertedMesh();
 			Matrix4x4	mat		=GetSceneNodeTransform(colladaFile, mc);
 
 			//this might not be totally necessary
@@ -697,11 +679,6 @@ public partial class AnimForm : Form
 		//create useful anims
 		List<SubAnim>	subs	=CreateSubAnims(colladaFile, skel, ePrint);
 
-		foreach(SubAnim sub in subs)
-		{
-			sub.ConvertToLeftHanded();
-		}
-
 		Anim	anm	=new Anim(subs);
 
 		FixMultipleSkeletons(lvs, anm, skel);
@@ -827,20 +804,12 @@ public partial class AnimForm : Form
 				}
 				else
 				{
-					//coord system change the inverse bind poses
+					//inverse bind poses need the scalefactor applied
 					Matrix4x4.Invert(ibp, out ibp);
 
-					KeyFrame.RightHandToLeft(ref ibp);
+					Matrix4x4	scaleMat	=Matrix4x4.CreateScale(scaleFactor);
 
-					//adjust coordinate system
-					//There always seems to be a rotation in blenders stuff these days
-					Matrix4x4	shiftMat	=Matrix4x4.CreateRotationX(MathHelper.PiOver2);
-
-					//this will put the model verts back into the space
-					//where the animation happens, which is usually meter space
-					shiftMat	*=Matrix4x4.CreateScale(scaleFactor);
-
-					ibp	*=shiftMat;
+					ibp	*=scaleMat;
 
 					Matrix4x4.Invert(ibp, out ibp);
 
@@ -2496,11 +2465,8 @@ public partial class AnimForm : Form
 	//for adjusting coordinate systems
 	void TransformRoots(Skeleton skel, Anim anm, float scaleFactor)
 	{
-		//adjust coordinate system
-		Matrix4x4	shiftMat	=Matrix4x4.CreateRotationX(MathHelper.PiOver2);
-
 		//this will undo the scaling from the bind shape
-		shiftMat	*=Matrix4x4.CreateScale(Vector3.One * scaleFactor);
+		Matrix4x4	scaleMat	=Matrix4x4.CreateScale(Vector3.One * scaleFactor);
 
 		List<string>	roots	=new List<string>();
 
@@ -2509,7 +2475,7 @@ public partial class AnimForm : Form
 		//rotate the animation to match our coord system
 		foreach(string root in roots)
 		{
-			anm.TransformBoneAnim(root, shiftMat);
+			anm.TransformBoneAnim(root, scaleMat);
 		}
 	}
 
