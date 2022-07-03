@@ -163,7 +163,7 @@ internal static class Program
 
 			cbk.SetCommonCBToShaders(gd.DC);
 
-			matLib.SetTriLightValues(Vector4.One, Vector4.One, Vector4.One, lightDir);
+			matLib.SetLightDirection(lightDir);
 
 			gd.GCam.Update(pos, pSteering.Pitch, pSteering.Yaw, pSteering.Roll);
 
