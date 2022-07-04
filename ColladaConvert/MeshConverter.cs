@@ -483,7 +483,7 @@ internal class MeshConverter
 			{
 				Vector3	norm;
 
-				//copy out of float array and switch handedness
+				//copy out of float array
 				norm.X	=norms.Values[nidx * 3];
 				norm.Y	=norms.Values[1 + nidx * 3];
 				norm.Z	=norms.Values[2 + nidx * 3];
@@ -497,22 +497,22 @@ internal class MeshConverter
 			if(texIdxs0 != null && texCoords0 != null)
 			{
 				tv.TexCoord0.X	=texCoords0.Values[tidx0 * 2];
-				tv.TexCoord0.Y	=-texCoords0.Values[1 + tidx0 * 2];
+				tv.TexCoord0.Y	=texCoords0.Values[1 + tidx0 * 2];
 			}
 			if(texIdxs1 != null && texCoords1 != null)
 			{
 				tv.TexCoord1.X	=texCoords1.Values[tidx1 * 2];
-				tv.TexCoord1.Y	=-texCoords1.Values[1 + tidx1 * 2];
+				tv.TexCoord1.Y	=texCoords1.Values[1 + tidx1 * 2];
 			}
 			if(texIdxs2 != null && texCoords2 != null)
 			{
 				tv.TexCoord2.X	=texCoords2.Values[tidx2 * 2];
-				tv.TexCoord2.Y	=-texCoords2.Values[1 + tidx2 * 2];
+				tv.TexCoord2.Y	=texCoords2.Values[1 + tidx2 * 2];
 			}
 			if(texIdxs3 != null && texCoords3 != null)
 			{
 				tv.TexCoord3.X	=texCoords3.Values[tidx3 * 2];
-				tv.TexCoord3.Y	=-texCoords3.Values[1 + tidx3 * 2];
+				tv.TexCoord3.Y	=texCoords3.Values[1 + tidx3 * 2];
 			}
 			if(colIdxs0 != null && colors0 != null)
 			{
