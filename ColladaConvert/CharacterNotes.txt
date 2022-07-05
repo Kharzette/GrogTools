@@ -27,9 +27,10 @@ Select the mesh, then the metarig, then Object->Parent->Armature Deform->With Au
 
 When the weights look right do: Object Data Properties panel->GameRig->Generate New Rig
 
-Note that this generated rig has a 90 degree X rotation in the root node.  This will cause the
-bind poses to have rotation which is annoying since the exporters axis stuff is broken (z always up).
-Select it and do Object->Apply->Rotation (not that this will fix the bind pose)
+There used to be a problem with generated rigs having a 90 degree rotation in them, but I think
+I've gotten rid of that now.
+
+Select the generated rig and do Object->Apply->Rotation just in case.
 
 Unparent the mesh from the metarig and parent it to the generated rig.
 
