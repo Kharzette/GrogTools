@@ -29,6 +29,7 @@ internal static class Program
 		Pitch, PitchUp, PitchDown,
 		LightX, LightY, LightZ,
 		ToggleMouseLookOn, ToggleMouseLookOff,
+		SensitivityUp, SensitivityDown,
 		Exit
 	};
 
@@ -79,6 +80,7 @@ internal static class Program
 		CommonPrims		comPrims		=new CommonPrims(gd, sk);
 		bool			bMouseLookOn	=false;
 		CBKeeper		cbk				=sk.GetCBKeeper();
+		UserSettings	sets			=new UserSettings();
 
 		//set up post processing module
 		PostProcess	post	=new PostProcess(gd, sk);
@@ -140,7 +142,7 @@ internal static class Program
 			time.Stamp();
 			while(time.GetUpdateDeltaSeconds() > 0f)
 			{
-				acts	=UpdateInput(inp, gd,
+				acts	=UpdateInput(inp, sets, gd,
 					time.GetUpdateDeltaSeconds(), ref bMouseLookOn);
 				if(!gd.RendForm.Focused)
 				{
@@ -205,6 +207,7 @@ internal static class Program
 			acts.Clear();
 		}, true);   //true here is slow but needed for winforms events
 
+		sets.SaveSettings();
 		Properties.Settings.Default.Save();
 
 		gd.RendForm.Activated		-=actHandler;
@@ -372,6 +375,16 @@ internal static class Program
 		inp.MapAction(MyActions.LightY, ActionTypes.ContinuousHold, Modifiers.None, Input.VariousButtons.GamePadDPadDown);
 		inp.MapAction(MyActions.LightZ, ActionTypes.ContinuousHold, Modifiers.None, Input.VariousButtons.GamePadDPadRight);
 
+		//sensitivity adjust
+		inp.MapAction(MyActions.SensitivityDown, ActionTypes.PressAndRelease,
+			Modifiers.None, System.Windows.Forms.Keys.OemMinus);
+		//for numpad
+		inp.MapAction(MyActions.SensitivityUp, ActionTypes.PressAndRelease,
+			Modifiers.None, System.Windows.Forms.Keys.Oemplus);
+		//non numpad will have shift held too
+		inp.MapAction(MyActions.SensitivityUp, ActionTypes.PressAndRelease,
+			Modifiers.ShiftHeld, System.Windows.Forms.Keys.Oemplus);
+
 		inp.MapAction(MyActions.Exit, ActionTypes.ActivateOnce, Modifiers.None, Keys.Escape);
 
 		return	inp;
@@ -407,7 +420,7 @@ internal static class Program
 			System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 	}
 
-	static List<Input.InputAction> UpdateInput(Input inp,
+	static List<Input.InputAction> UpdateInput(Input inp, UserSettings sets,
 		GraphicsDevice gd, float delta, ref bool bMouseLookOn)
 	{
 		List<Input.InputAction>	actions	=inp.GetAction();
@@ -462,7 +475,8 @@ internal static class Program
 			{
 				if(act.mDevice == Input.InputAction.DeviceType.MOUSE)
 				{
-					act.mMultiplier	*=UserSettings.MouseTurnMultiplier;
+					act.mMultiplier	*=UserSettings.MouseTurnMultiplier
+						* sets.mTurnSensitivity;
 				}
 				else if(act.mDevice == Input.InputAction.DeviceType.ANALOG)
 				{
@@ -474,6 +488,26 @@ internal static class Program
 				}
 			}
 		}
+
+		//sensitivity adjust
+		foreach(Input.InputAction act in actions)
+		{
+			float	sense	=sets.mTurnSensitivity;
+			if(act.mAction.Equals(MyActions.SensitivityUp))
+			{
+				sense	+=0.025f;
+			}
+			else if(act.mAction.Equals(MyActions.SensitivityDown))
+			{
+				sense	-=0.025f;
+			}
+			else
+			{
+				continue;
+			}
+			sets.mTurnSensitivity	=Math.Clamp(sense, 0.025f, 10f);
+		}
+
 		return	actions;
 	}
 
