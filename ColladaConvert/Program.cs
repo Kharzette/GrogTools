@@ -28,7 +28,8 @@ internal static class Program
 		Turn, TurnLeft, TurnRight,
 		Pitch, PitchUp, PitchDown,
 		LightX, LightY, LightZ,
-		ToggleMouseLookOn, ToggleMouseLookOff
+		ToggleMouseLookOn, ToggleMouseLookOff,
+		Exit
 	};
 
 	const float	MaxTimeDelta	=0.1f;
@@ -371,6 +372,8 @@ internal static class Program
 		inp.MapAction(MyActions.LightY, ActionTypes.ContinuousHold, Modifiers.None, Input.VariousButtons.GamePadDPadDown);
 		inp.MapAction(MyActions.LightZ, ActionTypes.ContinuousHold, Modifiers.None, Input.VariousButtons.GamePadDPadRight);
 
+		inp.MapAction(MyActions.Exit, ActionTypes.ActivateOnce, Modifiers.None, Keys.Escape);
+
 		return	inp;
 	}
 
@@ -408,6 +411,16 @@ internal static class Program
 		GraphicsDevice gd, float delta, ref bool bMouseLookOn)
 	{
 		List<Input.InputAction>	actions	=inp.GetAction();
+
+		//check for exit
+		foreach(Input.InputAction act in actions)
+		{
+			if(act.mAction.Equals(MyActions.Exit))
+			{
+				gd.RendForm.Close();
+				return	actions;
+			}
+		}
 
 		foreach(Input.InputAction act in actions)
 		{
