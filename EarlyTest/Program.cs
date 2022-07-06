@@ -139,10 +139,11 @@ internal class Program
 			Vector2.UnitX * 20f + Vector2.UnitY * 460f,	//position
 			Vector2.One);								//scale
 
-		prism.World		=Matrix4x4.CreateTranslation(Vector3.UnitX * 15f);
-		sphere.World	=Matrix4x4.CreateTranslation(Vector3.UnitX * -15f);
-		box.World		=Matrix4x4.CreateTranslation(Vector3.UnitZ * 15f);
-		cyl.World		=Matrix4x4.CreateTranslation(Vector3.UnitZ * -15f);
+		//using this to sort of visualize my coordinate system
+		sphere.World	=Matrix4x4.CreateTranslation(Vector3.Zero);
+		box.World		=Matrix4x4.CreateTranslation(Vector3.UnitX * 25f);
+		prism.World		=Matrix4x4.CreateTranslation(Vector3.UnitY * 25f);
+		cyl.World		=Matrix4x4.CreateTranslation(Vector3.UnitZ * 25f);
 
 		//make samplers for 3d and 2d
 		SamplerDescription	sd	=new SamplerDescription(
