@@ -28,6 +28,7 @@ internal class Program
 	};
 
 	const float	MaxTimeDelta	=0.1f;
+	const float	MoveScalar		=25f;
 
 
 	[STAThread]
@@ -49,6 +50,9 @@ internal class Program
 		Input			inp				=SetUpInput(gd.RendForm);
 		UserSettings	sets			=new UserSettings();
 		bool			bMouseLookOn	=false;
+
+		//turn on sprint
+		pSteering.SprintEnabled	=true;
 
 		EventHandler	actHandler	=new EventHandler(
 			delegate(object ?s, EventArgs ea)
@@ -90,7 +94,7 @@ internal class Program
 		skcb.SetTrilights(Vector3.One, Vector3.One * 0.3f,
 			Vector3.One * 0.2f, lightDir);
 
-		skcb.SetSpecular(Vector4.One, 5f);
+		skcb.SetSpecular(Vector4.One, 15f);
 
 		//grab shaders
 		ID3D11VertexShader	vs	=sk.GetVertexShader("WNormWPosTexVS");
@@ -226,7 +230,7 @@ internal class Program
 				Vector3	deltaMove	=pSteering.Update(pos,
 					gd.GCam.Forward, gd.GCam.Left, gd.GCam.Up, acts);
 
-				deltaMove	*=200f;
+				deltaMove	*=MoveScalar;
 				pos			+=deltaMove;
 
 				st.ModifyStringText("Camera Location: " + pos, "Position");

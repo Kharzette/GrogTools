@@ -34,6 +34,7 @@ internal static class Program
 	};
 
 	const float	MaxTimeDelta	=0.1f;
+	const float	MoveScalar		=50f;
 
 
 	[STAThread]
@@ -81,6 +82,9 @@ internal static class Program
 		bool			bMouseLookOn	=false;
 		CBKeeper		cbk				=sk.GetCBKeeper();
 		UserSettings	sets			=new UserSettings();
+
+		//turn on sprint
+		pSteering.SprintEnabled	=true;
 
 		//set up post processing module
 		PostProcess	post	=new PostProcess(gd, sk);
@@ -156,7 +160,7 @@ internal static class Program
 				Vector3	deltaMove	=pSteering.Update(pos,
 					gd.GCam.Forward, gd.GCam.Left, gd.GCam.Up, acts);
 
-				deltaMove	*=200f;
+				deltaMove	*=MoveScalar;
 				pos			+=deltaMove;
 				
 				ChangeLight(acts, ref lightDir);
