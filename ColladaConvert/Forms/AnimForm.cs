@@ -452,7 +452,6 @@ public partial class AnimForm : Form
 			conv.SetTransform(Matrix4x4.Identity);
 
 			arch.AddPart(conv);
-			chr.AddPart(mMatLib);
 
 			if(!conv.Name.EndsWith("Mesh"))
 			{
@@ -495,7 +494,6 @@ public partial class AnimForm : Form
 			m.SetTransform(mat);
 
 			arch.AddPart(m);
-			sm.AddPart(mMatLib);
 		}
 		return	arch;
 	}
@@ -2216,12 +2214,12 @@ public partial class AnimForm : Form
 
 		if(mStatMesh != null)
 		{
-			mStatMesh.Draw(dc, mMatLib);
+			mStatMesh.Draw(mMatLib);
 		}
 
 		if(mChar != null)
 		{
-			mChar.Draw(dc, mSKeeper.GetCBKeeper());
+			mChar.Draw(mMatLib);
 		}
 	}
 
@@ -2235,12 +2233,12 @@ public partial class AnimForm : Form
 
 		if(mStatMesh != null)
 		{
-			mStatMesh.DrawDMN(dc, mMatLib);
+			mStatMesh.DrawDMN(mMatLib);
 		}
 
 		if(mChar != null)
 		{
-			mChar.DrawDMN(dc, mSKeeper.GetCBKeeper());
+			mChar.DrawDMN(mMatLib);
 		}
 	}
 
@@ -2542,19 +2540,7 @@ public partial class AnimForm : Form
 		mea.mArch	=mArch;
 
 		mArch.ReadFromFile(mOFD.FileName, mGD, true);
-		if(!mChar.ReadFromFile(mOFD.FileName + "Instance"))
-		{
-			//make some materialmesh things
-			int	count	=mArch.GetPartCount();
-			for(int i=0;i < count;i++)
-			{
-				mChar.AddPart(mMatLib);
-			}
-		}
-		else
-		{
-			mChar.SetMatLib(mMatLib, mSKeeper);
-		}
+		mChar.ReadFromFile(mOFD.FileName + "Instance");
 
 		Misc.SafeInvoke(eMeshChanged, mea);
 	}
@@ -2596,19 +2582,7 @@ public partial class AnimForm : Form
 		mea.mArch	=mArch;
 
 		mArch.ReadFromFile(mOFD.FileName, mGD, true);
-		if(!mStatMesh.ReadFromFile(mOFD.FileName + "Instance"))
-		{
-			//make some materialmesh things
-			int	count	=mArch.GetPartCount();
-			for(int i=0;i < count;i++)
-			{
-				mStatMesh.AddPart(mMatLib);
-			}
-		}
-		else
-		{
-			mStatMesh.SetMatLib(mMatLib, mSKeeper);
-		}
+		mStatMesh.ReadFromFile(mOFD.FileName + "Instance");
 
 		Misc.SafeInvoke(eMeshChanged, mea);
 	}
