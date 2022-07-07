@@ -348,8 +348,7 @@ public partial class AnimForm : Form
 	}
 
 
-	internal void LoadCharacterDAE(string path,
-		AnimLib alib, IArch arch, Character chr)
+	internal void LoadCharacterDAE(string path,	AnimLib alib, IArch arch)
 	{
 		COLLADA	colladaFile	=DeSerializeCOLLADA(path);
 
@@ -474,13 +473,8 @@ public partial class AnimForm : Form
 
 		IArch	arch	=new StaticArch();
 
-		sm	=new StaticMesh(arch);
 
 		List<MeshConverter>	chunks	=GetMeshChunks(colladaFile, false, GetScaleFactor());
-
-		//this needs to be identity so the game
-		//can mess with it without needing the axis info
-		sm.SetTransform(Matrix4x4.Identity);
 
 		BuildFinalVerts(mGD, colladaFile, chunks);
 		foreach(MeshConverter mc in chunks)
@@ -495,6 +489,13 @@ public partial class AnimForm : Form
 
 			arch.AddPart(m);
 		}
+
+		sm	=new StaticMesh(arch);
+
+		//this needs to be identity so the game
+		//can mess with it without needing the axis info
+		sm.SetTransform(Matrix4x4.Identity);
+
 		return	arch;
 	}
 
@@ -2641,12 +2642,14 @@ public partial class AnimForm : Form
 
 		foreach(string fileName in mOFD.FileNames)
 		{
-			LoadCharacterDAE(fileName, mAnimLib, mArch, mChar);
+			LoadCharacterDAE(fileName, mAnimLib, mArch);
 		}
 
 		RefreshAnimList();
 
 		Mesh.MeshAndArch	mea	=new Mesh.MeshAndArch();
+
+		mChar	=new Character(mArch, mAnimLib);
 
 		mea.mMesh	=mChar;
 		mea.mArch	=mArch;
@@ -2739,15 +2742,6 @@ public partial class AnimForm : Form
 	void OnCalcBounds(object sender, EventArgs e)
 	{
 		mArch.UpdateBounds();
-
-		if(mStatMesh != null)
-		{
-			if(!mStatMesh.IsEmpty())
-			{
-				mStatMesh.UpdateBounds();
-				Misc.SafeInvoke(eBoundsChanged, mStatMesh);
-			}
-		}
 
 		if(mChar != null)
 		{
