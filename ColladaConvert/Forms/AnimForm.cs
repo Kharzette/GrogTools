@@ -479,13 +479,6 @@ public partial class AnimForm : Form
 
 		List<MeshConverter>	chunks	=GetMeshChunks(colladaFile, false, GetScaleFactor());
 
-		//adjust coordinate system
-		Matrix4x4	shiftMat	=Matrix4x4.Identity;
-		if(colladaFile.asset.up_axis == UpAxisType.Z_UP)
-		{
-			shiftMat	*=Matrix4x4.CreateRotationX(MathHelper.PiOver2);
-		}
-
 		//this needs to be identity so the game
 		//can mess with it without needing the axis info
 		sm.SetTransform(Matrix4x4.Identity);
@@ -499,7 +492,7 @@ public partial class AnimForm : Form
 			m.Name	=mc.GetGeomName();
 
 			//set transform of each mesh
-			m.SetTransform(mat * shiftMat);
+			m.SetTransform(mat);
 
 			arch.AddPart(m);
 			sm.AddPart(mMatLib);
