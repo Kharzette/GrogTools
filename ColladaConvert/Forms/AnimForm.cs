@@ -430,7 +430,7 @@ public partial class AnimForm : Form
 		//for the root bone.
 		anm.SetBoneRefs(skel);
 
-		CreateSkin(colladaFile, arch, chunks, skel, scaleFactor, ePrint);
+		FixBoneIndexes(colladaFile, chunks, skel);
 
 		BuildFinalVerts(mGD, colladaFile, chunks);
 
@@ -458,6 +458,7 @@ public partial class AnimForm : Form
 			}
 			mc.ePrint	-=OnPrintString;
 		}
+		CreateSkin(colladaFile, arch, chunks, skel, scaleFactor, ePrint);
 	}
 
 
@@ -685,9 +686,9 @@ public partial class AnimForm : Form
 	static void CreateSkin(COLLADA				colladaFile,
 							IArch				arch,
 							List<MeshConverter>	chunks,
-							Skeleton				skel,
+							Skeleton			skel,
 							float				scaleFactor,
-							EventHandler			ePrint)
+							EventHandler		ePrint)
 	{
 		IEnumerable<library_controllers>	lcs	=colladaFile.Items.OfType<library_controllers>();
 		if(lcs.Count() <= 0)
@@ -812,9 +813,7 @@ public partial class AnimForm : Form
 
 		skin.SetBonePoses(invBindPoses);
 
-		arch.SetSkin(skin);
-
-		FixBoneIndexes(colladaFile, chunks, skel);
+		arch.SetSkin(skin, skel);
 	}
 
 
@@ -2516,6 +2515,8 @@ public partial class AnimForm : Form
 		mAnimLib.ReadFromFile(mOFD.FileName);
 
 		Misc.SafeInvoke(eSkeletonChanged, mAnimLib.GetSkeleton());
+
+		BonesChanged();
 
 		RefreshAnimList();
 	}
