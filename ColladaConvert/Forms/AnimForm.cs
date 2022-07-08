@@ -2742,8 +2742,6 @@ public partial class AnimForm : Form
 
 	void OnCalcBounds(object sender, EventArgs e)
 	{
-		mArch.UpdateBounds();
-
 		if(mChar != null)
 		{
 			if(!mChar.IsEmpty())
@@ -2751,6 +2749,12 @@ public partial class AnimForm : Form
 				mChar.UpdateBounds();
 				Misc.SafeInvoke(eBoundsChanged, mChar);
 			}
+		}
+
+		if(mStatMesh != null)
+		{
+			mArch.UpdateBounds();
+			Misc.SafeInvoke(eBoundsChanged, mStatMesh);
 		}
 	}
 
