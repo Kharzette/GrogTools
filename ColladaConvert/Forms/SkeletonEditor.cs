@@ -14,6 +14,9 @@ namespace ColladaConvert
 
 		internal event EventHandler	eSelectUnUsedBones;
 		internal event EventHandler	eBonesChanged;
+		internal event EventHandler	ePrint;
+		internal event EventHandler	eAdjustBone;
+		internal event EventHandler	eChangeBoneBound;
 
 
 		public SkeletonEditor()
@@ -118,6 +121,45 @@ namespace ColladaConvert
 //			{
 //				OnRenameEntity(null, null);
 //			}
+		}
+
+
+		void OnAdjustBone(object sender, EventArgs e)
+		{
+			TreeNode	toAdj	=SkeletonTree.SelectedNode;
+			if(toAdj == null)
+			{
+				return;
+			}
+
+			//disable tree till adjusting done
+			SkeletonTree.Enabled	=false;
+
+			Misc.SafeInvoke(ePrint, "Adjusting bound of " + toAdj.Name
+				+ ".  Use R / Shift-R to adjust radius, T / Shift-T to adjust length along the bone axis, X when finished.\n");
+
+			Misc.SafeInvoke(eAdjustBone, toAdj.Name);
+		}
+
+
+		void BoundShapeChanged(object sender, EventArgs e)
+		{
+			string	shape	="";
+
+			if(RadioBox.Checked)
+			{
+				shape	=RadioBox.Text;
+			}
+			else if(RadioSphere.Checked)
+			{
+				shape	=RadioSphere.Text;
+			}
+			else if(RadioCapsule.Checked)
+			{
+				shape	=RadioCapsule.Text;
+			}
+
+			Misc.SafeInvoke(eChangeBoneBound, shape);
 		}
 	}
 }

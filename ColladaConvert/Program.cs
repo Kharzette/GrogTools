@@ -30,6 +30,8 @@ internal static class Program
 		LightX, LightY, LightZ,
 		ToggleMouseLookOn, ToggleMouseLookOff,
 		SensitivityUp, SensitivityDown,
+		BoneRadiusUp, BoneLengthUp, 
+		BoneRadiusDown, BoneLengthDown, BoneDone,
 		Exit
 	};
 
@@ -280,6 +282,7 @@ internal static class Program
 
 		af.eMeshChanged			+=(sender, args) => matForm.SetMesh(sender);
 		af.ePrint				+=(sender, args) => outForm.Print(sender as string);
+		skel.ePrint				+=(sender, args) => outForm.Print(sender as string);
 		matForm.eNukedMeshPart	+=(sender, args) => af.NukeMeshPart(sender as List<int>);
 		matForm.eStripElements	+=(sender, args) =>
 			{	if(se.Visible){	return;	}
@@ -311,6 +314,7 @@ internal static class Program
 
 		skel.eSelectUnUsedBones	+=(sender, args) => af.GetBoneNamesInUseByDraw(sender as List<string>);
 		skel.eBonesChanged		+=(sender, args) => af.BonesChanged();
+		skel.eAdjustBone		+=(sender, args) => af.AdjustBone(sender as string);
 
 		af.Visible		=true;
 		matForm.Visible	=true;
@@ -388,6 +392,12 @@ internal static class Program
 		//non numpad will have shift held too
 		inp.MapAction(MyActions.SensitivityUp, ActionTypes.PressAndRelease,
 			Modifiers.ShiftHeld, System.Windows.Forms.Keys.Oemplus);
+
+		inp.MapAction(MyActions.BoneLengthUp, ActionTypes.ActivateOnce, Modifiers.None, Keys.T);
+		inp.MapAction(MyActions.BoneRadiusUp, ActionTypes.ActivateOnce, Modifiers.None, Keys.R);
+		inp.MapAction(MyActions.BoneLengthDown, ActionTypes.ActivateOnce, Modifiers.ShiftHeld, Keys.T);
+		inp.MapAction(MyActions.BoneRadiusDown, ActionTypes.ActivateOnce, Modifiers.ShiftHeld, Keys.R);
+		inp.MapAction(MyActions.BoneDone, ActionTypes.ActivateOnce, Modifiers.None, Keys.X);
 
 		inp.MapAction(MyActions.Exit, ActionTypes.ActivateOnce, Modifiers.None, Keys.Escape);
 
@@ -513,6 +523,29 @@ internal static class Program
 		}
 
 		return	actions;
+	}
+
+
+	static void AdjustBone(List<Input.InputAction> acts)
+	{
+		foreach(Input.InputAction act in acts)
+		{
+			if(act.mAction.Equals(MyActions.BoneLengthUp))
+			{
+			}
+			else if(act.mAction.Equals(MyActions.BoneRadiusUp))
+			{
+			}
+			else if(act.mAction.Equals(MyActions.BoneLengthDown))
+			{
+			}
+			else if(act.mAction.Equals(MyActions.BoneRadiusDown))
+			{
+			}
+			else if(act.mAction.Equals(MyActions.BoneDone))
+			{
+			}
+		}
 	}
 
 
