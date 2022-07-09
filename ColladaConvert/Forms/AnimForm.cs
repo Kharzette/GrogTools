@@ -96,6 +96,12 @@ public partial class AnimForm : Form
 	}
 
 
+	public void AdjustBone(string boneName)
+	{
+		//stub till I get things going
+	}
+
+
 	internal COLLADA DeSerializeCOLLADA(string path)
 	{
 		FileStream		fs	=new FileStream(path, FileMode.Open, FileAccess.Read);
@@ -2558,6 +2564,10 @@ public partial class AnimForm : Form
 		{
 			return;
 		}
+
+//		CharacterArch?	ca	=mArch as CharacterArch;
+
+//		ca?.SaveToFile(mSFD.FileName, mAnimLib.GetSkeleton());
 
 		mArch.SaveToFile(mSFD.FileName);
 		mChar.SaveToFile(mSFD.FileName + "Instance");
