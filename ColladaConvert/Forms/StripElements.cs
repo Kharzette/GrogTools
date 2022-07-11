@@ -28,7 +28,7 @@ namespace ColladaConvert
 		}
 
 
-		public void Populate(ArchEventArgs aea)
+		public void Populate(ArchEventArgs ?aea)
 		{
 			if(aea == null)
 			{

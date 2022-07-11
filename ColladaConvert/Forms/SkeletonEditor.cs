@@ -16,7 +16,7 @@ namespace ColladaConvert
 		internal event EventHandler	eBonesChanged;
 		internal event EventHandler	ePrint;
 		internal event EventHandler	eAdjustBone;
-		internal event EventHandler	eChangeBoneBound;
+		internal event EventHandler	eChangeBoundShape;
 
 
 		public SkeletonEditor()
@@ -25,8 +25,13 @@ namespace ColladaConvert
 		}
 
 
-		public void Initialize(Skeleton skel)
+		public void Initialize(Skeleton ?skel)
 		{
+			if(skel == null)
+			{
+				return;
+			}
+
 			SkeletonTree.Nodes.Clear();
 
 			mSkeleton	=skel;
@@ -159,7 +164,7 @@ namespace ColladaConvert
 				shape	=RadioCapsule.Text;
 			}
 
-			Misc.SafeInvoke(eChangeBoneBound, shape);
+			Misc.SafeInvoke(eChangeBoundShape, shape);
 		}
 	}
 }

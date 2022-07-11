@@ -19,7 +19,7 @@ namespace ColladaConvert;
 
 internal static class Program
 {
-	enum MyActions
+	internal enum MyActions
 	{
 		MoveForwardBack, MoveForward, MoveBack,
 		MoveLeftRight, MoveLeft, MoveRight,
@@ -70,20 +70,13 @@ internal static class Program
 
 		sk.Init(gd, ".");
 
-		MatLib		matLib	=new MatLib(gd, sk);
-
-//		matLib.InitCelShading(1);
-//		matLib.GenerateCelTexturePreset(gd.GD,
-//			gd.GD.FeatureLevel == FeatureLevel.Level_9_3, false, 0);
-//		matLib.SetCelTexture(0);
-
 		PlayerSteering	pSteering		=SetUpSteering();
 		Input			inp				=SetUpInput(gd.RendForm);
 		Random			rand			=new Random();
-		CommonPrims		comPrims		=new CommonPrims(gd, sk);
 		bool			bMouseLookOn	=false;
 		CBKeeper		cbk				=sk.GetCBKeeper();
 		UserSettings	sets			=new UserSettings();
+		FormStuff		fstuff			=new FormStuff(gd.GD, sk);
 
 		//turn on sprint
 		pSteering.SprintEnabled	=true;
@@ -115,8 +108,6 @@ internal static class Program
 
 		int	resx	=gd.RendForm.ClientRectangle.Width;
 		int	resy	=gd.RendForm.ClientRectangle.Height;
-
-		AnimForm	ss	=SetUpForms(gd.GD, matLib, sk, comPrims);
 
 		Vector3	pos			=Vector3.One * 5f;
 		Vector3	lightDir	=-Vector3.UnitY;
@@ -172,18 +163,12 @@ internal static class Program
 
 			cbk.SetCommonCBToShaders(gd.DC);
 
-			matLib.SetLightDirection(lightDir);
-
 			gd.GCam.Update(pos, pSteering.Pitch, pSteering.Yaw, pSteering.Roll);
 
 			cbk.SetView(gd.GCam.ViewTransposed, gd.GCam.Position);
 			cbk.UpdateFrame(gd.DC);
 
-//			matLib.UpdateWVP(Matrix.Identity, gd.GCam.View, gd.GCam.Projection, gd.GCam.Position);
-
-			comPrims.Update(gd.GCam, lightDir);
-
-			ss.RenderUpdate(time.GetRenderUpdateDeltaSeconds());
+			fstuff.RenderUpdate(gd.GCam, lightDir, time.GetRenderUpdateDeltaSeconds());
 
 			post.SetTargets(gd, "BackColor", "BackDepth");
 
@@ -191,23 +176,7 @@ internal static class Program
 				Misc.SystemColorToDXColor(System.Drawing.Color.CornflowerBlue));
 			post.ClearDepth(gd, "BackDepth");
 
-			ss.Render(gd.DC);
-
-			if(ss.GetDrawAxis())
-			{
-				comPrims.DrawAxis(gd.DC);
-			}
-
-			if(ss.GetDrawBox())
-			{
-				comPrims.DrawBox(gd.DC, Matrix4x4.Identity);
-			}
-
-			if(ss.GetDrawSphere())
-			{
-				comPrims.DrawSphere(gd.DC, Matrix4x4.Identity);
-			}
-
+			fstuff.Render();
 			gd.Present();
 
 			acts.Clear();
@@ -219,10 +188,9 @@ internal static class Program
 		gd.RendForm.Activated		-=actHandler;
 		gd.RendForm.AppDeactivated	-=deActHandler;
 
-		comPrims.FreeAll();
 		inp.FreeAll(gd.RendForm);
 		post.FreeAll(gd);
-		matLib.FreeAll();
+		fstuff.FreeAll();
 
 		sk.eCompileDone		-=SharedForms.ShaderCompileHelper.CompileDoneHandler;
 		sk.eCompileNeeded	-=SharedForms.ShaderCompileHelper.CompileNeededHandler;
@@ -233,97 +201,6 @@ internal static class Program
 		gd.ReleaseAll();
 	}
 
-	static AnimForm SetUpForms(ID3D11Device gd, MatLib matLib, StuffKeeper sk, CommonPrims ep)
-	{
-		MeshLib.AnimLib	animLib	=new MeshLib.AnimLib();
-		AnimForm		af		=new AnimForm(gd, matLib, animLib, sk);
-		StripElements	se		=new StripElements();
-		SkeletonEditor	skel	=new SkeletonEditor();			
-
-		SharedForms.MaterialForm	matForm	=new SharedForms.MaterialForm(matLib, sk);
-		SharedForms.CelTweakForm	celForm	=new SharedForms.CelTweakForm(gd, matLib);
-		SharedForms.Output			outForm	=new SharedForms.Output();
-
-		//save positions
-		matForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
-			Properties.Settings.Default, "MaterialFormPos", true,
-			System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-
-		matForm.DataBindings.Add(new System.Windows.Forms.Binding("Size",
-			Properties.Settings.Default, "MaterialFormSize", true,
-			System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-
-		af.DataBindings.Add(new System.Windows.Forms.Binding("Location",
-			Properties.Settings.Default, "AnimFormPos", true,
-			System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-
-		skel.DataBindings.Add(new System.Windows.Forms.Binding("Location",
-			Properties.Settings.Default, "SkeletonEditorFormPos", true,
-			System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-
-		skel.DataBindings.Add(new System.Windows.Forms.Binding("Size",
-			Properties.Settings.Default, "SkeletonEditorFormSize", true,
-			System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-
-		celForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
-			Properties.Settings.Default, "CelTweakFormPos", true,
-			System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-
-		outForm.DataBindings.Add(new System.Windows.Forms.Binding("Location",
-			Properties.Settings.Default, "OutputFormPos", true,
-			System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-
-		outForm.DataBindings.Add(new System.Windows.Forms.Binding("Size",
-			Properties.Settings.Default, "OutputFormSize", true,
-			System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-
-		SeamEditor	seam	=null;
-		MakeSeamForm(ref seam);
-
-		af.eMeshChanged			+=(sender, args) => matForm.SetMesh(sender);
-		af.ePrint				+=(sender, args) => outForm.Print(sender as string);
-		skel.ePrint				+=(sender, args) => outForm.Print(sender as string);
-		matForm.eNukedMeshPart	+=(sender, args) => af.NukeMeshPart(sender as List<int>);
-		matForm.eStripElements	+=(sender, args) =>
-			{	if(se.Visible){	return;	}
-				se.Populate(args as ArchEventArgs);	};
-		matForm.eGenTangents	+=(sender, args) =>
-			{	ArchEventArgs	aea	=args as ArchEventArgs;
-				if(aea != null)
-				{
-					aea.mArch.GenTangents(gd, aea.mIndexes, matForm.GetTexCoordSet());
-				}	};
-		matForm.eFoundSeams		+=(sender, args) =>
-			{	if(seam.IsDisposed)
-				{
-					MakeSeamForm(ref seam);
-				}
-				seam.Initialize(gd);
-				seam.AddSeams(sender as List<EditorMesh.WeightSeam>);
-				seam.SizeColumns();
-				seam.Visible	=true;	};
-		se.eDeleteElement		+=(sender, args) =>
-			{	List<int>	elements	=sender as List<int>;
-				af.NukeVertexElement(se.GetIndexes(), elements);
-				se.Populate(null);	se.Visible	=false;
-				matForm.RefreshMeshPartList();	};
-		se.eEscape				+=(sender, args) =>
-			{	se.Populate(null);	se.Visible	=false;	};
-		af.eSkeletonChanged		+=(sender, args) => skel.Initialize(sender as MeshLib.Skeleton);
-		af.eBoundsChanged		+=(sender, args) => ep.ReBuildBoundsDrawData(gd, sender);			
-
-		skel.eSelectUnUsedBones	+=(sender, args) => af.GetBoneNamesInUseByDraw(sender as List<string>);
-		skel.eBonesChanged		+=(sender, args) => af.BonesChanged();
-		skel.eAdjustBone		+=(sender, args) => af.AdjustBone(sender as string);
-
-		af.Visible		=true;
-		matForm.Visible	=true;
-		skel.Visible	=true;
-		celForm.Visible	=true;
-		outForm.Visible	=true;
-
-		return	af;
-	}
 
 	static Input SetUpInput(RenderForm hwnd)
 	{
@@ -419,19 +296,6 @@ internal static class Program
 		pSteering.SetPitchEnums(MyActions.Pitch, MyActions.PitchUp, MyActions.PitchDown);
 
 		return	pSteering;
-	}
-
-	static void MakeSeamForm(ref SeamEditor seam)
-	{
-		seam	=new SeamEditor();
-
-		seam.DataBindings.Add(new System.Windows.Forms.Binding("Location",
-			Properties.Settings.Default, "SeamEditorFormPos", true,
-			System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-
-		seam.DataBindings.Add(new System.Windows.Forms.Binding("Size",
-			Properties.Settings.Default, "SeamEditorFormSize", true,
-			System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 	}
 
 	static List<Input.InputAction> UpdateInput(Input inp, UserSettings sets,

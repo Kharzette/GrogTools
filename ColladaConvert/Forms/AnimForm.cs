@@ -84,7 +84,7 @@ public partial class AnimForm : Form
 	}
 
 
-	internal void GetBoneNamesInUseByDraw(List<string> names)
+	internal void GetBoneNamesInUseByDraw(List<string> ?names)
 	{
 		mChar.GetBoneNamesInUseByDraw(names);
 	}
