@@ -41,6 +41,12 @@ namespace ColladaConvert
 		}
 
 
+		internal Skeleton GetSkeleton()
+		{
+			return	mSkeleton;
+		}
+
+
 		void IterateStructure(string boneName, string parent)
 		{
 			Debug.WriteLine(boneName + ", " + parent);

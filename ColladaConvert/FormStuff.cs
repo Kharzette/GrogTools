@@ -94,18 +94,20 @@ internal class FormStuff
 
 		if(mAF.GetDrawAxis())
 		{
-			mCPrims.DrawAxis(mGD.ImmediateContext);
+			mCPrims.DrawAxis();
 		}
 
 		if(mAF.GetDrawBox())
 		{
-			mCPrims.DrawBox(mGD.ImmediateContext, Matrix4x4.Identity);
+			mCPrims.DrawBox(Matrix4x4.Identity);
 		}
 
 		if(mAF.GetDrawSphere())
 		{
-			mCPrims.DrawSphere(mGD.ImmediateContext, Matrix4x4.Identity);
+			mCPrims.DrawSphere(Matrix4x4.Identity);
 		}
+
+		mBBE.Render();
 	}
 
 
@@ -121,12 +123,13 @@ internal class FormStuff
 	#region Anim Form Events
 	void OnAFBoundsChanged(object ?sender, EventArgs ea)
 	{
-		mCPrims.ReBuildBoundsDrawData(mGD, sender);
+		mCPrims.ReBuildBoundsDrawData(sender);
 	}
 
 	void OnAFMeshChanged(object ?sender, EventArgs ea)
 	{
 		mMF.SetMesh(sender);
+		mBBE.MeshChanged(sender);
 	}
 
 	void OnAFSkelChanged(object ?sender, EventArgs ea)
