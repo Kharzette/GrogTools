@@ -141,6 +141,7 @@ internal static class Program
 			{
 				acts	=UpdateInput(inp, sets, gd,
 					time.GetUpdateDeltaSeconds(), ref bMouseLookOn);
+
 				if(!gd.RendForm.Focused)
 				{
 					acts.Clear();
@@ -157,6 +158,7 @@ internal static class Program
 				pos			+=deltaMove;
 				
 				ChangeLight(acts, ref lightDir);
+				fstuff.AdjustBone(acts);
 
 				time.UpdateDone();
 			}
