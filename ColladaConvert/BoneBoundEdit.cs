@@ -68,9 +68,16 @@ internal class BoneBoundEdit
 		}
 
 		mBoneName	=sender as string;
-		mBoneIndex	=skel.GetBoneIndex(mBoneName);
-
-		mbActive	=true;
+		if(mBoneName == null)
+		{
+			mBoneIndex	=-1;
+			mbActive	=false;
+		}
+		else
+		{
+			mBoneIndex	=skel.GetBoneIndex(mBoneName);
+			mbActive	=true;
+		}
 	}
 
 	void OnBonesChanged(object ?sender, EventArgs ea)

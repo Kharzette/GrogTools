@@ -143,13 +143,28 @@ namespace ColladaConvert
 				return;
 			}
 
-			//disable tree till adjusting done
-			SkeletonTree.Enabled	=false;
+			string	bone;
+			string	msg;
 
-			Misc.SafeInvoke(ePrint, "Adjusting bound of " + toAdj.Name
-				+ ".  Use R / Shift-R to adjust radius, T / Shift-T to adjust length along the bone axis, X when finished.\n");
+			//toggle
+			if(SkeletonTree.Enabled)
+			{
+				//disable tree till adjusting done
+				SkeletonTree.Enabled	=false;
+				bone					=toAdj.Name;
+				msg						="Adjusting bound of " + toAdj.Name
+										+ ".  Use R / Shift-R to adjust radius, T / Shift-T to adjust "
+										+ "length along the bone axis, X when finished.\n";
+			}
+			else
+			{
+				SkeletonTree.Enabled	=true;
+				bone					="";
+				msg						="Bone adjust off.\n";
+			}
 
-			Misc.SafeInvoke(eAdjustBone, toAdj.Name);
+			Misc.SafeInvoke(ePrint, msg);
+			Misc.SafeInvoke(eAdjustBone, bone);
 		}
 
 
