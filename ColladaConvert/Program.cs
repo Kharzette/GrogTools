@@ -36,7 +36,7 @@ internal static class Program
 	};
 
 	const float	MaxTimeDelta	=0.1f;
-	const float	MoveScalar		=50f;
+	const float	MoveScalar		=1.25f;
 
 
 	[STAThread]
@@ -153,7 +153,7 @@ internal static class Program
 				Vector3	deltaMove	=pSteering.Update(pos,
 					gd.GCam.Forward, gd.GCam.Left, gd.GCam.Up, acts);
 
-				deltaMove	*=MoveScalar;
+				deltaMove	*=MoveScalar * fstuff.GetScaleFactor();
 				pos			+=deltaMove;
 				
 				ChangeLight(acts, ref lightDir);
@@ -276,7 +276,7 @@ internal static class Program
 		inp.MapAction(MyActions.BoneRadiusDown, ActionTypes.ActivateOnce, Modifiers.ShiftHeld, Keys.R);
 		inp.MapAction(MyActions.BoneDone, ActionTypes.ActivateOnce, Modifiers.None, Keys.X);
 
-		inp.MapAction(MyActions.Exit, ActionTypes.ActivateOnce, Modifiers.None, Keys.Escape);
+		inp.MapAction(MyActions.Exit, ActionTypes.ActivateOnce, Modifiers.ControlHeld, Keys.X);
 
 		return	inp;
 	}

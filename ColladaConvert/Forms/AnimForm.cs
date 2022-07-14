@@ -45,6 +45,7 @@ public partial class AnimForm : Form
 	public event EventHandler	?eMeshChanged;
 	public event EventHandler	?eSkeletonChanged;
 	public event EventHandler	?eBoundsChanged;
+	public event EventHandler	?eScaleFactorDecided;
 	public event EventHandler	?ePrint;
 
 
@@ -287,6 +288,8 @@ public partial class AnimForm : Form
 
 		scaleFactor	*=MeshConverter.GetScaleFactor(GetScaleFactor());
 
+		Misc.SafeInvoke(eScaleFactorDecided, scaleFactor);
+
 		Skeleton	skel	=BuildSkeleton(colladaFile, ePrint);
 
 		//grab visual scenes
@@ -378,6 +381,8 @@ public partial class AnimForm : Form
 		}
 
 		scaleFactor	*=MeshConverter.GetScaleFactor(GetScaleFactor());
+
+		Misc.SafeInvoke(eScaleFactorDecided, scaleFactor);
 
 		Matrix4x4	scaleMat	=Matrix4x4.CreateScale(Vector3.One * (1f / scaleFactor));
 		
@@ -2257,9 +2262,13 @@ public partial class AnimForm : Form
 
 	internal void NukeMeshPart(List<int> indexes)
 	{
+		int	partsLeft	=0;
+
 		if(mArch != null)
 		{
 			mArch.NukeParts(indexes);
+
+			partsLeft	=mArch.GetPartCount();
 		}
 		if(mStatMesh != null)
 		{
@@ -2269,6 +2278,22 @@ public partial class AnimForm : Form
 		{
 			mChar.NukeParts(indexes);
 		}
+
+		if(partsLeft > 0)
+		{
+			return;
+		}
+
+		//if all parts are gone, just blast the skin and skel and all
+		mArch	=new CharacterArch();
+		mChar	=new Character(mArch, mAnimLib);
+
+		Mesh.MeshAndArch	mea	=new Mesh.MeshAndArch();
+
+		mea.mMesh	=mChar;
+		mea.mArch	=mArch;
+
+		Misc.SafeInvoke(eMeshChanged, mea);
 	}
 
 

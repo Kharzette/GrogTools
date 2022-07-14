@@ -54,11 +54,6 @@ internal class MeshConverter
 
 	internal event EventHandler	ePrint;
 
-	//scale factors, collada always in meterish scale
-	const float	MetersToQuakeUnits	=37.6471f;
-	const float	MetersToValveUnits	=39.37001f;
-	const float	MetersToGrogUnits	=MetersToValveUnits;
-
 
 	internal MeshConverter(string name, string geoName)
 	{
@@ -103,22 +98,22 @@ internal class MeshConverter
 
 		if(sf == ScaleFactor.Centimeters)
 		{
-			scaleFactor	*=100f;
+			scaleFactor	*=Mesh.MetersToCentiMeters;
 		}
 		else if(sf == ScaleFactor.Grog)
 		{
-			scaleFactor	*=MetersToGrogUnits;
+			scaleFactor	*=Mesh.MetersToGrogUnits;
 		}
 		else if(sf == ScaleFactor.Meters)
 		{
 		}
 		else if(sf == ScaleFactor.Quake)
 		{
-			scaleFactor	*=MetersToQuakeUnits;
+			scaleFactor	*=Mesh.MetersToQuakeUnits;
 		}
 		else if(sf == ScaleFactor.Valve)
 		{
-			scaleFactor	*=MetersToValveUnits;
+			scaleFactor	*=Mesh.MetersToValveUnits;
 		}
 
 		return	scaleFactor;

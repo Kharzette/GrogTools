@@ -37,6 +37,8 @@ internal class FormStuff
 
 	ID3D11Device	mGD;
 
+	float	mScaleFactor;
+
 
 	internal FormStuff(ID3D11Device gd, StuffKeeper sk)
 	{
@@ -50,6 +52,8 @@ internal class FormStuff
 //		matLib.GenerateCelTexturePreset(gd.GD,
 //			gd.GD.FeatureLevel == FeatureLevel.Level_9_3, false, 0);
 //		matLib.SetCelTexture(0);
+
+		mScaleFactor	=1f;	//start at meters?
 
 		mAF		=new AnimForm(gd, mMatLib, mAnimLib, sk);
 		mSE		=new StripElements();
@@ -75,6 +79,12 @@ internal class FormStuff
 	internal void AdjustBone(List<Input.InputAction> acts)
 	{
 		mBBE.AdjustBone(acts);
+	}
+
+
+	internal float GetScaleFactor()
+	{
+		return	mScaleFactor;
 	}
 
 
@@ -136,6 +146,16 @@ internal class FormStuff
 	{
 		Skeleton	?skel	=sender as Skeleton;
 		mSKE.Initialize(skel);
+	}
+
+	void OnAFScaleFactorDecided(object ?sender, EventArgs ea)
+	{
+		if(sender == null)
+		{
+			return;
+		}
+		mScaleFactor	=(float)sender;
+		mCPrims.SetAxisScale(mScaleFactor);
 	}
 	#endregion
 
@@ -246,6 +266,7 @@ internal class FormStuff
 		mAF.eMeshChanged		+=OnAFMeshChanged;
 		mAF.ePrint				+=OnAnyPrint;
 		mAF.eSkeletonChanged	+=OnAFSkelChanged;
+		mAF.eScaleFactorDecided	+=OnAFScaleFactorDecided;
 
 		//strip elements
 		mSE.eDeleteElement	+=OnSEDeleteElement;
@@ -273,6 +294,7 @@ internal class FormStuff
 		mAF.eMeshChanged		-=OnAFMeshChanged;
 		mAF.ePrint				-=OnAnyPrint;
 		mAF.eSkeletonChanged	-=OnAFSkelChanged;
+		mAF.eScaleFactorDecided	-=OnAFScaleFactorDecided;
 
 		//strip elements
 		mSE.eDeleteElement	-=OnSEDeleteElement;
