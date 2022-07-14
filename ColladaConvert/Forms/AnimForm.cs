@@ -712,7 +712,7 @@ public partial class AnimForm : Form
 		Skin	skin	=arch.GetSkin();
 		if(skin == null)
 		{
-			skin	=new Skin();
+			skin	=new Skin(scaleFactor);
 		}
 
 		Dictionary<int, Matrix4x4>	invBindPoses	=new Dictionary<int, Matrix4x4>();
