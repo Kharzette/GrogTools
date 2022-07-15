@@ -21,7 +21,8 @@ internal class BoneBoundEdit
 	string		?mBoneName;		//active bone name
 
 	//values in meters
-	const float	RadiusIncrement	=0.01f;
+	const float	RadiusIncrement	=0.05f;
+	const float	LengthIncrement	=0.05f;
 
 
 	internal BoneBoundEdit(CommonPrims cp, SkeletonEditor se)
@@ -102,6 +103,24 @@ internal class BoneBoundEdit
 	}
 
 
+	void IncDecLength(float amount)
+	{
+		Skin			?sk		=mMAA?.mArch.GetSkin();
+		Skeleton		skel	=mEditor.GetSkeleton();
+		CharacterArch	?ca		=mMAA?.mArch as CharacterArch;
+
+		if(sk == null || skel == null || ca == null)
+		{
+			return;
+		}
+
+		sk?.AdjustBoneBoundLength(mBoneIndex, amount);
+
+		//this is probably overkill
+		ca?.BuildDebugBoundDrawData(mBoneIndex, mCPrims);
+	}
+
+
 	void IncDecRadius(float amount)
 	{
 		Skin			?sk		=mMAA?.mArch.GetSkin();
@@ -119,7 +138,7 @@ internal class BoneBoundEdit
 		ca?.BuildDebugBoundDrawData(mBoneIndex, mCPrims);
 	}
 
-	
+
 	internal void AdjustBone(List<Input.InputAction> acts)
 	{
 		if(!mbActive)
@@ -131,6 +150,7 @@ internal class BoneBoundEdit
 		{
 			if(act.mAction.Equals(Program.MyActions.BoneLengthUp))
 			{
+				IncDecLength(LengthIncrement);
 			}
 			else if(act.mAction.Equals(Program.MyActions.BoneRadiusUp))
 			{
@@ -138,6 +158,7 @@ internal class BoneBoundEdit
 			}
 			else if(act.mAction.Equals(Program.MyActions.BoneLengthDown))
 			{
+				IncDecLength(-LengthIncrement);
 			}
 			else if(act.mAction.Equals(Program.MyActions.BoneRadiusDown))
 			{
