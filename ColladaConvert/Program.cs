@@ -31,7 +31,8 @@ internal static class Program
 		ToggleMouseLookOn, ToggleMouseLookOff,
 		SensitivityUp, SensitivityDown,
 		BoneRadiusUp, BoneLengthUp, 
-		BoneRadiusDown, BoneLengthDown, BoneDone,
+		BoneRadiusDown, BoneLengthDown,
+		BoneDone, BoneMirror,
 		Exit
 	};
 
@@ -277,6 +278,7 @@ internal static class Program
 		inp.MapAction(MyActions.BoneLengthDown, ActionTypes.ActivateOnce, Modifiers.ShiftHeld, Keys.T);
 		inp.MapAction(MyActions.BoneRadiusDown, ActionTypes.ActivateOnce, Modifiers.ShiftHeld, Keys.R);
 		inp.MapAction(MyActions.BoneDone, ActionTypes.ActivateOnce, Modifiers.None, Keys.X);
+		inp.MapAction(MyActions.BoneMirror, ActionTypes.ActivateOnce, Modifiers.None, Keys.M);
 
 		inp.MapAction(MyActions.Exit, ActionTypes.ActivateOnce, Modifiers.ControlHeld, Keys.X);
 
@@ -387,6 +389,8 @@ internal static class Program
 			}
 			sets.mTurnSensitivity	=Math.Clamp(sense, 0.025f, 10f);
 		}
+
+		
 
 		return	actions;
 	}

@@ -2575,6 +2575,10 @@ public partial class AnimForm : Form
 		mArch.ReadFromFile(mOFD.FileName, mGD, true);
 		mChar.ReadFromFile(mOFD.FileName + "Instance");
 
+		Skin	sk	=mArch.GetSkin();
+
+		Misc.SafeInvoke(eScaleFactorDecided, sk.GetScaleFactor());
+
 		Misc.SafeInvoke(eMeshChanged, mea);
 	}
 

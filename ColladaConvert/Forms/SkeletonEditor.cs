@@ -47,6 +47,25 @@ namespace ColladaConvert
 		}
 
 
+		internal bool GetDrawBounds()
+		{
+			return	DrawBounds.Checked;
+		}
+
+
+		internal void DoneBoneAdjust()
+		{
+			//re-enable tree
+			SkeletonTree.Enabled	=true;
+
+			//re-enable adjustish controls
+			AdjustBoneBound.Enabled	=true;
+			RadioBox.Enabled		=true;
+			RadioSphere.Enabled		=true;
+			RadioCapsule.Enabled	=true;
+		}
+
+
 		void IterateStructure(string boneName, string parent)
 		{
 			Debug.WriteLine(boneName + ", " + parent);
@@ -146,22 +165,20 @@ namespace ColladaConvert
 			string	bone;
 			string	msg;
 
-			//toggle
-			if(SkeletonTree.Enabled)
-			{
-				//disable tree till adjusting done
-				SkeletonTree.Enabled	=false;
-				bone					=toAdj.Name;
-				msg						="Adjusting bound of " + toAdj.Name
-										+ ".  Use R / Shift-R to adjust radius, T / Shift-T to adjust "
-										+ "length along the bone axis, X when finished.\n";
-			}
-			else
-			{
-				SkeletonTree.Enabled	=true;
-				bone					="";
-				msg						="Bone adjust off.\n";
-			}
+			//disable tree till adjusting done
+			SkeletonTree.Enabled	=false;
+
+			//disable shape and adjust button too
+			AdjustBoneBound.Enabled	=false;
+			RadioBox.Enabled		=false;
+			RadioSphere.Enabled		=false;
+			RadioCapsule.Enabled	=false;
+
+			bone	=toAdj.Name;
+			msg		="Adjusting bound of " + toAdj.Name
+					+ ".  Use R / Shift-R to adjust radius, T / Shift-T to adjust "
+					+ "length along the bone axis,\n"
+					+ "M to mirror to opposite side (if possible), X when finished.\n";
 
 			Misc.SafeInvoke(ePrint, msg);
 			Misc.SafeInvoke(eAdjustBone, bone);

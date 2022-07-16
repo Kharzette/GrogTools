@@ -34,6 +34,7 @@
 			this.RadioSphere = new System.Windows.Forms.RadioButton();
 			this.RadioCapsule = new System.Windows.Forms.RadioButton();
 			this.AdjustBoneBound = new System.Windows.Forms.Button();
+			this.DrawBounds = new System.Windows.Forms.CheckBox();
 			this.SuspendLayout();
 			// 
 			// SkeletonTree
@@ -109,12 +110,24 @@
 			this.AdjustBoneBound.UseVisualStyleBackColor = true;
 			this.AdjustBoneBound.Click += new System.EventHandler(this.OnAdjustBone);
 			// 
+			// DrawBounds
+			// 
+			this.DrawBounds.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.DrawBounds.AutoSize = true;
+			this.DrawBounds.Location = new System.Drawing.Point(14, 415);
+			this.DrawBounds.Name = "DrawBounds";
+			this.DrawBounds.Size = new System.Drawing.Size(96, 19);
+			this.DrawBounds.TabIndex = 6;
+			this.DrawBounds.Text = "Draw Bounds";
+			this.DrawBounds.UseVisualStyleBackColor = true;
+			// 
 			// SkeletonEditor
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(331, 455);
 			this.ControlBox = false;
+			this.Controls.Add(this.DrawBounds);
 			this.Controls.Add(this.AdjustBoneBound);
 			this.Controls.Add(this.RadioCapsule);
 			this.Controls.Add(this.RadioSphere);
@@ -137,5 +150,6 @@
 		private RadioButton RadioSphere;
 		private RadioButton RadioCapsule;
 		private Button AdjustBoneBound;
+		private CheckBox DrawBounds;
 	}
 }

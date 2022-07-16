@@ -38,10 +38,6 @@ internal class BoneBoundEdit
 
 	internal void Render()
 	{
-		if(!mbActive)
-		{
-			return;
-		}
 		Skin		?sk		=mMAA?.mArch.GetSkin();
 		Skeleton	skel	=mEditor.GetSkeleton();
 
@@ -50,9 +46,57 @@ internal class BoneBoundEdit
 			return;
 		}
 
-		Matrix4x4	mat	=sk.GetBoneByNameNoBind(mBoneName, skel);
+		if(mEditor.GetDrawBounds())
+		{
+			for(int i=0;i < skel.GetNumIndexedBones();i++)
+			{
+				if(mbActive && i == mBoneIndex)
+				{
+					continue;
+				}
 
-		mCPrims.DrawCapsule(mBoneIndex, Matrix4x4.Transpose(mat));
+				int			choice	=sk.GetBoundChoice(i);
+				Matrix4x4	mat		=sk.GetBoneByIndexNoBind(i, skel);
+
+				if(choice == Skin.Box)
+				{
+					mCPrims.DrawBox(i, Matrix4x4.Transpose(mat), Vector4.One * 0.5f);
+				}
+				if(choice == Skin.Sphere)
+				{
+					mCPrims.DrawSphere(i, Matrix4x4.Transpose(mat), Vector4.One * 0.5f);
+				}
+				if(choice == Skin.Capsule)
+				{
+					mCPrims.DrawCapsule(i, Matrix4x4.Transpose(mat), Vector4.One * 0.5f);
+				}
+			}
+		}
+
+		if(!mbActive)
+		{
+			return;
+		}
+
+		Matrix4x4	actMat	=sk.GetBoneByNameNoBind(mBoneName, skel);
+
+		Vector4	selectedColor	=Vector4.One * 0.5f;
+		selectedColor.X	=1f;
+
+		int	selChoice	=sk.GetBoundChoice(mBoneIndex);
+
+		if(selChoice == Skin.Box)
+		{
+			mCPrims.DrawBox(mBoneIndex, Matrix4x4.Transpose(actMat), selectedColor);
+		}
+		else if(selChoice == Skin.Sphere)
+		{
+			mCPrims.DrawSphere(mBoneIndex, Matrix4x4.Transpose(actMat), selectedColor);
+		}
+		else if(selChoice == Skin.Capsule)
+		{
+			mCPrims.DrawCapsule(mBoneIndex, Matrix4x4.Transpose(actMat), selectedColor);
+		}
 	}
 
 
@@ -100,6 +144,32 @@ internal class BoneBoundEdit
 		CharacterArch	?ca	=mMAA?.mArch as CharacterArch;
 
 		ca?.BuildDebugBoundDrawData(mCPrims);
+	}
+
+
+	void Mirror()
+	{
+		Skin			?sk		=mMAA?.mArch.GetSkin();
+		Skeleton		skel	=mEditor.GetSkeleton();
+		CharacterArch	?ca		=mMAA?.mArch as CharacterArch;
+
+		if(sk == null || skel == null || ca == null)
+		{
+			return;
+		}
+
+		string	mirror	=skel.GetBoneNameMirror(mBoneName);
+		if(mirror == null)
+		{
+			return;
+		}
+
+		int	mirIdx	=skel.GetBoneIndex(mirror);
+
+		sk.CopyBound(mBoneIndex, mirIdx);
+
+		//this is probably overkill
+		ca?.BuildDebugBoundDrawData(mirIdx, mCPrims);
 	}
 
 
@@ -166,6 +236,12 @@ internal class BoneBoundEdit
 			}
 			else if(act.mAction.Equals(Program.MyActions.BoneDone))
 			{
+				mbActive	=false;
+				mEditor.DoneBoneAdjust();
+			}
+			else if(act.mAction.Equals(Program.MyActions.BoneMirror))
+			{
+				Mirror();
 			}
 		}
 	}
