@@ -30,8 +30,8 @@ internal static class Program
 		LightX, LightY, LightZ,
 		ToggleMouseLookOn, ToggleMouseLookOff,
 		SensitivityUp, SensitivityDown,
-		BoneRadiusUp, BoneLengthUp, 
-		BoneRadiusDown, BoneLengthDown,
+		BoneRadiusUp, BoneLengthUp, BoneDepthUp, 
+		BoneRadiusDown, BoneLengthDown, BoneDepthDown,
 		BoneDone, BoneMirror,
 		Exit
 	};
@@ -275,8 +275,10 @@ internal static class Program
 
 		inp.MapAction(MyActions.BoneLengthUp, ActionTypes.ContinuousHold, Modifiers.None, Keys.T);
 		inp.MapAction(MyActions.BoneRadiusUp, ActionTypes.ContinuousHold, Modifiers.None, Keys.R);
+		inp.MapAction(MyActions.BoneDepthUp, ActionTypes.ContinuousHold, Modifiers.None, Keys.Y);
 		inp.MapAction(MyActions.BoneLengthDown, ActionTypes.ContinuousHold, Modifiers.ShiftHeld, Keys.T);
 		inp.MapAction(MyActions.BoneRadiusDown, ActionTypes.ContinuousHold, Modifiers.ShiftHeld, Keys.R);
+		inp.MapAction(MyActions.BoneDepthDown, ActionTypes.ContinuousHold, Modifiers.ShiftHeld, Keys.Y);
 		inp.MapAction(MyActions.BoneDone, ActionTypes.ActivateOnce, Modifiers.None, Keys.X);
 		inp.MapAction(MyActions.BoneMirror, ActionTypes.ActivateOnce, Modifiers.None, Keys.M);
 

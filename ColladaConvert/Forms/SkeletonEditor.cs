@@ -186,11 +186,36 @@ public partial class SkeletonEditor : Form
 		RadioSphere.Enabled		=true;
 		RadioCapsule.Enabled	=true;
 
+		int	idx	=mSkeleton.GetBoneIndex(toAdj.Name);
+
+		//eventargs will return choice
+		BoundChoiceEventArgs	bcea	=new BoundChoiceEventArgs();
+
+		bcea.mChoice	=Skin.Invalid;
+
+		Misc.SafeInvoke(eRequestShape, idx, bcea);
+
 		bone	=toAdj.Name;
-		msg		="Adjusting bound of " + toAdj.Name
-				+ ".  Use R / Shift-R to adjust radius, T / Shift-T to adjust "
+		msg		="Adjusting bound of " + toAdj.Name +".\n";
+
+		if(bcea.mChoice == Skin.Box)
+		{
+			msg	+="Use R / Shift-R to adjust width, Y / Shift-Y to adjust depth,\n"
+				+ "T / Shift-T to adjust length along the bone axis,\n"
+				+ "M to mirror to opposite side (if possible), X when finished.\n";
+		}
+		else if(bcea.mChoice == Skin.Sphere)
+		{
+			msg	+="Use R / Shift-R to adjust radius, "
+				+ "M to mirror to opposite side (if possible), X when finished.\n";
+		}
+		else if(bcea.mChoice == Skin.Capsule)
+		{
+			msg	+="Use R / Shift-R to adjust radius, T / Shift-T to adjust "
 				+ "length along the bone axis,\n"
 				+ "M to mirror to opposite side (if possible), X when finished.\n";
+		}
+
 
 		Misc.SafeInvoke(ePrint, msg);
 		Misc.SafeInvoke(eAdjustBone, bone);
