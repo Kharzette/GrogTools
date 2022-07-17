@@ -182,6 +182,19 @@ internal class BoneBoundEdit
 	}
 
 
+	void Snap()
+	{
+		Skin			?sk		=mMAA?.mArch.GetSkin();
+
+		if(sk == null)
+		{
+			return;
+		}
+
+		sk.SnapBoneBoundToJoint(mBoneIndex);
+	}
+
+
 	void Mirror()
 	{
 		Skin			?sk		=mMAA?.mArch.GetSkin();
@@ -203,7 +216,6 @@ internal class BoneBoundEdit
 
 		sk.CopyBound(mBoneIndex, mirIdx);
 
-		//this is probably overkill
 		ca?.BuildDebugBoundDrawData(mirIdx, mCPrims);
 	}
 
@@ -221,7 +233,6 @@ internal class BoneBoundEdit
 
 		sk?.AdjustBoneBoundLength(mBoneIndex, amount);
 
-		//this is probably overkill
 		ca?.BuildDebugBoundDrawData(mBoneIndex, mCPrims);
 	}
 
@@ -239,7 +250,6 @@ internal class BoneBoundEdit
 
 		sk?.AdjustBoneBoundRadius(mBoneIndex, amount);
 
-		//this is probably overkill
 		ca?.BuildDebugBoundDrawData(mBoneIndex, mCPrims);
 	}
 
@@ -303,6 +313,10 @@ internal class BoneBoundEdit
 			else if(act.mAction.Equals(Program.MyActions.BoneMirror))
 			{
 				Mirror();
+			}
+			else if(act.mAction.Equals(Program.MyActions.BoneSphereSnap))
+			{
+				Snap();
 			}
 		}
 	}

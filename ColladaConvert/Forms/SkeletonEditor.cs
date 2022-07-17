@@ -206,7 +206,8 @@ public partial class SkeletonEditor : Form
 		}
 		else if(bcea.mChoice == Skin.Sphere)
 		{
-			msg	+="Use R / Shift-R to adjust radius, "
+			msg	+="Use R / Shift-R to adjust radius, C to snap to joint pos,\n"
+				+ "T / Shift-T to move along the bone axis,\n"
 				+ "M to mirror to opposite side (if possible), X when finished.\n";
 		}
 		else if(bcea.mChoice == Skin.Capsule)

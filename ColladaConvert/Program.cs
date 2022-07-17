@@ -32,7 +32,7 @@ internal static class Program
 		SensitivityUp, SensitivityDown,
 		BoneRadiusUp, BoneLengthUp, BoneDepthUp, 
 		BoneRadiusDown, BoneLengthDown, BoneDepthDown,
-		BoneDone, BoneMirror,
+		BoneDone, BoneMirror, BoneSphereSnap,
 		Exit
 	};
 
@@ -281,6 +281,7 @@ internal static class Program
 		inp.MapAction(MyActions.BoneDepthDown, ActionTypes.ContinuousHold, Modifiers.ShiftHeld, Keys.Y);
 		inp.MapAction(MyActions.BoneDone, ActionTypes.ActivateOnce, Modifiers.None, Keys.X);
 		inp.MapAction(MyActions.BoneMirror, ActionTypes.ActivateOnce, Modifiers.None, Keys.M);
+		inp.MapAction(MyActions.BoneSphereSnap, ActionTypes.ActivateOnce, Modifiers.None, Keys.C);
 
 		inp.MapAction(MyActions.Exit, ActionTypes.ActivateOnce, Modifiers.ControlHeld, Keys.X);
 
