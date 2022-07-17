@@ -273,10 +273,10 @@ internal static class Program
 		inp.MapAction(MyActions.SensitivityUp, ActionTypes.PressAndRelease,
 			Modifiers.ShiftHeld, System.Windows.Forms.Keys.Oemplus);
 
-		inp.MapAction(MyActions.BoneLengthUp, ActionTypes.ActivateOnce, Modifiers.None, Keys.T);
-		inp.MapAction(MyActions.BoneRadiusUp, ActionTypes.ActivateOnce, Modifiers.None, Keys.R);
-		inp.MapAction(MyActions.BoneLengthDown, ActionTypes.ActivateOnce, Modifiers.ShiftHeld, Keys.T);
-		inp.MapAction(MyActions.BoneRadiusDown, ActionTypes.ActivateOnce, Modifiers.ShiftHeld, Keys.R);
+		inp.MapAction(MyActions.BoneLengthUp, ActionTypes.ContinuousHold, Modifiers.None, Keys.T);
+		inp.MapAction(MyActions.BoneRadiusUp, ActionTypes.ContinuousHold, Modifiers.None, Keys.R);
+		inp.MapAction(MyActions.BoneLengthDown, ActionTypes.ContinuousHold, Modifiers.ShiftHeld, Keys.T);
+		inp.MapAction(MyActions.BoneRadiusDown, ActionTypes.ContinuousHold, Modifiers.ShiftHeld, Keys.R);
 		inp.MapAction(MyActions.BoneDone, ActionTypes.ActivateOnce, Modifiers.None, Keys.X);
 		inp.MapAction(MyActions.BoneMirror, ActionTypes.ActivateOnce, Modifiers.None, Keys.M);
 

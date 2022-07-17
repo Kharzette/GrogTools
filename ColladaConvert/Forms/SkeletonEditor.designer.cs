@@ -47,6 +47,7 @@
 			this.SkeletonTree.Name = "SkeletonTree";
 			this.SkeletonTree.Size = new System.Drawing.Size(303, 360);
 			this.SkeletonTree.TabIndex = 0;
+			this.SkeletonTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.OnTreeAfterSelect);
 			this.SkeletonTree.KeyUp += new System.Windows.Forms.KeyEventHandler(this.OnTreeKeyUp);
 			// 
 			// SelectUnUsedBones
@@ -66,6 +67,7 @@
 			this.RadioBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.RadioBox.AutoSize = true;
 			this.RadioBox.Checked = true;
+			this.RadioBox.Enabled = false;
 			this.RadioBox.Location = new System.Drawing.Point(251, 380);
 			this.RadioBox.Name = "RadioBox";
 			this.RadioBox.Size = new System.Drawing.Size(45, 19);
@@ -79,6 +81,7 @@
 			// 
 			this.RadioSphere.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.RadioSphere.AutoSize = true;
+			this.RadioSphere.Enabled = false;
 			this.RadioSphere.Location = new System.Drawing.Point(251, 405);
 			this.RadioSphere.Name = "RadioSphere";
 			this.RadioSphere.Size = new System.Drawing.Size(61, 19);
@@ -91,6 +94,7 @@
 			// 
 			this.RadioCapsule.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.RadioCapsule.AutoSize = true;
+			this.RadioCapsule.Enabled = false;
 			this.RadioCapsule.Location = new System.Drawing.Point(251, 430);
 			this.RadioCapsule.Name = "RadioCapsule";
 			this.RadioCapsule.Size = new System.Drawing.Size(67, 19);
@@ -102,6 +106,7 @@
 			// AdjustBoneBound
 			// 
 			this.AdjustBoneBound.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.AdjustBoneBound.Enabled = false;
 			this.AdjustBoneBound.Location = new System.Drawing.Point(170, 380);
 			this.AdjustBoneBound.Name = "AdjustBoneBound";
 			this.AdjustBoneBound.Size = new System.Drawing.Size(75, 63);

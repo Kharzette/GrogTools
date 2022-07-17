@@ -6,203 +6,273 @@ using MeshLib;
 using UtilityLib;
 
 
-namespace ColladaConvert
+namespace ColladaConvert;
+
+public class BoundChoiceEventArgs : EventArgs
 {
-	public partial class SkeletonEditor : Form
+	public int	mChoice;
+}
+
+public partial class SkeletonEditor : Form
+{
+	Skeleton	mSkeleton;
+	bool		mbSelectionChanging;
+
+	internal event EventHandler	eSelectUnUsedBones;
+	internal event EventHandler	eBonesChanged;
+	internal event EventHandler	ePrint;
+	internal event EventHandler	eAdjustBone;
+	internal event EventHandler	eChangeBoundShape;
+
+	internal event EventHandler<BoundChoiceEventArgs>	eRequestShape;		//kind of backwards
+
+
+	public SkeletonEditor()
 	{
-		Skeleton	mSkeleton;
-
-		internal event EventHandler	eSelectUnUsedBones;
-		internal event EventHandler	eBonesChanged;
-		internal event EventHandler	ePrint;
-		internal event EventHandler	eAdjustBone;
-		internal event EventHandler	eChangeBoundShape;
+		InitializeComponent();
+	}
 
 
-		public SkeletonEditor()
+	public void Initialize(Skeleton ?skel)
+	{
+		if(skel == null)
 		{
-			InitializeComponent();
+			return;
 		}
 
+		SkeletonTree.Nodes.Clear();
 
-		public void Initialize(Skeleton ?skel)
+		mSkeleton	=skel;
+		skel.IterateStructure(IterateStructure);
+
+		SkeletonTree.ExpandAll();
+	}
+
+
+	internal Skeleton GetSkeleton()
+	{
+		return	mSkeleton;
+	}
+
+
+	internal bool GetDrawBounds()
+	{
+		return	DrawBounds.Checked;
+	}
+
+
+	internal void DoneBoneAdjust()
+	{
+		//re-enable tree
+		SkeletonTree.Enabled	=true;
+
+		//re-enable adjust button
+		AdjustBoneBound.Enabled	=true;
+
+		//disable radios
+		RadioBox.Enabled		=false;
+		RadioSphere.Enabled		=false;
+		RadioCapsule.Enabled	=false;
+	}
+
+
+	void IterateStructure(string boneName, string parent)
+	{
+		Debug.WriteLine(boneName + ", " + parent);
+
+		TreeNode	tn	=new TreeNode();
+
+		tn.Text	=boneName;
+		tn.Name	=boneName;
+
+		if(parent != null)
 		{
-			if(skel == null)
-			{
-				return;
-			}
+			TreeNode	[]found		=SkeletonTree.Nodes.Find(parent, true);
 
-			SkeletonTree.Nodes.Clear();
+			Debug.Assert(found.Length == 1);
 
-			mSkeleton	=skel;
-			skel.IterateStructure(IterateStructure);
+			found[0].Nodes.Add(tn);
+		}
+		else
+		{
+			SkeletonTree.Nodes.Add(tn);
+		}
+	}
 
+
+	void DeleteBone(object sender, EventArgs e)
+	{
+		TreeNode	toNuke	=SkeletonTree.SelectedNode;
+
+		mSkeleton.NukeBone(toNuke.Name);
+
+		//remove from tree
+		toNuke.Remove();
+
+		//Need to make characters remake the bone array
+		Misc.SafeInvoke(eBonesChanged, null);
+	}
+
+
+	void OnSelectUnUsedBones(object sender, EventArgs ea)
+	{
+		List<string>	boneNames	=new List<string>();
+
+		Misc.SafeInvoke(eSelectUnUsedBones, boneNames);
+
+		foreach(TreeNode n in SkeletonTree.Nodes)
+		{
+			SelectThese(n, boneNames);
+		}
+	}
+
+
+	void SelectThese(TreeNode n, List<string> names)
+	{
+		if(!names.Contains(n.Name))
+		{
+			n.BackColor	=System.Drawing.Color.Red;
+		}
+
+		foreach(TreeNode kid in n.Nodes)
+		{
+			SelectThese(kid, names);
+		}
+	}
+
+
+	void OnTreeKeyUp(object sender, KeyEventArgs e)
+	{
+		if(!SkeletonTree.Focused)
+		{
+			return;
+		}
+
+		if(e.KeyCode == Keys.Delete)
+		{
+			DeleteBone(null, null);
+			e.Handled	=true;
+		}
+		else if(e.KeyCode == Keys.F4)
+		{
 			SkeletonTree.ExpandAll();
 		}
-
-
-		internal Skeleton GetSkeleton()
-		{
-			return	mSkeleton;
-		}
-
-
-		internal bool GetDrawBounds()
-		{
-			return	DrawBounds.Checked;
-		}
-
-
-		internal void DoneBoneAdjust()
-		{
-			//re-enable tree
-			SkeletonTree.Enabled	=true;
-
-			//re-enable adjustish controls
-			AdjustBoneBound.Enabled	=true;
-			RadioBox.Enabled		=true;
-			RadioSphere.Enabled		=true;
-			RadioCapsule.Enabled	=true;
-		}
-
-
-		void IterateStructure(string boneName, string parent)
-		{
-			Debug.WriteLine(boneName + ", " + parent);
-
-			TreeNode	tn	=new TreeNode();
-
-			tn.Text	=boneName;
-			tn.Name	=boneName;
-
-			if(parent != null)
-			{
-				TreeNode	[]found		=SkeletonTree.Nodes.Find(parent, true);
-
-				Debug.Assert(found.Length == 1);
-
-				found[0].Nodes.Add(tn);
-			}
-			else
-			{
-				SkeletonTree.Nodes.Add(tn);
-			}
-		}
-
-
-		void DeleteBone(object sender, EventArgs e)
-		{
-			TreeNode	toNuke	=SkeletonTree.SelectedNode;
-
-			mSkeleton.NukeBone(toNuke.Name);
-
-			//remove from tree
-			toNuke.Remove();
-
-			//Need to make characters remake the bone array
-			Misc.SafeInvoke(eBonesChanged, null);
-		}
-
-
-		void OnSelectUnUsedBones(object sender, EventArgs ea)
-		{
-			List<string>	boneNames	=new List<string>();
-
-			Misc.SafeInvoke(eSelectUnUsedBones, boneNames);
-
-			foreach(TreeNode n in SkeletonTree.Nodes)
-			{
-				SelectThese(n, boneNames);
-			}
-		}
-
-
-		void SelectThese(TreeNode n, List<string> names)
-		{
-			if(!names.Contains(n.Name))
-			{
-				n.BackColor	=System.Drawing.Color.Red;
-			}
-
-			foreach(TreeNode kid in n.Nodes)
-			{
-				SelectThese(kid, names);
-			}
-		}
-
-
-		void OnTreeKeyUp(object sender, KeyEventArgs e)
-		{
-			if(!SkeletonTree.Focused)
-			{
-				return;
-			}
-
-			if(e.KeyCode == Keys.Delete)
-			{
-				DeleteBone(null, null);
-				e.Handled	=true;
-			}
-			else if(e.KeyCode == Keys.F4)
-			{
-				SkeletonTree.ExpandAll();
-			}
 //			else if(e.KeyCode == Keys.F2)
 //			{
 //				OnRenameEntity(null, null);
 //			}
+	}
+
+
+	void OnAdjustBone(object sender, EventArgs e)
+	{
+		TreeNode	toAdj	=SkeletonTree.SelectedNode;
+		if(toAdj == null)
+		{
+			return;
 		}
 
+		string	bone;
+		string	msg;
 
-		void OnAdjustBone(object sender, EventArgs e)
+		//disable tree till adjusting done
+		SkeletonTree.Enabled	=false;
+
+		//disable adjust button too
+		AdjustBoneBound.Enabled	=false;
+
+		//enable shape changes
+		RadioBox.Enabled		=true;
+		RadioSphere.Enabled		=true;
+		RadioCapsule.Enabled	=true;
+
+		bone	=toAdj.Name;
+		msg		="Adjusting bound of " + toAdj.Name
+				+ ".  Use R / Shift-R to adjust radius, T / Shift-T to adjust "
+				+ "length along the bone axis,\n"
+				+ "M to mirror to opposite side (if possible), X when finished.\n";
+
+		Misc.SafeInvoke(ePrint, msg);
+		Misc.SafeInvoke(eAdjustBone, bone);
+	}
+
+
+	void BoundShapeChanged(object sender, EventArgs e)
+	{
+		if(mbSelectionChanging)
 		{
-			TreeNode	toAdj	=SkeletonTree.SelectedNode;
-			if(toAdj == null)
-			{
-				return;
-			}
+			return;	//only react to user changes
+		}
 
-			string	bone;
-			string	msg;
+		int	choice	=Skin.Invalid;
 
-			//disable tree till adjusting done
-			SkeletonTree.Enabled	=false;
+		if(RadioBox.Checked)
+		{
+			choice	=Skin.Box;
+		}
+		else if(RadioSphere.Checked)
+		{
+			choice	=Skin.Sphere;
+		}
+		else if(RadioCapsule.Checked)
+		{
+			choice	=Skin.Capsule;
+		}
 
-			//disable shape and adjust button too
+		Misc.SafeInvoke(eChangeBoundShape, choice);
+	}
+
+	void OnTreeAfterSelect(object sender, TreeViewEventArgs e)
+	{
+		TreeNode	toAdj	=SkeletonTree.SelectedNode;
+		if(toAdj == null)
+		{
 			AdjustBoneBound.Enabled	=false;
-			RadioBox.Enabled		=false;
-			RadioSphere.Enabled		=false;
-			RadioCapsule.Enabled	=false;
-
-			bone	=toAdj.Name;
-			msg		="Adjusting bound of " + toAdj.Name
-					+ ".  Use R / Shift-R to adjust radius, T / Shift-T to adjust "
-					+ "length along the bone axis,\n"
-					+ "M to mirror to opposite side (if possible), X when finished.\n";
-
-			Misc.SafeInvoke(ePrint, msg);
-			Misc.SafeInvoke(eAdjustBone, bone);
+			return;
 		}
 
-
-		void BoundShapeChanged(object sender, EventArgs e)
+		int	idx	=mSkeleton.GetBoneIndex(toAdj.Name);
+		if(idx == -1)
 		{
-			string	shape	="";
-
-			if(RadioBox.Checked)
-			{
-				shape	=RadioBox.Text;
-			}
-			else if(RadioSphere.Checked)
-			{
-				shape	=RadioSphere.Text;
-			}
-			else if(RadioCapsule.Checked)
-			{
-				shape	=RadioCapsule.Text;
-			}
-
-			Misc.SafeInvoke(eChangeBoundShape, shape);
+			AdjustBoneBound.Enabled	=false;
+			return;
 		}
+
+		//this lets the radio event know
+		//that this method is active
+		//and to ignore changes
+		mbSelectionChanging	=true;
+
+		//valid node selected?  Enable controls
+		AdjustBoneBound.Enabled	=true;
+
+
+		//eventargs will return choice
+		BoundChoiceEventArgs	bcea	=new BoundChoiceEventArgs();
+
+		bcea.mChoice	=Skin.Invalid;
+
+		Misc.SafeInvoke(eRequestShape, idx, bcea);
+
+		//set radio buttons to current shape
+		if(bcea.mChoice == Skin.Box)
+		{
+			RadioBox.Checked		=true;
+		}
+		else if(bcea.mChoice == Skin.Sphere)
+		{
+			RadioSphere.Checked		=true;
+		}
+		else if(bcea.mChoice == Skin.Capsule)
+		{
+			RadioCapsule.Checked	=true;
+		}
+		else
+		{
+			//bone with no index or something
+			AdjustBoneBound.Enabled	=false;
+		}
+
+		mbSelectionChanging	=false;
 	}
 }

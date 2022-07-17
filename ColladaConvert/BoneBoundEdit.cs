@@ -33,6 +33,7 @@ internal class BoneBoundEdit
 		se.eAdjustBone			+=OnAdjustBone;
 		se.eBonesChanged		+=OnBonesChanged;
 		se.eChangeBoundShape	+=OnChangeBoundShape;
+		se.eRequestShape		+=OnRequestShape;
 	}
 
 
@@ -131,8 +132,42 @@ internal class BoneBoundEdit
 	void OnBonesChanged(object ?sender, EventArgs ea)
 	{
 	}
+
 	void OnChangeBoundShape(object ?sender, EventArgs ea)
 	{
+		if(sender == null || !mbActive)
+		{
+			return;
+		}
+
+		CharacterArch	?ca	=mMAA?.mArch as CharacterArch;
+		Skin			?sk	=mMAA?.mArch.GetSkin();
+		if(sk == null || ca == null)
+		{
+			return;
+		}
+
+		sk.SetBoundChoice(mBoneIndex, (int)sender);
+
+		ca?.BuildDebugBoundDrawData(mBoneIndex, mCPrims);
+	}
+
+	void OnRequestShape(object ?sender, BoundChoiceEventArgs ea)
+	{
+		if(sender == null)
+		{
+			return;
+		}
+
+		int	idx	=(int)sender;
+
+		Skin	?sk		=mMAA?.mArch.GetSkin();
+		if(sk == null)
+		{
+			return;
+		}
+
+		ea.mChoice	=sk.GetBoundChoice(idx);
 	}
 
 
