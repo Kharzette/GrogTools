@@ -118,8 +118,7 @@ internal static class Program
 		time.SetFixedTimeStepSeconds(1f / 60f);	//60fps update rate
 		time.SetMaxDeltaSeconds(MaxTimeDelta);
 
-		cbk.SetProjection(gd.GCam.ProjectionTransposed);
-		cbk.UpdateChangeLess(gd.DC);
+		cbk.SetTransposedProjection(gd.GCam.ProjectionTransposed);
 
 		List<Input.InputAction>	acts	=new List<Input.InputAction>();
 
@@ -168,7 +167,7 @@ internal static class Program
 
 			gd.GCam.Update(pos, pSteering.Pitch, pSteering.Yaw, pSteering.Roll);
 
-			cbk.SetView(gd.GCam.ViewTransposed, gd.GCam.Position);
+			cbk.SetTransposedView(gd.GCam.ViewTransposed, gd.GCam.Position);
 			cbk.UpdateFrame(gd.DC);
 
 			fstuff.RenderUpdate(gd.GCam, lightDir, time.GetRenderUpdateDeltaSeconds());

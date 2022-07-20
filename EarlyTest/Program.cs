@@ -281,42 +281,42 @@ internal class Program
 			gd.GCam.Update(pos, pSteering.Pitch, pSteering.Yaw, pSteering.Roll);
 
 			//update perframe data
-			skcb.SetView(gd.GCam.ViewTransposed, pos);
+			skcb.SetTransposedView(gd.GCam.ViewTransposed, pos);
 			skcb.UpdateFrame(gd.DC);
 
 			//per object shader vars
-			skcb.SetWorldMat(Matrix4x4.Transpose(prism.World));
+			skcb.SetWorldMat(prism.World);
 			skcb.SetSolidColour(prismColour);
 			skcb.UpdateObject(gd.DC);
 			prism.Draw(gd.DC);
 
-			skcb.SetWorldMat(Matrix4x4.Transpose(sphere.World));
+			skcb.SetWorldMat(sphere.World);
 			skcb.SetSolidColour(sphereColour);
 			skcb.UpdateObject(gd.DC);
 			sphere.Draw(gd.DC);
 
-			skcb.SetWorldMat(Matrix4x4.Transpose(box.World));
+			skcb.SetWorldMat(box.World);
 			skcb.SetSolidColour(boxColour);
 			skcb.UpdateObject(gd.DC);
 			box.Draw(gd.DC);
 
-			skcb.SetWorldMat(Matrix4x4.Transpose(cyl.World));
+			skcb.SetWorldMat(cyl.World);
 			skcb.SetSolidColour(cylColour);
 			skcb.UpdateObject(gd.DC);
 			cyl.Draw(gd.DC);
 
-			//set up for 2D
-			skcb.SetProjection(Matrix4x4.Transpose(textProj));
-			skcb.UpdateChangeLess(gd.DC);
+			//set proj for 2D
+			skcb.SetProjection(textProj);
+			skcb.UpdateFrame(gd.DC);
 
 			gd.DC.OMSetDepthStencilState(dss2D);
 			gd.DC.OMSetBlendState(bsAlpha, oneCol);
 
-			st.Draw(Matrix4x4.Identity, textProj);
+			st.Draw();
 
 			//change back to 3D
-			skcb.SetProjection(gd.GCam.ProjectionTransposed);
-			skcb.UpdateChangeLess(gd.DC);
+			skcb.SetTransposedProjection(gd.GCam.ProjectionTransposed);
+			skcb.UpdateFrame(gd.DC);
 
 			gd.Present();
 

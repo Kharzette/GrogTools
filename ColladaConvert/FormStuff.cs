@@ -156,6 +156,7 @@ internal class FormStuff
 		}
 		mScaleFactor	=(float)sender;
 		mCPrims.SetAxisScale(mScaleFactor);
+		mOut.Print("Using scale factor " + mScaleFactor + ".\n");
 	}
 	#endregion
 
