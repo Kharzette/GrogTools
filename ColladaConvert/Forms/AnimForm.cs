@@ -44,7 +44,7 @@ public partial class AnimForm : Form
 
 	public event EventHandler	?eMeshChanged;
 	public event EventHandler	?eSkeletonChanged;
-	public event EventHandler	?eBoundsChanged;
+	public event EventHandler	?eBoundReCompute;
 	public event EventHandler	?eScaleFactorDecided;
 	public event EventHandler	?ePrint;
 
@@ -74,14 +74,18 @@ public partial class AnimForm : Form
 		return	DrawAxis.Checked;
 	}
 
-	internal bool GetDrawBox()
+	internal bool GetDrawBound()
 	{
-		return	ShowBox.Checked;
+		return	ShowBound.Checked;
 	}
 
-	internal bool GetDrawSphere()
+	internal BoundChoice GetBoundChoice()
 	{
-		return	ShowSphere.Checked;
+		if(ChoiceSphere.Checked)
+		{
+			return	BoundChoice.Sphere;
+		}
+		return	BoundChoice.Box;
 	}
 
 
@@ -2781,37 +2785,9 @@ public partial class AnimForm : Form
 
 	void OnCalcBounds(object sender, EventArgs e)
 	{
-		if(mChar != null)
+		if(mArch != null)
 		{
-			if(!mChar.IsEmpty())
-			{
-				mChar.UpdateBounds();
-				Misc.SafeInvoke(eBoundsChanged, mChar);
-			}
-		}
-
-		if(mStatMesh != null)
-		{
-			mArch.UpdateBounds();
-			Misc.SafeInvoke(eBoundsChanged, mStatMesh);
-		}
-	}
-
-
-	void OnShowSphereChanged(object sender, EventArgs e)
-	{
-		if(ShowSphere.Checked)
-		{
-			ShowBox.Checked	=false;
-		}
-	}
-
-
-	void OnShowBoxChanged(object sender, EventArgs e)
-	{
-		if(ShowBox.Checked)
-		{
-			ShowSphere.Checked	=false;
+			Misc.SafeInvoke(eBoundReCompute, mArch);
 		}
 	}
 
@@ -2828,6 +2804,10 @@ public partial class AnimForm : Form
 		}
 	}
 
+	void OnEditBound(object sender, EventArgs e)
+	{
+		BoundGroup.Enabled	=false;
+	}
 
 	void OnAnimListKeyUp(object sender, KeyEventArgs e)
 	{

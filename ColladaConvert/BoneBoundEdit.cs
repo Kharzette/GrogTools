@@ -61,15 +61,15 @@ internal class BoneBoundEdit
 
 				if(choice == Skin.Box)
 				{
-					mCPrims.DrawBox(i, Matrix4x4.Transpose(mat), Vector4.One * 0.5f);
+					mCPrims.DrawBox(i, mat, Vector4.One * 0.5f);
 				}
 				if(choice == Skin.Sphere)
 				{
-					mCPrims.DrawSphere(i, Matrix4x4.Transpose(mat), Vector4.One * 0.5f);
+					mCPrims.DrawSphere(i, mat, Vector4.One * 0.5f);
 				}
 				if(choice == Skin.Capsule)
 				{
-					mCPrims.DrawCapsule(i, Matrix4x4.Transpose(mat), Vector4.One * 0.5f);
+					mCPrims.DrawCapsule(i, mat, Vector4.One * 0.5f);
 				}
 			}
 		}
@@ -88,15 +88,15 @@ internal class BoneBoundEdit
 
 		if(selChoice == Skin.Box)
 		{
-			mCPrims.DrawBox(mBoneIndex, Matrix4x4.Transpose(actMat), selectedColor);
+			mCPrims.DrawBox(mBoneIndex, actMat, selectedColor);
 		}
 		else if(selChoice == Skin.Sphere)
 		{
-			mCPrims.DrawSphere(mBoneIndex, Matrix4x4.Transpose(actMat), selectedColor);
+			mCPrims.DrawSphere(mBoneIndex, actMat, selectedColor);
 		}
 		else if(selChoice == Skin.Capsule)
 		{
-			mCPrims.DrawCapsule(mBoneIndex, Matrix4x4.Transpose(actMat), selectedColor);
+			mCPrims.DrawCapsule(mBoneIndex, actMat, selectedColor);
 		}
 	}
 

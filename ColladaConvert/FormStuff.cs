@@ -107,14 +107,16 @@ internal class FormStuff
 			mCPrims.DrawAxis();
 		}
 
-		if(mAF.GetDrawBox())
+		if(mAF.GetDrawBound())
 		{
-			mCPrims.DrawBox(Matrix4x4.Identity);
-		}
-
-		if(mAF.GetDrawSphere())
-		{
-			mCPrims.DrawSphere(Matrix4x4.Identity);
+			if(mAF.GetBoundChoice() == BoundChoice.Sphere)
+			{
+				mCPrims.DrawSphere(Matrix4x4.Identity);
+			}
+			else
+			{
+				mCPrims.DrawBox(Matrix4x4.Identity);
+			}
 		}
 
 		mBBE.Render();
@@ -131,9 +133,22 @@ internal class FormStuff
 
 
 	#region Anim Form Events
-	void OnAFBoundsChanged(object ?sender, EventArgs ea)
+	void OnAFBoundReCompute(object ?sender, EventArgs ea)
 	{
-		mCPrims.ReBuildBoundsDrawData(sender);
+		if(sender == null)
+		{
+			return;
+		}
+
+		IArch	arch	=sender as IArch;
+		if(arch == null)
+		{
+			return;
+		}
+
+		arch.GenerateRoughBounds();
+
+		mCPrims.ReBuildBoundsDrawData(sender as IArch);
 	}
 
 	void OnAFMeshChanged(object ?sender, EventArgs ea)
@@ -263,7 +278,7 @@ internal class FormStuff
 	void BindEvents()
 	{
 		//anim form events
-		mAF.eBoundsChanged		+=OnAFBoundsChanged;
+		mAF.eBoundReCompute		+=OnAFBoundReCompute;
 		mAF.eMeshChanged		+=OnAFMeshChanged;
 		mAF.ePrint				+=OnAnyPrint;
 		mAF.eSkeletonChanged	+=OnAFSkelChanged;
@@ -291,7 +306,7 @@ internal class FormStuff
 	void UnBindEvents()
 	{
 		//anim form events
-		mAF.eBoundsChanged		-=OnAFBoundsChanged;
+		mAF.eBoundReCompute		-=OnAFBoundReCompute;
 		mAF.eMeshChanged		-=OnAFMeshChanged;
 		mAF.ePrint				-=OnAnyPrint;
 		mAF.eSkeletonChanged	-=OnAFSkelChanged;
