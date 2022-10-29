@@ -141,8 +141,8 @@ internal class FormStuff
 			return;
 		}
 
-		StaticMesh	sm	=sender as StaticMesh;
-		Character	chr	=sender as Character;
+		StaticMesh	?sm		=sender as StaticMesh;
+		Character	?chr	=sender as Character;
 
 		BoundingBox		box;
 		BoundingSphere	sph;
@@ -152,10 +152,14 @@ internal class FormStuff
 			sm.GenerateRoughBounds();
 			sm.GetRoughBounds(out box, out sph);
 		}
-		else
+		else if(chr != null)
 		{
 			chr.GenerateRoughBounds();
 			chr.GetRoughBounds(out box, out sph);
+		}
+		else
+		{
+			return;
 		}
 
 		mCPrims.AddBox(0, box);
@@ -254,14 +258,14 @@ internal class FormStuff
 			return;
 		}
 
-		StaticMesh	sm	=sender as StaticMesh;
-		Character	chr	=sender as Character;
+		StaticMesh	?sm		=sender as StaticMesh;
+		Character	?chr	=sender as Character;
 
 		if(sm != null)
 		{
 			sm.GenTangents(mGD, oea.mObj as List<int>, mMF.GetTexCoordSet());
 		}
-		else
+		else if(chr != null)
 		{
 			chr.GenTangents(mGD, oea.mObj as List<int>, mMF.GetTexCoordSet());
 		}

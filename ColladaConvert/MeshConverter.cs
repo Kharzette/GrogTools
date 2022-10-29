@@ -41,16 +41,16 @@ internal class MeshConverter
 	}
 
 	string			mName, mGeomName;
-	TrackedVert		[]mBaseVerts;
+	TrackedVert		[]?mBaseVerts;
 	int				mNumBaseVerts;
 	List<ushort>	mIndexList	=new List<ushort>();
 
-	internal string	mGeometryID;
+	internal string	?mGeometryID;
 	internal int	mNumVerts, mNumTriangles;
 	internal int	mPartIndex;
 
 	//the converted meshes
-	Mesh	mConverted;
+	Mesh	?mConverted;
 
 	internal event EventHandler	?ePrint;
 
@@ -62,7 +62,7 @@ internal class MeshConverter
 	}
 
 
-	internal Mesh	GetConvertedMesh()
+	internal Mesh?	GetConvertedMesh()
 	{
 		return	mConverted;
 	}
@@ -154,6 +154,11 @@ internal class MeshConverter
 
 	internal void BakeTransformIntoVerts(Matrix4x4 mat)
 	{
+		if(mBaseVerts == null)
+		{
+			return;
+		}
+
 		for(int i=0;i < mBaseVerts.Length;i++)
 		{
 			mBaseVerts[i].Position0	=Mathery.TransformCoordinate(mBaseVerts[i].Position0, ref mat);
@@ -163,6 +168,11 @@ internal class MeshConverter
 
 	internal void BakeTransformIntoNormals(Matrix4x4 mat)
 	{
+		if(mBaseVerts == null)
+		{
+			return;
+		}
+
 		for(int i=0;i < mBaseVerts.Length;i++)
 		{
 			Vector3	norm	=Vector3.Zero;
@@ -182,6 +192,11 @@ internal class MeshConverter
 	//fill baseverts with bone indices and weights
 	internal void AddWeightsToBaseVerts(skin sk)
 	{
+		if(mBaseVerts == null)
+		{
+			return;
+		}
+
 		//break out vert weight counts
 		List<int>	influenceCounts	=new List<int>();
 
@@ -382,33 +397,33 @@ internal class MeshConverter
 	//texcoords can vary on a particular position in a mesh
 	//depending on which polygon is being drawn.
 	//This also constructs a list of indices
-	internal void AddNormTexByPoly(List<int>		posIdxs,
-									float_array		norms,
-									List<int>		normIdxs,
-									float_array		texCoords0,
-									List<int>		texIdxs0,
-									float_array		texCoords1,
-									List<int>		texIdxs1,
-									float_array		texCoords2,
-									List<int>		texIdxs2,
-									float_array		texCoords3,
-									List<int>		texIdxs3,
-									float_array		colors0,
-									List<int>		colIdxs0,
-									float_array		colors1,
-									List<int>		colIdxs1,
-									float_array		colors2,
-									List<int>		colIdxs2,
-									float_array		colors3,
-									List<int>		colIdxs3,
-									List<int>		vertCounts,
+	internal void AddNormTexByPoly(List<int>		?posIdxs,
+									float_array		?norms,
+									List<int>		?normIdxs,
+									float_array		?texCoords0,
+									List<int>		?texIdxs0,
+									float_array		?texCoords1,
+									List<int>		?texIdxs1,
+									float_array		?texCoords2,
+									List<int>		?texIdxs2,
+									float_array		?texCoords3,
+									List<int>		?texIdxs3,
+									float_array		?colors0,
+									List<int>		?colIdxs0,
+									float_array		?colors1,
+									List<int>		?colIdxs1,
+									float_array		?colors2,
+									List<int>		?colIdxs2,
+									float_array		?colors3,
+									List<int>		?colIdxs3,
+									List<int>		?vertCounts,
 									int				col0Stride,
 									int				col1Stride,
 									int				col2Stride,
 									int				col3Stride)
 	{
 		//make sure there are at least positions and vertCounts
-		if(posIdxs == null || vertCounts == null)
+		if(posIdxs == null || vertCounts == null || mBaseVerts == null)
 		{
 			return;
 		}
@@ -651,6 +666,11 @@ internal class MeshConverter
 		bool bTexCoord2, bool bTexCoord3, bool bColor0,
 		bool bColor1, bool bColor2, bool bColor3)
 	{
+		if(mBaseVerts == null || mConverted == null)
+		{
+			return;
+		}
+
 		int	numTex		=0;
 		int	numColor	=0;
 
@@ -753,6 +773,11 @@ internal class MeshConverter
 	//this will fix them so they do
 	internal void FixBoneIndexes(Skeleton skel, List<string> bnames)
 	{
+		if(mBaseVerts == null)
+		{
+			return;
+		}
+		
 		for(int i=0;i < mNumBaseVerts;i++)
 		{
 			Color	inds	=mBaseVerts[i].BoneIndex;

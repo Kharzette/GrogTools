@@ -20,7 +20,7 @@ public class Animation
 		All			=511
 	}
 
-	string	mName;
+	string	?mName;
 
 	List<SubAnimation>	mSubAnims	=new List<SubAnimation>();
 
@@ -31,7 +31,7 @@ public class Animation
 		{
 			foreach(object anObj in anim.Items)
 			{
-				animation	anm	=anObj as animation;
+				animation	?anm	=anObj as animation;
 				if(anm == null)
 				{
 					continue;
@@ -53,14 +53,14 @@ public class Animation
 	}
 
 
-	public string GetName()
+	public string? GetName()
 	{
 		return	mName;
 	}
 
 
 	internal List<MeshLib.SubAnim>	GetAnims(MeshLib.Skeleton skel, library_visual_scenes lvs,
-		EventHandler ePrint, out KeyPartsUsed parts)
+		EventHandler ?ePrint, out KeyPartsUsed parts)
 	{
 		List<MeshLib.SubAnim>	ret	=new List<MeshLib.SubAnim>();
 

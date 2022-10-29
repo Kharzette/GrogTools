@@ -521,7 +521,12 @@ public partial class AnimForm : Form
 
 		foreach(MeshConverter mc in chunks)
 		{
-			Mesh		conv	=mc.GetConvertedMesh();
+			Mesh	?conv	=mc.GetConvertedMesh();
+			if(conv == null)
+			{
+				continue;
+			}
+
 			Matrix4x4	mat		=GetSceneNodeTransform(colladaFile, mc);
 
 			//this might not be totally necessary
@@ -544,12 +549,12 @@ public partial class AnimForm : Form
 
 		if(mChar != null)
 		{
-			Skin	sk	=mChar.GetSkin();
+			Skin	?sk	=mChar.GetSkin();
 			CreateSkin(colladaFile, ref sk, chunks, skel, scaleFactor, ePrint);
 		}
 		else
 		{
-			Skin	sk	=null;
+			Skin	?sk	=null;
 			CreateSkin(colladaFile, ref sk, chunks, skel, scaleFactor, ePrint);
 
 			mChar	=new Character(converted, sk, alib);
@@ -581,7 +586,11 @@ public partial class AnimForm : Form
 		BuildFinalVerts(mGD, colladaFile, chunks);
 		foreach(MeshConverter mc in chunks)
 		{
-			Mesh	m	=mc.GetConvertedMesh();
+			Mesh	?m	=mc.GetConvertedMesh();
+			if(m == null)
+			{
+				continue;
+			}
 			Matrix4x4	mat	=GetSceneNodeTransform(colladaFile, mc);
 
 			m.Name	=mc.GetGeomName();
@@ -622,28 +631,28 @@ public partial class AnimForm : Form
 					int	normStride, tex0Stride, tex1Stride, tex2Stride, tex3Stride;
 					int	col0Stride, col1Stride, col2Stride, col3Stride;
 
-					List<int>	posIdxs		=GetGeometryIndexesBySemantic(geom, "VERTEX", 0, name);
-					float_array	norms		=GetGeometryFloatArrayBySemantic(geom, "NORMAL", 0, name, out normStride);
-					List<int>	normIdxs	=GetGeometryIndexesBySemantic(geom, "NORMAL", 0, name);
-					float_array	texCoords0	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 0, name, out tex0Stride);
-					float_array	texCoords1	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 1, name, out tex1Stride);
-					float_array	texCoords2	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 2, name, out tex2Stride);
-					float_array	texCoords3	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 3, name, out tex3Stride);
-					List<int>	texIdxs0	=GetGeometryIndexesBySemantic(geom, "TEXCOORD", 0, name);
-					List<int>	texIdxs1	=GetGeometryIndexesBySemantic(geom, "TEXCOORD", 1, name);
-					List<int>	texIdxs2	=GetGeometryIndexesBySemantic(geom, "TEXCOORD", 2, name);
-					List<int>	texIdxs3	=GetGeometryIndexesBySemantic(geom, "TEXCOORD", 3, name);
-					float_array	colors0		=GetGeometryFloatArrayBySemantic(geom, "COLOR", 0, name, out col0Stride);
-					float_array	colors1		=GetGeometryFloatArrayBySemantic(geom, "COLOR", 1, name, out col1Stride);
-					float_array	colors2		=GetGeometryFloatArrayBySemantic(geom, "COLOR", 2, name, out col2Stride);
-					float_array	colors3		=GetGeometryFloatArrayBySemantic(geom, "COLOR", 3, name, out col3Stride);
-					List<int>	colIdxs0	=GetGeometryIndexesBySemantic(geom, "COLOR", 0, name);
-					List<int>	colIdxs1	=GetGeometryIndexesBySemantic(geom, "COLOR", 1, name);
-					List<int>	colIdxs2	=GetGeometryIndexesBySemantic(geom, "COLOR", 2, name);
-					List<int>	colIdxs3	=GetGeometryIndexesBySemantic(geom, "COLOR", 3, name);
-					List<int>	vertCounts	=GetGeometryVertCount(geom, name, ePrint);
+					List<int>	?posIdxs	=GetGeometryIndexesBySemantic(geom, "VERTEX", 0, name);
+					float_array	?norms		=GetGeometryFloatArrayBySemantic(geom, "NORMAL", 0, name, out normStride);
+					List<int>	?normIdxs	=GetGeometryIndexesBySemantic(geom, "NORMAL", 0, name);
+					float_array	?texCoords0	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 0, name, out tex0Stride);
+					float_array	?texCoords1	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 1, name, out tex1Stride);
+					float_array	?texCoords2	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 2, name, out tex2Stride);
+					float_array	?texCoords3	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 3, name, out tex3Stride);
+					List<int>	?texIdxs0	=GetGeometryIndexesBySemantic(geom, "TEXCOORD", 0, name);
+					List<int>	?texIdxs1	=GetGeometryIndexesBySemantic(geom, "TEXCOORD", 1, name);
+					List<int>	?texIdxs2	=GetGeometryIndexesBySemantic(geom, "TEXCOORD", 2, name);
+					List<int>	?texIdxs3	=GetGeometryIndexesBySemantic(geom, "TEXCOORD", 3, name);
+					float_array	?colors0	=GetGeometryFloatArrayBySemantic(geom, "COLOR", 0, name, out col0Stride);
+					float_array	?colors1	=GetGeometryFloatArrayBySemantic(geom, "COLOR", 1, name, out col1Stride);
+					float_array	?colors2	=GetGeometryFloatArrayBySemantic(geom, "COLOR", 2, name, out col2Stride);
+					float_array	?colors3	=GetGeometryFloatArrayBySemantic(geom, "COLOR", 3, name, out col3Stride);
+					List<int>	?colIdxs0	=GetGeometryIndexesBySemantic(geom, "COLOR", 0, name);
+					List<int>	?colIdxs1	=GetGeometryIndexesBySemantic(geom, "COLOR", 1, name);
+					List<int>	?colIdxs2	=GetGeometryIndexesBySemantic(geom, "COLOR", 2, name);
+					List<int>	?colIdxs3	=GetGeometryIndexesBySemantic(geom, "COLOR", 3, name);
+					List<int>	?vertCounts	=GetGeometryVertCount(geom, name, ePrint);
 
-					if(vertCounts.Count == 0)
+					if(vertCounts == null || vertCounts.Count == 0)
 					{
 						PrintToOutput("Empty geometry chunk in BuildFinalVerts()!\n");
 						toNuke.Add(cnk);
@@ -731,6 +740,10 @@ public partial class AnimForm : Form
 			string	contID	=cont.id;
 
 			skin	?sk	=cont.Item as skin;
+			if(sk == null)
+			{
+				continue;
+			}
 
 			string	skinSource	=sk.source1.Substring(1);
 
@@ -778,11 +791,11 @@ public partial class AnimForm : Form
 
 
 	static void CreateSkin(COLLADA				colladaFile,
-							ref Skin			skin,
+							ref Skin?			skin,
 							List<MeshConverter>	chunks,
 							Skeleton			skel,
 							float				scaleFactor,
-							EventHandler		ePrint)
+							EventHandler		?ePrint)
 	{
 		IEnumerable<library_controllers>	lcs	=colladaFile.Items.OfType<library_controllers>();
 		if(lcs.Count() <= 0)
@@ -851,6 +864,11 @@ public partial class AnimForm : Form
 				{
 					ma	=src.Item as float_array;
 				}
+			}
+
+			if(ma == null || na == null)
+			{
+				continue;
 			}
 
 			List<Matrix4x4>	mats	=GetMatrixListFromFA(ma);
@@ -1228,6 +1246,11 @@ public partial class AnimForm : Form
 				}
 			}
 
+			if(na == null)
+			{
+				continue;
+			}
+
 			List<string>	bnames	=GetBoneNamesViaSID(na.Values, colladaFile);
 			string	skinSource	=sk.source1.Substring(1);
 
@@ -1252,7 +1275,7 @@ public partial class AnimForm : Form
 		{
 			//supposed to use sids (I think, the spec is ambiguous)
 			//but if that fails use ids.  Maybe should use names I dunno
-			node	n	=LookUpNodeViaSID(lvs.First(), sid);
+			node	?n	=LookUpNodeViaSID(lvs.First(), sid);
 
 			if(n == null)
 			{
@@ -1397,7 +1420,10 @@ public partial class AnimForm : Form
 								skelNode	=LookUpNode(lvs, skelName);
 							}
 
-							anm.FixDetatchedSkeleton(skel, skelNode.name);
+							if(skelNode != null)
+							{
+								anm.FixDetatchedSkeleton(skel, skelNode.name);
+							}
 						}
 					}
 				}
@@ -1541,7 +1567,7 @@ public partial class AnimForm : Form
 	}
 
 
-	static List<int>? GetGeometryVertCount(geometry geom, string material, EventHandler ePrint)
+	static List<int>? GetGeometryVertCount(geometry geom, string material, EventHandler ?ePrint)
 	{
 		List<int>	ret	=new List<int>();
 
@@ -1662,7 +1688,7 @@ public partial class AnimForm : Form
 			mesh	?m	=geom.Item as mesh;
 
 			//check for empty geoms
-			if(m.Items == null)
+			if(m == null || m.Items == null)
 			{
 				PrintToOutput("Empty mesh in GetMeshChunks()\n");
 				continue;
@@ -1773,11 +1799,11 @@ public partial class AnimForm : Form
 	}
 
 
-	List<int> GetGeometryIndexesBySemantic(geometry geom, string sem, int set, string material)
+	List<int> ?GetGeometryIndexesBySemantic(geometry geom, string sem, int set, string material)
 	{
 		List<int>	ret	=new List<int>();
 
-		mesh	msh	=geom.Item as mesh;
+		mesh	msh	=(mesh)geom.Item;
 		if(msh == null || msh.Items == null)
 		{
 			return	null;
@@ -1788,9 +1814,9 @@ public partial class AnimForm : Form
 		int		ofs		=-1;
 		foreach(object polObj in msh.Items)
 		{
-			polygons	polys	=polObj as polygons;
-			polylist	plist	=polObj as polylist;
-			triangles	tris	=polObj as triangles;
+			polygons	?polys	=polObj as polygons;
+			polylist	?plist	=polObj as polylist;
+			triangles	?tris	=polObj as triangles;
 
 			if(polys == null && plist == null && tris == null)
 			{
@@ -1798,7 +1824,7 @@ public partial class AnimForm : Form
 				continue;
 			}
 
-			InputLocalOffset	[]inputs	=null;
+			InputLocalOffset	[]?inputs	=null;
 
 			if(polys != null)
 			{
@@ -1823,6 +1849,11 @@ public partial class AnimForm : Form
 				{
 					continue;
 				}
+			}
+
+			if(inputs == null)
+			{
+				continue;
 			}
 
 			//find the key, idx, and offset for passed in sem
@@ -1862,7 +1893,7 @@ public partial class AnimForm : Form
 			{
 				foreach(object polyObj in polys.Items)
 				{
-					string	pols	=polyObj as string;
+					string	?pols	=polyObj as string;
 					Debug.Assert(pols != null);
 
 					//better collada adds some annoying whitespace
@@ -1994,7 +2025,7 @@ public partial class AnimForm : Form
 	}
 
 
-	geometry ?GetGeometryByID(COLLADA colladaFile, string id)
+	geometry ?GetGeometryByID(COLLADA colladaFile, string? id)
 	{
 		if(colladaFile == null)
 		{
@@ -2107,7 +2138,7 @@ public partial class AnimForm : Form
 	internal static node ?LookUpNode(library_visual_scenes lvs, string nodeID)
 	{
 		//find the node addressed
-		node	addressed	=null;
+		node	?addressed	=null;
 		foreach(visual_scene vs in lvs.visual_scene)
 		{
 			foreach(node n in vs.node)
@@ -2350,7 +2381,7 @@ public partial class AnimForm : Form
 	}
 
 
-	internal void NukeVertexElement(List<int> partIndexes, List<int> vertElementIndexes)
+	internal void NukeVertexElement(List<int> ?partIndexes, List<int> vertElementIndexes)
 	{
 		if(mChar != null)
 		{

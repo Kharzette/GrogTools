@@ -19,17 +19,20 @@ public class SubAnimation
 		{
 			if(anObj is source)
 			{
-				source	src	=anObj as source;
+				source	?src	=anObj as source;
+				Debug.Assert(src != null);
 				mSources.Add(src.id, src);
 			}
 			else if(anObj is sampler)
 			{
-				sampler	samp	=anObj as sampler;
+				sampler	?samp	=anObj as sampler;
+				Debug.Assert(samp != null);
 				mSamplers.Add(samp.id, samp);
 			}
 			else if(anObj is channel)
 			{
-				channel	chan	=anObj as channel;
+				channel	?chan	=anObj as channel;
+				Debug.Assert(chan != null);
 				mChannels.Add(chan);
 			}
 		}
@@ -73,7 +76,7 @@ public class SubAnimation
 			//me gives the bones sids, but then the address element
 			//says Name (note the case), so I guess you need to try
 			//to match via sid first and if that fails, use name?
-			node	n	=AnimForm.LookUpNode(lvs, sid);
+			node	?n	=AnimForm.LookUpNode(lvs, sid);
 
 			if(n == null)
 			{
@@ -94,7 +97,8 @@ public class SubAnimation
 			sampler	samp	=mSamplers[sampKey];
 			string	srcInp	=GetSourceForSemantic(samp, "INPUT");
 
-			float_array	srcTimes	=mSources[srcInp].Item as float_array;
+			float_array	?srcTimes	=mSources[srcInp].Item as float_array;
+			Debug.Assert(srcTimes != null);
 
 			foreach(float time in srcTimes.Values)
 			{
@@ -165,7 +169,7 @@ public class SubAnimation
 
 	internal Animation.KeyPartsUsed SetKeys(string bone,
 		List<float> times, List<MeshLib.KeyFrame> keys,
-		library_visual_scenes scenes, EventHandler ePrint,
+		library_visual_scenes scenes, EventHandler ?ePrint,
 		List<MeshLib.KeyFrame> axisAngleKeys)
 	{
 		Animation.KeyPartsUsed	ret	=0;
@@ -176,7 +180,7 @@ public class SubAnimation
 			int		sidx	=chan.target.IndexOf('/');
 			string	sid		=chan.target.Substring(0, sidx);
 
-			node	n	=AnimForm.LookUpNode(scenes, sid);
+			node	?n	=AnimForm.LookUpNode(scenes, sid);
 
 			if(n == null)
 			{
@@ -201,9 +205,12 @@ public class SubAnimation
 			string	srcC1	=GetSourceForSemantic(samp, "IN_TANGENT");
 			string	srcC2	=GetSourceForSemantic(samp, "OUT_TANGENT");
 
-			float_array	chanTimes	=mSources[srcInp].Item as float_array;
-			float_array	chanValues	=mSources[srcOut].Item as float_array;
+			float_array	?chanTimes	=mSources[srcInp].Item as float_array;
+			float_array	?chanValues	=mSources[srcOut].Item as float_array;
 			List<float>	outValues	=new List<float>();
+
+			Debug.Assert(chanTimes != null);
+			Debug.Assert(chanValues != null);
 
 			int	numChanKeys	=chanValues.Values.Length;
 
@@ -225,7 +232,7 @@ public class SubAnimation
 			string	nodeElement	=chan.target.Substring(slashIndex + 1);
 
 			//see if the element has an additional address
-			string	addr	=null;
+			string	?addr	=null;
 			int		dotIdx	=nodeElement.IndexOf('.');
 			if(dotIdx != -1)
 			{
@@ -233,9 +240,10 @@ public class SubAnimation
 				nodeElement	=nodeElement.Substring(0, dotIdx);
 			}
 
-			node	targeted	=AnimForm.LookUpNode(scenes, nodeID);
-			int		idx			=AnimForm.GetNodeItemIndex(targeted, nodeElement);
+			node	?targeted	=AnimForm.LookUpNode(scenes, nodeID);
+			Debug.Assert(targeted != null);
 
+			int	idx	=AnimForm.GetNodeItemIndex(targeted, nodeElement);
 			if(idx == -1)
 			{
 				continue;	//bad anim stuffs?
@@ -259,7 +267,7 @@ public class SubAnimation
 					//The scale and position were ok at least.  The results were hilarious.
 					if(!bWorked)
 					{
-						ePrint?.Invoke("Keyframe: " + v + " failed to decompose in anim " + sampKey + "\n", null);
+						ePrint?.Invoke("Keyframe: " + v + " failed to decompose in anim " + sampKey + "\n", EventArgs.Empty);
 					}
 				}
 				ret	|=Animation.KeyPartsUsed.All;
@@ -278,7 +286,9 @@ public class SubAnimation
 				{
 					Debug.Assert(targeted.Items[idx] is rotate);
 
-					rotate	rot	=targeted.Items[idx] as rotate;
+					rotate	?rot	=targeted.Items[idx] as rotate;
+					
+					Debug.Assert(rot != null);
 
 					if(rot.Values[0] > 0.999f)
 					{

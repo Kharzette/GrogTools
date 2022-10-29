@@ -10,7 +10,7 @@ namespace ColladaConvert;
 
 public partial class SeamEditor : Form
 {
-	ID3D11Device		mDevice;		
+	ID3D11Device		?mDevice;		
 
 
 	public SeamEditor()
@@ -73,8 +73,13 @@ public partial class SeamEditor : Form
 		{
 			ListViewItem	lvi	=SeamList.SelectedItems[i];
 
-			EditorMesh.WeightSeam	ws	=
+			EditorMesh.WeightSeam	?ws	=
 				lvi.Tag as EditorMesh.WeightSeam;
+
+			if(ws == null)
+			{
+				continue;
+			}
 
 			ws.mMeshA.WeldOtherWeights(mDevice, ws);
 
@@ -101,8 +106,13 @@ public partial class SeamEditor : Form
 		{
 			ListViewItem	lvi	=SeamList.SelectedItems[i];
 
-			EditorMesh.WeightSeam	ws	=
+			EditorMesh.WeightSeam	?ws	=
 				lvi.Tag as EditorMesh.WeightSeam;
+
+			if(ws == null)
+			{
+				continue;
+			}
 
 			ws.mMeshA.WeldMyWeights(mDevice, ws);
 
@@ -129,8 +139,13 @@ public partial class SeamEditor : Form
 		{
 			ListViewItem	lvi	=SeamList.SelectedItems[i];
 
-			EditorMesh.WeightSeam	ws	=
+			EditorMesh.WeightSeam	?ws	=
 				lvi.Tag as EditorMesh.WeightSeam;
+
+			if(ws == null)
+			{
+				continue;
+			}
 
 			ws.mMeshA.WeldAverage(mDevice, ws);
 

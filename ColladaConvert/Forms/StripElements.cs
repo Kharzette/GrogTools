@@ -10,10 +10,10 @@ namespace ColladaConvert
 {
 	public partial class StripElements : Form
 	{
-		List<int>	mIndexes;
+		List<int>	?mIndexes;
 
-		public event EventHandler	eDeleteElement;
-		public event EventHandler	eEscape;
+		public event EventHandler	?eDeleteElement;
+		public event EventHandler	?eEscape;
 
 
 		public StripElements()
@@ -22,15 +22,15 @@ namespace ColladaConvert
 		}
 
 
-		public List<int> GetIndexes()
+		public List<int>? GetIndexes()
 		{
 			return	mIndexes;
 		}
 
 
-		public void Populate(object mesh, List<int> indexes)
+		public void Populate(object ?mesh, List<int> ?indexes)
 		{
-			if(mesh == null)
+			if(mesh == null || indexes == null)
 			{
 				VertElements.Clear();
 				MeshName.Text	="";
@@ -39,8 +39,8 @@ namespace ColladaConvert
 
 			mIndexes	=indexes;
 
-			StaticMesh	sm	=mesh as StaticMesh;
-			Character	chr	=mesh as Character;
+			StaticMesh	?sm		=mesh as StaticMesh;
+			Character	?chr	=mesh as Character;
 
 			if(indexes.Count == 1)
 			{
@@ -48,7 +48,7 @@ namespace ColladaConvert
 				{
 					MeshName.Text	=sm.GetPartName(indexes[0]);
 				}
-				else
+				else if(chr != null)
 				{
 					MeshName.Text	=chr.GetPartName(indexes[0]);
 				}
@@ -64,9 +64,13 @@ namespace ColladaConvert
 			{
 				t	=sm.GetPartVertexType(indexes[0]);
 			}
-			else
+			else if(chr != null)
 			{
 				t	=chr.GetPartVertexType(indexes[0]);
+			}
+			else
+			{
+				return;
 			}
 
 			FieldInfo	[]fis	=t.GetFields();

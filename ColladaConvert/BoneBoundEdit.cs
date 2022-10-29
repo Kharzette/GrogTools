@@ -13,7 +13,7 @@ namespace ColladaConvert;
 internal class BoneBoundEdit
 {
 	CommonPrims			mCPrims;
-	Character			mChr;
+	Character			?mChr;
 	SkeletonEditor		mEditor;
 
 	bool		mbActive;		//edit mode?
@@ -43,9 +43,9 @@ internal class BoneBoundEdit
 		{
 			return;
 		}
-		
+
 		Skin		?sk		=mChr.GetSkin();
-		Skeleton	skel	=mEditor.GetSkeleton();
+		Skeleton	?skel	=mEditor.GetSkeleton();
 
 		if(sk == null || skel == null)
 		{
@@ -189,8 +189,7 @@ internal class BoneBoundEdit
 
 	void Snap()
 	{
-		Skin	?sk	=mChr.GetSkin();
-
+		Skin	?sk	=mChr?.GetSkin();
 		if(sk == null)
 		{
 			return;
@@ -202,8 +201,8 @@ internal class BoneBoundEdit
 
 	void Mirror()
 	{
-		Skin			?sk		=mChr.GetSkin();
-		Skeleton		skel	=mEditor.GetSkeleton();
+		Skin			?sk		=mChr?.GetSkin();
+		Skeleton		?skel	=mEditor.GetSkeleton();
 
 		if(sk == null || skel == null)
 		{
@@ -220,14 +219,14 @@ internal class BoneBoundEdit
 
 		sk.CopyBound(mBoneIndex, mirIdx);
 
-		mChr.BuildDebugBoundDrawData(mirIdx, mCPrims);
+		mChr?.BuildDebugBoundDrawData(mirIdx, mCPrims);
 	}
 
 
 	void IncDecLength(float amount)
 	{
-		Skin			?sk		=mChr.GetSkin();
-		Skeleton		skel	=mEditor.GetSkeleton();
+		Skin			?sk		=mChr?.GetSkin();
+		Skeleton		?skel	=mEditor.GetSkeleton();
 
 		if(sk == null || skel == null)
 		{
@@ -236,14 +235,14 @@ internal class BoneBoundEdit
 
 		sk?.AdjustBoneBoundLength(mBoneIndex, amount);
 
-		mChr.BuildDebugBoundDrawData(mBoneIndex, mCPrims);
+		mChr?.BuildDebugBoundDrawData(mBoneIndex, mCPrims);
 	}
 
 
 	void IncDecRadius(float amount)
 	{
-		Skin			?sk		=mChr.GetSkin();
-		Skeleton		skel	=mEditor.GetSkeleton();
+		Skin			?sk		=mChr?.GetSkin();
+		Skeleton		?skel	=mEditor.GetSkeleton();
 
 		if(sk == null || skel == null)
 		{
@@ -252,14 +251,14 @@ internal class BoneBoundEdit
 
 		sk?.AdjustBoneBoundRadius(mBoneIndex, amount);
 
-		mChr.BuildDebugBoundDrawData(mBoneIndex, mCPrims);
+		mChr?.BuildDebugBoundDrawData(mBoneIndex, mCPrims);
 	}
 
 
 	void IncDecDepth(float amount)
 	{
-		Skin			?sk		=mChr.GetSkin();
-		Skeleton		skel	=mEditor.GetSkeleton();
+		Skin			?sk		=mChr?.GetSkin();
+		Skeleton		?skel	=mEditor.GetSkeleton();
 
 		if(sk == null || skel == null)
 		{
@@ -269,7 +268,7 @@ internal class BoneBoundEdit
 		sk?.AdjustBoneBoundDepth(mBoneIndex, amount);
 
 		//this is probably overkill
-		mChr.BuildDebugBoundDrawData(mBoneIndex, mCPrims);
+		mChr?.BuildDebugBoundDrawData(mBoneIndex, mCPrims);
 	}
 
 

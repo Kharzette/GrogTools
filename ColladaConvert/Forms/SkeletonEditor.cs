@@ -15,16 +15,16 @@ public class BoundChoiceEventArgs : EventArgs
 
 public partial class SkeletonEditor : Form
 {
-	Skeleton	mSkeleton;
+	Skeleton	?mSkeleton;
 	bool		mbSelectionChanging;
 
-	internal event EventHandler	eSelectUnUsedBones;
-	internal event EventHandler	eBonesChanged;
-	internal event EventHandler	ePrint;
-	internal event EventHandler	eAdjustBone;
-	internal event EventHandler	eChangeBoundShape;
+	internal event EventHandler	?eSelectUnUsedBones;
+	internal event EventHandler	?eBonesChanged;
+	internal event EventHandler	?ePrint;
+	internal event EventHandler	?eAdjustBone;
+	internal event EventHandler	?eChangeBoundShape;
 
-	internal event EventHandler<BoundChoiceEventArgs>	eRequestShape;		//kind of backwards
+	internal event EventHandler<BoundChoiceEventArgs>	?eRequestShape;		//kind of backwards
 
 
 	public SkeletonEditor()
@@ -49,7 +49,7 @@ public partial class SkeletonEditor : Form
 	}
 
 
-	internal Skeleton GetSkeleton()
+	internal Skeleton? GetSkeleton()
 	{
 		return	mSkeleton;
 	}
@@ -100,8 +100,13 @@ public partial class SkeletonEditor : Form
 	}
 
 
-	void DeleteBone(object sender, EventArgs e)
+	void DeleteBone(object ?sender, EventArgs ?e)
 	{
+		if(mSkeleton == null)
+		{
+			return;
+		}
+
 		TreeNode	toNuke	=SkeletonTree.SelectedNode;
 
 		mSkeleton.NukeBone(toNuke.Name);
@@ -166,6 +171,11 @@ public partial class SkeletonEditor : Form
 
 	void OnAdjustBone(object sender, EventArgs e)
 	{
+		if(mSkeleton == null)
+		{
+			return;
+		}
+
 		TreeNode	toAdj	=SkeletonTree.SelectedNode;
 		if(toAdj == null)
 		{
@@ -250,6 +260,11 @@ public partial class SkeletonEditor : Form
 
 	void OnTreeAfterSelect(object sender, TreeViewEventArgs e)
 	{
+		if(mSkeleton == null)
+		{
+			return;
+		}
+		
 		TreeNode	toAdj	=SkeletonTree.SelectedNode;
 		if(toAdj == null)
 		{
