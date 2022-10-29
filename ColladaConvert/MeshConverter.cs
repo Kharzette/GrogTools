@@ -50,9 +50,9 @@ internal class MeshConverter
 	internal int	mPartIndex;
 
 	//the converted meshes
-	EditorMesh	mConverted;
+	Mesh	mConverted;
 
-	internal event EventHandler	ePrint;
+	internal event EventHandler	?ePrint;
 
 
 	internal MeshConverter(string name, string geoName)
@@ -148,7 +148,7 @@ internal class MeshConverter
 		}
 
 		//create a new meshlib mesh
-		mConverted	=new EditorMesh(mName);
+		mConverted	=new Mesh(mName);
 	}
 
 
@@ -744,7 +744,7 @@ internal class MeshConverter
 
 		mConverted.SetIndexBuffer(inds);
 
-		mConverted.SetData(verts, idxs);
+		mConverted.SetEditorData(verts, idxs);
 	}
 
 

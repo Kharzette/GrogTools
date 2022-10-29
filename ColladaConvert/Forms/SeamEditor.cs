@@ -48,9 +48,9 @@ public partial class SeamEditor : Form
 		{
 			foreach(EditorMesh.WeightSeam ws in seams)
 			{
-				ListViewItem	lvi	=lv.Items.Add(ws.mMeshA.Name);
+				ListViewItem	lvi	=lv.Items.Add(ws.mMeshA.GetHashCode().ToString());
 
-				lv.Items[lvi.Index].SubItems.Add(ws.mMeshB.Name);
+				lv.Items[lvi.Index].SubItems.Add(ws.mMeshB.GetHashCode().ToString());
 				lv.Items[lvi.Index].SubItems.Add(ws.mSeam.Count.ToString());
 				lv.Items[lvi.Index].Tag	=ws;
 			}

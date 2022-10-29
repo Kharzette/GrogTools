@@ -28,20 +28,30 @@ namespace ColladaConvert
 		}
 
 
-		public void Populate(ArchEventArgs ?aea)
+		public void Populate(object mesh, List<int> indexes)
 		{
-			if(aea == null)
+			if(mesh == null)
 			{
 				VertElements.Clear();
 				MeshName.Text	="";
 				return;
 			}
 
-			mIndexes	=aea.mIndexes;
+			mIndexes	=indexes;
 
-			if(aea.mIndexes.Count == 1)
+			StaticMesh	sm	=mesh as StaticMesh;
+			Character	chr	=mesh as Character;
+
+			if(indexes.Count == 1)
 			{
-				MeshName.Text	=aea.mArch.GetPartName(aea.mIndexes[0]);
+				if(sm != null)
+				{
+					MeshName.Text	=sm.GetPartName(indexes[0]);
+				}
+				else
+				{
+					MeshName.Text	=chr.GetPartName(indexes[0]);
+				}
 			}
 			else
 			{
@@ -49,7 +59,15 @@ namespace ColladaConvert
 			}
 
 			//only affect those matching the first
-			Type	t	=aea.mArch.GetPartVertexType(aea.mIndexes[0]);
+			Type	t;
+			if(sm != null)
+			{
+				t	=sm.GetPartVertexType(indexes[0]);
+			}
+			else
+			{
+				t	=chr.GetPartVertexType(indexes[0]);
+			}
 
 			FieldInfo	[]fis	=t.GetFields();
 

@@ -454,9 +454,7 @@ internal static class Program
 		{
 			if(m.VertexType == firstType)
 			{
-				EditorMesh	em	=m as EditorMesh;
-
-				em.NukeVertexElement(inds, gd);
+				m.DeleteVertElement(gd, inds);
 			}
 		}
 	}

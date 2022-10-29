@@ -13,7 +13,7 @@ namespace ColladaConvert;
 internal class BoneBoundEdit
 {
 	CommonPrims			mCPrims;
-	Mesh.MeshAndArch	?mMAA;
+	Character			mChr;
 	SkeletonEditor		mEditor;
 
 	bool		mbActive;		//edit mode?
@@ -39,7 +39,12 @@ internal class BoneBoundEdit
 
 	internal void Render()
 	{
-		Skin		?sk		=mMAA?.mArch.GetSkin();
+		if(mChr == null)
+		{
+			return;
+		}
+		
+		Skin		?sk		=mChr.GetSkin();
 		Skeleton	skel	=mEditor.GetSkeleton();
 
 		if(sk == null || skel == null)
@@ -135,33 +140,32 @@ internal class BoneBoundEdit
 
 	void OnChangeBoundShape(object ?sender, EventArgs ea)
 	{
-		if(sender == null || !mbActive)
+		if(sender == null || !mbActive || mChr == null)
 		{
 			return;
 		}
 
-		CharacterArch	?ca	=mMAA?.mArch as CharacterArch;
-		Skin			?sk	=mMAA?.mArch.GetSkin();
-		if(sk == null || ca == null)
+		Skin	?sk	=mChr.GetSkin();
+		if(sk == null)
 		{
 			return;
 		}
 
 		sk.SetBoundChoice(mBoneIndex, (int)sender);
 
-		ca?.BuildDebugBoundDrawData(mBoneIndex, mCPrims);
+		mChr.BuildDebugBoundDrawData(mBoneIndex, mCPrims);
 	}
 
 	void OnRequestShape(object ?sender, BoundChoiceEventArgs ea)
 	{
-		if(sender == null)
+		if(sender == null || mChr == null)
 		{
 			return;
 		}
 
 		int	idx	=(int)sender;
 
-		Skin	?sk		=mMAA?.mArch.GetSkin();
+		Skin	?sk		=mChr.GetSkin();
 		if(sk == null)
 		{
 			return;
@@ -174,17 +178,18 @@ internal class BoneBoundEdit
 	//when a new one is loaded/created
 	internal void MeshChanged(object ?mesh)
 	{
-		mMAA	=mesh as Mesh.MeshAndArch;
+		mChr	=mesh as Character;
 
-		CharacterArch	?ca	=mMAA?.mArch as CharacterArch;
-
-		ca?.BuildDebugBoundDrawData(mCPrims);
+		if(mChr != null)
+		{
+			mChr.BuildDebugBoundDrawData(mCPrims);
+		}
 	}
 
 
 	void Snap()
 	{
-		Skin			?sk		=mMAA?.mArch.GetSkin();
+		Skin	?sk	=mChr.GetSkin();
 
 		if(sk == null)
 		{
@@ -197,11 +202,10 @@ internal class BoneBoundEdit
 
 	void Mirror()
 	{
-		Skin			?sk		=mMAA?.mArch.GetSkin();
+		Skin			?sk		=mChr.GetSkin();
 		Skeleton		skel	=mEditor.GetSkeleton();
-		CharacterArch	?ca		=mMAA?.mArch as CharacterArch;
 
-		if(sk == null || skel == null || ca == null)
+		if(sk == null || skel == null)
 		{
 			return;
 		}
@@ -216,51 +220,48 @@ internal class BoneBoundEdit
 
 		sk.CopyBound(mBoneIndex, mirIdx);
 
-		ca?.BuildDebugBoundDrawData(mirIdx, mCPrims);
+		mChr.BuildDebugBoundDrawData(mirIdx, mCPrims);
 	}
 
 
 	void IncDecLength(float amount)
 	{
-		Skin			?sk		=mMAA?.mArch.GetSkin();
+		Skin			?sk		=mChr.GetSkin();
 		Skeleton		skel	=mEditor.GetSkeleton();
-		CharacterArch	?ca		=mMAA?.mArch as CharacterArch;
 
-		if(sk == null || skel == null || ca == null)
+		if(sk == null || skel == null)
 		{
 			return;
 		}
 
 		sk?.AdjustBoneBoundLength(mBoneIndex, amount);
 
-		ca?.BuildDebugBoundDrawData(mBoneIndex, mCPrims);
+		mChr.BuildDebugBoundDrawData(mBoneIndex, mCPrims);
 	}
 
 
 	void IncDecRadius(float amount)
 	{
-		Skin			?sk		=mMAA?.mArch.GetSkin();
+		Skin			?sk		=mChr.GetSkin();
 		Skeleton		skel	=mEditor.GetSkeleton();
-		CharacterArch	?ca		=mMAA?.mArch as CharacterArch;
 
-		if(sk == null || skel == null || ca == null)
+		if(sk == null || skel == null)
 		{
 			return;
 		}
 
 		sk?.AdjustBoneBoundRadius(mBoneIndex, amount);
 
-		ca?.BuildDebugBoundDrawData(mBoneIndex, mCPrims);
+		mChr.BuildDebugBoundDrawData(mBoneIndex, mCPrims);
 	}
 
 
 	void IncDecDepth(float amount)
 	{
-		Skin			?sk		=mMAA?.mArch.GetSkin();
+		Skin			?sk		=mChr.GetSkin();
 		Skeleton		skel	=mEditor.GetSkeleton();
-		CharacterArch	?ca		=mMAA?.mArch as CharacterArch;
 
-		if(sk == null || skel == null || ca == null)
+		if(sk == null || skel == null)
 		{
 			return;
 		}
@@ -268,7 +269,7 @@ internal class BoneBoundEdit
 		sk?.AdjustBoneBoundDepth(mBoneIndex, amount);
 
 		//this is probably overkill
-		ca?.BuildDebugBoundDrawData(mBoneIndex, mCPrims);
+		mChr.BuildDebugBoundDrawData(mBoneIndex, mCPrims);
 	}
 
 

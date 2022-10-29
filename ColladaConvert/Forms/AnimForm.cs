@@ -39,8 +39,7 @@ public partial class AnimForm : Form
 	bool	mbPaused;
 
 	StaticMesh		?mStatMesh;
-	Character		mChar;
-	IArch			mArch;
+	Character		?mChar;
 
 	public event EventHandler	?eMeshChanged;
 	public event EventHandler	?eSkeletonChanged;
@@ -57,8 +56,6 @@ public partial class AnimForm : Form
 		mMatLib		=mats;
 		mSKeeper	=sk;
 		mAnimLib	=alib;
-		mArch		=new CharacterArch();
-		mChar		=new Character(mArch, alib);
 
 		AnimList.Columns.Add("Name");
 		AnimList.Columns.Add("Total Time");
@@ -79,25 +76,25 @@ public partial class AnimForm : Form
 		return	ShowBound.Checked;
 	}
 
-	internal BoundChoice GetBoundChoice()
+	internal bool GetBoundChoice()
 	{
 		if(ChoiceSphere.Checked)
 		{
-			return	BoundChoice.Sphere;
+			return	false;
 		}
-		return	BoundChoice.Box;
+		return	true;
 	}
 
 
 	internal void GetBoneNamesInUseByDraw(List<string> ?names)
 	{
-		mChar.GetBoneNamesInUseByDraw(names);
+		mChar?.GetBoneNamesInUseByDraw(names);
 	}
 
 
 	internal void BonesChanged()
 	{
-		mChar.ReBuildBones(mGD);
+		mChar?.ReBuildBones(mGD);
 	}
 
 
@@ -107,12 +104,12 @@ public partial class AnimForm : Form
 	}
 
 
-	internal COLLADA DeSerializeCOLLADA(string path)
+	internal COLLADA? DeSerializeCOLLADA(string path)
 	{
 		FileStream		fs	=new FileStream(path, FileMode.Open, FileAccess.Read);
 		XmlSerializer	xs	=new XmlSerializer(typeof(COLLADA));
 
-		COLLADA	ret	=xs.Deserialize(fs) as COLLADA;
+		COLLADA	?ret	=xs.Deserialize(fs) as COLLADA;
 
 		fs.Close();
 
@@ -132,9 +129,14 @@ public partial class AnimForm : Form
 
 
 	//crude dae export
-	internal void ConvertMesh(IArch ia, out COLLADA col)
+	internal void ConvertMesh(object mesh, out COLLADA col)
 	{
 		col	=new COLLADA();
+
+		if(mesh == null)
+		{
+			return;
+		}
 
 		col.asset	=new asset();
 
@@ -148,27 +150,68 @@ public partial class AnimForm : Form
 
 		library_geometries	geom	=new library_geometries();
 
-		int	partCount	=ia.GetPartCount();
+		StaticMesh	?sm		=mesh as StaticMesh;
+		Character	?chr	=mesh as Character;
+
+		int	partCount;
+		if(sm != null)
+		{
+			partCount	=sm.GetPartCount();
+		}
+		else if(chr != null)
+		{
+			partCount	=chr.GetPartCount();
+		}
+		else
+		{
+			PrintToOutput("Invalid part in ConvertMesh()\n");
+			return;
+		}
 
 		geom.geometry	=new geometry[partCount];
 
 		for(int i=0;i < partCount;i++)
 		{
 			geometry	g	=new geometry();
+			Type		vType;
 
-			g.name	=ia.GetPartName(i);
+			if(sm != null)
+			{
+				g.name	=sm.GetPartName(i);
+				vType	=sm.GetPartVertexType(i);
+			}
+			else if(chr != null)
+			{
+				g.name	=chr.GetPartName(i);
+				vType	=chr.GetPartVertexType(i);
+			}
+			else
+			{
+				continue;
+			}
+
 			g.id	=g.name + "-mesh";
 
 			polylist	plist	=new polylist();
-
-			Type	vType	=ia.GetPartVertexType(i);
 
 			plist.input	=MakeInputs(g.id, vType);
 
 			plist.material	=g.id + "_mat";	//hax
 
 			string	polys, vcounts;
-			plist.count	=(ulong)ia.GetPartColladaPolys(i, out polys, out vcounts);
+
+			if(sm != null)
+			{
+				plist.count	=(ulong)sm.GetPartColladaPolys(i, out polys, out vcounts);
+			}
+			else if(chr != null)
+			{
+				plist.count	=(ulong)chr.GetPartColladaPolys(i, out polys, out vcounts);
+			}
+			else
+			{
+				continue;
+			}
 
 			plist.p			=polys;
 			plist.vcount	=vcounts;
@@ -181,7 +224,7 @@ public partial class AnimForm : Form
 
 			m.Items	=itemses;
 
-			m.source	=MakeSources(g.id, ia, i);
+			m.source	=MakeSources(g.id, mesh, i);
 
 			m.vertices	=new vertices();
 
@@ -215,10 +258,23 @@ public partial class AnimForm : Form
 		{
 			nodes[i]	=new node();
 
-			nodes[i].id		=ia.GetPartName(i);
-			nodes[i].name	=ia.GetPartName(i);
+			Matrix4x4	mat			=Matrix4x4.Identity;
+			string		partName	="default";
 
-			Matrix4x4	mat	=ia.GetPartTransform(i);
+			if(sm != null)
+			{
+				nodes[i].id		=sm.GetPartName(i);
+				nodes[i].name	=sm.GetPartName(i);
+				mat				=sm.GetPartTransform(i);
+				partName		=sm.GetPartName(i);
+			}
+			else if(chr != null)
+			{
+				nodes[i].id		=chr.GetPartName(i);
+				nodes[i].name	=chr.GetPartName(i);
+				mat				=chr.GetPartTransform(i);
+				partName		=chr.GetPartName(i);
+			}
 
 			TargetableFloat3	trans	=new TargetableFloat3();
 
@@ -253,7 +309,7 @@ public partial class AnimForm : Form
 
 			nodes[i].instance_geometry[0]	=new instance_geometry();
 
-			nodes[i].instance_geometry[0].url	="#" + ia.GetPartName(i) + "-mesh";
+			nodes[i].instance_geometry[0].url	="#" + partName + "-mesh";
 		}
 
 		lvs.visual_scene[0].node	=nodes;
@@ -273,7 +329,13 @@ public partial class AnimForm : Form
 	//loads an animation into an existing anim lib
 	internal bool LoadAnimDAE(string path, AnimLib alib, bool bCheckSkeleton)
 	{
-		COLLADA	colladaFile	=DeSerializeCOLLADA(path);
+		COLLADA	?colladaFile	=DeSerializeCOLLADA(path);
+
+		if(colladaFile == null)
+		{
+			PrintToOutput("Null file in LoadAnim()\n");
+			return	false;
+		}
 
 		//don't have a way to test this
 		if(colladaFile.asset.up_axis == UpAxisType.X_UP)
@@ -361,9 +423,15 @@ public partial class AnimForm : Form
 	}
 
 
-	internal void LoadCharacterDAE(string path,	AnimLib alib, IArch arch)
+	internal void LoadCharacterDAE(string path,	AnimLib alib)
 	{
-		COLLADA	colladaFile	=DeSerializeCOLLADA(path);
+		COLLADA	?colladaFile	=DeSerializeCOLLADA(path);
+
+		if(colladaFile == null)
+		{
+			PrintToOutput("Null file in LoadCharacterDAE()\n");
+			return;
+		}
 
 		//don't have a way to test this
 		if(colladaFile.asset.up_axis == UpAxisType.X_UP)
@@ -449,6 +517,8 @@ public partial class AnimForm : Form
 
 		BuildFinalVerts(mGD, colladaFile, chunks);
 
+		List<Mesh>		converted	=new List<Mesh>();
+
 		foreach(MeshConverter mc in chunks)
 		{
 			Mesh		conv	=mc.GetConvertedMesh();
@@ -463,9 +533,7 @@ public partial class AnimForm : Form
 
 			conv.Name	=mc.GetGeomName();
 
-			conv.SetTransform(Matrix4x4.Identity);
-
-			arch.AddPart(conv);
+			converted.Add(conv);
 
 			if(!conv.Name.EndsWith("Mesh"))
 			{
@@ -473,13 +541,32 @@ public partial class AnimForm : Form
 			}
 			mc.ePrint	-=OnPrintString;
 		}
-		CreateSkin(colladaFile, arch, chunks, skel, scaleFactor, ePrint);
+
+		if(mChar != null)
+		{
+			Skin	sk	=mChar.GetSkin();
+			CreateSkin(colladaFile, ref sk, chunks, skel, scaleFactor, ePrint);
+		}
+		else
+		{
+			Skin	sk	=null;
+			CreateSkin(colladaFile, ref sk, chunks, skel, scaleFactor, ePrint);
+
+			mChar	=new Character(converted, sk, alib);
+		}
 	}
 
 
-	internal IArch LoadStatic(string path, out StaticMesh sm)
+	internal void LoadStatic(string path, out StaticMesh ?sm)
 	{
-		COLLADA	colladaFile	=DeSerializeCOLLADA(path);
+		COLLADA	?colladaFile	=DeSerializeCOLLADA(path);
+
+		if(colladaFile == null)
+		{
+			PrintToOutput("Null file in LoadStatic()\n");
+			sm	=null;
+			return;
+		}
 
 		//don't have a way to test this
 		if(colladaFile.asset.up_axis == UpAxisType.X_UP)
@@ -487,8 +574,7 @@ public partial class AnimForm : Form
 			PrintToOutput("Warning!  X up axis not supported.  Strange things may happen!\n");
 		}
 
-		IArch	arch	=new StaticArch();
-
+		sm	=new StaticMesh();
 
 		List<MeshConverter>	chunks	=GetMeshChunks(colladaFile, false, GetScaleFactor());
 
@@ -500,19 +586,12 @@ public partial class AnimForm : Form
 
 			m.Name	=mc.GetGeomName();
 
-			//set transform of each mesh
-			m.SetTransform(mat);
-
-			arch.AddPart(m);
+			sm.AddPart(m, mat, null);
 		}
-
-		sm	=new StaticMesh(arch);
 
 		//this needs to be identity so the game
 		//can mess with it without needing the axis info
 		sm.SetTransform(Matrix4x4.Identity);
-
-		return	arch;
 	}
 
 
@@ -682,7 +761,7 @@ public partial class AnimForm : Form
 	}
 
 
-	static Anim BuildAnim(COLLADA colladaFile, Skeleton skel, library_visual_scenes lvs, string path, EventHandler ePrint)
+	static Anim BuildAnim(COLLADA colladaFile, Skeleton skel, library_visual_scenes lvs, string path, EventHandler ?ePrint)
 	{
 		//create useful anims
 		List<SubAnim>	subs	=CreateSubAnims(colladaFile, skel, ePrint);
@@ -699,7 +778,7 @@ public partial class AnimForm : Form
 
 
 	static void CreateSkin(COLLADA				colladaFile,
-							IArch				arch,
+							ref Skin			skin,
 							List<MeshConverter>	chunks,
 							Skeleton			skel,
 							float				scaleFactor,
@@ -713,7 +792,6 @@ public partial class AnimForm : Form
 		}
 
 		//create or reuse a single master skin for the character's parts
-		Skin	skin	=arch.GetSkin();
 		if(skin == null)
 		{
 			skin	=new Skin(scaleFactor);
@@ -827,12 +905,10 @@ public partial class AnimForm : Form
 		}
 
 		skin.SetBonePoses(invBindPoses);
-
-		arch.SetSkin(skin, skel);
 	}
 
 
-	static List<SubAnim> CreateSubAnims(COLLADA colladaFile, Skeleton skel, EventHandler ePrint)
+	static List<SubAnim> CreateSubAnims(COLLADA colladaFile, Skeleton skel, EventHandler ?ePrint)
 	{
 		//create useful anims
 		List<SubAnim>	subs	=new List<SubAnim>();
@@ -1087,7 +1163,7 @@ public partial class AnimForm : Form
 			{
 				if(pi.Name == "sid")
 				{
-					string	itemSid	=pi.GetValue(item, null) as string;
+					string	?itemSid	=pi.GetValue(item, null) as string;
 					if(itemSid == sid)
 					{
 						return	i;
@@ -1142,7 +1218,7 @@ public partial class AnimForm : Form
 				}
 			}
 
-			Name_array	na	=null;
+			Name_array	?na	=null;
 
 			foreach(source src in sk.source)
 			{
@@ -1191,10 +1267,10 @@ public partial class AnimForm : Form
 	}
 
 
-	internal static node LookUpNodeViaSID(library_visual_scenes lvs, string SID)
+	internal static node? LookUpNodeViaSID(library_visual_scenes lvs, string SID)
 	{
 		//find the node addressed
-		node	addressed	=null;
+		node	?addressed	=null;
 		foreach(visual_scene vs in lvs.visual_scene)
 		{
 			foreach(node n in vs.node)
@@ -1210,7 +1286,7 @@ public partial class AnimForm : Form
 	}
 
 
-	internal static node LookUpNodeViaSID(node n, string sid)
+	internal static node? LookUpNodeViaSID(node n, string sid)
 	{
 		if(n.sid == sid)
 		{
@@ -1224,7 +1300,7 @@ public partial class AnimForm : Form
 
 		foreach(node child in n.node1)
 		{
-			node	ret	=LookUpNodeViaSID(child, sid);
+			node?	ret	=LookUpNodeViaSID(child, sid);
 			if(ret != null)
 			{
 				return	ret;
@@ -1315,7 +1391,7 @@ public partial class AnimForm : Form
 						{
 							string	skelName	=skels[i].Substring(1);
 
-							node	skelNode	=LookUpNodeViaSID(lvs, skelName);
+							node	?skelNode	=LookUpNodeViaSID(lvs, skelName);
 							if(skelNode == null)
 							{
 								skelNode	=LookUpNode(lvs, skelName);
@@ -1374,7 +1450,7 @@ public partial class AnimForm : Form
 	}
 
 
-	static void BuildSkeleton(node n, List<string> namesInUse, out GSNode gsn, EventHandler ePrint)
+	static void BuildSkeleton(node n, List<string> namesInUse, out GSNode gsn, EventHandler ?ePrint)
 	{
 		gsn	=new GSNode();
 
@@ -1417,7 +1493,7 @@ public partial class AnimForm : Form
 	}
 
 
-	static Skeleton BuildSkeleton(COLLADA colMesh, EventHandler ePrint)
+	static Skeleton BuildSkeleton(COLLADA colMesh, EventHandler ?ePrint)
 	{
 		Skeleton	ret	=new Skeleton();
 
@@ -1465,20 +1541,20 @@ public partial class AnimForm : Form
 	}
 
 
-	static List<int> GetGeometryVertCount(geometry geom, string material, EventHandler ePrint)
+	static List<int>? GetGeometryVertCount(geometry geom, string material, EventHandler ePrint)
 	{
 		List<int>	ret	=new List<int>();
 
-		mesh	msh	=geom.Item as mesh;
+		mesh	?msh	=geom.Item as mesh;
 		if(msh == null || msh.Items == null)
 		{
 			return	null;
 		}
 		foreach(object polObj in msh.Items)
 		{
-			polygons	polys	=polObj as polygons;
-			polylist	plist	=polObj as polylist;
-			triangles	tris	=polObj as triangles;
+			polygons	?polys	=polObj as polygons;
+			polylist	?plist	=polObj as polylist;
+			triangles	?tris	=polObj as triangles;
 
 			if(polys == null && plist == null && tris == null)
 			{
@@ -1511,7 +1587,7 @@ public partial class AnimForm : Form
 
 				foreach(object polyObj in polys.Items)
 				{
-					string	pols	=polyObj as string;
+					string	?pols	=polyObj as string;
 					Debug.Assert(pols != null);
 
 					pols	=pols.Trim();
@@ -1583,7 +1659,7 @@ public partial class AnimForm : Form
 
 		foreach(geometry geom in geoms)
 		{
-			mesh	m	=geom.Item as mesh;
+			mesh	?m	=geom.Item as mesh;
 
 			//check for empty geoms
 			if(m.Items == null)
@@ -1594,9 +1670,9 @@ public partial class AnimForm : Form
 
 			foreach(object polyObj in m.Items)
 			{
-				polygons	polys	=polyObj as polygons;
-				polylist	plist	=polyObj as polylist;
-				triangles	tris	=polyObj as triangles;
+				polygons	?polys	=polyObj as polygons;
+				polylist	?plist	=polyObj as polylist;
+				triangles	?tris	=polyObj as triangles;
 
 				if(polys == null && plist == null && tris == null)
 				{
@@ -1604,7 +1680,7 @@ public partial class AnimForm : Form
 					continue;
 				}
 
-				string	mat		=null;
+				string	?mat	=null;
 				UInt64	count	=0;
 				if(polys != null)
 				{
@@ -1635,8 +1711,8 @@ public partial class AnimForm : Form
 					continue;
 				}
 
-				float_array		verts	=null;
-				MeshConverter	cnk		=null;
+				float_array		?verts	=null;
+				MeshConverter	?cnk	=null;
 				int				stride	=0;
 
 				verts	=GetGeometryFloatArrayBySemantic(geom, "VERTEX", 0, mat, out stride);
@@ -1815,12 +1891,12 @@ public partial class AnimForm : Form
 	}
 
 
-	float_array GetGeometryFloatArrayBySemantic(geometry geom,
-		string sem, int set, string material, out int stride)
+	float_array ?GetGeometryFloatArrayBySemantic(geometry geom,
+		string sem, int set, string ?material, out int stride)
 	{
 		stride	=-1;
 
-		mesh	msh	=geom.Item as mesh;
+		mesh	?msh	=geom.Item as mesh;
 		if(msh == null)
 		{
 			return	null;
@@ -1831,9 +1907,9 @@ public partial class AnimForm : Form
 		int		ofs		=-1;
 		foreach(object polObj in msh.Items)
 		{
-			polygons	polys	=polObj as polygons;
-			polylist	plist	=polObj as polylist;
-			triangles	tris	=polObj as triangles;
+			polygons	?polys	=polObj as polygons;
+			polylist	?plist	=polObj as polylist;
+			triangles	?tris	=polObj as triangles;
 
 			if(polys == null && plist == null && tris == null)
 			{
@@ -1841,7 +1917,7 @@ public partial class AnimForm : Form
 				continue;
 			}
 
-			InputLocalOffset	[]inputs	=null;
+			InputLocalOffset	[]?inputs	=null;
 
 			string	polyMat	="";
 
@@ -1862,6 +1938,11 @@ public partial class AnimForm : Form
 			}
 
 			if(polyMat != material)
+			{
+				continue;
+			}
+
+			if(inputs == null)
 			{
 				continue;
 			}
@@ -1896,7 +1977,7 @@ public partial class AnimForm : Form
 
 		for(int j=0;j < msh.source.Length;j++)
 		{
-			float_array	verts	=msh.source[j].Item as float_array;
+			float_array	?verts	=msh.source[j].Item as float_array;
 			if(verts == null || msh.source[j].id != key)
 			{
 				continue;
@@ -1913,8 +1994,13 @@ public partial class AnimForm : Form
 	}
 
 
-	geometry GetGeometryByID(COLLADA colladaFile, string id)
+	geometry ?GetGeometryByID(COLLADA colladaFile, string id)
 	{
+		if(colladaFile == null)
+		{
+			return	null;
+		}
+
 		return	(from geoms in colladaFile.Items.OfType<library_geometries>().First().geometry
 				where geoms is geometry
 				where geoms.id == id select geoms).FirstOrDefault();
@@ -1956,7 +2042,7 @@ public partial class AnimForm : Form
 		{
 			if(n.ItemsElementName[i] == ItemsChoiceType2.matrix)
 			{
-				matrix	cmat	=n.Items[i] as matrix;
+				matrix	?cmat	=n.Items[i] as matrix;
 
 				Debug.Assert(cmat != null);
 
@@ -1964,7 +2050,7 @@ public partial class AnimForm : Form
 			}
 			else if(n.ItemsElementName[i] == ItemsChoiceType2.rotate)
 			{
-				rotate	rot	=n.Items[i] as rotate;
+				rotate	?rot	=n.Items[i] as rotate;
 
 				Debug.Assert(rot != null);
 
@@ -1979,27 +2065,33 @@ public partial class AnimForm : Form
 			}
 			else if(n.ItemsElementName[i] == ItemsChoiceType2.translate)
 			{
-				TargetableFloat3	trans	=n.Items[i] as TargetableFloat3;
+				TargetableFloat3	?trans	=n.Items[i] as TargetableFloat3;
 
-				Vector3	t	=Vector3.Zero;
-				t.X	=trans.Values[0];
-				t.Y	=trans.Values[1];
-				t.Z	=trans.Values[2];
+				if(trans != null)
+				{
+					Vector3	t	=Vector3.Zero;
+					t.X	=trans.Values[0];
+					t.Y	=trans.Values[1];
+					t.Z	=trans.Values[2];
 
-				mat	=Matrix4x4.CreateTranslation(t)
-					* mat;
+					mat	=Matrix4x4.CreateTranslation(t)
+						* mat;
+				}
 			}
 			else if(n.ItemsElementName[i] == ItemsChoiceType2.scale)
 			{
-				TargetableFloat3	scl	=n.Items[i] as TargetableFloat3;
+				TargetableFloat3	?scl	=n.Items[i] as TargetableFloat3;
 
-				Vector3	t	=Vector3.Zero;
-				t.X	=scl.Values[0];
-				t.Y	=scl.Values[1];
-				t.Z	=scl.Values[2];
+				if(scl != null)
+				{
+					Vector3	t	=Vector3.Zero;
+					t.X	=scl.Values[0];
+					t.Y	=scl.Values[1];
+					t.Z	=scl.Values[2];
 
-				mat	=Matrix4x4.CreateScale(t)
-					* mat;
+					mat	=Matrix4x4.CreateScale(t)
+						* mat;
+				}
 			}
 		}
 
@@ -2012,7 +2104,7 @@ public partial class AnimForm : Form
 	}
 
 
-	internal static node LookUpNode(library_visual_scenes lvs, string nodeID)
+	internal static node ?LookUpNode(library_visual_scenes lvs, string nodeID)
 	{
 		//find the node addressed
 		node	addressed	=null;
@@ -2031,7 +2123,7 @@ public partial class AnimForm : Form
 	}
 
 
-	internal static node LookUpNode(node n, string id)
+	internal static node ?LookUpNode(node n, string id)
 	{
 		if(n.id == id)
 		{
@@ -2045,7 +2137,7 @@ public partial class AnimForm : Form
 
 		foreach(node child in n.node1)
 		{
-			node	ret	=LookUpNode(child, id);
+			node	?ret	=LookUpNode(child, id);
 			if(ret != null)
 			{
 				return	ret;
@@ -2088,7 +2180,7 @@ public partial class AnimForm : Form
 
 	Matrix4x4 GetSceneNodeTransform(COLLADA colFile, MeshConverter chunk)
 	{
-		geometry	g	=GetGeometryByID(colFile, chunk.mGeometryID);
+		geometry	?g	=GetGeometryByID(colFile, chunk.mGeometryID);
 		if(g == null)
 		{
 			return	Matrix4x4.Identity;
@@ -2260,7 +2352,14 @@ public partial class AnimForm : Form
 
 	internal void NukeVertexElement(List<int> partIndexes, List<int> vertElementIndexes)
 	{
-		mArch.NukeVertexElements(mGD, partIndexes, vertElementIndexes);
+		if(mChar != null)
+		{
+			mChar.NukeVertexElements(mGD, partIndexes, vertElementIndexes);
+		}
+		else if(mStatMesh != null)
+		{
+			mStatMesh.NukeVertexElements(mGD, partIndexes, vertElementIndexes);
+		}
 	}
 
 
@@ -2268,19 +2367,15 @@ public partial class AnimForm : Form
 	{
 		int	partsLeft	=0;
 
-		if(mArch != null)
-		{
-			mArch.NukeParts(indexes);
-
-			partsLeft	=mArch.GetPartCount();
-		}
 		if(mStatMesh != null)
 		{
 			mStatMesh.NukeParts(indexes);
+			partsLeft	=mStatMesh.GetPartCount();
 		}
-		else
+		else if(mChar != null)
 		{
 			mChar.NukeParts(indexes);
+			partsLeft	=mChar.GetPartCount();
 		}
 
 		if(partsLeft > 0)
@@ -2289,23 +2384,42 @@ public partial class AnimForm : Form
 		}
 
 		//if all parts are gone, just blast the skin and skel and all
-		mArch	=new CharacterArch();
-		mChar	=new Character(mArch, mAnimLib);
+		if(mStatMesh != null)
+		{
+			mStatMesh.FreeAll();
+			mStatMesh	=null;
+		}
+		else if(mChar != null)
+		{
+			mChar.FreeAll();
+			mChar	=null;
+		}
 
-		Mesh.MeshAndArch	mea	=new Mesh.MeshAndArch();
-
-		mea.mMesh	=mChar;
-		mea.mArch	=mArch;
-
-		Misc.SafeInvoke(eMeshChanged, mea);
+		//Misc.SafeInvoke(eMeshChanged, mea);
 	}
 
 
-	source	[]MakeSources(string sourcePrefix, IArch arch, int partIndex)
+	source	[]?MakeSources(string sourcePrefix, object mesh, int partIndex)
 	{
 		List<source>	ret	=new List<source>();
 
-		Type	vType	=arch.GetPartVertexType(partIndex);
+		StaticMesh	?sm		=mesh as StaticMesh;
+		Character	?chr	=mesh as Character;
+
+		Type	vType;
+
+		if(sm != null)
+		{
+			vType	=sm.GetPartVertexType(partIndex);
+		}
+		else if(chr != null)
+		{
+			vType	=chr.GetPartVertexType(partIndex);
+		}
+		else
+		{
+			return	null;
+		}
 
 		FieldInfo	[]fi	=vType.GetFields();
 		for(int i=0;i < fi.Length;i++)
@@ -2320,7 +2434,18 @@ public partial class AnimForm : Form
 
 				float	[]positions;
 
-				arch.GetPartColladaPositions(partIndex, out positions);
+				if(sm != null)
+				{
+					sm.GetPartColladaPositions(partIndex, out positions);
+				}
+				else if(chr != null)
+				{
+					chr.GetPartColladaPositions(partIndex, out positions);
+				}
+				else
+				{
+					continue;
+				}
 
 				fa.count		=(ulong)positions.Length;
 				fa.id			=src.id + "-array";
@@ -2340,7 +2465,18 @@ public partial class AnimForm : Form
 
 				float	[]normals;
 
-				arch.GetPartColladaNormals(partIndex, out normals);
+				if(sm != null)
+				{
+					sm.GetPartColladaNormals(partIndex, out normals);
+				}
+				else if(chr != null)
+				{
+					chr.GetPartColladaNormals(partIndex, out normals);
+				}
+				else
+				{
+					continue;
+				}
 
 				fa.count		=(ulong)normals.Length;
 				fa.id			=src.id + "-array";
@@ -2513,7 +2649,7 @@ public partial class AnimForm : Form
 
 
 	#region FormEvents
-	void OnPrintString(object sender, EventArgs ea)
+	void OnPrintString(object ?sender, EventArgs ?ea)
 	{
 		//pass it along
 		Misc.SafeInvoke(ePrint, sender, ea);
@@ -2568,22 +2704,17 @@ public partial class AnimForm : Form
 			return;
 		}
 
-		mArch	=new CharacterArch();
-		mChar	=new Character(mArch, mAnimLib);
+		//load up submeshes in the folder
+		Dictionary<string, Mesh>	meshes	=Mesh.LoadAllMeshes(
+			FileUtil.StripFileName(mOFD.FileName), mGD);
 
-		Mesh.MeshAndArch	mea	=new Mesh.MeshAndArch();
+		mChar	=new Character(mOFD.FileName, meshes, mAnimLib);
 
-		mea.mMesh	=mChar;
-		mea.mArch	=mArch;
-
-		mArch.ReadFromFile(mOFD.FileName, mGD, true);
-		mChar.ReadFromFile(mOFD.FileName + "Instance");
-
-		Skin	sk	=mArch.GetSkin();
+		Skin	sk	=mChar.GetSkin();
 
 		Misc.SafeInvoke(eScaleFactorDecided, sk.GetScaleFactor());
 
-		Misc.SafeInvoke(eMeshChanged, mea);
+		Misc.SafeInvoke(eMeshChanged, mChar);
 	}
 
 
@@ -2598,12 +2729,10 @@ public partial class AnimForm : Form
 			return;
 		}
 
-//		CharacterArch?	ca	=mArch as CharacterArch;
-
-//		ca?.SaveToFile(mSFD.FileName, mAnimLib.GetSkeleton());
-
-		mArch.SaveToFile(mSFD.FileName);
-		mChar.SaveToFile(mSFD.FileName + "Instance");
+		if(mChar != null)
+		{
+			mChar.SaveToFile(mSFD.FileName);
+		}
 	}
 
 
@@ -2618,18 +2747,13 @@ public partial class AnimForm : Form
 			return;
 		}
 
-		mArch		=new StaticArch();
-		mStatMesh	=new StaticMesh(mArch);
+		//load up submeshes in the folder
+		Dictionary<string, Mesh>	meshes	=Mesh.LoadAllMeshes(
+			FileUtil.StripFileName(mOFD.FileName), mGD);
 
-		Mesh.MeshAndArch	mea	=new Mesh.MeshAndArch();
+		mStatMesh	=new StaticMesh(mOFD.FileName, meshes);
 
-		mea.mMesh	=mStatMesh;
-		mea.mArch	=mArch;
-
-		mArch.ReadFromFile(mOFD.FileName, mGD, true);
-		mStatMesh.ReadFromFile(mOFD.FileName + "Instance");
-
-		Misc.SafeInvoke(eMeshChanged, mea);
+		Misc.SafeInvoke(eMeshChanged, mStatMesh);
 	}
 
 
@@ -2644,8 +2768,7 @@ public partial class AnimForm : Form
 			return;
 		}
 
-		mArch.SaveToFile(mSFD.FileName);
-		mStatMesh.SaveToFile(mSFD.FileName + "Instance");
+		mStatMesh?.SaveToFile(mSFD.FileName + "Instance");
 	}
 
 
@@ -2661,14 +2784,9 @@ public partial class AnimForm : Form
 			return;
 		}
 
-		mArch	=LoadStatic(mOFD.FileName, out mStatMesh);
+		LoadStatic(mOFD.FileName, out mStatMesh);
 
-		Mesh.MeshAndArch	mea	=new Mesh.MeshAndArch();
-
-		mea.mMesh	=mStatMesh;
-		mea.mArch	=mArch;
-
-		Misc.SafeInvoke(eMeshChanged, mea);
+		Misc.SafeInvoke(eMeshChanged, mStatMesh);
 	}
 
 
@@ -2686,19 +2804,12 @@ public partial class AnimForm : Form
 
 		foreach(string fileName in mOFD.FileNames)
 		{
-			LoadCharacterDAE(fileName, mAnimLib, mArch);
+			LoadCharacterDAE(fileName, mAnimLib);
 		}
 
 		RefreshAnimList();
 
-		Mesh.MeshAndArch	mea	=new Mesh.MeshAndArch();
-
-		mChar	=new Character(mArch, mAnimLib);
-
-		mea.mMesh	=mChar;
-		mea.mArch	=mArch;
-
-		Misc.SafeInvoke(eMeshChanged, mea);
+		Misc.SafeInvoke(eMeshChanged, mChar);
 	}
 
 
@@ -2753,7 +2864,19 @@ public partial class AnimForm : Form
 		}
 
 		COLLADA	col;
-		ConvertMesh(mArch, out col);
+
+		if(mStatMesh != null)
+		{
+			ConvertMesh(mStatMesh, out col);
+		}
+		else if(mChar != null)
+		{
+			ConvertMesh(mChar, out col);
+		}
+		else
+		{
+			return;
+		}
 
 		SerializeCOLLADA(col, mSFD.FileName);
 	}
@@ -2785,9 +2908,13 @@ public partial class AnimForm : Form
 
 	void OnCalcBounds(object sender, EventArgs e)
 	{
-		if(mArch != null)
+		if(mStatMesh != null)
 		{
-			Misc.SafeInvoke(eBoundReCompute, mArch);
+			Misc.SafeInvoke(eBoundReCompute, mStatMesh);
+		}
+		else if(mChar != null)
+		{
+			Misc.SafeInvoke(eBoundReCompute, mChar);
 		}
 	}
 

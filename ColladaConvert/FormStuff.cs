@@ -10,6 +10,7 @@ using MaterialLib;
 using MeshLib;
 using UtilityLib;
 using Vortice.Direct3D11;
+using Vortice.Mathematics;
 
 //renderform and renderloop
 using SharpDX.Windows;
@@ -109,14 +110,14 @@ internal class FormStuff
 
 		if(mAF.GetDrawBound())
 		{
-			if(mAF.GetBoundChoice() == BoundChoice.Sphere)
-			{
-				mCPrims.DrawSphere(Matrix4x4.Identity);
-			}
-			else
-			{
-				mCPrims.DrawBox(Matrix4x4.Identity);
-			}
+//			if(mAF.GetBoundChoice() == BoundChoice.Sphere)
+//			{
+//				mCPrims.DrawSphere(Matrix4x4.Identity);
+//			}
+//			else
+//			{
+//				mCPrims.DrawBox(Matrix4x4.Identity);
+//			}
 		}
 
 		mBBE.Render();
@@ -140,15 +141,25 @@ internal class FormStuff
 			return;
 		}
 
-		IArch	arch	=sender as IArch;
-		if(arch == null)
+		StaticMesh	sm	=sender as StaticMesh;
+		Character	chr	=sender as Character;
+
+		BoundingBox		box;
+		BoundingSphere	sph;
+
+		if(sm != null)
 		{
-			return;
+			sm.GenerateRoughBounds();
+			sm.GetRoughBounds(out box, out sph);
+		}
+		else
+		{
+			chr.GenerateRoughBounds();
+			chr.GetRoughBounds(out box, out sph);
 		}
 
-		arch.GenerateRoughBounds();
-
-		mCPrims.ReBuildBoundsDrawData(sender as IArch);
+		mCPrims.AddBox(0, box);
+		mCPrims.AddSphere(0, sph);
 	}
 
 	void OnAFMeshChanged(object ?sender, EventArgs ea)
@@ -185,14 +196,14 @@ internal class FormStuff
 		List<int>	elements	=(List<int>)sender;
 
 		mAF.NukeVertexElement(mSE.GetIndexes(), elements);
-		mSE.Populate(null);
+		mSE.Populate(null, null);
 		mSE.Visible	=false;
 		mMF.RefreshMeshPartList();
 	}
 
 	void OnSEEscape(object ?sender, EventArgs ea)
 	{
-		mSE.Populate(null);
+		mSE.Populate(null, null);
 		mSE.Visible	=false;
 	}
 	#endregion
@@ -236,17 +247,23 @@ internal class FormStuff
 		mSME.Visible	=true;
 	}
 
-	void OnMFGenTangents(object ?sender, EventArgs ea)
+	void OnMFGenTangents(object ?sender, ObjEventArgs oea)
 	{
-		if(ea == null)
+		if(sender == null)
 		{
 			return;
 		}
 
-		ArchEventArgs	aea	=(ArchEventArgs)ea;
-		if(aea != null)
+		StaticMesh	sm	=sender as StaticMesh;
+		Character	chr	=sender as Character;
+
+		if(sm != null)
 		{
-			aea.mArch.GenTangents(mGD, aea.mIndexes, mMF.GetTexCoordSet());
+			sm.GenTangents(mGD, oea.mObj as List<int>, mMF.GetTexCoordSet());
+		}
+		else
+		{
+			chr.GenTangents(mGD, oea.mObj as List<int>, mMF.GetTexCoordSet());
 		}
 	}
 
@@ -259,13 +276,13 @@ internal class FormStuff
 		mAF.NukeMeshPart((List<int>)sender);
 	}
 
-	void OnMFStripElements(object ?sender, EventArgs ea)
+	void OnMFStripElements(object ?sender, ObjEventArgs oea)
 	{
 		if(mSE.Visible)
 		{
 			return;
 		}
-		mSE.Populate(ea as ArchEventArgs);
+		mSE.Populate(sender, oea.mObj as List<int>);
 	}
 	#endregion
 
