@@ -2751,6 +2751,12 @@ public partial class AnimForm : Form
 
 	void OnSaveCharacter(object sender, EventArgs e)
 	{
+		if(mChar == null)
+		{
+			PrintToOutput("No character to save!");
+			return;
+		}
+
 		mSFD.DefaultExt		="*.Character";
 		mSFD.Filter			="Character files (*.Character)|*.Character|All files (*.*)|*.*";
 		DialogResult	dr	=mSFD.ShowDialog();
@@ -2760,10 +2766,8 @@ public partial class AnimForm : Form
 			return;
 		}
 
-		if(mChar != null)
-		{
-			mChar.SaveToFile(mSFD.FileName);
-		}
+		mChar.SaveToFile(mSFD.FileName);
+		mChar.SaveParts(FileUtil.StripFileName(mSFD.FileName));
 	}
 
 
@@ -2790,6 +2794,12 @@ public partial class AnimForm : Form
 
 	void OnSaveStatic(object sender, EventArgs e)
 	{
+		if(mStatMesh == null)
+		{
+			PrintToOutput("No static to save!");
+			return;
+		}
+
 		mSFD.DefaultExt		="*.Static";
 		mSFD.Filter			="Static mesh files (*.Static)|*.Static|All files (*.*)|*.*";
 		DialogResult	dr	=mSFD.ShowDialog();
@@ -2799,7 +2809,7 @@ public partial class AnimForm : Form
 			return;
 		}
 
-		mStatMesh?.SaveToFile(mSFD.FileName + "Instance");
+		mStatMesh.SaveToFile(mSFD.FileName + "Instance");
 	}
 
 
@@ -2937,7 +2947,7 @@ public partial class AnimForm : Form
 	}
 
 
-	void OnCalcBounds(object sender, EventArgs e)
+	void OnComputeRoughBounds(object sender, EventArgs e)
 	{
 		if(mStatMesh != null)
 		{

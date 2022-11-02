@@ -60,6 +60,7 @@
 			this.UnitsValve = new System.Windows.Forms.RadioButton();
 			this.UnitsQuake = new System.Windows.Forms.RadioButton();
 			this.UnitsGrog = new System.Windows.Forms.RadioButton();
+			this.groupBox5 = new System.Windows.Forms.GroupBox();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.groupBox3.SuspendLayout();
@@ -67,6 +68,7 @@
 			((System.ComponentModel.ISupportInitialize)(this.AnimTimeScale)).BeginInit();
 			this.groupBox4.SuspendLayout();
 			this.GroupUnits.SuspendLayout();
+			this.groupBox5.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// groupBox1
@@ -74,11 +76,11 @@
 			this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.groupBox1.Controls.Add(this.button2);
 			this.groupBox1.Controls.Add(this.SaveAnimLib);
-			this.groupBox1.Location = new System.Drawing.Point(445, 298);
+			this.groupBox1.Location = new System.Drawing.Point(13, 394);
 			this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-			this.groupBox1.Size = new System.Drawing.Size(118, 97);
+			this.groupBox1.Size = new System.Drawing.Size(166, 56);
 			this.groupBox1.TabIndex = 17;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Anim Library";
@@ -88,20 +90,20 @@
 			this.button2.Location = new System.Drawing.Point(7, 22);
 			this.button2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.button2.Name = "button2";
-			this.button2.Size = new System.Drawing.Size(104, 29);
+			this.button2.Size = new System.Drawing.Size(71, 29);
 			this.button2.TabIndex = 6;
-			this.button2.Text = "Load AnimLib";
+			this.button2.Text = "Load";
 			this.button2.UseVisualStyleBackColor = true;
 			this.button2.Click += new System.EventHandler(this.OnLoadAnimLib);
 			// 
 			// SaveAnimLib
 			// 
-			this.SaveAnimLib.Location = new System.Drawing.Point(7, 58);
+			this.SaveAnimLib.Location = new System.Drawing.Point(86, 21);
 			this.SaveAnimLib.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.SaveAnimLib.Name = "SaveAnimLib";
-			this.SaveAnimLib.Size = new System.Drawing.Size(104, 29);
+			this.SaveAnimLib.Size = new System.Drawing.Size(72, 29);
 			this.SaveAnimLib.TabIndex = 5;
-			this.SaveAnimLib.Text = "Save AnimLib";
+			this.SaveAnimLib.Text = "Save";
 			this.SaveAnimLib.UseVisualStyleBackColor = true;
 			this.SaveAnimLib.Click += new System.EventHandler(this.OnSaveAnimLib);
 			// 
@@ -113,7 +115,7 @@
 			this.groupBox2.Controls.Add(this.LoadCharacter);
 			this.groupBox2.Controls.Add(this.SaveCharacter);
 			this.groupBox2.Controls.Add(this.SaveStatic);
-			this.groupBox2.Location = new System.Drawing.Point(187, 238);
+			this.groupBox2.Location = new System.Drawing.Point(187, 230);
 			this.groupBox2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.groupBox2.Name = "groupBox2";
 			this.groupBox2.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -184,7 +186,7 @@
 			this.groupBox3.Controls.Add(this.LoadModel);
 			this.groupBox3.Controls.Add(this.LoadStaticModel);
 			this.groupBox3.Controls.Add(this.LoadAnim);
-			this.groupBox3.Location = new System.Drawing.Point(13, 238);
+			this.groupBox3.Location = new System.Drawing.Point(13, 230);
 			this.groupBox3.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.groupBox3.Name = "groupBox3";
 			this.groupBox3.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -243,7 +245,7 @@
 			this.DrawAxis.AutoSize = true;
 			this.DrawAxis.Checked = true;
 			this.DrawAxis.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.DrawAxis.Location = new System.Drawing.Point(187, 448);
+			this.DrawAxis.Location = new System.Drawing.Point(115, 22);
 			this.DrawAxis.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.DrawAxis.Name = "DrawAxis";
 			this.DrawAxis.Size = new System.Drawing.Size(78, 19);
@@ -254,16 +256,13 @@
 			// BoundGroup
 			// 
 			this.BoundGroup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.BoundGroup.Controls.Add(this.ShowBound);
 			this.BoundGroup.Controls.Add(this.EditRoughBound);
-			this.BoundGroup.Controls.Add(this.ChoiceBox);
-			this.BoundGroup.Controls.Add(this.ChoiceSphere);
 			this.BoundGroup.Controls.Add(this.BoundMesh);
-			this.BoundGroup.Location = new System.Drawing.Point(323, 298);
+			this.BoundGroup.Location = new System.Drawing.Point(323, 230);
 			this.BoundGroup.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.BoundGroup.Name = "BoundGroup";
 			this.BoundGroup.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-			this.BoundGroup.Size = new System.Drawing.Size(114, 182);
+			this.BoundGroup.Size = new System.Drawing.Size(118, 112);
 			this.BoundGroup.TabIndex = 23;
 			this.BoundGroup.TabStop = false;
 			this.BoundGroup.Text = "Bounds";
@@ -271,7 +270,7 @@
 			// ShowBound
 			// 
 			this.ShowBound.AutoSize = true;
-			this.ShowBound.Location = new System.Drawing.Point(7, 154);
+			this.ShowBound.Location = new System.Drawing.Point(6, 22);
 			this.ShowBound.Name = "ShowBound";
 			this.ShowBound.Size = new System.Drawing.Size(91, 19);
 			this.ShowBound.TabIndex = 4;
@@ -280,7 +279,7 @@
 			// 
 			// EditRoughBound
 			// 
-			this.EditRoughBound.Location = new System.Drawing.Point(7, 118);
+			this.EditRoughBound.Location = new System.Drawing.Point(7, 68);
 			this.EditRoughBound.Name = "EditRoughBound";
 			this.EditRoughBound.Size = new System.Drawing.Size(100, 30);
 			this.EditRoughBound.TabIndex = 3;
@@ -291,7 +290,7 @@
 			// ChoiceBox
 			// 
 			this.ChoiceBox.AutoSize = true;
-			this.ChoiceBox.Location = new System.Drawing.Point(7, 93);
+			this.ChoiceBox.Location = new System.Drawing.Point(6, 47);
 			this.ChoiceBox.Name = "ChoiceBox";
 			this.ChoiceBox.Size = new System.Drawing.Size(45, 19);
 			this.ChoiceBox.TabIndex = 2;
@@ -302,7 +301,7 @@
 			// ChoiceSphere
 			// 
 			this.ChoiceSphere.AutoSize = true;
-			this.ChoiceSphere.Location = new System.Drawing.Point(7, 68);
+			this.ChoiceSphere.Location = new System.Drawing.Point(6, 72);
 			this.ChoiceSphere.Name = "ChoiceSphere";
 			this.ChoiceSphere.Size = new System.Drawing.Size(61, 19);
 			this.ChoiceSphere.TabIndex = 1;
@@ -319,11 +318,11 @@
 			this.BoundMesh.TabIndex = 0;
 			this.BoundMesh.Text = "Calc Rough Bound";
 			this.BoundMesh.UseVisualStyleBackColor = true;
-			this.BoundMesh.Click += new System.EventHandler(this.OnCalcBounds);
+			this.BoundMesh.Click += new System.EventHandler(this.OnComputeRoughBounds);
 			// 
 			// PauseButton
 			// 
-			this.PauseButton.Location = new System.Drawing.Point(150, 22);
+			this.PauseButton.Location = new System.Drawing.Point(8, 51);
 			this.PauseButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.PauseButton.Name = "PauseButton";
 			this.PauseButton.Size = new System.Drawing.Size(64, 25);
@@ -372,11 +371,11 @@
 			this.groupBox4.Controls.Add(this.PauseButton);
 			this.groupBox4.Controls.Add(this.AnimTimeScale);
 			this.groupBox4.Controls.Add(this.label1);
-			this.groupBox4.Location = new System.Drawing.Point(323, 238);
+			this.groupBox4.Location = new System.Drawing.Point(498, 336);
 			this.groupBox4.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.groupBox4.Name = "groupBox4";
 			this.groupBox4.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-			this.groupBox4.Size = new System.Drawing.Size(222, 54);
+			this.groupBox4.Size = new System.Drawing.Size(146, 109);
 			this.groupBox4.TabIndex = 21;
 			this.groupBox4.TabStop = false;
 			this.groupBox4.Text = "Playback";
@@ -392,7 +391,7 @@
 			this.AnimList.Location = new System.Drawing.Point(14, 14);
 			this.AnimList.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.AnimList.Name = "AnimList";
-			this.AnimList.Size = new System.Drawing.Size(546, 218);
+			this.AnimList.Size = new System.Drawing.Size(628, 210);
 			this.AnimList.TabIndex = 24;
 			this.AnimList.UseCompatibleStateImageBehavior = false;
 			this.AnimList.View = System.Windows.Forms.View.Details;
@@ -408,7 +407,7 @@
 			this.GroupUnits.Controls.Add(this.UnitsValve);
 			this.GroupUnits.Controls.Add(this.UnitsQuake);
 			this.GroupUnits.Controls.Add(this.UnitsGrog);
-			this.GroupUnits.Location = new System.Drawing.Point(12, 402);
+			this.GroupUnits.Location = new System.Drawing.Point(323, 348);
 			this.GroupUnits.Name = "GroupUnits";
 			this.GroupUnits.Size = new System.Drawing.Size(168, 102);
 			this.GroupUnits.TabIndex = 26;
@@ -467,14 +466,28 @@
 			this.UnitsGrog.Text = "Grog";
 			this.UnitsGrog.UseVisualStyleBackColor = true;
 			// 
+			// groupBox5
+			// 
+			this.groupBox5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.groupBox5.Controls.Add(this.DrawAxis);
+			this.groupBox5.Controls.Add(this.ChoiceBox);
+			this.groupBox5.Controls.Add(this.ChoiceSphere);
+			this.groupBox5.Controls.Add(this.ShowBound);
+			this.groupBox5.Location = new System.Drawing.Point(448, 230);
+			this.groupBox5.Name = "groupBox5";
+			this.groupBox5.Size = new System.Drawing.Size(195, 100);
+			this.groupBox5.TabIndex = 27;
+			this.groupBox5.TabStop = false;
+			this.groupBox5.Text = "Drawing";
+			// 
 			// AnimForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(575, 516);
+			this.ClientSize = new System.Drawing.Size(657, 462);
 			this.ControlBox = false;
+			this.Controls.Add(this.groupBox5);
 			this.Controls.Add(this.GroupUnits);
-			this.Controls.Add(this.DrawAxis);
 			this.Controls.Add(this.AnimList);
 			this.Controls.Add(this.BoundGroup);
 			this.Controls.Add(this.groupBox3);
@@ -492,14 +505,14 @@
 			this.groupBox3.ResumeLayout(false);
 			this.groupBox3.PerformLayout();
 			this.BoundGroup.ResumeLayout(false);
-			this.BoundGroup.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.AnimTimeScale)).EndInit();
 			this.groupBox4.ResumeLayout(false);
 			this.groupBox4.PerformLayout();
 			this.GroupUnits.ResumeLayout(false);
 			this.GroupUnits.PerformLayout();
+			this.groupBox5.ResumeLayout(false);
+			this.groupBox5.PerformLayout();
 			this.ResumeLayout(false);
-			this.PerformLayout();
 
 		}
 
@@ -537,6 +550,7 @@
 		private RadioButton ChoiceBox;
 		private RadioButton ChoiceSphere;
 		private CheckBox ShowBound;
+		private GroupBox groupBox5;
 	}
 }
 

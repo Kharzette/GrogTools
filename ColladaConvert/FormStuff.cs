@@ -40,6 +40,8 @@ internal class FormStuff
 
 	float	mScaleFactor;
 
+	const int	RoughIndex	=6969;
+
 
 	internal FormStuff(ID3D11Device gd, StuffKeeper sk)
 	{
@@ -110,14 +112,14 @@ internal class FormStuff
 
 		if(mAF.GetDrawBound())
 		{
-//			if(mAF.GetBoundChoice() == BoundChoice.Sphere)
-//			{
-//				mCPrims.DrawSphere(Matrix4x4.Identity);
-//			}
-//			else
-//			{
-//				mCPrims.DrawBox(Matrix4x4.Identity);
-//			}
+			if(mAF.GetBoundChoice() == false)
+			{
+				mCPrims.DrawSphere(RoughIndex, Matrix4x4.Identity, Vector4.One * 0.5f);
+			}
+			else
+			{
+				mCPrims.DrawBox(RoughIndex, Matrix4x4.Identity, Vector4.One * 0.5f);
+			}
 		}
 
 		mBBE.Render();
@@ -162,8 +164,8 @@ internal class FormStuff
 			return;
 		}
 
-		mCPrims.AddBox(0, box);
-		mCPrims.AddSphere(0, sph);
+		mCPrims.AddBox(RoughIndex, box);
+		mCPrims.AddSphere(RoughIndex, sph);
 	}
 
 	void OnAFMeshChanged(object ?sender, EventArgs ea)
