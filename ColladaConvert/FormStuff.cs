@@ -146,8 +146,8 @@ internal class FormStuff
 		StaticMesh	?sm		=sender as StaticMesh;
 		Character	?chr	=sender as Character;
 
-		BoundingBox		box;
-		BoundingSphere	sph;
+		BoundingBox		?box;
+		BoundingSphere	?sph;
 
 		if(sm != null)
 		{
@@ -164,14 +164,46 @@ internal class FormStuff
 			return;
 		}
 
-		mCPrims.AddBox(RoughIndex, box);
-		mCPrims.AddSphere(RoughIndex, sph);
+		if(box == null || sph == null)
+		{
+			return;
+		}
+
+		mCPrims.AddBox(RoughIndex, box.Value);
+		mCPrims.AddSphere(RoughIndex, sph.Value);
 	}
 
 	void OnAFMeshChanged(object ?sender, EventArgs ea)
 	{
 		mMF.SetMesh(sender);
 		mBBE.MeshChanged(sender);
+
+		StaticMesh	?sm		=sender as StaticMesh;
+		Character	?chr	=sender as Character;
+
+		BoundingBox		?box;
+		BoundingSphere	?sph;
+
+		if(sm != null)
+		{
+			sm.GetRoughBounds(out box, out sph);
+		}
+		else if(chr != null)
+		{
+			chr.GetRoughBounds(out box, out sph);
+		}
+		else
+		{
+			return;
+		}
+
+		if(box == null || sph == null)
+		{
+			return;
+		}
+
+		mCPrims.AddBox(RoughIndex, box.Value);
+		mCPrims.AddSphere(RoughIndex, sph.Value);
 	}
 
 	void OnAFSkelChanged(object ?sender, EventArgs ea)

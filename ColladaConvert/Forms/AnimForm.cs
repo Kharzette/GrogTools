@@ -551,6 +551,11 @@ public partial class AnimForm : Form
 		{
 			Skin	?sk	=mChar.GetSkin();
 			CreateSkin(colladaFile, ref sk, chunks, skel, scaleFactor, ePrint);
+
+			foreach(Mesh part in converted)
+			{
+				mChar.AddPart(part, "default");
+			}
 		}
 		else
 		{
@@ -2736,8 +2741,8 @@ public partial class AnimForm : Form
 		}
 
 		//load up submeshes in the folder
-		Dictionary<string, Mesh>	meshes	=Mesh.LoadAllMeshes(
-			FileUtil.StripFileName(mOFD.FileName), mGD);
+		Dictionary<string, Mesh>	meshes	=new Dictionary<string, Mesh>();
+		Mesh.LoadAllMeshes(FileUtil.StripFileName(mOFD.FileName), mGD, meshes);
 
 		mChar	=new Character(mOFD.FileName, meshes, mAnimLib);
 
@@ -2783,8 +2788,8 @@ public partial class AnimForm : Form
 		}
 
 		//load up submeshes in the folder
-		Dictionary<string, Mesh>	meshes	=Mesh.LoadAllMeshes(
-			FileUtil.StripFileName(mOFD.FileName), mGD);
+		Dictionary<string, Mesh>	meshes	=new Dictionary<string, Mesh>();
+		Mesh.LoadAllMeshes(FileUtil.StripFileName(mOFD.FileName), mGD, meshes);
 
 		mStatMesh	=new StaticMesh(mOFD.FileName, meshes);
 
