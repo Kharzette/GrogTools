@@ -2726,6 +2726,12 @@ public partial class AnimForm : Form
 		BonesChanged();
 
 		RefreshAnimList();
+
+		int	animCount	=mAnimLib.GetAnims().Count;
+		int	boneCount	=mAnimLib.GetSkeleton().GetBoneCount();
+
+		PrintToOutput("Animation library: " + FileUtil.StripPath(mOFD.FileName) + " loaded with " +
+			 animCount + " animations and a skeleton with " + boneCount + " bones.\n");
 	}
 
 
@@ -2751,6 +2757,11 @@ public partial class AnimForm : Form
 		Misc.SafeInvoke(eScaleFactorDecided, sk.GetScaleFactor());
 
 		Misc.SafeInvoke(eMeshChanged, mChar);
+
+		int	partCount	=mChar.GetPartCount();
+
+		PrintToOutput("Character: " + FileUtil.StripPath(mOFD.FileName) + " loaded with " +
+			 partCount + " submesh parts.\n");
 	}
 
 

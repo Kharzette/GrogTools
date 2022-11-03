@@ -355,6 +355,7 @@ internal class FormStuff
 		mMF.eGenTangents	+=OnMFGenTangents;
 		mMF.eNukedMeshPart	+=OnMFNukedMeshPart;
 		mMF.eStripElements	+=OnMFStripElements;
+		mMF.ePrint			+=OnAnyPrint;
 	}
 
 
@@ -383,6 +384,7 @@ internal class FormStuff
 		mMF.eGenTangents	-=OnMFGenTangents;
 		mMF.eNukedMeshPart	-=OnMFNukedMeshPart;
 		mMF.eStripElements	-=OnMFStripElements;
+		mMF.ePrint			-=OnAnyPrint;
 	}
 
 

@@ -44,11 +44,11 @@
 			this.LoadAnim = new System.Windows.Forms.Button();
 			this.DrawAxis = new System.Windows.Forms.CheckBox();
 			this.BoundGroup = new System.Windows.Forms.GroupBox();
-			this.ShowBound = new System.Windows.Forms.CheckBox();
 			this.EditRoughBound = new System.Windows.Forms.Button();
+			this.BoundMesh = new System.Windows.Forms.Button();
+			this.ShowBound = new System.Windows.Forms.CheckBox();
 			this.ChoiceBox = new System.Windows.Forms.RadioButton();
 			this.ChoiceSphere = new System.Windows.Forms.RadioButton();
-			this.BoundMesh = new System.Windows.Forms.Button();
 			this.PauseButton = new System.Windows.Forms.Button();
 			this.AnimTimeScale = new System.Windows.Forms.NumericUpDown();
 			this.label1 = new System.Windows.Forms.Label();
@@ -267,16 +267,6 @@
 			this.BoundGroup.TabStop = false;
 			this.BoundGroup.Text = "Bounds";
 			// 
-			// ShowBound
-			// 
-			this.ShowBound.AutoSize = true;
-			this.ShowBound.Location = new System.Drawing.Point(6, 22);
-			this.ShowBound.Name = "ShowBound";
-			this.ShowBound.Size = new System.Drawing.Size(91, 19);
-			this.ShowBound.TabIndex = 4;
-			this.ShowBound.Text = "Draw Bound";
-			this.ShowBound.UseVisualStyleBackColor = true;
-			// 
 			// EditRoughBound
 			// 
 			this.EditRoughBound.Location = new System.Drawing.Point(7, 68);
@@ -287,9 +277,31 @@
 			this.EditRoughBound.UseVisualStyleBackColor = true;
 			this.EditRoughBound.Click += new System.EventHandler(this.OnEditBound);
 			// 
+			// BoundMesh
+			// 
+			this.BoundMesh.Location = new System.Drawing.Point(7, 22);
+			this.BoundMesh.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+			this.BoundMesh.Name = "BoundMesh";
+			this.BoundMesh.Size = new System.Drawing.Size(100, 40);
+			this.BoundMesh.TabIndex = 0;
+			this.BoundMesh.Text = "Calc Rough Bound";
+			this.BoundMesh.UseVisualStyleBackColor = true;
+			this.BoundMesh.Click += new System.EventHandler(this.OnComputeRoughBounds);
+			// 
+			// ShowBound
+			// 
+			this.ShowBound.AutoSize = true;
+			this.ShowBound.Location = new System.Drawing.Point(6, 22);
+			this.ShowBound.Name = "ShowBound";
+			this.ShowBound.Size = new System.Drawing.Size(91, 19);
+			this.ShowBound.TabIndex = 4;
+			this.ShowBound.Text = "Draw Bound";
+			this.ShowBound.UseVisualStyleBackColor = true;
+			// 
 			// ChoiceBox
 			// 
 			this.ChoiceBox.AutoSize = true;
+			this.ChoiceBox.Checked = true;
 			this.ChoiceBox.Location = new System.Drawing.Point(6, 47);
 			this.ChoiceBox.Name = "ChoiceBox";
 			this.ChoiceBox.Size = new System.Drawing.Size(45, 19);
@@ -305,20 +317,8 @@
 			this.ChoiceSphere.Name = "ChoiceSphere";
 			this.ChoiceSphere.Size = new System.Drawing.Size(61, 19);
 			this.ChoiceSphere.TabIndex = 1;
-			this.ChoiceSphere.TabStop = true;
 			this.ChoiceSphere.Text = "Sphere";
 			this.ChoiceSphere.UseVisualStyleBackColor = true;
-			// 
-			// BoundMesh
-			// 
-			this.BoundMesh.Location = new System.Drawing.Point(7, 22);
-			this.BoundMesh.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-			this.BoundMesh.Name = "BoundMesh";
-			this.BoundMesh.Size = new System.Drawing.Size(100, 40);
-			this.BoundMesh.TabIndex = 0;
-			this.BoundMesh.Text = "Calc Rough Bound";
-			this.BoundMesh.UseVisualStyleBackColor = true;
-			this.BoundMesh.Click += new System.EventHandler(this.OnComputeRoughBounds);
 			// 
 			// PauseButton
 			// 
