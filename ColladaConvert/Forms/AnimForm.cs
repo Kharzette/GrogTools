@@ -44,6 +44,7 @@ public partial class AnimForm : Form
 	public event EventHandler	?eMeshChanged;
 	public event EventHandler	?eSkeletonChanged;
 	public event EventHandler	?eBoundReCompute;
+	public event EventHandler	?eBoundAdjust;
 	public event EventHandler	?eScaleFactorDecided;
 	public event EventHandler	?ePrint;
 
@@ -83,6 +84,17 @@ public partial class AnimForm : Form
 			return	false;
 		}
 		return	true;
+	}
+
+
+	internal void DoneBoneAdjust()
+	{
+		//re-enable bound group
+		BoundGroup.Enabled	=true;
+
+		//re-enable radios
+		ChoiceBox.Enabled		=true;
+		ChoiceSphere.Enabled	=true;
 	}
 
 
@@ -2990,7 +3002,26 @@ public partial class AnimForm : Form
 
 	void OnEditBound(object sender, EventArgs e)
 	{
-		BoundGroup.Enabled	=false;
+		BoundGroup.Enabled		=false;
+		ChoiceBox.Enabled		=false;
+		ChoiceSphere.Enabled	=false;
+
+		string	msg		="Adjusting bound...\n";
+
+		if(ChoiceBox.Checked)
+		{
+			msg	+="Use R / Shift-R to adjust width, Y / Shift-Y to adjust depth,\n"
+				+ "T / Shift-T to adjust length along the bone axis,\n"
+				+ ", and X when finished.\n";
+		}
+		else
+		{
+			msg	+="Use R / Shift-R to adjust radius, X when finished.\n";
+		}
+
+		PrintToOutput(msg);
+
+		Misc.SafeInvoke(eBoundAdjust, null);
 	}
 
 	void OnAnimListKeyUp(object sender, KeyEventArgs e)

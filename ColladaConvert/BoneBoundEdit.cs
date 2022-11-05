@@ -15,25 +15,31 @@ internal class BoneBoundEdit
 	CommonPrims			mCPrims;
 	Character			?mChr;
 	SkeletonEditor		mEditor;
+	AnimForm			mAForm;
 
 	bool		mbActive;		//edit mode?
+	bool		mbRoughMode;	//rough edit mode?
 	int			mBoneIndex;		//active bone
 	string		?mBoneName;		//active bone name
 
 	//values in meters
-	const float	RadiusIncrement	=0.03f;
-	const float	LengthIncrement	=0.03f;
+	const float	RadiusIncrement			=0.03f;
+	const float	LengthIncrement			=0.03f;
+	const int	RoughIndex				=6969;
 
 
-	internal BoneBoundEdit(CommonPrims cp, SkeletonEditor se)
+	internal BoneBoundEdit(CommonPrims cp, SkeletonEditor se, AnimForm af)
 	{
 		mCPrims	=cp;
 		mEditor	=se;
+		mAForm	=af;
 
 		se.eAdjustBone			+=OnAdjustBone;
 		se.eBonesChanged		+=OnBonesChanged;
 		se.eChangeBoundShape	+=OnChangeBoundShape;
 		se.eRequestShape		+=OnRequestShape;
+
+		af.eBoundAdjust			+=OnRoughAdjust;
 	}
 
 
@@ -103,6 +109,12 @@ internal class BoneBoundEdit
 		{
 			mCPrims.DrawCapsule(mBoneIndex, actMat, selectedColor);
 		}
+	}
+
+
+	void OnRoughAdjust(object ?sender, EventArgs ea)
+	{
+		mbRoughMode	=!mbRoughMode;
 	}
 
 
@@ -272,51 +284,143 @@ internal class BoneBoundEdit
 	}
 
 
+	void IncDecRoughLength(float amount)
+	{
+		mChr?.AdjustBoundLength(amount, mAForm.GetBoundChoice());
+
+		BoundingBox		?box	=null;
+		BoundingSphere	?sph	=null;
+
+		mChr?.GetRoughBounds(out box, out sph);
+
+		if(box == null || sph == null)
+		{
+			return;
+		}
+		mCPrims.AddBox(RoughIndex, box.Value);
+		mCPrims.AddSphere(RoughIndex, sph.Value);
+	}
+
+
+	void IncDecRoughRadius(float amount)
+	{
+		mChr?.AdjustBoundRadius(amount, mAForm.GetBoundChoice());
+
+		BoundingBox		?box	=null;
+		BoundingSphere	?sph	=null;
+
+		mChr?.GetRoughBounds(out box, out sph);
+
+		if(box == null || sph == null)
+		{
+			return;
+		}
+		mCPrims.AddBox(RoughIndex, box.Value);
+		mCPrims.AddSphere(RoughIndex, sph.Value);
+	}
+
+
+	void IncDecRoughDepth(float amount)
+	{
+		mChr?.AdjustBoundDepth(amount, mAForm.GetBoundChoice());
+
+		BoundingBox		?box	=null;
+		BoundingSphere	?sph	=null;
+
+		mChr?.GetRoughBounds(out box, out sph);
+
+		if(box == null || sph == null)
+		{
+			return;
+		}
+		mCPrims.AddBox(RoughIndex, box.Value);
+		mCPrims.AddSphere(RoughIndex, sph.Value);
+	}
+
+
 	internal void AdjustBone(List<Input.InputAction> acts)
 	{
-		if(!mbActive)
+		if(!mbActive && !mbRoughMode)
 		{
 			return;
 		}
 
-		foreach(Input.InputAction act in acts)
+		if(mbActive)
 		{
-			if(act.mAction.Equals(Program.MyActions.BoneLengthUp))
+			foreach(Input.InputAction act in acts)
 			{
-				IncDecLength(LengthIncrement);
+				if(act.mAction.Equals(Program.MyActions.BoneLengthUp))
+				{
+					IncDecLength(LengthIncrement);
+				}
+				else if(act.mAction.Equals(Program.MyActions.BoneRadiusUp))
+				{
+					IncDecRadius(RadiusIncrement);
+				}
+				else if(act.mAction.Equals(Program.MyActions.BoneDepthUp))
+				{
+					IncDecDepth(RadiusIncrement);
+				}
+				else if(act.mAction.Equals(Program.MyActions.BoneLengthDown))
+				{
+					IncDecLength(-LengthIncrement);
+				}
+				else if(act.mAction.Equals(Program.MyActions.BoneRadiusDown))
+				{
+					IncDecRadius(-RadiusIncrement);
+				}
+				else if(act.mAction.Equals(Program.MyActions.BoneDepthDown))
+				{
+					IncDecDepth(-RadiusIncrement);
+				}
+				else if(act.mAction.Equals(Program.MyActions.BoneDone))
+				{
+					mbActive	=false;
+					mEditor.DoneBoneAdjust();
+				}
+				else if(act.mAction.Equals(Program.MyActions.BoneMirror))
+				{
+					Mirror();
+				}
+				else if(act.mAction.Equals(Program.MyActions.BoneSphereSnap))
+				{
+					Snap();
+				}
 			}
-			else if(act.mAction.Equals(Program.MyActions.BoneRadiusUp))
+		}
+		else	//rough adjust
+		{
+			foreach(Input.InputAction act in acts)
 			{
-				IncDecRadius(RadiusIncrement);
-			}
-			else if(act.mAction.Equals(Program.MyActions.BoneDepthUp))
-			{
-				IncDecDepth(RadiusIncrement);
-			}
-			else if(act.mAction.Equals(Program.MyActions.BoneLengthDown))
-			{
-				IncDecLength(-LengthIncrement);
-			}
-			else if(act.mAction.Equals(Program.MyActions.BoneRadiusDown))
-			{
-				IncDecRadius(-RadiusIncrement);
-			}
-			else if(act.mAction.Equals(Program.MyActions.BoneDepthDown))
-			{
-				IncDecDepth(-RadiusIncrement);
-			}
-			else if(act.mAction.Equals(Program.MyActions.BoneDone))
-			{
-				mbActive	=false;
-				mEditor.DoneBoneAdjust();
-			}
-			else if(act.mAction.Equals(Program.MyActions.BoneMirror))
-			{
-				Mirror();
-			}
-			else if(act.mAction.Equals(Program.MyActions.BoneSphereSnap))
-			{
-				Snap();
+				if(act.mAction.Equals(Program.MyActions.BoneLengthUp))
+				{
+					IncDecRoughLength(LengthIncrement);
+				}
+				else if(act.mAction.Equals(Program.MyActions.BoneRadiusUp))
+				{
+					IncDecRoughRadius(RadiusIncrement);
+				}
+				else if(act.mAction.Equals(Program.MyActions.BoneDepthUp))
+				{
+					IncDecRoughDepth(RadiusIncrement);
+				}
+				else if(act.mAction.Equals(Program.MyActions.BoneLengthDown))
+				{
+					IncDecRoughLength(-LengthIncrement);
+				}
+				else if(act.mAction.Equals(Program.MyActions.BoneRadiusDown))
+				{
+					IncDecRoughRadius(-RadiusIncrement);
+				}
+				else if(act.mAction.Equals(Program.MyActions.BoneDepthDown))
+				{
+					IncDecRoughDepth(-RadiusIncrement);
+				}
+				else if(act.mAction.Equals(Program.MyActions.BoneDone))
+				{
+					mbRoughMode	=false;
+					mAForm.DoneBoneAdjust();
+				}
 			}
 		}
 	}

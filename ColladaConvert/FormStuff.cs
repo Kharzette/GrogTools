@@ -39,6 +39,7 @@ internal class FormStuff
 	ID3D11Device	mGD;
 
 	float	mScaleFactor;
+	bool	mbRoughAdjust;
 
 	const int	RoughIndex	=6969;
 
@@ -66,7 +67,7 @@ internal class FormStuff
 		mOut	=new Output();
 		mSME	=new SeamEditor();
 
-		mBBE	=new BoneBoundEdit(mCPrims, mSKE);
+		mBBE	=new BoneBoundEdit(mCPrims, mSKE, mAF);
 
 		BindPositions();
 		BindEvents();
@@ -82,6 +83,19 @@ internal class FormStuff
 	internal void AdjustBone(List<Input.InputAction> acts)
 	{
 		mBBE.AdjustBone(acts);
+
+		if(!mbRoughAdjust)
+		{
+			return;
+		}
+
+		foreach(Input.InputAction act in acts)
+		{
+			if(act.mAction.Equals(Program.MyActions.BoneDone))
+			{
+				mbRoughAdjust	=false;
+			}
+		}
 	}
 
 
@@ -112,13 +126,30 @@ internal class FormStuff
 
 		if(mAF.GetDrawBound())
 		{
+			Vector4	selectedColor	=Vector4.One * 0.5f;
+			selectedColor.X	=1f;
+
 			if(mAF.GetBoundChoice() == false)
 			{
-				mCPrims.DrawSphere(RoughIndex, Matrix4x4.Identity, Vector4.One * 0.5f);
+				if(mbRoughAdjust)
+				{
+					mCPrims.DrawSphere(RoughIndex, Matrix4x4.Identity, selectedColor);
+				}
+				else
+				{
+					mCPrims.DrawSphere(RoughIndex, Matrix4x4.Identity, Vector4.One * 0.5f);
+				}
 			}
 			else
 			{
-				mCPrims.DrawBox(RoughIndex, Matrix4x4.Identity, Vector4.One * 0.5f);
+				if(mbRoughAdjust)
+				{
+					mCPrims.DrawBox(RoughIndex, Matrix4x4.Identity, selectedColor);
+				}
+				else
+				{
+					mCPrims.DrawBox(RoughIndex, Matrix4x4.Identity, Vector4.One * 0.5f);
+				}
 			}
 		}
 
@@ -221,6 +252,11 @@ internal class FormStuff
 		mScaleFactor	=(float)sender;
 		mCPrims.SetAxisScale(mScaleFactor);
 		mOut.Print("Using scale factor " + mScaleFactor + ".\n");
+	}
+
+	void OnAFBoundAdjust(object ?sender, EventArgs ea)
+	{
+		mbRoughAdjust	=true;
 	}
 	#endregion
 
@@ -338,6 +374,7 @@ internal class FormStuff
 		mAF.ePrint				+=OnAnyPrint;
 		mAF.eSkeletonChanged	+=OnAFSkelChanged;
 		mAF.eScaleFactorDecided	+=OnAFScaleFactorDecided;
+		mAF.eBoundAdjust		+=OnAFBoundAdjust;
 
 		//strip elements
 		mSE.eDeleteElement	+=OnSEDeleteElement;
@@ -367,6 +404,7 @@ internal class FormStuff
 		mAF.ePrint				-=OnAnyPrint;
 		mAF.eSkeletonChanged	-=OnAFSkelChanged;
 		mAF.eScaleFactorDecided	-=OnAFScaleFactorDecided;
+		mAF.eBoundAdjust		-=OnAFBoundAdjust;
 
 		//strip elements
 		mSE.eDeleteElement	-=OnSEDeleteElement;
