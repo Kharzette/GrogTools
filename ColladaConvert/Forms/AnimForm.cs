@@ -349,16 +349,15 @@ public partial class AnimForm : Form
 			return	false;
 		}
 
-		//don't have a way to test this
+		//Blender's collada exporter always outputs Z up.
+		//If you select Z or X it simply rotates the model before export
 		if(colladaFile.asset.up_axis == UpAxisType.X_UP)
 		{
 			PrintToOutput("Warning!  X up axis not supported.  Strange things may happen!\n");
 		}
-		//do have a way to test this, but it causes
-		//the bind shape matrii to have a rotation
 		else if(colladaFile.asset.up_axis == UpAxisType.Y_UP)
 		{
-			PrintToOutput("Warning!  Y up axis sort of works but might cause problems sharing anims between mesh parts!\n");
+			PrintToOutput("Warning!  Y up axis not supported.  Strange things may happen!\n");
 		}
 
 		//unit conversion
@@ -396,7 +395,7 @@ public partial class AnimForm : Form
 
 		alib.AddAnim(anm);
 
-		TransformRoots(alib.GetSkeleton(), anm, scaleFactor);
+		TransformRootsBlender(alib.GetSkeleton(), anm, scaleFactor);
 
 		//need to do this again in case keyframes were added
 		//for the root bone.
@@ -445,16 +444,15 @@ public partial class AnimForm : Form
 			return;
 		}
 
-		//don't have a way to test this
+		//Blender's collada exporter always outputs Z up.
+		//If you select Z or X it simply rotates the model before export
 		if(colladaFile.asset.up_axis == UpAxisType.X_UP)
 		{
 			PrintToOutput("Warning!  X up axis not supported.  Strange things may happen!\n");
 		}
-		//do have a way to test this, but it causes
-		//the bind shape matrii to have a rotation
 		else if(colladaFile.asset.up_axis == UpAxisType.Y_UP)
 		{
-			PrintToOutput("Warning!  Y up axis sort of works but might cause problems sharing anims between mesh parts!\n");
+			PrintToOutput("Warning!  Y up axis not supported.  Strange things may happen!\n");
 		}
 
 		//unit conversion
@@ -519,7 +517,7 @@ public partial class AnimForm : Form
 
 		alib.AddAnim(anm);
 
-		TransformRoots(alib.GetSkeleton(), anm, scaleFactor);
+		TransformRootsBlender(alib.GetSkeleton(), anm, scaleFactor);
 
 		//need to do this again in case keyframes were added
 		//for the root bone.
@@ -590,10 +588,15 @@ public partial class AnimForm : Form
 			return;
 		}
 
-		//don't have a way to test this
+		//Blender's collada exporter always outputs Z up.
+		//If you select Z or X it simply rotates the model before export
 		if(colladaFile.asset.up_axis == UpAxisType.X_UP)
 		{
 			PrintToOutput("Warning!  X up axis not supported.  Strange things may happen!\n");
+		}
+		else if(colladaFile.asset.up_axis == UpAxisType.Y_UP)
+		{
+			PrintToOutput("Warning!  Y up axis not supported.  Strange things may happen!\n");
 		}
 
 		sm	=new StaticMesh();
@@ -2257,8 +2260,6 @@ public partial class AnimForm : Form
 						Matrix4x4.CreateFromQuaternion(kf.mRotation) *
 						Matrix4x4.CreateTranslation(kf.mPosition);
 
-					KeyFrame.RightHandToLeft(ref mat);
-								
 					return	mat;
 				}
 			}
@@ -2296,8 +2297,6 @@ public partial class AnimForm : Form
 							parentMat	=Matrix4x4.CreateScale(kfParent.mScale) *
 								Matrix4x4.CreateFromQuaternion(kfParent.mRotation) *
 								Matrix4x4.CreateTranslation(kfParent.mPosition);
-
-							KeyFrame.RightHandToLeft(ref parentMat);
 						}
 
 						if(CNodeHasKeyData(sn))
@@ -2307,8 +2306,6 @@ public partial class AnimForm : Form
 							mat	=Matrix4x4.CreateScale(kf.mScale) *
 								Matrix4x4.CreateFromQuaternion(kf.mRotation) *
 								Matrix4x4.CreateTranslation(kf.mPosition);
-
-							KeyFrame.RightHandToLeft(ref mat);
 						}
 						return	parentMat * mat;// * parentMat;
 					}
@@ -2672,12 +2669,9 @@ public partial class AnimForm : Form
 	}
 
 
-	//for adjusting coordinate systems
-	void TransformRoots(Skeleton skel, Anim anm, float scaleFactor)
+	//this is for the standard unchanged export of z up and y forward
+	void TransformRootsBlender(Skeleton skel, Anim anm, float scaleFactor)
 	{
-		//this will undo the scaling from the bind shape
-		Matrix4x4	scaleMat	=Matrix4x4.CreateScale(Vector3.One * scaleFactor);
-
 		//need a couple rotations to go from blender which is:
 		//z up, y forward, x right
 		//to
@@ -2686,9 +2680,23 @@ public partial class AnimForm : Form
 		Matrix4x4	tiltYToForward	=Matrix4x4.CreateRotationX(-MathHelper.PiOver2);
 		Matrix4x4	spinYToFront	=Matrix4x4.CreateRotationY(MathHelper.Pi);
 
-		scaleMat	*=spinXToLeft;
-		scaleMat	*=tiltYToForward;
-		scaleMat	*=spinYToFront;
+		Matrix4x4	accum	=Matrix4x4.Identity;
+
+		accum	*=spinXToLeft;
+		accum	*=tiltYToForward;
+		accum	*=spinYToFront;
+
+		TransformRoots(skel, anm, scaleFactor, ref accum);
+	}
+
+
+	//for adjusting coordinate systems
+	void TransformRoots(Skeleton skel, Anim anm, float scaleFactor, ref Matrix4x4 coordAdjust)
+	{
+		//this will undo the scaling from the bind shape
+		Matrix4x4	scaleMat	=Matrix4x4.CreateScale(Vector3.One * scaleFactor);
+
+		scaleMat	*=coordAdjust;
 
 		List<string>	roots	=new List<string>();
 

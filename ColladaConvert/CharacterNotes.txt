@@ -42,8 +42,8 @@ Main tab:
 	Selection only
 	Include Armatures
 	Global Orientation
-		Forward Z
-		Up		Y
+		Leave Default:
+			Forward	Y	Up	Z
 		Check Apply
 Geom tab:
 	No triangulate
