@@ -255,7 +255,8 @@ public class SubAnimation
 			}
 			else if(targeted.ItemsElementName[idx] == ItemsChoiceType2.matrix)
 			{
-				//this doesn't really work yet
+				//This is the usual path for characters now using the default
+				//blender exporter.  Seems to be working well.
 				List<Matrix4x4>	mats	=AnimForm.GetMatrixListFromFloatList(outValues);
 				for(int v=0;v < mats.Count;v++)
 				{

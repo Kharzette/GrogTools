@@ -896,9 +896,9 @@ public partial class AnimForm : Form
 			//add to master list
 			for(int i=0;i < mats.Count;i++)
 			{
-				string	bname	=bnames[i];
+				string		bname	=bnames[i];
 				Matrix4x4	ibp		=mats[i];
-				int		idx		=skel.GetBoneIndex(bname);
+				int			idx		=skel.GetBoneIndex(bname);
 
 				if(idx == -1)
 				{
@@ -933,7 +933,7 @@ public partial class AnimForm : Form
 					ibp	*=scaleMat;
 
 					Matrix4x4.Invert(ibp, out ibp);
-
+					
 					invBindPoses.Add(idx, ibp);
 				}
 			}
@@ -2677,6 +2677,18 @@ public partial class AnimForm : Form
 	{
 		//this will undo the scaling from the bind shape
 		Matrix4x4	scaleMat	=Matrix4x4.CreateScale(Vector3.One * scaleFactor);
+
+		//need a couple rotations to go from blender which is:
+		//z up, y forward, x right
+		//to
+		//z forward, y up, x left
+		Matrix4x4	spinXToLeft		=Matrix4x4.CreateRotationZ(MathHelper.Pi);
+		Matrix4x4	tiltYToForward	=Matrix4x4.CreateRotationX(-MathHelper.PiOver2);
+		Matrix4x4	spinYToFront	=Matrix4x4.CreateRotationY(MathHelper.Pi);
+
+		scaleMat	*=spinXToLeft;
+		scaleMat	*=tiltYToForward;
+		scaleMat	*=spinYToFront;
 
 		List<string>	roots	=new List<string>();
 
