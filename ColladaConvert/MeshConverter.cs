@@ -345,7 +345,8 @@ internal class MeshConverter
 				}
 			}
 
-			Int4	index	=Int4.Zero;
+			int	X, Y, Z, W;
+			X	=Y	=Z	=W	=0;
 			Vector4	weight	=Vector4.Zero;
 			for(int j=0;j < numInfluences;j++)
 			{
@@ -361,31 +362,31 @@ internal class MeshConverter
 				switch(j)
 				{
 					case	0:
-						index.X		=boneIdx;
+						X			=boneIdx;
 						weight.X	=boneWeight;
 						break;
 					case	1:
-						index.Y		=boneIdx;
+						Y			=boneIdx;
 						weight.Y	=boneWeight;
 						break;
 					case	2:
-						index.Z		=boneIdx;
+						Z			=boneIdx;
 						weight.Z	=boneWeight;
 						break;
 					case	3:
-						index.W		=boneIdx;
+						W			=boneIdx;
 						weight.W	=boneWeight;
 						break;
 				}
 			}
 
 			//some rigs can get crazy with bone counts
-			if(index.X >= 256 || index.Y >= 256 || index.Z >= 256 || index.W >= 256)
+			if(X >= 256 || Y >= 256 || Z >= 256 || W >= 256)
 			{
 				Print("Warning!  Base Vertex " + i + " indexes bones beyond the 8 bit range!\n");
 			}
 
-			mBaseVerts[i].BoneIndex		=new Color((byte)index.X, (byte)index.Y, (byte)index.Z, (byte)index.W);
+			mBaseVerts[i].BoneIndex		=new Color((byte)X, (byte)Y, (byte)Z, (byte)W);
 			mBaseVerts[i].BoneWeights	=weight;
 		}
 	}
