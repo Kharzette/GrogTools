@@ -23,8 +23,8 @@ internal class BoneBoundEdit
 	string		?mBoneName;		//active bone name
 
 	//values in meters
-	const float	RadiusIncrement			=0.03f;
-	const float	LengthIncrement			=0.03f;
+	const float	RadiusIncrement			=0.001f;
+	const float	LengthIncrement			=0.001f;
 	const int	RoughIndex				=6969;
 
 
@@ -245,7 +245,9 @@ internal class BoneBoundEdit
 			return;
 		}
 
-		sk?.AdjustBoneBoundLength(mBoneIndex, amount);
+		float	scaleFactor	=sk.GetScaleFactor();
+
+		sk?.AdjustBoneBoundLength(mBoneIndex, amount * scaleFactor);
 
 		mChr?.BuildDebugBoundDrawData(mBoneIndex, mCPrims);
 	}
@@ -261,7 +263,9 @@ internal class BoneBoundEdit
 			return;
 		}
 
-		sk?.AdjustBoneBoundRadius(mBoneIndex, amount);
+		float	scaleFactor	=sk.GetScaleFactor();
+
+		sk?.AdjustBoneBoundRadius(mBoneIndex, amount * scaleFactor);
 
 		mChr?.BuildDebugBoundDrawData(mBoneIndex, mCPrims);
 	}
@@ -277,7 +281,9 @@ internal class BoneBoundEdit
 			return;
 		}
 
-		sk?.AdjustBoneBoundDepth(mBoneIndex, amount);
+		float	scaleFactor	=sk.GetScaleFactor();
+
+		sk?.AdjustBoneBoundDepth(mBoneIndex, amount * scaleFactor);
 
 		//this is probably overkill
 		mChr?.BuildDebugBoundDrawData(mBoneIndex, mCPrims);
