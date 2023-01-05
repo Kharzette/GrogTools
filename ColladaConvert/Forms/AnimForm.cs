@@ -350,7 +350,7 @@ public partial class AnimForm : Form
 		}
 
 		//Blender's collada exporter always outputs Z up.
-		//If you select Z or X it simply rotates the model before export
+		//If you select Y or X it simply rotates the model before export
 		if(colladaFile.asset.up_axis == UpAxisType.X_UP)
 		{
 			PrintToOutput("Warning!  X up axis not supported.  Strange things may happen!\n");
@@ -394,8 +394,6 @@ public partial class AnimForm : Form
 		Anim	anm	=BuildAnim(colladaFile, alib.GetSkeleton(), lvs, path, ePrint);
 
 		alib.AddAnim(anm);
-
-		TransformRootsBlender(alib.GetSkeleton(), anm, scaleFactor);
 
 		//need to do this again in case keyframes were added
 		//for the root bone.
@@ -445,7 +443,7 @@ public partial class AnimForm : Form
 		}
 
 		//Blender's collada exporter always outputs Z up.
-		//If you select Z or X it simply rotates the model before export
+		//If you select Y or X it simply rotates the model before export
 		if(colladaFile.asset.up_axis == UpAxisType.X_UP)
 		{
 			PrintToOutput("Warning!  X up axis not supported.  Strange things may happen!\n");
@@ -517,8 +515,6 @@ public partial class AnimForm : Form
 
 		alib.AddAnim(anm);
 
-		TransformRootsBlender(alib.GetSkeleton(), anm, scaleFactor);
-
 		//need to do this again in case keyframes were added
 		//for the root bone.
 		anm.SetBoneRefs(skel);
@@ -574,6 +570,8 @@ public partial class AnimForm : Form
 
 			mChar	=new Character(converted, sk, alib);
 		}
+
+		SetSkinRootTransformBlender();
 	}
 
 
@@ -928,15 +926,6 @@ public partial class AnimForm : Form
 				}
 				else
 				{
-					//inverse bind poses need the scalefactor applied
-					Matrix4x4.Invert(ibp, out ibp);
-
-					Matrix4x4	scaleMat	=Matrix4x4.CreateScale(scaleFactor);
-
-					ibp	*=scaleMat;
-
-					Matrix4x4.Invert(ibp, out ibp);
-					
 					invBindPoses.Add(idx, ibp);
 				}
 			}
@@ -1785,7 +1774,7 @@ public partial class AnimForm : Form
 					fileUnitSize	=colladaFile.asset.unit.meter;
 				}
 
-				cnk.CreateBaseVerts(verts, fileUnitSize, sf);
+				cnk.CreateBaseVerts(verts);
 
 				cnk.mPartIndex	=-1;
 				cnk.SetGeometryID(geom.id);
@@ -2670,7 +2659,7 @@ public partial class AnimForm : Form
 
 
 	//this is for the standard unchanged export of z up and y forward
-	void TransformRootsBlender(Skeleton skel, Anim anm, float scaleFactor)
+	void SetSkinRootTransformBlender()
 	{
 		//need a couple rotations to go from blender which is:
 		//z up, y forward, x right
@@ -2686,27 +2675,7 @@ public partial class AnimForm : Form
 		accum	*=tiltYToForward;
 		accum	*=spinYToFront;
 
-		TransformRoots(skel, anm, scaleFactor, ref accum);
-	}
-
-
-	//for adjusting coordinate systems
-	void TransformRoots(Skeleton skel, Anim anm, float scaleFactor, ref Matrix4x4 coordAdjust)
-	{
-		//this will undo the scaling from the bind shape
-		Matrix4x4	scaleMat	=Matrix4x4.CreateScale(Vector3.One * scaleFactor);
-
-		scaleMat	*=coordAdjust;
-
-		List<string>	roots	=new List<string>();
-
-		skel.GetRootNames(roots);
-
-		//rotate the animation to match our coord system
-		foreach(string root in roots)
-		{
-			anm.TransformBoneAnim(root, scaleMat);
-		}
+		mChar.GetSkin().SetRootTransform(accum);
 	}
 
 
@@ -2753,17 +2722,42 @@ public partial class AnimForm : Form
 
 		mAnimLib.ReadFromFile(mOFD.FileName);
 
-		Misc.SafeInvoke(eSkeletonChanged, mAnimLib.GetSkeleton());
+		Skeleton	skel	=mAnimLib.GetSkeleton();
+
+		Misc.SafeInvoke(eSkeletonChanged, skel);
 
 		BonesChanged();
 
 		RefreshAnimList();
 
-		int	animCount	=mAnimLib.GetAnims().Count;
-		int	boneCount	=mAnimLib.GetSkeleton().GetBoneCount();
+		List<Anim>	anims	=mAnimLib.GetAnims();
+
+		int	animCount	=anims.Count;
+		int	boneCount	=skel.GetBoneCount();
 
 		PrintToOutput("Animation library: " + FileUtil.StripPath(mOFD.FileName) + " loaded with " +
 			 animCount + " animations and a skeleton with " + boneCount + " bones.\n");
+	}
+
+
+	void SetUnitsByScaleFactor(float scaleFactor)
+	{
+		if(Mathery.CompareFloatEpsilon(Mesh.MetersToCentiMeters, scaleFactor, 0.1f))
+		{
+			UnitsCentimeters.Checked	=true;
+		}
+		else if(Mathery.CompareFloatEpsilon(Mesh.MetersToGrogUnits, scaleFactor, 0.1f))
+		{
+			UnitsGrog.Checked	=true;
+		}
+		else if(Mathery.CompareFloatEpsilon(Mesh.MetersToQuakeUnits, scaleFactor, 0.1f))
+		{
+			UnitsQuake.Checked	=true;
+		}
+		else
+		{
+			UnitsMeters.Checked	=true;
+		}
 	}
 
 
@@ -2786,9 +2780,12 @@ public partial class AnimForm : Form
 
 		Skin	sk	=mChar.GetSkin();
 
-		Misc.SafeInvoke(eScaleFactorDecided, sk.GetScaleFactor());
+		float	scaleFactor	=sk.GetScaleFactor();
 
+		Misc.SafeInvoke(eScaleFactorDecided, scaleFactor);
 		Misc.SafeInvoke(eMeshChanged, mChar);
+
+		SetUnitsByScaleFactor(scaleFactor);
 
 		int	partCount	=mChar.GetPartCount();
 

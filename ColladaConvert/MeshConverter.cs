@@ -122,7 +122,7 @@ internal class MeshConverter
 
 	//this will build a base list of verts
 	//eventually these will need to expand
-	internal void CreateBaseVerts(float_array verts, float meterScale, ScaleFactor sf)
+	internal void CreateBaseVerts(float_array verts)
 	{
 		mNumBaseVerts	=(int)verts.count / 3;
 		mBaseVerts		=new TrackedVert[mNumBaseVerts];
@@ -133,18 +133,6 @@ internal class MeshConverter
 			mBaseVerts[i / 3].Position0.Y		=verts.Values[i + 1];
 			mBaseVerts[i / 3].Position0.Z		=verts.Values[i + 2];
 			mBaseVerts[i / 3].mOriginalIndex	=i / 3;
-		}
-
-		//get users desired size
-		float	scaleFactor	=GetScaleFactor(sf);
-
-		//scale by the to-meters scale of the collada file
-		scaleFactor	*=meterScale;
-
-		//convert sizes
-		for(int i=0;i < mNumBaseVerts;i++)
-		{
-			mBaseVerts[i].Position0	*=scaleFactor;
 		}
 
 		//create a new meshlib mesh

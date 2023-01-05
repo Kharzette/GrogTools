@@ -245,9 +245,7 @@ internal class BoneBoundEdit
 			return;
 		}
 
-		float	scaleFactor	=sk.GetScaleFactor();
-
-		sk?.AdjustBoneBoundLength(mBoneIndex, amount * scaleFactor);
+		sk?.AdjustBoneBoundLength(mBoneIndex, amount);
 
 		mChr?.BuildDebugBoundDrawData(mBoneIndex, mCPrims);
 	}
@@ -263,9 +261,7 @@ internal class BoneBoundEdit
 			return;
 		}
 
-		float	scaleFactor	=sk.GetScaleFactor();
-
-		sk?.AdjustBoneBoundRadius(mBoneIndex, amount * scaleFactor);
+		sk?.AdjustBoneBoundRadius(mBoneIndex, amount);
 
 		mChr?.BuildDebugBoundDrawData(mBoneIndex, mCPrims);
 	}
@@ -281,9 +277,7 @@ internal class BoneBoundEdit
 			return;
 		}
 
-		float	scaleFactor	=sk.GetScaleFactor();
-
-		sk?.AdjustBoneBoundDepth(mBoneIndex, amount * scaleFactor);
+		sk?.AdjustBoneBoundDepth(mBoneIndex, amount);
 
 		//this is probably overkill
 		mChr?.BuildDebugBoundDrawData(mBoneIndex, mCPrims);
@@ -292,10 +286,14 @@ internal class BoneBoundEdit
 
 	void IncDecRoughLength(float amount)
 	{
-		mChr?.AdjustBoundLength(amount, mAForm.GetBoundChoice());
-
+		Skin			?sk		=mChr?.GetSkin();
 		BoundingBox		?box	=null;
 		BoundingSphere	?sph	=null;
+
+		float	scaleFactor	=sk.GetScaleFactor();
+
+		mChr?.AdjustBoundLength(amount * scaleFactor, mAForm.GetBoundChoice());
+
 
 		mChr?.GetRoughBounds(out box, out sph);
 
@@ -310,10 +308,13 @@ internal class BoneBoundEdit
 
 	void IncDecRoughRadius(float amount)
 	{
-		mChr?.AdjustBoundRadius(amount, mAForm.GetBoundChoice());
-
+		Skin			?sk		=mChr?.GetSkin();
 		BoundingBox		?box	=null;
 		BoundingSphere	?sph	=null;
+
+		float	scaleFactor	=sk.GetScaleFactor();
+
+		mChr?.AdjustBoundRadius(amount * scaleFactor, mAForm.GetBoundChoice());
 
 		mChr?.GetRoughBounds(out box, out sph);
 
@@ -328,10 +329,13 @@ internal class BoneBoundEdit
 
 	void IncDecRoughDepth(float amount)
 	{
-		mChr?.AdjustBoundDepth(amount, mAForm.GetBoundChoice());
-
+		Skin			?sk		=mChr?.GetSkin();
 		BoundingBox		?box	=null;
 		BoundingSphere	?sph	=null;
+
+		float	scaleFactor	=sk.GetScaleFactor();
+
+		mChr?.AdjustBoundDepth(amount * scaleFactor, mAForm.GetBoundChoice());
 
 		mChr?.GetRoughBounds(out box, out sph);
 
