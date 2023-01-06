@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "ColladaConvert": {
+      "commandName": "Project",
+      "workingDirectory": "E:\\Games\\CurrentGame",
+      "nativeDebugging": true
+    }
+  }
+}
