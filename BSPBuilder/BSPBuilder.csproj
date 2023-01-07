@@ -1,34 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net6.0-windows</TargetFramework>
-	<UseWindowsForms>true</UseWindowsForms>
+    <UseWindowsForms>true</UseWindowsForms>
     <OutputType>exe</OutputType>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
   <ItemGroup>
-	<Reference Include="SharpDX">
-      <HintPath>..\GrogLibs\SharpDX\Bin\$(Configuration)\net45\SharpDX.dll</HintPath>
-    </Reference>
-	<Reference Include="SharpDX.Mathematics">
-      <HintPath>..\GrogLibs\SharpDX\Bin\$(Configuration)\net45\SharpDX.Mathematics.dll</HintPath>
-    </Reference>
-	<Reference Include="SharpDX.DXGI">
-      <HintPath>..\GrogLibs\SharpDX\Bin\$(Configuration)\net45\SharpDX.DXGI.dll</HintPath>
-    </Reference>
-	<Reference Include="SharpDX.Direct3D11">
-      <HintPath>..\GrogLibs\SharpDX\Bin\$(Configuration)\net45\SharpDX.Direct3D11.dll</HintPath>
-    </Reference>
-	<Reference Include="SharpDX.Desktop">
-      <HintPath>..\GrogLibs\SharpDX\Bin\$(Configuration)\net45\SharpDX.Desktop.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\GrogLibs\BSPCore\BSPCore.csproj" />
+    <ProjectReference Include="..\GrogLibs\BSPZone\BSPZone.csproj" />
+    <ProjectReference Include="..\GrogLibs\BSPVis\BSPVis.csproj" />
+    <ProjectReference Include="..\GrogLibs\InputLib\InputLib.csproj" />
+    <ProjectReference Include="..\GrogLibs\MeshLib\MeshLib.csproj" />
+    <ProjectReference Include="..\GrogLibs\SharedForms\SharedForms.csproj" />
+    <ProjectReference Include="..\GrogLibs\MaterialLib\MaterialLib.csproj" />
+    <ProjectReference Include="..\GrogLibs\UtilityLib\UtilityLib.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GrogLibs\BSPCore\BSPCore.csproj"/>
-    <ProjectReference Include="..\GrogLibs\BSPZone\BSPZone.csproj"/>
-    <ProjectReference Include="..\GrogLibs\BSPVis\BSPVis.csproj"/>
-    <ProjectReference Include="..\GrogLibs\InputLib\InputLib.csproj"/>
-    <ProjectReference Include="..\GrogLibs\MeshLib\MeshLib.csproj"/>
-    <ProjectReference Include="..\GrogLibs\SharedForms\SharedForms.csproj"/>
-    <ProjectReference Include="..\GrogLibs\MaterialLib\MaterialLib.csproj"/>
-    <ProjectReference Include="..\GrogLibs\UtilityLib\UtilityLib.csproj"/>
+    <PackageReference Include="Vortice.DirectX" Version="2.2.0" />
   </ItemGroup>
 </Project>

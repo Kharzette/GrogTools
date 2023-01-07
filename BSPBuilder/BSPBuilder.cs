@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Numerics;
 using System.Threading;
 using System.Collections.Generic;
 using System.Windows.Forms;
@@ -8,8 +9,9 @@ using BSPVis;
 using MeshLib;
 using UtilityLib;
 using MaterialLib;
-using SharpDX;
-using SharpDX.Direct3D;
+using Vortice.Direct3D11;
+using Vortice.Mathematics;
+using Vortice.Mathematics.PackedVector;
 
 using MatLib = MaterialLib.MaterialLib;
 
@@ -19,20 +21,16 @@ namespace BSPBuilder
 	internal class BSPBuilder
 	{
 		//data
-		Map						mMap;
-		VisMap					mVisMap;
-		IndoorMesh				mZoneDraw;
-		MatLib					mMatLib;
-		StuffKeeper				mSKeeper;
-		bool					mbWorking, mbFullBuilding;
-		string					mFullBuildFileName;
-		List<string>			mAllTextures	=new List<string>();
-		Dictionary<int, Matrix>	mModelMats;
-		string					mGameRootDir;
-
-		//shader parameter stuff
-		List<string>	mCommonIgnores	=new List<string>();
-		List<string>	mCommonHides	=new List<string>();
+		Map							mMap;
+		VisMap						mVisMap;
+		IndoorMesh					mZoneDraw;
+		MatLib						mMatLib;
+		StuffKeeper					mSKeeper;
+		bool						mbWorking, mbFullBuilding;
+		string						mFullBuildFileName;
+		List<string>				mAllTextures	=new List<string>();
+		Dictionary<int, Matrix4x4>	mModelMats;
+		string						mGameRootDir;
 
 		//gpu
 		GraphicsDevice	mGD;
@@ -104,8 +102,6 @@ namespace BSPBuilder
 			mVisForm.eResumeVis				+=OnResumeVis;
 			mVisForm.eStopVis				+=OnStopVis;
 			mVisForm.eVis					+=OnVis;
-			mMatForm.eMatLibNotReadyToSave	+=OnMatLibNotReadyToSave;
-			mMatForm.eMatTechniqueChanged	+=OnMatTechChanged;
 
 			//core events
 			CoreEvents.eBuildDone		+=OnBuildDone;
@@ -121,8 +117,6 @@ namespace BSPBuilder
 			CoreEvents.eNumVertsChanged		+=OnNumVertsChanged;
 
 			ProgressWatcher.eProgressUpdated	+=OnProgress;
-
-			SetUpCommonIgnores();
 		}
 
 
@@ -168,8 +162,8 @@ namespace BSPBuilder
 
 			mZoneDraw.Update(msDelta);
 
-			mMatLib.UpdateWVP(Matrix.Identity,
-				gd.GCam.View, gd.GCam.Projection, gd.GCam.Position);
+//			mMatLib.UpdateWVP(Matrix.Identity,
+//				gd.GCam.View, gd.GCam.Projection, gd.GCam.Position);
 		}
 
 
@@ -188,7 +182,7 @@ namespace BSPBuilder
 			}
 
 			mZoneDraw.Draw(gd, 0, mVisMap.IsMaterialVisibleFromPos,
-				GetModelMatrix, RenderExternal, RenderShadows, SetUpAlphaRenderTargets);
+				GetModelMatrix, RenderExternal, RenderShadows);
 		}
 
 
@@ -210,7 +204,7 @@ namespace BSPBuilder
 		}
 
 
-		void RenderExternal(MaterialLib.AlphaPool ap, GameCamera gcam)
+		void RenderExternal(GameCamera gcam)
 		{
 		}
 
@@ -226,16 +220,16 @@ namespace BSPBuilder
 		}
 
 
-		Matrix GetModelMatrix(int modelIndex)
+		Matrix4x4 GetModelMatrix(int modelIndex)
 		{
 			if(mModelMats == null)
 			{
-				return	Matrix.Identity;
+				return	Matrix4x4.Identity;
 			}
 
 			if(!mModelMats.ContainsKey(modelIndex))
 			{
-				return	Matrix.Identity;
+				return	Matrix4x4.Identity;
 			}
 
 			return	mModelMats[modelIndex];
@@ -268,11 +262,7 @@ namespace BSPBuilder
 			mSKeeper.Init(mGD, mGameRootDir);
 
 			mDebugDraw	=new SharedForms.DebugDraw(mGD, mSKeeper);
-			mMatLib		=new MatLib(mGD, mSKeeper);
-
-			mMatLib.InitCelShading(1);
-			mMatLib.GenerateCelTexturePreset(mGD.GD,
-				mGD.GD.FeatureLevel == FeatureLevel.Level_9_3, false, 0);
+			mMatLib		=new MatLib(mSKeeper);
 
 			mZoneDraw	=new IndoorMesh(mGD, mMatLib);
 		}
@@ -384,27 +374,25 @@ namespace BSPBuilder
 
 					mMap.MakeMaterials(mGD, mMatLib, fileName);
 
-					bool	bPerPlaneAlpha	=false;
+//					bool	bPerPlaneAlpha	=false;
 
-					mZoneDraw.BuildLM(mGD, mSKeeper, mZoneForm.GetLightAtlasSize(), mMap.BuildLMRenderData, mMap.GetPlanes(), bPerPlaneAlpha);
-					mZoneDraw.BuildVLit(mGD, mSKeeper, mMap.BuildVLitRenderData, mMap.GetPlanes());
-					mZoneDraw.BuildAlpha(mGD, mSKeeper, mMap.BuildAlphaRenderData, mMap.GetPlanes());
-					mZoneDraw.BuildFullBright(mGD, mSKeeper, mMap.BuildFullBrightRenderData, mMap.GetPlanes());
-					mZoneDraw.BuildMirror(mGD, mSKeeper, mMap.BuildMirrorRenderData, mMap.GetPlanes());
-					mZoneDraw.BuildSky(mGD, mSKeeper, mMap.BuildSkyRenderData, mMap.GetPlanes());
-
+//					mZoneDraw.BuildLM(mGD, mSKeeper, mZoneForm.GetLightAtlasSize(), mMap.BuildLMRenderData, mMap.GetPlanes(), bPerPlaneAlpha);
+//					mZoneDraw.BuildVLit(mGD, mSKeeper, mMap.BuildVLitRenderData, mMap.GetPlanes());
+//					mZoneDraw.BuildAlpha(mGD, mSKeeper, mMap.BuildAlphaRenderData, mMap.GetPlanes());
+//					mZoneDraw.BuildFullBright(mGD, mSKeeper, mMap.BuildFullBrightRenderData, mMap.GetPlanes());
+//					mZoneDraw.BuildMirror(mGD, mSKeeper, mMap.BuildMirrorRenderData, mMap.GetPlanes());
+//					mZoneDraw.BuildSky(mGD, mSKeeper, mMap.BuildSkyRenderData, mMap.GetPlanes());
+//
 					mZoneDraw.FinishAtlas(mGD, mSKeeper);
-					mZoneDraw.FixAlphaDrawCalls();
+//					mZoneDraw.FixAlphaDrawCalls();
 
 					mModelMats	=mMap.GetModelTransforms();
 
 					mMatForm.RefreshMaterials();
 
-					HideParametersByMaterial();
-
 					mVisMap.SetMaterialVisBytes(mMatLib.GetMaterialNames().Count);
 
-					mMatLib.SetLightMapsToAtlas();
+//					mMatLib.SetLightMapsToAtlas();
 				}
 				mZoneForm.EnableFileIO(true);
 				mBSPForm.EnableFileIO(true);
@@ -532,20 +520,25 @@ namespace BSPBuilder
 				return;
 			}
 
-			IArch	sa	=new StaticArch();
+			string	path	=FileUtil.StripFileName(fileName);
 
-			sa.ReadFromFile(fileName, mGD.GD, true);
+			Dictionary<string, Mesh>	meshes	=new Dictionary<string, Mesh>();
+
+			//load all .mesh 
+			Mesh.LoadAllMeshes(path, mGD.GD, meshes);
+
+			StaticMesh	sm	=new StaticMesh(fileName, meshes);
 
 			mMap	=new Map();
 
-			int	count	=sa.GetPartCount();
+			int	count	=sm.GetPartCount();
 			for(int i=0;i < count;i++)
 			{
 				Bounds	bnd	=new Bounds();
 
 				List<Vector3>	pos;
 				List<int>		inds;
-				sa.GetPartPositions(i, out pos, out inds);
+				sm.GetPartPositions(i, out pos, out inds);
 
 				for(int j=0;j < inds.Count;j+=3)
 				{
@@ -556,7 +549,7 @@ namespace BSPBuilder
 
 				mMap.PrepareTriTree(bnd);
 
-				mOutForm.Print("Convexizing part " + i + ": " + sa.GetPartName(i) + "\n");
+				mOutForm.Print("Convexizing part " + i + ": " + sm.GetPartName(i) + "\n");
 
 				List<Vector3>	tri	=new List<Vector3>();
 				for(int j=0;j < inds.Count;j+=3)
@@ -587,6 +580,13 @@ namespace BSPBuilder
 			int	numDumped	=mMap.DumpBSPVolumesToQuarkMap(FileUtil.StripExtension(fileName));
 
 			mOutForm.Print(fileName + " opened and " + numDumped + " brushes extracted.\n");
+
+			//free .meshes
+			foreach(KeyValuePair<string, Mesh> m in meshes)
+			{
+				m.Value.FreeAll();
+			}
+			meshes.Clear();
 
 			mMap	=null;
 		}
@@ -621,12 +621,7 @@ namespace BSPBuilder
 			List<Half4>	h4norms	=new List<Half4>();
 			foreach(Vector3 norm in norms)
 			{
-				Half4	h4norm;
-
-				h4norm.X	=norm.X;
-				h4norm.Y	=norm.Y;
-				h4norm.Z	=norm.Z;
-				h4norm.W	=1f;
+				Half4	h4norm	=new Half4(norm.X, norm.Y, norm.Z, 1f);
 
 				h4norms.Add(h4norm);
 			}
@@ -644,7 +639,7 @@ namespace BSPBuilder
 				maxVerts.Add(maxVert);
 			}
 
-			EditorMesh	em	=new EditorMesh("MapMesh");
+			Mesh	bspMesh	=new Mesh("blort");
 
 			Type	vtype	=VertexTypes.GetMatch(true, true, false, false, false, false, 0, 1);
 
@@ -657,33 +652,30 @@ namespace BSPBuilder
 				VertexTypes.SetArrayField(varray, i, "Color0", cols[i]);
 			}
 
-			SharpDX.Direct3D11.Buffer	vb	=VertexTypes.BuildABuffer(mGD.GD, varray, vtype);
-
 			int	vertSize	=VertexTypes.GetSizeForType(vtype);
-
-			em.SetVertSize(vertSize);
-			em.SetNumVerts(maxVerts.Count);
-			em.SetNumTriangles(inds.Count / 3);
-			em.SetTypeIndex(VertexTypes.GetIndex(vtype));
-			em.SetVertexBuffer(vb);
 
 			UInt16	[]iarray	=inds.ToArray();
 
-			SharpDX.Direct3D11.Buffer	ib	=VertexTypes.BuildAnIndexBuffer(mGD.GD, iarray);
+			ID3D11Buffer	vb	=VertexTypes.BuildABuffer(mGD.GD, varray, vtype);
+			ID3D11Buffer	ib	=VertexTypes.BuildAnIndexBuffer(mGD.GD, iarray);
 
-			em.SetIndexBuffer(ib);
-
-			em.SetData(varray, iarray);			
+			bspMesh.SetEditorData(varray, iarray);
+			bspMesh.SetIndexBuffer(ib);
+			bspMesh.SetNumTriangles(inds.Count / 3);
+			bspMesh.SetNumVerts(maxVerts.Count);
+			bspMesh.SetTypeIndex(VertexTypes.GetIndex(vtype));
+			bspMesh.SetVertexBuffer(vb);
+			bspMesh.SetVertSize(vertSize);
 
 			mOutForm.Print(fileName + " opened and " + maxVerts.Count + " verts converted.\n");
 
-			IArch	saveArch	=new StaticArch();
+			StaticMesh	saveMesh	=new StaticMesh();
 
-			em.SetTransform(Matrix.RotationX((float)(Math.PI / 4)));
+			saveMesh.SetTransform(Matrix4x4.CreateRotationX((float)(Math.PI / 4)));
 
-			saveArch.AddPart(em);
+			saveMesh.AddPart(bspMesh, Matrix4x4.Identity, "Flort");
 
-			saveArch.SaveToFile(FileUtil.StripExtension(fileName) + ".Static");
+			saveMesh.SaveToFile(FileUtil.StripExtension(fileName) + ".Static");
 
 			mMap	=null;
 		}
@@ -926,148 +918,6 @@ namespace BSPBuilder
 			int	num	=(int)sender;
 
 //			mBSPForm.NumberOfPlanes	="" + num;
-		}
-
-		void OnMatLibNotReadyToSave(object sender, EventArgs ea)
-		{
-			mOutForm.Print("Material lib has some sort of problem that is preventing saving!\n");
-		}
-
-
-		void OnMatTechChanged(object sender, EventArgs ea)
-		{
-			string	matName	=sender as string;
-			if(matName == null || matName == "")
-			{
-				return;
-			}
-
-			mOutForm.Print("Material " + matName + " changed techniques...\n");
-
-			//reset hides
-			HideParameters(matName);
-		}
-
-
-		void SetUpCommonIgnores()
-		{
-			//some stuff isn't used by most bsp stuff
-			mCommonIgnores.Add("mSpecColor");
-			mCommonIgnores.Add("mSpecPower");
-			mCommonIgnores.Add("mSolidColour");
-
-			//renderstates are never used as a variable
-			mCommonIgnores.Add("AlphaBlending");
-			mCommonIgnores.Add("NoBlending");
-			mCommonIgnores.Add("ShadowBlending");
-			mCommonIgnores.Add("EnableDepth");
-			mCommonIgnores.Add("DisableDepth");
-			mCommonIgnores.Add("DisableDepthWrite");
-			mCommonIgnores.Add("DisableDepthTest");
-			mCommonIgnores.Add("NoCull");
-			mCommonIgnores.Add("LinearClamp");
-			mCommonIgnores.Add("LinearWrap");
-			mCommonIgnores.Add("PointClamp");
-			mCommonIgnores.Add("PointWrap");
-			mCommonIgnores.Add("LinearClampCube");
-			mCommonIgnores.Add("LinearWrapCube");
-			mCommonIgnores.Add("PointClampCube");
-			mCommonIgnores.Add("PointWrapCube");
-			mCommonIgnores.Add("PointClamp1D");
-
-			//common hidey stuff
-			mCommonHides.Add("mWorld");
-			mCommonHides.Add("mView");
-			mCommonHides.Add("mProjection");
-			mCommonHides.Add("mLightViewProj");
-			mCommonHides.Add("mEyePos");
-			mCommonHides.Add("mCelTable");
-			mCommonHides.Add("mShadowTexture");
-			mCommonHides.Add("mShadowCube");
-			mCommonHides.Add("mShadowLightPos");
-			mCommonHides.Add("mbDirectional");
-			mCommonHides.Add("mAniIntensities");
-			mCommonHides.Add("mDynLights");
-			mCommonHides.Add("mShadowAtten");
-			mCommonHides.Add("mSpecColor");	//eventually want these
-			mCommonHides.Add("mSpecPower");	//for future
-			mCommonHides.Add("mMaterialID");	//idkeeper takes care of this
-		}
-
-
-		void HideParameters(string matName)
-		{
-			//look for material specific stuff to hide / ignore
-			List<string>	matIgnores	=new List<string>();
-			List<string>	matHides	=new List<string>();
-
-			string	tech	=mMatLib.GetMaterialTechnique(matName);
-
-			if(tech == null)
-			{
-				return;	//no shaders loaded?
-			}
-
-			if(tech == "FullBright"
-				|| tech == "VertexLightingCel"
-				|| tech == "VertexLighting"
-				|| tech == "VertexLightingAlpha"
-				|| tech == "VertexLightingAlphaCel")
-			{
-				matIgnores.Add("mLightMap");
-				matIgnores.Add("mEyePos");
-				matIgnores.Add("mSkyGradient0");
-				matIgnores.Add("mSkyGradient1");
-				matHides.Add("mLightMap");
-				matHides.Add("mEyePos");
-				matHides.Add("mSkyGradient0");
-				matHides.Add("mSkyGradient1");
-			}
-			else if(tech.StartsWith("LightMap"))
-			{
-				matIgnores.Add("mEyePos");
-				matIgnores.Add("mSkyGradient0");
-				matIgnores.Add("mSkyGradient1");
-				matHides.Add("mSkyGradient0");
-				matHides.Add("mSkyGradient1");
-				matHides.Add("mEyePos");
-				matHides.Add("mLightMap");	//autohandled
-			}
-			else if(tech == "Sky")
-			{
-				matIgnores.Add("mLightMap");
-				matHides.Add("mLightMap");
-			}
-
-			if(!tech.Contains("Anim"))
-			{
-				matIgnores.Add("mAniIntensities");
-			}
-
-			if(!tech.Contains("Cel"))
-			{
-				matIgnores.Add("mCelTable");
-			}
-
-			//add common stuff
-			matHides.AddRange(mCommonHides);
-			matIgnores.AddRange(mCommonIgnores);
-
-			mMatLib.IgnoreMaterialVariables(matName, matIgnores, true);
-			mMatLib.HideMaterialVariables(matName, matHides, true);
-		}
-
-
-		void HideParametersByMaterial()
-		{
-			List<string>	mats	=mMatLib.GetMaterialNames();
-
-			//hide stuff that the user doesn't care about
-			//these are for all indoormesh materials
-			foreach(string m in mats)
-			{
-				HideParameters(m);
-			}
 		}
 	}
 }
