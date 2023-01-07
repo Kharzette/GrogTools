@@ -5,16 +5,16 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<UseWindowsForms>true</UseWindowsForms>
+	  <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
-	<ProjectReference Include="..\GrogLibs\UtilityLib\UtilityLib.csproj" />
-	<ProjectReference Include="..\GrogLibs\InputLib\InputLib.csproj" />
-	<ProjectReference Include="..\GrogLibs\MaterialLib\MaterialLib.csproj" />
-	<ProjectReference Include="..\GrogLibs\SharpDXWindows\SharpDXWindows.csproj" />
-	<ProjectReference Include="..\GrogLibs\MeshLib\MeshLib.csproj" />
+	  <ProjectReference Include="..\GrogLibs\UtilityLib\UtilityLib.csproj" />
+	  <ProjectReference Include="..\GrogLibs\InputLib\InputLib.csproj" />
+	  <ProjectReference Include="..\GrogLibs\MaterialLib\MaterialLib.csproj" />
+	  <ProjectReference Include="..\GrogLibs\SharpDXWindows\SharpDXWindows.csproj" />
+	  <ProjectReference Include="..\GrogLibs\MeshLib\MeshLib.csproj" />
   </ItemGroup>
 
   <ItemGroup>
