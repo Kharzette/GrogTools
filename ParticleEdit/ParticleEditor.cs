@@ -18,202 +18,201 @@ using SharpDX.Direct3D11;
 using MatLib	=MaterialLib.MaterialLib;
 
 
-namespace ParticleEdit
+namespace ParticleEdit;
+
+internal class ParticleEditor
 {
-	internal class ParticleEditor
+	GraphicsDevice	mGD;
+	ParticleForm	mPF;
+	ParticleBoss	mPB;
+	MatLib			mMats;
+
+	int	mCurSelection;
+
+
+	internal ParticleEditor(GraphicsDevice gd, ParticleForm pf, MatLib mats)
 	{
-		GraphicsDevice	mGD;
-		ParticleForm	mPF;
-		ParticleBoss	mPB;
-		MatLib			mMats;
+		mGD		=gd;
+		mPF		=pf;
+		mMats	=mats;
+		mPB		=new ParticleBoss(gd.GD, mats);
 
-		int	mCurSelection;
+		pf.eCreate						+=OnCreate;
+		pf.eItemNuked					+=OnEmitterNuked;
+		pf.eValueChanged				+=OnValueChanged;
+		pf.eSelectionChanged			+=OnEmitterSelChanged;
+		pf.eCopyEmitterToClipBoard		+=OnCopyEmitterToClipBoard;
+		pf.ePasteEmitterFromClipBoard	+=OnPasteEmitterFromClipBoard;
+		pf.eTextureChanged				+=OnTextureChanged;
+	}
 
 
-		internal ParticleEditor(GraphicsDevice gd, ParticleForm pf, MatLib mats)
+	void OnCreate(object sender, EventArgs ea)
+	{
+		float	str		=mPF.GravStrength;
+
+		Vector4	colorMin	=new Vector4(mPF.ColorVelocityMin.X,
+			mPF.ColorVelocityMin.Y, mPF.ColorVelocityMin.Z, mPF.AlphaMin);
+
+		Vector4	colorMax	=new Vector4(mPF.ColorVelocityMax.X,
+			mPF.ColorVelocityMax.Y, mPF.ColorVelocityMax.Z, mPF.AlphaMax);
+
+		mPB.CreateEmitter(mPF.EmTexture, mPF.EMStartColor,
+			mPF.EmShape, mPF.EmShapeSize,
+			mPF.MaxParts, Vector3.Zero,
+			mPF.GravPos, mPF.GravStrength,
+			mPF.StartingSize, mPF.EmitMS,
+			mPF.SpinMin, mPF.SpinMax,
+			mPF.VelMin, mPF.VelMax, mPF.VelCap,
+			mPF.SizeMin, mPF.SizeMax,
+			colorMin, colorMax,
+			mPF.LifeMin, mPF.LifeMax);
+
+		UpdateListView();
+	}
+
+
+	void OnEmitterNuked(object sender, EventArgs ea)
+	{
+		Nullable<int>	index	=sender as Nullable<int>;
+		if(index == null)
 		{
-			mGD		=gd;
-			mPF		=pf;
-			mMats	=mats;
-			mPB		=new ParticleBoss(gd.GD, mats);
+			return;
+		}
+		mPB.NukeEmitter(index.Value);
 
-			pf.eCreate						+=OnCreate;
-			pf.eItemNuked					+=OnEmitterNuked;
-			pf.eValueChanged				+=OnValueChanged;
-			pf.eSelectionChanged			+=OnEmitterSelChanged;
-			pf.eCopyEmitterToClipBoard		+=OnCopyEmitterToClipBoard;
-			pf.ePasteEmitterFromClipBoard	+=OnPasteEmitterFromClipBoard;
-			pf.eTextureChanged				+=OnTextureChanged;
+		UpdateListView();
+	}
+
+
+	void OnEmitterSelChanged(object sender, EventArgs ea)
+	{
+		Nullable<int>	index	=sender as Nullable<int>;
+		if(index == null)
+		{
+			return;
 		}
 
+		mCurSelection	=index.Value;
 
-		void OnCreate(object sender, EventArgs ea)
+		UpdateControls(index.Value);
+	}
+
+
+	void OnTextureChanged(object sender, EventArgs ea)
+	{
+		string	tex	=sender as string;
+		if(tex == null)
 		{
-			float	str		=mPF.GravStrength;
-
-			Vector4	colorMin	=new Vector4(mPF.ColorVelocityMin.X,
-				mPF.ColorVelocityMin.Y, mPF.ColorVelocityMin.Z, mPF.AlphaMin);
-
-			Vector4	colorMax	=new Vector4(mPF.ColorVelocityMax.X,
-				mPF.ColorVelocityMax.Y, mPF.ColorVelocityMax.Z, mPF.AlphaMax);
-
-			mPB.CreateEmitter(mPF.EmTexture, mPF.EMStartColor,
-				mPF.EmShape, mPF.EmShapeSize,
-				mPF.MaxParts, Vector3.Zero,
-				mPF.GravPos, mPF.GravStrength,
-				mPF.StartingSize, mPF.EmitMS,
-				mPF.SpinMin, mPF.SpinMax,
-				mPF.VelMin, mPF.VelMax, mPF.VelCap,
-				mPF.SizeMin, mPF.SizeMax,
-				colorMin, colorMax,
-				mPF.LifeMin, mPF.LifeMax);
-
-			UpdateListView();
+			return;
 		}
 
-
-		void OnEmitterNuked(object sender, EventArgs ea)
+		if(mPB != null && mCurSelection >= 0)
 		{
-			Nullable<int>	index	=sender as Nullable<int>;
-			if(index == null)
-			{
-				return;
-			}
-			mPB.NukeEmitter(index.Value);
+			mPB.SetTextureByIndex(mCurSelection, tex);
+		}
+	}
 
-			UpdateListView();
+
+	void OnValueChanged(object sender, EventArgs ea)
+	{
+		if(mCurSelection < 0)
+		{
+			return;
 		}
 
-
-		void OnEmitterSelChanged(object sender, EventArgs ea)
+		ParticleLib.Emitter	em	=mPB.GetEmitterByIndex(mCurSelection);
+		if(em == null)
 		{
-			Nullable<int>	index	=sender as Nullable<int>;
-			if(index == null)
-			{
-				return;
-			}
-
-			mCurSelection	=index.Value;
-
-			UpdateControls(index.Value);
+			return;
 		}
 
+		mPF.UpdateEmitter(em);
+	}
 
-		void OnTextureChanged(object sender, EventArgs ea)
+
+	void OnCopyEmitterToClipBoard(object sender, EventArgs ea)
+	{
+		Nullable<int>	index	=sender as Nullable<int>;
+		if(index == null)
 		{
-			string	tex	=sender as string;
-			if(tex == null)
-			{
-				return;
-			}
-
-			if(mPB != null && mCurSelection >= 0)
-			{
-				mPB.SetTextureByIndex(mCurSelection, tex);
-			}
+			return;
 		}
 
-
-		void OnValueChanged(object sender, EventArgs ea)
+		string	ent	=mPB.GetEmitterEntityString(index.Value);
+		if(ent != null && ent != "")
 		{
-			if(mCurSelection < 0)
-			{
-				return;
-			}
+			System.Windows.Forms.Clipboard.SetText(ent);
+		}
+	}
 
-			ParticleLib.Emitter	em	=mPB.GetEmitterByIndex(mCurSelection);
+
+	void OnPasteEmitterFromClipBoard(object sender, EventArgs ea)
+	{
+		string	ent	=System.Windows.Forms.Clipboard.GetText();
+
+		mPB.CreateEmitterFromQuArK(ent);
+
+		UpdateListView();
+	}
+
+
+	void UpdateListView()
+	{
+		int	count	=mPB.GetEmitterCount();
+		if(count <= 0)
+		{
+			return;
+		}
+
+		List<string>	emitters	=new List<string>();
+		List<int>		indexes		=new List<int>();
+
+		int	j=0;
+		for(int i=0;j < count;i++)
+		{
+			ParticleLib.Emitter	em	=mPB.GetEmitterByIndex(i);
+
 			if(em == null)
 			{
-				return;
+				continue;
 			}
 
-			mPF.UpdateEmitter(em);
+			emitters.Add("Emitter" + string.Format("{0:000}", i));
+			indexes.Add(i);
+			j++;
 		}
 
+		mPF.UpdateListView(emitters, indexes);
+	}
 
-		void OnCopyEmitterToClipBoard(object sender, EventArgs ea)
+
+	void UpdateControls(int index)
+	{
+		if(index < 0)
 		{
-			Nullable<int>	index	=sender as Nullable<int>;
-			if(index == null)
-			{
-				return;
-			}
-
-			string	ent	=mPB.GetEmitterEntityString(index.Value);
-			if(ent != null && ent != "")
-			{
-				System.Windows.Forms.Clipboard.SetText(ent);
-			}
+			return;
 		}
 
-
-		void OnPasteEmitterFromClipBoard(object sender, EventArgs ea)
-		{
-			string	ent	=System.Windows.Forms.Clipboard.GetText();
-
-			mPB.CreateEmitterFromQuArK(ent);
-
-			UpdateListView();
-		}
+		mPF.UpdateControls(mPB.GetEmitterByIndex(index),
+			mPB.GetTextureByIndex(index));
+	}
 
 
-		void UpdateListView()
-		{
-			int	count	=mPB.GetEmitterCount();
-			if(count <= 0)
-			{
-				return;
-			}
-
-			List<string>	emitters	=new List<string>();
-			List<int>		indexes		=new List<int>();
-
-			int	j=0;
-			for(int i=0;j < count;i++)
-			{
-				ParticleLib.Emitter	em	=mPB.GetEmitterByIndex(i);
-
-				if(em == null)
-				{
-					continue;
-				}
-
-				emitters.Add("Emitter" + string.Format("{0:000}", i));
-				indexes.Add(i);
-				j++;
-			}
-
-			mPF.UpdateListView(emitters, indexes);
-		}
+	internal void Update(int msDelta)
+	{
+		mPB.Update(mGD.DC, msDelta);
+	}
 
 
-		void UpdateControls(int index)
-		{
-			if(index < 0)
-			{
-				return;
-			}
-
-			mPF.UpdateControls(mPB.GetEmitterByIndex(index),
-				mPB.GetTextureByIndex(index));
-		}
+	internal void Draw()
+	{
+		mPB.Draw(mGD.DC, mGD.GCam.View, mGD.GCam.Projection);
+	}
 
 
-		internal void Update(int msDelta)
-		{
-			mPB.Update(mGD.DC, msDelta);
-		}
-
-
-		internal void Draw()
-		{
-			mPB.Draw(mGD.DC, mGD.GCam.View, mGD.GCam.Projection);
-		}
-
-
-		internal void DrawDMN()
-		{
-			mPB.DrawDMN(mGD.DC, mGD.GCam.View, mGD.GCam.Projection, mGD.GCam.Position);
-		}
+	internal void DrawDMN()
+	{
+		mPB.DrawDMN(mGD.DC, mGD.GCam.View, mGD.GCam.Projection, mGD.GCam.Position);
 	}
 }
