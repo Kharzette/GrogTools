@@ -5,23 +5,6 @@
 		<UseWindowsForms>true</UseWindowsForms>
 	</PropertyGroup>
 	<ItemGroup>
-		<Reference Include="SharpDX">
-			<HintPath>..\GrogLibs\SharpDX\Bin\$(Configuration)\net45\SharpDX.dll</HintPath>
-		</Reference>
-		<Reference Include="SharpDX.Mathematics">
-			<HintPath>..\GrogLibs\SharpDX\Bin\$(Configuration)\net45\SharpDX.Mathematics.dll</HintPath>
-		</Reference>
-		<Reference Include="SharpDX.DXGI">
-			<HintPath>..\GrogLibs\SharpDX\Bin\$(Configuration)\net45\SharpDX.DXGI.dll</HintPath>
-		</Reference>
-		<Reference Include="SharpDX.Direct3D11">
-			<HintPath>..\GrogLibs\SharpDX\Bin\$(Configuration)\net45\SharpDX.Direct3D11.dll</HintPath>
-		</Reference>
-		<Reference Include="SharpDX.Desktop">
-			<HintPath>..\GrogLibs\SharpDX\Bin\$(Configuration)\net45\SharpDX.Desktop.dll</HintPath>
-		</Reference>
-	</ItemGroup>
-	<ItemGroup>
 		<ProjectReference Include="..\GrogLibs\BSPCore\BSPCore.csproj"/>
 		<ProjectReference Include="..\GrogLibs\BSPZone\BSPZone.csproj"/>
 		<ProjectReference Include="..\GrogLibs\BSPVis\BSPVis.csproj"/>
