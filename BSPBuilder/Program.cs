@@ -62,7 +62,7 @@ static class Program
 		SharedForms.ShaderCompileHelper.mTitle	="Compiling Shaders...";
 
 		PlayerSteering	pSteering		=SetUpSteering();
-		Input			inp				=SetUpInput();
+		Input			inp				=SetUpInput(gd.RendForm);
 		Random			rand			=new Random();
 		Vector3			pos				=Vector3.One * 5f;
 		Vector3			lightDir		=-Vector3.UnitY;
@@ -231,9 +231,9 @@ static class Program
 	}
 
 
-	static Input SetUpInput()
+	static Input SetUpInput(RenderForm hwnd)
 	{
-		Input	inp	=new InputLib.Input(1f / Stopwatch.Frequency);
+		Input	inp	=new InputLib.Input(1f / Stopwatch.Frequency, hwnd);
 		
 		//wasd
 		inp.MapAction(MyActions.MoveForward, ActionTypes.ContinuousHold,

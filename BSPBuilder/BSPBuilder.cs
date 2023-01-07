@@ -16,363 +16,363 @@ using Vortice.Mathematics.PackedVector;
 using MatLib = MaterialLib.MaterialLib;
 
 
-namespace BSPBuilder
+namespace BSPBuilder;
+
+internal class BSPBuilder
 {
-	internal class BSPBuilder
+	//data
+	Map							mMap;
+	VisMap						mVisMap;
+	IndoorMesh					mZoneDraw;
+	MatLib						mMatLib;
+	StuffKeeper					mSKeeper;
+	bool						mbWorking, mbFullBuilding;
+	string						mFullBuildFileName;
+	List<string>				mAllTextures	=new List<string>();
+	Dictionary<int, Matrix4x4>	mModelMats;
+	string						mGameRootDir;
+
+	//gpu
+	GraphicsDevice	mGD;
+
+	//debug draw stuff
+	SharedForms.DebugDraw	mDebugDraw;
+
+	//forms
+	BSPForm		mBSPForm	=new BSPForm();
+	VisForm		mVisForm	=new VisForm();
+	ZoneForm	mZoneForm	=new ZoneForm();
+
+	//shared forms
+	SharedForms.MaterialForm	mMatForm;
+	SharedForms.CelTweakForm	mCTForm;
+	SharedForms.Output			mOutForm	=new SharedForms.Output();
+
+
+	internal BSPBuilder(GraphicsDevice gd, string gameRootDir)
 	{
-		//data
-		Map							mMap;
-		VisMap						mVisMap;
-		IndoorMesh					mZoneDraw;
-		MatLib						mMatLib;
-		StuffKeeper					mSKeeper;
-		bool						mbWorking, mbFullBuilding;
-		string						mFullBuildFileName;
-		List<string>				mAllTextures	=new List<string>();
-		Dictionary<int, Matrix4x4>	mModelMats;
-		string						mGameRootDir;
+		mGD				=gd;
+		mGameRootDir	=gameRootDir;
 
-		//gpu
-		GraphicsDevice	mGD;
+		mGD.eDeviceLost	+=OnDeviceLost;
 
-		//debug draw stuff
-		SharedForms.DebugDraw	mDebugDraw;
+		mSKeeper	=new StuffKeeper();
 
-		//forms
-		BSPForm		mBSPForm	=new BSPForm();
-		VisForm		mVisForm	=new VisForm();
-		ZoneForm	mZoneForm	=new ZoneForm();
+		mSKeeper.eCompileNeeded	+=SharedForms.ShaderCompileHelper.CompileNeededHandler;
+		mSKeeper.eCompileDone	+=SharedForms.ShaderCompileHelper.CompileDoneHandler;
 
-		//shared forms
-		SharedForms.MaterialForm	mMatForm;
-		SharedForms.CelTweakForm	mCTForm;
-		SharedForms.Output			mOutForm	=new SharedForms.Output();
+		LoadStuff();
+
+		int	resx	=gd.RendForm.ClientRectangle.Width;
+		int	resy	=gd.RendForm.ClientRectangle.Height;
+
+		mMatForm	=new SharedForms.MaterialForm(mMatLib, mSKeeper);
+		mCTForm		=new SharedForms.CelTweakForm(gd.GD, mMatLib);
+
+		SetFormPos(mBSPForm, "BSPFormPos");
+		SetFormPos(mVisForm, "VisFormPos");
+		SetFormPos(mZoneForm, "ZoneFormPos");
+		SetFormPos(mOutForm, "OutputFormPos");
+		SetFormPos(mMatForm, "MaterialFormPos");
+		SetFormPos(mCTForm, "CelTweakFormPos");
+		SetFormSize(mMatForm, "MaterialFormSize");
+
+		//show forms
+		mBSPForm.Visible	=true;
+		mVisForm.Visible	=true;
+		mZoneForm.Visible	=true;
+		mOutForm.Visible	=true;
+		mMatForm.Visible	=true;
+		mCTForm.Visible		=true;
+
+		//form events
+		mZoneForm.eMaterialVis			+=OnMaterialVis;
+		mZoneForm.eSaveZone				+=OnSaveZone;
+		mZoneForm.eZoneGBSP				+=OnZoneGBSP;
+		mZoneForm.eLoadDebug			+=OnLoadDebug;
+		mZoneForm.eDumpTextures			+=OnDumpTextures;
+		mBSPForm.eBuild					+=OnBuild;
+		mBSPForm.eLight					+=OnLight;
+		mBSPForm.eOpenMap				+=OnOpenMap;
+		mBSPForm.eStaticToMap			+=OnOpenStatic;
+		mBSPForm.eMapToStatic			+=OnMapToStatic;
+		mBSPForm.eSave					+=OnSaveGBSP;
+		mBSPForm.eFullBuild				+=OnFullBuild;
+		mBSPForm.eUpdateEntities		+=OnUpdateEntities;
+		mVisForm.eResumeVis				+=OnResumeVis;
+		mVisForm.eStopVis				+=OnStopVis;
+		mVisForm.eVis					+=OnVis;
+
+		//core events
+		CoreEvents.eBuildDone		+=OnBuildDone;
+		CoreEvents.eLightDone		+=OnLightDone;
+		CoreEvents.eGBSPSaveDone	+=OnGBSPSaveDone;
+		CoreEvents.eVisDone			+=OnVisDone;
+		CoreEvents.ePrint			+=OnPrint;
+
+		//stats
+		CoreEvents.eNumPortalsChanged	+=OnNumPortalsChanged;
+		CoreEvents.eNumClustersChanged	+=OnNumClustersChanged;
+		CoreEvents.eNumPlanesChanged	+=OnNumPlanesChanged;
+		CoreEvents.eNumVertsChanged		+=OnNumVertsChanged;
+
+		ProgressWatcher.eProgressUpdated	+=OnProgress;
+	}
 
 
-		internal BSPBuilder(GraphicsDevice gd, string gameRootDir)
+	internal void FreeAll()
+	{
+		if(mMap != null)
 		{
-			mGD				=gd;
-			mGameRootDir	=gameRootDir;
-
-			mGD.eDeviceLost	+=OnDeviceLost;
-
-			mSKeeper	=new StuffKeeper();
-
-			mSKeeper.eCompileNeeded	+=SharedForms.ShaderCompileHelper.CompileNeededHandler;
-			mSKeeper.eCompileDone	+=SharedForms.ShaderCompileHelper.CompileDoneHandler;
-
-			LoadStuff();
-
-			int	resx	=gd.RendForm.ClientRectangle.Width;
-			int	resy	=gd.RendForm.ClientRectangle.Height;
-
-			mMatForm	=new SharedForms.MaterialForm(mMatLib, mSKeeper);
-			mCTForm		=new SharedForms.CelTweakForm(gd.GD, mMatLib);
-
-			SetFormPos(mBSPForm, "BSPFormPos");
-			SetFormPos(mVisForm, "VisFormPos");
-			SetFormPos(mZoneForm, "ZoneFormPos");
-			SetFormPos(mOutForm, "OutputFormPos");
-			SetFormPos(mMatForm, "MaterialFormPos");
-			SetFormPos(mCTForm, "CelTweakFormPos");
-			SetFormSize(mMatForm, "MaterialFormSize");
-
-			//show forms
-			mBSPForm.Visible	=true;
-			mVisForm.Visible	=true;
-			mZoneForm.Visible	=true;
-			mOutForm.Visible	=true;
-			mMatForm.Visible	=true;
-			mCTForm.Visible		=true;
-
-			//form events
-			mZoneForm.eMaterialVis			+=OnMaterialVis;
-			mZoneForm.eSaveZone				+=OnSaveZone;
-			mZoneForm.eZoneGBSP				+=OnZoneGBSP;
-			mZoneForm.eLoadDebug			+=OnLoadDebug;
-			mZoneForm.eDumpTextures			+=OnDumpTextures;
-			mBSPForm.eBuild					+=OnBuild;
-			mBSPForm.eLight					+=OnLight;
-			mBSPForm.eOpenMap				+=OnOpenMap;
-			mBSPForm.eStaticToMap			+=OnOpenStatic;
-			mBSPForm.eMapToStatic			+=OnMapToStatic;
-			mBSPForm.eSave					+=OnSaveGBSP;
-			mBSPForm.eFullBuild				+=OnFullBuild;
-			mBSPForm.eUpdateEntities		+=OnUpdateEntities;
-			mVisForm.eResumeVis				+=OnResumeVis;
-			mVisForm.eStopVis				+=OnStopVis;
-			mVisForm.eVis					+=OnVis;
-
-			//core events
-			CoreEvents.eBuildDone		+=OnBuildDone;
-			CoreEvents.eLightDone		+=OnLightDone;
-			CoreEvents.eGBSPSaveDone	+=OnGBSPSaveDone;
-			CoreEvents.eVisDone			+=OnVisDone;
-			CoreEvents.ePrint			+=OnPrint;
-
-			//stats
-			CoreEvents.eNumPortalsChanged	+=OnNumPortalsChanged;
-			CoreEvents.eNumClustersChanged	+=OnNumClustersChanged;
-			CoreEvents.eNumPlanesChanged	+=OnNumPlanesChanged;
-			CoreEvents.eNumVertsChanged		+=OnNumVertsChanged;
-
-			ProgressWatcher.eProgressUpdated	+=OnProgress;
+			mMap.FreeGBSPFile();
 		}
 
-
-		internal void FreeAll()
+		if(mVisMap != null)
 		{
-			if(mMap != null)
-			{
-				mMap.FreeGBSPFile();
-			}
-
-			if(mVisMap != null)
-			{
-				mVisMap.FreeFileVisData();
-			}
-
-			if(mZoneDraw != null)
-			{
-				mZoneDraw.FreeAll();
-			}
-
-			mMatLib.FreeAll();
-			mDebugDraw.FreeAll();
-
-			mSKeeper.eCompileNeeded	-=SharedForms.ShaderCompileHelper.CompileNeededHandler;
-			mSKeeper.eCompileDone	-=SharedForms.ShaderCompileHelper.CompileDoneHandler;
-			mSKeeper.FreeAll();
+			mVisMap.FreeFileVisData();
 		}
 
-
-		internal bool Busy()
+		if(mZoneDraw != null)
 		{
-			return	mbWorking;
+			mZoneDraw.FreeAll();
 		}
 
+		mMatLib.FreeAll();
+		mDebugDraw.FreeAll();
 
-		internal void Update(float msDelta, GraphicsDevice gd)
+		mSKeeper.eCompileNeeded	-=SharedForms.ShaderCompileHelper.CompileNeededHandler;
+		mSKeeper.eCompileDone	-=SharedForms.ShaderCompileHelper.CompileDoneHandler;
+		mSKeeper.FreeAll();
+	}
+
+
+	internal bool Busy()
+	{
+		return	mbWorking;
+	}
+
+
+	internal void Update(float msDelta, GraphicsDevice gd)
+	{
+		if(mbWorking)
 		{
-			if(mbWorking)
-			{
-				Thread.Sleep(0);
-				return;
-			}
+			Thread.Sleep(0);
+			return;
+		}
 
-			mZoneDraw.Update(msDelta);
+		mZoneDraw.Update(msDelta);
 
 //			mMatLib.UpdateWVP(Matrix.Identity,
 //				gd.GCam.View, gd.GCam.Projection, gd.GCam.Position);
+	}
+
+
+	internal void Render(GraphicsDevice gd)
+	{
+		if(mbWorking)
+		{
+			Thread.Sleep(0);
+			return;
 		}
 
-
-		internal void Render(GraphicsDevice gd)
+		if(mZoneDraw == null || mVisMap == null)
 		{
-			if(mbWorking)
-			{
-				Thread.Sleep(0);
-				return;
-			}
-
-			if(mZoneDraw == null || mVisMap == null)
-			{
-				mDebugDraw.Draw(mGD);
-				return;
-			}
-
-			mZoneDraw.Draw(gd, 0, mVisMap.IsMaterialVisibleFromPos,
-				GetModelMatrix, RenderExternal, RenderShadows);
+			mDebugDraw.Draw(mGD);
+			return;
 		}
 
+		mZoneDraw.Draw(gd, 0, mVisMap.IsMaterialVisibleFromPos,
+			GetModelMatrix, RenderExternal, RenderShadows);
+	}
 
-		void BuildDebugDraw(Map.DebugDrawChoice choice)
+
+	void BuildDebugDraw(Map.DebugDrawChoice choice)
+	{
+		List<Vector3>	verts	=new List<Vector3>();
+		List<UInt16>	inds	=new List<UInt16>();
+		List<Vector3>	norms	=new List<Vector3>();
+		List<Color>		cols	=new List<Color>();
+
+		mMap.GetTriangles(verts, norms, cols, inds, choice);
+		
+		mDebugDraw.MakeDrawStuff(mGD.GD, verts, norms, cols, inds);
+	}
+
+
+	void SetUpAlphaRenderTargets()
+	{
+	}
+
+
+	void RenderExternal(GameCamera gcam)
+	{
+	}
+
+
+	void RenderExternalDMN(GameCamera gcam)
+	{
+	}
+
+
+	bool RenderShadows(int shadIndex)
+	{
+		return	false;
+	}
+
+
+	Matrix4x4 GetModelMatrix(int modelIndex)
+	{
+		if(mModelMats == null)
 		{
-			List<Vector3>	verts	=new List<Vector3>();
-			List<UInt16>	inds	=new List<UInt16>();
-			List<Vector3>	norms	=new List<Vector3>();
-			List<Color>		cols	=new List<Color>();
-
-			mMap.GetTriangles(verts, norms, cols, inds, choice);
-			
-			mDebugDraw.MakeDrawStuff(mGD.GD, verts, norms, cols, inds);
+			return	Matrix4x4.Identity;
 		}
 
-
-		void SetUpAlphaRenderTargets()
+		if(!mModelMats.ContainsKey(modelIndex))
 		{
+			return	Matrix4x4.Identity;
 		}
 
+		return	mModelMats[modelIndex];
+	}
 
-		void RenderExternal(GameCamera gcam)
+
+	void SetFormPos(Form form, string posName)
+	{
+		form.DataBindings.Add(new Binding("Location",
+			Settings.Default, posName, true,
+			DataSourceUpdateMode.OnPropertyChanged));
+
+		System.Configuration.SettingsPropertyValue	val	=			
+			Settings.Default.PropertyValues[posName];
+
+		form.Location	=(System.Drawing.Point)val.PropertyValue;
+	}
+
+
+	void SetFormSize(Form form, string sizeName)
+	{
+		form.DataBindings.Add(new Binding("Size",
+			Settings.Default, sizeName, true,
+			DataSourceUpdateMode.OnPropertyChanged));
+	}
+
+
+	void LoadStuff()
+	{
+		mSKeeper.Init(mGD, mGameRootDir);
+
+		mDebugDraw	=new SharedForms.DebugDraw(mGD, mSKeeper);
+		mMatLib		=new MatLib(mSKeeper);
+
+		mZoneDraw	=new IndoorMesh(mGD, mMatLib);
+	}
+
+
+	void OnProgress(object sender, EventArgs ea)
+	{
+		ProgressEventArgs pea	=ea as ProgressEventArgs;
+
+		if(pea != null)
 		{
+			mOutForm.UpdateProgress(pea.mMin, pea.mMax, pea.mCurrent);
+		}
+	}
+
+
+	void OnPrint(object sender, EventArgs ea)
+	{
+		string	sz	=sender as string;
+		if(sz != null)
+		{
+			mOutForm.Print(sz);
+		}
+	}
+
+
+	void OnDeviceLost(object sender, EventArgs ea)
+	{
+		mOutForm.Print("Graphics device lost, rebuilding stuffs...\n");
+
+		mSKeeper.FreeAll();
+		mDebugDraw.FreeAll();
+		mMatLib.FreeAll();
+		mZoneDraw.FreeAll();
+
+		LoadStuff();
+	}
+
+
+	void OnMaterialVis(object sender, EventArgs ea)
+	{
+		string	fileName	=sender as string;
+
+		if(fileName == null)
+		{
+			return;
 		}
 
+		Action<System.Windows.Forms.Form>	setText	=frm => frm.Text = fileName;
+		SharedForms.FormExtensions.Invoke(mZoneForm, setText);
+		mZoneForm.SetZoneSaveEnabled(false);
+		mZoneForm.EnableFileIO(false);
+		mBSPForm.EnableFileIO(false);
+		mVisForm.EnableFileIO(false);
 
-		void RenderExternalDMN(GameCamera gcam)
+		mVisMap	=new VisMap();
+		mVisMap.MaterialVisGBSPFile(fileName, mGD);
+
+		mZoneForm.EnableFileIO(true);
+		mBSPForm.EnableFileIO(true);
+		mVisForm.EnableFileIO(true);
+
+		mVisMap	=null;
+	}
+
+	void OnSaveZone(object sender, EventArgs ea)
+	{
+		string	fileName	=sender as string;
+
+		if(fileName != null)
 		{
+			mZoneForm.Text	=fileName;
+			mMap.Write(fileName, mZoneForm.SaveDebugInfo,
+				mMatLib.GetMaterialNames().Count, mVisMap.SaveVisZoneData);
+
+			//write out the zoneDraw
+			mZoneDraw.Write(fileName + "Draw");
+
+			mOutForm.Print("Zone save complete.\n");
 		}
+	}
 
+	void OnZoneGBSP(object sender, EventArgs ea)
+	{
+		string	fileName	=sender as string;
 
-		bool RenderShadows(int shadIndex)
+		if(fileName != null)
 		{
-			return	false;
-		}
-
-
-		Matrix4x4 GetModelMatrix(int modelIndex)
-		{
-			if(mModelMats == null)
-			{
-				return	Matrix4x4.Identity;
-			}
-
-			if(!mModelMats.ContainsKey(modelIndex))
-			{
-				return	Matrix4x4.Identity;
-			}
-
-			return	mModelMats[modelIndex];
-		}
-
-
-		void SetFormPos(Form form, string posName)
-		{
-			form.DataBindings.Add(new Binding("Location",
-				Settings.Default, posName, true,
-				DataSourceUpdateMode.OnPropertyChanged));
-
-			System.Configuration.SettingsPropertyValue	val	=			
-				Settings.Default.PropertyValues[posName];
-
-			form.Location	=(System.Drawing.Point)val.PropertyValue;
-		}
-
-
-		void SetFormSize(Form form, string sizeName)
-		{
-			form.DataBindings.Add(new Binding("Size",
-				Settings.Default, sizeName, true,
-				DataSourceUpdateMode.OnPropertyChanged));
-		}
-
-
-		void LoadStuff()
-		{
-			mSKeeper.Init(mGD, mGameRootDir);
-
-			mDebugDraw	=new SharedForms.DebugDraw(mGD, mSKeeper);
-			mMatLib		=new MatLib(mSKeeper);
-
-			mZoneDraw	=new IndoorMesh(mGD, mMatLib);
-		}
-
-
-		void OnProgress(object sender, EventArgs ea)
-		{
-			ProgressEventArgs pea	=ea as ProgressEventArgs;
-
-			if(pea != null)
-			{
-				mOutForm.UpdateProgress(pea.mMin, pea.mMax, pea.mCurrent);
-			}
-		}
-
-
-		void OnPrint(object sender, EventArgs ea)
-		{
-			string	sz	=sender as string;
-			if(sz != null)
-			{
-				mOutForm.Print(sz);
-			}
-		}
-
-
-		void OnDeviceLost(object sender, EventArgs ea)
-		{
-			mOutForm.Print("Graphics device lost, rebuilding stuffs...\n");
-
-			mSKeeper.FreeAll();
-			mDebugDraw.FreeAll();
-			mMatLib.FreeAll();
-			mZoneDraw.FreeAll();
-
-			LoadStuff();
-		}
-
-
-		void OnMaterialVis(object sender, EventArgs ea)
-		{
-			string	fileName	=sender as string;
-
-			if(fileName == null)
-			{
-				return;
-			}
-
 			Action<System.Windows.Forms.Form>	setText	=frm => frm.Text = fileName;
 			SharedForms.FormExtensions.Invoke(mZoneForm, setText);
-			mZoneForm.SetZoneSaveEnabled(false);
 			mZoneForm.EnableFileIO(false);
 			mBSPForm.EnableFileIO(false);
 			mVisForm.EnableFileIO(false);
+			mMap	=new Map();
 
-			mVisMap	=new VisMap();
-			mVisMap.MaterialVisGBSPFile(fileName, mGD);
+			GFXHeader	hdr	=mMap.LoadGBSPFile(fileName);
 
-			mZoneForm.EnableFileIO(true);
-			mBSPForm.EnableFileIO(true);
-			mVisForm.EnableFileIO(true);
-
-			mVisMap	=null;
-		}
-
-		void OnSaveZone(object sender, EventArgs ea)
-		{
-			string	fileName	=sender as string;
-
-			if(fileName != null)
+			if(hdr == null)
 			{
-				mZoneForm.Text	=fileName;
-				mMap.Write(fileName, mZoneForm.SaveDebugInfo,
-					mMatLib.GetMaterialNames().Count, mVisMap.SaveVisZoneData);
-
-				//write out the zoneDraw
-				mZoneDraw.Write(fileName + "Draw");
-
-				mOutForm.Print("Zone save complete.\n");
+				CoreEvents.Print("Load failed\n");
 			}
-		}
-
-		void OnZoneGBSP(object sender, EventArgs ea)
-		{
-			string	fileName	=sender as string;
-
-			if(fileName != null)
+			else
 			{
-				Action<System.Windows.Forms.Form>	setText	=frm => frm.Text = fileName;
-				SharedForms.FormExtensions.Invoke(mZoneForm, setText);
-				mZoneForm.EnableFileIO(false);
-				mBSPForm.EnableFileIO(false);
-				mVisForm.EnableFileIO(false);
-				mMap	=new Map();
+				mVisMap	=new VisMap();
+				mVisMap.SetMap(mMap);
+				mVisMap.LoadVisData(fileName);
 
-				GFXHeader	hdr	=mMap.LoadGBSPFile(fileName);
+				mMatLib.NukeAllMaterials();
 
-				if(hdr == null)
-				{
-					CoreEvents.Print("Load failed\n");
-				}
-				else
-				{
-					mVisMap	=new VisMap();
-					mVisMap.SetMap(mMap);
-					mVisMap.LoadVisData(fileName);
-
-					mMatLib.NukeAllMaterials();
-
-					mMap.MakeMaterials(mGD, mMatLib, fileName);
+				mMap.MakeMaterials(mGD, mMatLib, fileName);
 
 //					bool	bPerPlaneAlpha	=false;
 
@@ -383,56 +383,56 @@ namespace BSPBuilder
 //					mZoneDraw.BuildMirror(mGD, mSKeeper, mMap.BuildMirrorRenderData, mMap.GetPlanes());
 //					mZoneDraw.BuildSky(mGD, mSKeeper, mMap.BuildSkyRenderData, mMap.GetPlanes());
 //
-					mZoneDraw.FinishAtlas(mGD, mSKeeper);
+				mZoneDraw.FinishAtlas(mGD, mSKeeper);
 //					mZoneDraw.FixAlphaDrawCalls();
 
-					mModelMats	=mMap.GetModelTransforms();
+				mModelMats	=mMap.GetModelTransforms();
 
-					mMatForm.RefreshMaterials();
+				mMatForm.RefreshMaterials();
 
-					mVisMap.SetMaterialVisBytes(mMatLib.GetMaterialNames().Count);
+				mVisMap.SetMaterialVisBytes(mMatLib.GetMaterialNames().Count);
 
 //					mMatLib.SetLightMapsToAtlas();
-				}
-				mZoneForm.EnableFileIO(true);
-				mBSPForm.EnableFileIO(true);
-				mVisForm.EnableFileIO(true);
-				mZoneForm.SetZoneSaveEnabled(true);
+			}
+			mZoneForm.EnableFileIO(true);
+			mBSPForm.EnableFileIO(true);
+			mVisForm.EnableFileIO(true);
+			mZoneForm.SetZoneSaveEnabled(true);
 
-				mOutForm.Print("Zoning complete.\n");
+			mOutForm.Print("Zoning complete.\n");
 
 //				BuildDebugDraw(Map.DebugDrawChoice.GFXFaces);
-			}
+		}
+	}
+
+	void OnLoadDebug(object sender, EventArgs ea)
+	{
+		string	fileName	=sender as string;
+
+		if(fileName == null)
+		{
+			return;
 		}
 
-		void OnLoadDebug(object sender, EventArgs ea)
+		FileStream		fs	=new FileStream(fileName, FileMode.Open, FileAccess.Read);
+		BinaryReader	br	=new BinaryReader(fs);
+
+		List<Vector3>	points	=new List<Vector3>();
+
+		int	numPoints	=br.ReadInt32();
+		for(int i=0;i < numPoints;i++)
 		{
-			string	fileName	=sender as string;
+			Vector3	p	=Vector3.Zero;
 
-			if(fileName == null)
-			{
-				return;
-			}
+			p.X	=br.ReadSingle();
+			p.Y	=br.ReadSingle();
+			p.Z	=br.ReadSingle();
 
-			FileStream		fs	=new FileStream(fileName, FileMode.Open, FileAccess.Read);
-			BinaryReader	br	=new BinaryReader(fs);
+			points.Add(p);
+		}
 
-			List<Vector3>	points	=new List<Vector3>();
-
-			int	numPoints	=br.ReadInt32();
-			for(int i=0;i < numPoints;i++)
-			{
-				Vector3	p	=Vector3.Zero;
-
-				p.X	=br.ReadSingle();
-				p.Y	=br.ReadSingle();
-				p.Z	=br.ReadSingle();
-
-				points.Add(p);
-			}
-
-			br.Close();
-			fs.Close();
+		br.Close();
+		fs.Close();
 
 //			mLineVB	=new VertexBuffer(mGDM.GraphicsDevice, typeof(VertexPositionColor),
 //				points.Count, BufferUsage.WriteOnly);
@@ -445,479 +445,478 @@ namespace BSPBuilder
 //			}
 
 //			mLineVB.SetData<VertexPositionColor>(normVerts);
+	}
+
+	void OnDumpTextures(object sender, EventArgs e)
+	{
+		mAllTextures.Sort();
+		foreach(string tex in mAllTextures)
+		{
+			CoreEvents.Print("\t" + tex + "\n");
+		}
+	}
+
+	void OnBuild(object sender, EventArgs ea)
+	{
+		mbWorking	=true;
+		mZoneForm.EnableFileIO(false);
+		mBSPForm.EnableFileIO(false);
+		mVisForm.EnableFileIO(false);
+		mMap.BuildTree(mBSPForm.BSPParameters);
+	}
+
+	void OnLight(object sender, EventArgs ea)
+	{
+		string	fileName	=sender as string;
+		if(fileName == null)
+		{
+			return;
 		}
 
-		void OnDumpTextures(object sender, EventArgs e)
-		{
-			mAllTextures.Sort();
-			foreach(string tex in mAllTextures)
-			{
-				CoreEvents.Print("\t" + tex + "\n");
-			}
-		}
-
-		void OnBuild(object sender, EventArgs ea)
-		{
-			mbWorking	=true;
-			mZoneForm.EnableFileIO(false);
-			mBSPForm.EnableFileIO(false);
-			mVisForm.EnableFileIO(false);
-			mMap.BuildTree(mBSPForm.BSPParameters);
-		}
-
-		void OnLight(object sender, EventArgs ea)
-		{
-			string	fileName	=sender as string;
-			if(fileName == null)
-			{
-				return;
-			}
-
-			mbWorking	=true;
+		mbWorking	=true;
 //			mEmissives	=FileUtil.LoadEmissives(fileName);
 
-			mBSPForm.SetSaveEnabled(false);
-			mBSPForm.SetBuildEnabled(false);
-			mZoneForm.EnableFileIO(false);
-			mBSPForm.EnableFileIO(false);
-			mVisForm.EnableFileIO(false);
+		mBSPForm.SetSaveEnabled(false);
+		mBSPForm.SetBuildEnabled(false);
+		mZoneForm.EnableFileIO(false);
+		mBSPForm.EnableFileIO(false);
+		mVisForm.EnableFileIO(false);
 
-			mMap	=new Map();
+		mMap	=new Map();
 
-			mMap.LightGBSPFile(fileName, mBSPForm.LightParameters,
-				mBSPForm.BSPParameters);
+		mMap.LightGBSPFile(fileName, mBSPForm.LightParameters,
+			mBSPForm.BSPParameters);
+	}
+
+	void OnOpenMap(object sender, EventArgs ea)
+	{
+		string	fileName	=sender as string;
+		if(fileName == null)
+		{
+			return;
 		}
 
-		void OnOpenMap(object sender, EventArgs ea)
+		mMap	=new Map();
+
+		BSPBuildParams	bbp	=mBSPForm.BSPParameters;
+		bbp.mMapName		=Path.GetFileName(fileName);
+
+		mMap.LoadBrushFile(fileName, mBSPForm.BSPParameters);
+
+		mBSPForm.SetBuildEnabled(true);
+		mBSPForm.SetSaveEnabled(false);
+
+		if(!mbFullBuilding)
 		{
-			string	fileName	=sender as string;
-			if(fileName == null)
-			{
-				return;
-			}
+			BuildDebugDraw(Map.DebugDrawChoice.MapBrushes);
+		}
+	}
 
-			mMap	=new Map();
-
-			BSPBuildParams	bbp	=mBSPForm.BSPParameters;
-			bbp.mMapName		=Path.GetFileName(fileName);
-
-			mMap.LoadBrushFile(fileName, mBSPForm.BSPParameters);
-
-			mBSPForm.SetBuildEnabled(true);
-			mBSPForm.SetSaveEnabled(false);
-
-			if(!mbFullBuilding)
-			{
-				BuildDebugDraw(Map.DebugDrawChoice.MapBrushes);
-			}
+	void OnOpenStatic(object sender, EventArgs ea)
+	{
+		string	fileName	=sender as string;
+		if(fileName == null)
+		{
+			return;
 		}
 
-		void OnOpenStatic(object sender, EventArgs ea)
+		string	path	=FileUtil.StripFileName(fileName);
+
+		Dictionary<string, Mesh>	meshes	=new Dictionary<string, Mesh>();
+
+		//load all .mesh 
+		Mesh.LoadAllMeshes(path, mGD.GD, meshes);
+
+		StaticMesh	sm	=new StaticMesh(fileName, meshes);
+
+		mMap	=new Map();
+
+		int	count	=sm.GetPartCount();
+		for(int i=0;i < count;i++)
 		{
-			string	fileName	=sender as string;
-			if(fileName == null)
+			Bounds	bnd	=new Bounds();
+
+			List<Vector3>	pos;
+			List<int>		inds;
+			sm.GetPartPositions(i, out pos, out inds);
+
+			for(int j=0;j < inds.Count;j+=3)
 			{
-				return;
+				bnd.AddPointToBounds(pos[inds[j]]);
+				bnd.AddPointToBounds(pos[inds[j + 1]]);
+				bnd.AddPointToBounds(pos[inds[j + 2]]);
 			}
 
-			string	path	=FileUtil.StripFileName(fileName);
+			mMap.PrepareTriTree(bnd);
 
-			Dictionary<string, Mesh>	meshes	=new Dictionary<string, Mesh>();
+			mOutForm.Print("Convexizing part " + i + ": " + sm.GetPartName(i) + "\n");
 
-			//load all .mesh 
-			Mesh.LoadAllMeshes(path, mGD.GD, meshes);
-
-			StaticMesh	sm	=new StaticMesh(fileName, meshes);
-
-			mMap	=new Map();
-
-			int	count	=sm.GetPartCount();
-			for(int i=0;i < count;i++)
+			List<Vector3>	tri	=new List<Vector3>();
+			for(int j=0;j < inds.Count;j+=3)
 			{
-				Bounds	bnd	=new Bounds();
+				tri.Add(pos[inds[j]]);
+				tri.Add(pos[inds[j + 1]]);
+				tri.Add(pos[inds[j + 2]]);
 
-				List<Vector3>	pos;
-				List<int>		inds;
-				sm.GetPartPositions(i, out pos, out inds);
+				mMap.AddBSPTriangle(tri);
 
-				for(int j=0;j < inds.Count;j+=3)
-				{
-					bnd.AddPointToBounds(pos[inds[j]]);
-					bnd.AddPointToBounds(pos[inds[j + 1]]);
-					bnd.AddPointToBounds(pos[inds[j + 2]]);
-				}
-
-				mMap.PrepareTriTree(bnd);
-
-				mOutForm.Print("Convexizing part " + i + ": " + sm.GetPartName(i) + "\n");
-
-				List<Vector3>	tri	=new List<Vector3>();
-				for(int j=0;j < inds.Count;j+=3)
-				{
-					tri.Add(pos[inds[j]]);
-					tri.Add(pos[inds[j + 1]]);
-					tri.Add(pos[inds[j + 2]]);
-
-					mMap.AddBSPTriangle(tri);
-
-					tri.Clear();
-				}
-
-				mMap.AddBSPVolume(bnd);
-
-				mMap.AccumulateVolumes();
+				tri.Clear();
 			}
 
-			if(count <= 0)
-			{
-				mOutForm.Print(fileName + " didn't have anything usable.\n");
-				mMap	=null;
-				return;
-			}
+			mMap.AddBSPVolume(bnd);
 
-			BuildDebugDraw(Map.DebugDrawChoice.TriTree);
+			mMap.AccumulateVolumes();
+		}
 
-			int	numDumped	=mMap.DumpBSPVolumesToQuarkMap(FileUtil.StripExtension(fileName));
-
-			mOutForm.Print(fileName + " opened and " + numDumped + " brushes extracted.\n");
-
-			//free .meshes
-			foreach(KeyValuePair<string, Mesh> m in meshes)
-			{
-				m.Value.FreeAll();
-			}
-			meshes.Clear();
-
+		if(count <= 0)
+		{
+			mOutForm.Print(fileName + " didn't have anything usable.\n");
 			mMap	=null;
+			return;
 		}
 
-		void OnMapToStatic(object sender, EventArgs ea)
+		BuildDebugDraw(Map.DebugDrawChoice.TriTree);
+
+		int	numDumped	=mMap.DumpBSPVolumesToQuarkMap(FileUtil.StripExtension(fileName));
+
+		mOutForm.Print(fileName + " opened and " + numDumped + " brushes extracted.\n");
+
+		//free .meshes
+		foreach(KeyValuePair<string, Mesh> m in meshes)
 		{
-			string	fileName	=sender as string;
-			if(fileName == null)
-			{
-				return;
-			}
+			m.Value.FreeAll();
+		}
+		meshes.Clear();
 
-			mMap	=new Map();
+		mMap	=null;
+	}
 
-			mMap.LoadBrushFile(fileName, mBSPForm.BSPParameters);
+	void OnMapToStatic(object sender, EventArgs ea)
+	{
+		string	fileName	=sender as string;
+		if(fileName == null)
+		{
+			return;
+		}
 
-			List<Vector3>	verts	=new List<Vector3>();
-			List<UInt16>	inds	=new List<UInt16>();
-			List<Vector3>	norms	=new List<Vector3>();
-			List<Color>		cols	=new List<Color>();
+		mMap	=new Map();
 
-			mMap.GetTriangles(verts, norms, cols, inds, Map.DebugDrawChoice.MapBrushes);
+		mMap.LoadBrushFile(fileName, mBSPForm.BSPParameters);
 
-			if(verts.Count <= 0)
-			{
-				mOutForm.Print(fileName + " didn't have anything usable.\n");
-				mMap	=null;
-				return;
-			}
+		List<Vector3>	verts	=new List<Vector3>();
+		List<UInt16>	inds	=new List<UInt16>();
+		List<Vector3>	norms	=new List<Vector3>();
+		List<Color>		cols	=new List<Color>();
 
-			//convert normals to half4
-			List<Half4>	h4norms	=new List<Half4>();
-			foreach(Vector3 norm in norms)
-			{
-				Half4	h4norm	=new Half4(norm.X, norm.Y, norm.Z, 1f);
+		mMap.GetTriangles(verts, norms, cols, inds, Map.DebugDrawChoice.MapBrushes);
 
-				h4norms.Add(h4norm);
-			}
-
-			//convert to funky max coordinate system
-			List<Vector3>	maxVerts	=new List<Vector3>();
-			foreach(Vector3 vert in verts)
-			{
-				Vector3	maxVert;
-
-				maxVert.X	=vert.X;
-				maxVert.Y	=vert.Y;
-				maxVert.Z	=vert.Z;
-
-				maxVerts.Add(maxVert);
-			}
-
-			Mesh	bspMesh	=new Mesh("blort");
-
-			Type	vtype	=VertexTypes.GetMatch(true, true, false, false, false, false, 0, 1);
-
-			Array	varray	=Array.CreateInstance(vtype, maxVerts.Count);
-
-			for(int i=0;i < maxVerts.Count;i++)
-			{
-				VertexTypes.SetArrayField(varray, i, "Position", maxVerts[i]);
-				VertexTypes.SetArrayField(varray, i, "Normal", h4norms[i]);
-				VertexTypes.SetArrayField(varray, i, "Color0", cols[i]);
-			}
-
-			int	vertSize	=VertexTypes.GetSizeForType(vtype);
-
-			UInt16	[]iarray	=inds.ToArray();
-
-			ID3D11Buffer	vb	=VertexTypes.BuildABuffer(mGD.GD, varray, vtype);
-			ID3D11Buffer	ib	=VertexTypes.BuildAnIndexBuffer(mGD.GD, iarray);
-
-			bspMesh.SetEditorData(varray, iarray);
-			bspMesh.SetIndexBuffer(ib);
-			bspMesh.SetNumTriangles(inds.Count / 3);
-			bspMesh.SetNumVerts(maxVerts.Count);
-			bspMesh.SetTypeIndex(VertexTypes.GetIndex(vtype));
-			bspMesh.SetVertexBuffer(vb);
-			bspMesh.SetVertSize(vertSize);
-
-			mOutForm.Print(fileName + " opened and " + maxVerts.Count + " verts converted.\n");
-
-			StaticMesh	saveMesh	=new StaticMesh();
-
-			saveMesh.SetTransform(Matrix4x4.CreateRotationX((float)(Math.PI / 4)));
-
-			saveMesh.AddPart(bspMesh, Matrix4x4.Identity, "Flort");
-
-			saveMesh.SaveToFile(FileUtil.StripExtension(fileName) + ".Static");
-
+		if(verts.Count <= 0)
+		{
+			mOutForm.Print(fileName + " didn't have anything usable.\n");
 			mMap	=null;
+			return;
 		}
 
-		void OnSaveGBSP(object sender, EventArgs ea)
+		//convert normals to half4
+		List<Half4>	h4norms	=new List<Half4>();
+		foreach(Vector3 norm in norms)
 		{
-			string	fileName	=sender as string;
-			if(fileName == null)
+			Half4	h4norm	=new Half4(norm.X, norm.Y, norm.Z, 1f);
+
+			h4norms.Add(h4norm);
+		}
+
+		//convert to funky max coordinate system
+		List<Vector3>	maxVerts	=new List<Vector3>();
+		foreach(Vector3 vert in verts)
+		{
+			Vector3	maxVert;
+
+			maxVert.X	=vert.X;
+			maxVert.Y	=vert.Y;
+			maxVert.Z	=vert.Z;
+
+			maxVerts.Add(maxVert);
+		}
+
+		Mesh	bspMesh	=new Mesh("blort");
+
+		Type	vtype	=VertexTypes.GetMatch(true, true, false, false, false, false, 0, 1);
+
+		Array	varray	=Array.CreateInstance(vtype, maxVerts.Count);
+
+		for(int i=0;i < maxVerts.Count;i++)
+		{
+			VertexTypes.SetArrayField(varray, i, "Position", maxVerts[i]);
+			VertexTypes.SetArrayField(varray, i, "Normal", h4norms[i]);
+			VertexTypes.SetArrayField(varray, i, "Color0", cols[i]);
+		}
+
+		int	vertSize	=VertexTypes.GetSizeForType(vtype);
+
+		UInt16	[]iarray	=inds.ToArray();
+
+		ID3D11Buffer	vb	=VertexTypes.BuildABuffer(mGD.GD, varray, vtype);
+		ID3D11Buffer	ib	=VertexTypes.BuildAnIndexBuffer(mGD.GD, iarray);
+
+		bspMesh.SetEditorData(varray, iarray);
+		bspMesh.SetIndexBuffer(ib);
+		bspMesh.SetNumTriangles(inds.Count / 3);
+		bspMesh.SetNumVerts(maxVerts.Count);
+		bspMesh.SetTypeIndex(VertexTypes.GetIndex(vtype));
+		bspMesh.SetVertexBuffer(vb);
+		bspMesh.SetVertSize(vertSize);
+
+		mOutForm.Print(fileName + " opened and " + maxVerts.Count + " verts converted.\n");
+
+		StaticMesh	saveMesh	=new StaticMesh();
+
+		saveMesh.SetTransform(Matrix4x4.CreateRotationX((float)(Math.PI / 4)));
+
+		saveMesh.AddPart(bspMesh, Matrix4x4.Identity, "Flort");
+
+		saveMesh.SaveToFile(FileUtil.StripExtension(fileName) + ".Static");
+
+		mMap	=null;
+	}
+
+	void OnSaveGBSP(object sender, EventArgs ea)
+	{
+		string	fileName	=sender as string;
+		if(fileName == null)
+		{
+			return;
+		}
+
+		mbWorking	=true;
+		mZoneForm.EnableFileIO(false);
+		mBSPForm.EnableFileIO(false);
+		mVisForm.EnableFileIO(false);
+
+		mMap.SaveGBSPFile(fileName, mBSPForm.BSPParameters);
+	}
+
+	void OnFullBuild(object sender, EventArgs ea)
+	{
+		string	fileName	=sender as string;
+		if(fileName == null)
+		{
+			return;
+		}
+
+		mbFullBuilding		=true;
+		mFullBuildFileName	=FileUtil.StripExtension(fileName);
+
+		OnOpenMap(sender, ea);
+		OnBuild(sender, ea);
+	}
+
+	void OnUpdateEntities(object sender, EventArgs ea)
+	{
+		string	fileName	=sender as string;
+		if(fileName == null)
+		{
+			return;
+		}
+
+		mFullBuildFileName	=FileUtil.StripExtension(fileName);
+
+		//load the update entities from the .map
+		Map	updatedMap	=new Map();
+		updatedMap.LoadBrushFile(fileName, mBSPForm.BSPParameters);
+
+		updatedMap.SaveUpdatedEntities(fileName);
+
+		mOutForm.Print("GBSP File Updated\n");
+
+		OnZoneGBSP(mFullBuildFileName + ".gbsp", null);
+		OnSaveZone(mFullBuildFileName + ".Zone", null);
+	}
+
+	void OnResumeVis(object sender, EventArgs ea)
+	{
+		string	fileName	=sender as string;
+		if(fileName == null)
+		{
+			return;
+		}
+		mbWorking	=true;
+		mZoneForm.EnableFileIO(false);
+		mBSPForm.EnableFileIO(false);
+		mVisForm.EnableFileIO(false);
+
+		VisParams	vp		=new VisParams();
+		vp.mbFullVis		=!mVisForm.bRough;
+		vp.mbResume			=true;
+		vp.mbSortPortals	=mVisForm.bSortPortals;
+
+		mVisMap	=new VisMap();
+
+		mVisMap.VisGBSPFile(fileName, vp, mBSPForm.BSPParameters);
+	}
+
+	void OnStopVis(object sender, EventArgs ea)
+	{
+		//dunno what to do here yet
+	}
+
+	void OnVis(object sender, EventArgs ea)
+	{
+		string	fileName	=sender as string;
+		if(fileName == null)
+		{
+			return;
+		}
+		mbWorking	=true;
+		mZoneForm.EnableFileIO(false);
+		mBSPForm.EnableFileIO(false);
+		mVisForm.EnableFileIO(false);
+
+		VisParams	vp		=new VisParams();
+		vp.mbFullVis		=!mVisForm.bRough;
+		vp.mbResume			=false;
+		vp.mbSortPortals	=mVisForm.bSortPortals;
+
+		mVisMap	=new VisMap();
+
+		mVisMap.VisGBSPFile(fileName, vp, mBSPForm.BSPParameters);
+	}
+
+	void OnBuildDone(object sender, EventArgs ea)
+	{
+		bool	bSuccess	=(bool)sender;
+
+		mBSPForm.SetSaveEnabled(true);
+		mBSPForm.SetBuildEnabled(false);
+		mZoneForm.EnableFileIO(true);
+		mBSPForm.EnableFileIO(true);
+		mVisForm.EnableFileIO(true);
+		mbWorking	=false;
+
+		if(bSuccess)
+		{
+			if(mbFullBuilding)
 			{
-				return;
-			}
-
-			mbWorking	=true;
-			mZoneForm.EnableFileIO(false);
-			mBSPForm.EnableFileIO(false);
-			mVisForm.EnableFileIO(false);
-
-			mMap.SaveGBSPFile(fileName, mBSPForm.BSPParameters);
-		}
-
-		void OnFullBuild(object sender, EventArgs ea)
-		{
-			string	fileName	=sender as string;
-			if(fileName == null)
-			{
-				return;
-			}
-
-			mbFullBuilding		=true;
-			mFullBuildFileName	=FileUtil.StripExtension(fileName);
-
-			OnOpenMap(sender, ea);
-			OnBuild(sender, ea);
-		}
-
-		void OnUpdateEntities(object sender, EventArgs ea)
-		{
-			string	fileName	=sender as string;
-			if(fileName == null)
-			{
-				return;
-			}
-
-			mFullBuildFileName	=FileUtil.StripExtension(fileName);
-
-			//load the update entities from the .map
-			Map	updatedMap	=new Map();
-			updatedMap.LoadBrushFile(fileName, mBSPForm.BSPParameters);
-
-			updatedMap.SaveUpdatedEntities(fileName);
-
-			mOutForm.Print("GBSP File Updated\n");
-
-			OnZoneGBSP(mFullBuildFileName + ".gbsp", null);
-			OnSaveZone(mFullBuildFileName + ".Zone", null);
-		}
-
-		void OnResumeVis(object sender, EventArgs ea)
-		{
-			string	fileName	=sender as string;
-			if(fileName == null)
-			{
-				return;
-			}
-			mbWorking	=true;
-			mZoneForm.EnableFileIO(false);
-			mBSPForm.EnableFileIO(false);
-			mVisForm.EnableFileIO(false);
-
-			VisParams	vp		=new VisParams();
-			vp.mbFullVis		=!mVisForm.bRough;
-			vp.mbResume			=true;
-			vp.mbSortPortals	=mVisForm.bSortPortals;
-
-			mVisMap	=new VisMap();
-
-			mVisMap.VisGBSPFile(fileName, vp, mBSPForm.BSPParameters);
-		}
-
-		void OnStopVis(object sender, EventArgs ea)
-		{
-			//dunno what to do here yet
-		}
-
-		void OnVis(object sender, EventArgs ea)
-		{
-			string	fileName	=sender as string;
-			if(fileName == null)
-			{
-				return;
-			}
-			mbWorking	=true;
-			mZoneForm.EnableFileIO(false);
-			mBSPForm.EnableFileIO(false);
-			mVisForm.EnableFileIO(false);
-
-			VisParams	vp		=new VisParams();
-			vp.mbFullVis		=!mVisForm.bRough;
-			vp.mbResume			=false;
-			vp.mbSortPortals	=mVisForm.bSortPortals;
-
-			mVisMap	=new VisMap();
-
-			mVisMap.VisGBSPFile(fileName, vp, mBSPForm.BSPParameters);
-		}
-
-		void OnBuildDone(object sender, EventArgs ea)
-		{
-			bool	bSuccess	=(bool)sender;
-
-			mBSPForm.SetSaveEnabled(true);
-			mBSPForm.SetBuildEnabled(false);
-			mZoneForm.EnableFileIO(true);
-			mBSPForm.EnableFileIO(true);
-			mVisForm.EnableFileIO(true);
-			mbWorking	=false;
-
-			if(bSuccess)
-			{
-				if(mbFullBuilding)
-				{
-					OnSaveGBSP(mFullBuildFileName + ".gbsp", null);
-				}
-				else
-				{
-				}
+				OnSaveGBSP(mFullBuildFileName + ".gbsp", null);
 			}
 			else
 			{
-				CoreEvents.Print("Halting full build due to a bsp build failure.\n");
-				mbFullBuilding	=false;
 			}
 		}
-
-		void OnLightDone(object sender, EventArgs ea)
+		else
 		{
-			bool	bSuccess	=(bool)sender;
+			CoreEvents.Print("Halting full build due to a bsp build failure.\n");
+			mbFullBuilding	=false;
+		}
+	}
 
-			mZoneForm.EnableFileIO(true);
-			mBSPForm.EnableFileIO(true);
-			mVisForm.EnableFileIO(true);
-			mbWorking	=false;
+	void OnLightDone(object sender, EventArgs ea)
+	{
+		bool	bSuccess	=(bool)sender;
 
-			if(bSuccess)
+		mZoneForm.EnableFileIO(true);
+		mBSPForm.EnableFileIO(true);
+		mVisForm.EnableFileIO(true);
+		mbWorking	=false;
+
+		if(bSuccess)
+		{
+			if(mbFullBuilding)
 			{
-				if(mbFullBuilding)
-				{
-					mbWorking	=true;
-					OnMaterialVis(mFullBuildFileName + ".gbsp", null);
+				mbWorking	=true;
+				OnMaterialVis(mFullBuildFileName + ".gbsp", null);
 
-					OnZoneGBSP(mFullBuildFileName + ".gbsp", null);
-					mbFullBuilding	=false;
-					mbWorking		=false;
-				}
-			}
-			else
-			{
-				CoreEvents.Print("Halting full build due to a light failure.\n");
+				OnZoneGBSP(mFullBuildFileName + ".gbsp", null);
 				mbFullBuilding	=false;
+				mbWorking		=false;
 			}
 		}
-
-		void OnGBSPSaveDone(object sender, EventArgs ea)
+		else
 		{
-			bool	bSuccess	=(bool)sender;
-
-			mZoneForm.EnableFileIO(true);
-			mBSPForm.EnableFileIO(true);
-			mVisForm.EnableFileIO(true);
-			mbWorking	=false;
-
-			if(bSuccess)
-			{
-				if(mbFullBuilding)
-				{
-					if(mBSPForm.BSPParameters.mbBuildAsBModel)
-					{
-						OnLight(mFullBuildFileName + ".gbsp", null);
-					}
-					else
-					{
-						OnVis(mFullBuildFileName + ".gbsp", null);
-					}
-				}
-			}
-			else
-			{
-				CoreEvents.Print("Halting full build due to a gbsp save failure.\n");
-				mbFullBuilding	=false;
-			}
+			CoreEvents.Print("Halting full build due to a light failure.\n");
+			mbFullBuilding	=false;
 		}
+	}
 
-		void OnVisDone(object sender, EventArgs ea)
+	void OnGBSPSaveDone(object sender, EventArgs ea)
+	{
+		bool	bSuccess	=(bool)sender;
+
+		mZoneForm.EnableFileIO(true);
+		mBSPForm.EnableFileIO(true);
+		mVisForm.EnableFileIO(true);
+		mbWorking	=false;
+
+		if(bSuccess)
 		{
-			bool	bSuccess	=(bool)sender;
-
-			mOutForm.UpdateProgress(0, 0, 0);
-			mbWorking	=false;
-			mZoneForm.EnableFileIO(true);
-			mBSPForm.EnableFileIO(true);
-			mVisForm.EnableFileIO(true);
-
-			if(bSuccess)
+			if(mbFullBuilding)
 			{
-				if(mbFullBuilding)
+				if(mBSPForm.BSPParameters.mbBuildAsBModel)
 				{
 					OnLight(mFullBuildFileName + ".gbsp", null);
 				}
-			}
-			else
-			{
-				CoreEvents.Print("Halting full build due to a vis failure.\n");
-				mbFullBuilding	=false;
+				else
+				{
+					OnVis(mFullBuildFileName + ".gbsp", null);
+				}
 			}
 		}
-
-		void OnNumClustersChanged(object sender, EventArgs ea)
+		else
 		{
-			int	num	=(int)sender;
+			CoreEvents.Print("Halting full build due to a gbsp save failure.\n");
+			mbFullBuilding	=false;
+		}
+	}
+
+	void OnVisDone(object sender, EventArgs ea)
+	{
+		bool	bSuccess	=(bool)sender;
+
+		mOutForm.UpdateProgress(0, 0, 0);
+		mbWorking	=false;
+		mZoneForm.EnableFileIO(true);
+		mBSPForm.EnableFileIO(true);
+		mVisForm.EnableFileIO(true);
+
+		if(bSuccess)
+		{
+			if(mbFullBuilding)
+			{
+				OnLight(mFullBuildFileName + ".gbsp", null);
+			}
+		}
+		else
+		{
+			CoreEvents.Print("Halting full build due to a vis failure.\n");
+			mbFullBuilding	=false;
+		}
+	}
+
+	void OnNumClustersChanged(object sender, EventArgs ea)
+	{
+		int	num	=(int)sender;
 
 //			mBSPForm.NumberOfClusters	="" + num;
-		}
+	}
 
-		void OnNumVertsChanged(object sender, EventArgs ea)
-		{
-			int	num	=(int)sender;
+	void OnNumVertsChanged(object sender, EventArgs ea)
+	{
+		int	num	=(int)sender;
 
 //			mBSPForm.NumberOfVerts	="" + num;
-		}
+	}
 
-		void OnNumPortalsChanged(object sender, EventArgs ea)
-		{
-			int	num	=(int)sender;
+	void OnNumPortalsChanged(object sender, EventArgs ea)
+	{
+		int	num	=(int)sender;
 
 //			mBSPForm.NumberOfPortals	="" + num;
-		}
+	}
 
-		void OnNumPlanesChanged(object sender, EventArgs ea)
-		{
-			int	num	=(int)sender;
+	void OnNumPlanesChanged(object sender, EventArgs ea)
+	{
+		int	num	=(int)sender;
 
 //			mBSPForm.NumberOfPlanes	="" + num;
-		}
 	}
 }
