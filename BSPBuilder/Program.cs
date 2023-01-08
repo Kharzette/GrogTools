@@ -135,10 +135,10 @@ static class Program
 
 				pos	-=moveDelta;
 			
-				gd.GCam.Update(pos, pSteering.Pitch, pSteering.Yaw, pSteering.Roll);
-
 				time.UpdateDone();
 			}
+
+			gd.GCam.Update(pos, pSteering.Pitch, pSteering.Yaw, pSteering.Roll);
 
 			bspBuild.Update(time.GetRenderUpdateDeltaMilliSeconds(), gd);
 			bspBuild.Render(gd);

@@ -160,6 +160,13 @@ internal class BSPBuilder
 			return;
 		}
 
+		CBKeeper	cbk	=mSKeeper.GetCBKeeper();
+
+		cbk.SetTransposedView(gd.GCam.ViewTransposed, gd.GCam.Position);
+		cbk.SetTransposedProjection(gd.GCam.ProjectionTransposed);
+
+		cbk.UpdateFrame(gd.DC);
+
 		mZoneDraw.Update(msDelta);
 
 //			mMatLib.UpdateWVP(Matrix.Identity,
