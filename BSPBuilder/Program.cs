@@ -133,7 +133,7 @@ static class Program
 				//scale up movement a bit
 				moveDelta	*=200f;
 
-				pos	-=moveDelta;
+				pos	+=moveDelta;
 			
 				time.UpdateDone();
 			}

@@ -188,8 +188,7 @@ internal class BSPBuilder
 			return;
 		}
 
-		mZoneDraw.Draw(gd, 0, mVisMap.IsMaterialVisibleFromPos,
-			GetModelMatrix, RenderExternal, RenderShadows);
+		mZoneDraw.Draw(gd, mVisMap.IsMaterialVisibleFromPos, GetModelMatrix);
 	}
 
 
@@ -379,19 +378,29 @@ internal class BSPBuilder
 
 				mMatLib.NukeAllMaterials();
 
-				mMap.MakeMaterials(mGD, mMatLib, fileName);
+				MapGrinder	mg	=mMap.MakeMaterials(mGD, mSKeeper,
+					mMatLib, mZoneForm.GetLightAtlasSize(), fileName);
 
-//					bool	bPerPlaneAlpha	=false;
+				mMap.MakeLMData(mg);
 
-//					mZoneDraw.BuildLM(mGD, mSKeeper, mZoneForm.GetLightAtlasSize(), mMap.BuildLMRenderData, mMap.GetPlanes(), bPerPlaneAlpha);
-//					mZoneDraw.BuildVLit(mGD, mSKeeper, mMap.BuildVLitRenderData, mMap.GetPlanes());
-//					mZoneDraw.BuildAlpha(mGD, mSKeeper, mMap.BuildAlphaRenderData, mMap.GetPlanes());
-//					mZoneDraw.BuildFullBright(mGD, mSKeeper, mMap.BuildFullBrightRenderData, mMap.GetPlanes());
-//					mZoneDraw.BuildMirror(mGD, mSKeeper, mMap.BuildMirrorRenderData, mMap.GetPlanes());
-//					mZoneDraw.BuildSky(mGD, mSKeeper, mMap.BuildSkyRenderData, mMap.GetPlanes());
-//
+				int		typeIndex;
+				Array	verts;
+				UInt16	[]inds;
+				mg.GetLMGeometry(out typeIndex, out verts, out inds);
+
+				mZoneDraw.SetLMData(mGD.GD, typeIndex, verts, inds, mg.GetLMDrawCalls());
+
+				mZoneDraw.SetLMAtlas(mg.GetLMAtlas());
+
+
+//				mZoneDraw.BuildLM(mGD, mSKeeper, mZoneForm.GetLightAtlasSize(), mMap.BuildLMRenderData, mMap.GetPlanes(), bPerPlaneAlpha);
+//				mZoneDraw.BuildVLit(mGD, mSKeeper, mMap.BuildVLitRenderData, mMap.GetPlanes());
+//				mZoneDraw.BuildAlpha(mGD, mSKeeper, mMap.BuildAlphaRenderData, mMap.GetPlanes());
+//				mZoneDraw.BuildFullBright(mGD, mSKeeper, mMap.BuildFullBrightRenderData, mMap.GetPlanes());
+//				mZoneDraw.BuildMirror(mGD, mSKeeper, mMap.BuildMirrorRenderData, mMap.GetPlanes());
+//				mZoneDraw.BuildSky(mGD, mSKeeper, mMap.BuildSkyRenderData, mMap.GetPlanes());
+
 				mZoneDraw.FinishAtlas(mGD, mSKeeper);
-//					mZoneDraw.FixAlphaDrawCalls();
 
 				mModelMats	=mMap.GetModelTransforms();
 
