@@ -382,13 +382,23 @@ internal class BSPBuilder
 					mMatLib, mZoneForm.GetLightAtlasSize(), fileName);
 
 				mMap.MakeLMData(mg);
+				mMap.MakeLMAData(mg);
+				mMap.MakeVLitData(mg);
 
 				int		typeIndex;
 				Array	verts;
 				UInt16	[]inds;
-				mg.GetLMGeometry(out typeIndex, out verts, out inds);
 
+				//feed data into meshlib
+				mg.GetLMGeometry(out typeIndex, out verts, out inds);
 				mZoneDraw.SetLMData(mGD.GD, typeIndex, verts, inds, mg.GetLMDrawCalls());
+
+				mg.GetLMAGeometry(out typeIndex, out verts, out inds);
+				mZoneDraw.SetLMAData(mGD.GD, typeIndex, verts, inds, mg.GetLMADrawCalls());
+
+				mg.GetVLitGeometry(out typeIndex, out verts, out inds);
+				mZoneDraw.SetVLitData(mGD.GD, typeIndex, verts, inds, mg.GetVLitDrawCalls());
+
 
 				mZoneDraw.SetLMAtlas(mg.GetLMAtlas());
 
