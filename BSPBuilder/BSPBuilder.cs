@@ -387,6 +387,8 @@ internal class BSPBuilder
 				mMap.MakeLMAnimData(mg);
 				mMap.MakeLMAAnimData(mg);
 				mMap.MakeAlphaData(mg);
+				mMap.MakeFullBrightData(mg);
+				mMap.MakeSkyData(mg);
 
 				int		typeIndex;
 				Array	verts;
@@ -410,6 +412,12 @@ internal class BSPBuilder
 
 				mg.GetAlphaGeometry(out typeIndex, out verts, out inds);
 				mZoneDraw.SetAlphaData(mGD.GD, typeIndex, verts, inds, mg.GetVLitAlphaDrawCalls());
+
+				mg.GetFullBrightGeometry(out typeIndex, out verts, out inds);
+				mZoneDraw.SetFullBrightData(mGD.GD, typeIndex, verts, inds, mg.GetFullBrightDrawCalls());
+
+				mg.GetSkyGeometry(out typeIndex, out verts, out inds);
+				mZoneDraw.SetSkyData(mGD.GD, typeIndex, verts, inds, mg.GetSkyDrawCalls());
 
 				mZoneDraw.SetLMAtlas(mg.GetLMAtlas());
 
