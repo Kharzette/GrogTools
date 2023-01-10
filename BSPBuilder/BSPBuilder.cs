@@ -384,6 +384,7 @@ internal class BSPBuilder
 				mMap.MakeLMData(mg);
 				mMap.MakeLMAData(mg);
 				mMap.MakeVLitData(mg);
+				mMap.MakeLMAnimData(mg);
 
 				int		typeIndex;
 				Array	verts;
@@ -399,6 +400,8 @@ internal class BSPBuilder
 				mg.GetVLitGeometry(out typeIndex, out verts, out inds);
 				mZoneDraw.SetVLitData(mGD.GD, typeIndex, verts, inds, mg.GetVLitDrawCalls());
 
+				mg.GetLMAnimGeometry(out typeIndex, out verts, out inds);
+				mZoneDraw.SetLMAnimData(mGD.GD, typeIndex, verts, inds, mg.GetLMAnimDrawCalls());
 
 				mZoneDraw.SetLMAtlas(mg.GetLMAtlas());
 
