@@ -140,7 +140,7 @@ static class Program
 
 			gd.GCam.Update(pos, pSteering.Pitch, pSteering.Yaw, pSteering.Roll);
 
-			bspBuild.Update(time.GetRenderUpdateDeltaMilliSeconds(), gd);
+			bspBuild.Update(time.GetRenderUpdateDeltaMilliSeconds(), gd, pos);
 			bspBuild.Render(gd);
 			
 			gd.Present();

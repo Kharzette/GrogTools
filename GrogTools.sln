@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpDXWindows", "GrogLibs\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UtilityLib", "GrogLibs\UtilityLib\UtilityLib.csproj", "{B9CC1D8A-1C84-4A66-8445-C0D3EDECCC4C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QEntityMaker", "QEntityMaker\QEntityMaker.csproj", "{10EAC5FB-26CE-4D06-83DD-AB457AE0C4DC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -92,6 +94,10 @@ Global
 		{B9CC1D8A-1C84-4A66-8445-C0D3EDECCC4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B9CC1D8A-1C84-4A66-8445-C0D3EDECCC4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B9CC1D8A-1C84-4A66-8445-C0D3EDECCC4C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10EAC5FB-26CE-4D06-83DD-AB457AE0C4DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10EAC5FB-26CE-4D06-83DD-AB457AE0C4DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10EAC5FB-26CE-4D06-83DD-AB457AE0C4DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10EAC5FB-26CE-4D06-83DD-AB457AE0C4DC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{BE4558B0-AE7A-41EB-941D-AB1FEF019335} = {FB7A4C23-D3CA-4A17-9DEB-FF8BD7812BDF}

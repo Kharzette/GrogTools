@@ -152,7 +152,7 @@ internal class BSPBuilder
 	}
 
 
-	internal void Update(float msDelta, GraphicsDevice gd)
+	internal void Update(float msDelta, GraphicsDevice gd, Vector3 pos)
 	{
 		if(mbWorking)
 		{
@@ -162,8 +162,8 @@ internal class BSPBuilder
 
 		CBKeeper	cbk	=mSKeeper.GetCBKeeper();
 
-		cbk.SetTransposedView(gd.GCam.ViewTransposed, gd.GCam.Position);
-		cbk.SetTransposedProjection(gd.GCam.ProjectionTransposed);
+		cbk.SetView(gd.GCam.View, pos);
+		cbk.SetProjection(gd.GCam.Projection);
 
 		cbk.UpdateFrame(gd.DC);
 
@@ -432,6 +432,8 @@ internal class BSPBuilder
 				mZoneDraw.FinishAtlas(mGD, mSKeeper);
 
 				mModelMats	=mMap.GetModelTransforms();
+
+				mMatForm.SetMesh(mZoneDraw);
 
 				mMatForm.RefreshMaterials();
 
