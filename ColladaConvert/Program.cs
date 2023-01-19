@@ -167,7 +167,7 @@ internal static class Program
 
 			gd.GCam.Update(pos, pSteering.Pitch, pSteering.Yaw, pSteering.Roll);
 
-			cbk.SetTransposedView(gd.GCam.ViewTransposed, gd.GCam.Position);
+			cbk.SetTransposedView(gd.GCam.ViewTransposed, pos);
 			cbk.UpdateFrame(gd.DC);
 
 			fstuff.RenderUpdate(gd.GCam, lightDir, time.GetRenderUpdateDeltaSeconds());
