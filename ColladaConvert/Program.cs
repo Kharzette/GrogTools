@@ -78,6 +78,9 @@ internal static class Program
 		CBKeeper		cbk				=sk.GetCBKeeper();
 		UserSettings	sets			=new UserSettings();
 		FormStuff		fstuff			=new FormStuff(gd.GD, sk);
+		ScreenText		st				=new ScreenText(gd, sk, "CGA", "CGA", 64);
+		Matrix4x4		textProj		=Matrix4x4.CreateOrthographicOffCenter(
+			0, gd.RendForm.Width, gd.RendForm.Height, 0, 0f, 1f);
 
 		//turn on sprint
 		pSteering.SprintEnabled	=true;
@@ -112,6 +115,10 @@ internal static class Program
 
 		Vector3	pos			=Vector3.One * 5f;
 		Vector3	lightDir	=-Vector3.UnitY;
+
+		st.AddString("LightDir: " + lightDir.ToString(), "LightDir",
+			Misc.SystemColorToV4Color(System.Drawing.Color.DarkRed),
+			Vector2.One * 10f, Vector2.One * 2f);
 
 		UpdateTimer	time	=new UpdateTimer(true, false);
 
@@ -170,7 +177,10 @@ internal static class Program
 			cbk.SetTransposedView(gd.GCam.ViewTransposed, pos);
 			cbk.UpdateFrame(gd.DC);
 
+			st.ModifyStringText("LightDir: " + lightDir.ToString(), "LightDir");
+
 			fstuff.RenderUpdate(gd.GCam, lightDir, time.GetRenderUpdateDeltaSeconds());
+			st.Update();
 
 			post.SetTargets(gd, "BackColor", "BackDepth");
 
@@ -179,6 +189,17 @@ internal static class Program
 			post.ClearDepth(gd, "BackDepth");
 
 			fstuff.Render();
+
+			//set proj for 2D
+			cbk.SetProjection(textProj);
+			cbk.UpdateFrame(gd.DC);
+
+			st.Draw();
+
+			//change back to 3D
+			cbk.SetTransposedProjection(gd.GCam.ProjectionTransposed);
+			cbk.UpdateFrame(gd.DC);
+
 			gd.Present();
 
 			acts.Clear();

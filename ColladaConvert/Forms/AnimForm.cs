@@ -521,7 +521,7 @@ public partial class AnimForm : Form
 
 		FixBoneIndexes(colladaFile, chunks, skel);
 
-		BuildFinalVerts(mGD, colladaFile, chunks);
+		BuildFinalVerts(mGD, colladaFile, chunks, false);
 
 		List<Mesh>		converted	=new List<Mesh>();
 
@@ -596,12 +596,19 @@ public partial class AnimForm : Form
 		{
 			PrintToOutput("Warning!  Y up axis not supported.  Strange things may happen!\n");
 		}
+		
+		//unit conversion
+		float	scaleFactor	=colladaFile.asset.unit.meter;
+
+		scaleFactor	*=MeshConverter.GetScaleFactor(GetScaleFactor());
+
+		Misc.SafeInvoke(eScaleFactorDecided, scaleFactor);
 
 		sm	=new StaticMesh();
 
 		List<MeshConverter>	chunks	=GetMeshChunks(colladaFile, false, GetScaleFactor());
 
-		BuildFinalVerts(mGD, colladaFile, chunks);
+		BuildFinalVerts(mGD, colladaFile, chunks, true);
 		foreach(MeshConverter mc in chunks)
 		{
 			Mesh	?m	=mc.GetConvertedMesh();
@@ -622,7 +629,7 @@ public partial class AnimForm : Form
 	}
 
 
-	void BuildFinalVerts(ID3D11Device gd, COLLADA colladaFile, List<MeshConverter> chunks)
+	void BuildFinalVerts(ID3D11Device gd, COLLADA colladaFile, List<MeshConverter> chunks, bool bStatic)
 	{
 		IEnumerable<library_geometries>		geoms	=colladaFile.Items.OfType<library_geometries>();
 		IEnumerable<library_controllers>	conts	=colladaFile.Items.OfType<library_controllers>();
@@ -682,7 +689,7 @@ public partial class AnimForm : Form
 						texCoords2, texIdxs2, texCoords3, texIdxs3,
 						colors0, colIdxs0, colors1, colIdxs1,
 						colors2, colIdxs2, colors3, colIdxs3,
-						vertCounts, col0Stride, col1Stride, col2Stride, col3Stride);
+						vertCounts, col0Stride, col1Stride, col2Stride, col3Stride, bStatic);
 
 					bool	bPos	=(posIdxs != null && posIdxs.Count > 0);
 					bool	bNorm	=(norms != null && norms.count > 0);

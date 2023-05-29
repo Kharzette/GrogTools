@@ -409,7 +409,8 @@ internal class MeshConverter
 									int				col0Stride,
 									int				col1Stride,
 									int				col2Stride,
-									int				col3Stride)
+									int				col3Stride,
+									bool			bStatic)
 	{
 		//make sure there are at least positions and vertCounts
 		if(posIdxs == null || vertCounts == null || mBaseVerts == null)
@@ -420,7 +421,26 @@ internal class MeshConverter
 		List<TrackedVert>	verts	=new List<TrackedVert>();
 
 		//adjust coordinate system for normals
-		//Matrix4x4	shiftMat	=Matrix4x4.CreateRotationX(MathHelper.PiOver2);
+		Matrix4x4	shiftMat	=Matrix4x4.CreateRotationX(MathHelper.PiOver2);
+
+		//find lowest texcoord index
+		int	lowestIndex	=-1;
+		if(texIdxs0 != null && texCoords0 != null)
+		{
+			lowestIndex	=0;
+		}
+		else if(texIdxs1 != null && texCoords1 != null)
+		{
+			lowestIndex	=1;
+		}
+		else if(texIdxs2 != null && texCoords2 != null)
+		{
+			lowestIndex	=2;
+		}
+		else if(texIdxs3 != null && texCoords3 != null)
+		{
+			lowestIndex	=3;
+		}
 
 		for(int i=0;i < posIdxs.Count;i++)
 		{
@@ -477,6 +497,13 @@ internal class MeshConverter
 			//and vertex weights
 			tv	=mBaseVerts[pidx];
 
+			if(bStatic)
+			{
+				//swap y and z on statics
+				tv.Position0.Z	=mBaseVerts[pidx].Position0.Y;
+				tv.Position0.Y	=mBaseVerts[pidx].Position0.Z;
+			}
+
 			//copy normal if exists
 			if(normIdxs != null && norms != null)
 			{
@@ -487,12 +514,42 @@ internal class MeshConverter
 				norm.Y	=norms.Values[1 + nidx * 3];
 				norm.Z	=norms.Values[2 + nidx * 3];
 
-				//rotate
-				//norm	=Vector3.TransformNormal(norm, shiftMat);
+				//rotate statics
+				if(bStatic)
+				{
+//					norm	=Vector3.TransformNormal(norm, shiftMat);
+				}
 
 				tv.Normal0	=new Half4(norm.X, norm.Y, norm.Z, 1f);
 			}
+
+			//Temp fix for https://projects.blender.org/blender/blender/issues/108053
+			if(lowestIndex != -1)
+			{
+				if(lowestIndex == 0)
+				{
+					tv.TexCoord0.X	=texCoords0.Values[tidx0 * 2];
+					tv.TexCoord0.Y	=texCoords0.Values[1 + tidx0 * 2];
+				}
+				else if(lowestIndex == 1)
+				{
+					tv.TexCoord0.X	=texCoords1.Values[tidx1 * 2];
+					tv.TexCoord0.Y	=texCoords1.Values[1 + tidx1 * 2];
+				}
+				else if(lowestIndex == 2)
+				{
+					tv.TexCoord0.X	=texCoords2.Values[tidx2 * 2];
+					tv.TexCoord0.Y	=texCoords2.Values[1 + tidx2 * 2];
+				}
+				else if(lowestIndex == 3)
+				{
+					tv.TexCoord0.X	=texCoords3.Values[tidx3 * 2];
+					tv.TexCoord0.Y	=texCoords3.Values[1 + tidx3 * 2];
+				}
+			}
+
 			//copy texcoords
+			/*
 			if(texIdxs0 != null && texCoords0 != null)
 			{
 				tv.TexCoord0.X	=texCoords0.Values[tidx0 * 2];
@@ -512,7 +569,7 @@ internal class MeshConverter
 			{
 				tv.TexCoord3.X	=texCoords3.Values[tidx3 * 2];
 				tv.TexCoord3.Y	=texCoords3.Values[1 + tidx3 * 2];
-			}
+			}*/
 			if(colIdxs0 != null && colors0 != null)
 			{
 				tv.Color0.X	=colors0.Values[cidx0 * col0Stride];
@@ -581,7 +638,7 @@ internal class MeshConverter
 			mBaseVerts[i]	=verts[i];
 		}
 
-		Triangulate(vertCounts);
+		Triangulate(vertCounts, bStatic);
 
 		mNumVerts		=verts.Count;
 		mNumTriangles	=mIndexList.Count / 3;
@@ -612,7 +669,7 @@ internal class MeshConverter
 	}
 
 
-	void Triangulate(List<int> vertCounts)
+	void Triangulate(List<int> vertCounts, bool bStatic)
 	{
 		List<ushort>	newIdxs	=new List<ushort>();
 
@@ -631,9 +688,18 @@ internal class MeshConverter
 
 			for(int j=1;j < (vCount - 1);j++)
 			{
-				newIdxs.Add((ushort)curIdx);
-				newIdxs.Add((ushort)(j + curIdx));
-				newIdxs.Add((ushort)(j + 1 + curIdx));
+				if(bStatic)
+				{
+					newIdxs.Add((ushort)(j + 1 + curIdx));
+					newIdxs.Add((ushort)(j + curIdx));
+					newIdxs.Add((ushort)curIdx);
+				}
+				else
+				{
+					newIdxs.Add((ushort)curIdx);
+					newIdxs.Add((ushort)(j + curIdx));
+					newIdxs.Add((ushort)(j + 1 + curIdx));
+				}
 			}
 			curIdx	+=vCount;
 		}
@@ -693,6 +759,15 @@ internal class MeshConverter
 			{
 				VertexTypes.SetArrayField(verts, i, "BoneWeights", mBaseVerts[i].BoneWeights);
 			}
+
+			//temp hack for blender bug
+			if(numTex > 0)
+			{
+				VertexTypes.SetArrayField(verts, i, "TexCoord0",
+					new Half2(mBaseVerts[i].TexCoord0.X, mBaseVerts[i].TexCoord0.Y));
+			}
+
+/*
 			if(bTexCoord0)
 			{
 				VertexTypes.SetArrayField(verts, i, "TexCoord0",
@@ -712,7 +787,7 @@ internal class MeshConverter
 			{
 				VertexTypes.SetArrayField(verts, i, "TexCoord3",
 					new Half2(mBaseVerts[i].TexCoord3.X, mBaseVerts[i].TexCoord3.Y));
-			}
+			}*/
 			if(bColor0)
 			{
 				VertexTypes.SetArrayField(verts, i, "Color0", new Color(mBaseVerts[i].Color0));

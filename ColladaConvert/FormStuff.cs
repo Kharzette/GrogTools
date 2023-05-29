@@ -38,8 +38,10 @@ internal class FormStuff
 
 	ID3D11Device	mGD;
 
-	float	mScaleFactor;
-	bool	mbRoughAdjust;
+	float		mScaleFactor;
+	bool		mbRoughAdjust;
+	Vector4		mLightArrowColour;
+	Matrix4x4	mLightArrowMat;
 
 	const int	RoughIndex	=6969;
 
@@ -77,6 +79,10 @@ internal class FormStuff
 		mSKE.Visible	=true;
 		mCT.Visible		=true;
 		mOut.Visible	=true;
+
+		mLightArrowColour	=Misc.SystemColorToV4Color(System.Drawing.Color.Gold);
+
+		mOut.Print("Starting with meter scale factor.\n");
 	}
 
 
@@ -107,6 +113,21 @@ internal class FormStuff
 
 	internal void RenderUpdate(GameCamera gcam, Vector3 lightDir, float updateTime)
 	{
+		//get a good side perp vec
+		Vector3	lightSide	=Vector3.Cross(Vector3.UnitY, lightDir);
+		if(lightSide.Equals(Vector3.Zero))
+		{
+			lightSide	=Vector3.Cross(Vector3.UnitX, lightDir);
+		}
+
+		//good up vec
+		Vector3	lightUp	=Vector3.Cross(lightSide, lightDir);
+
+		Vector3	camPos	=Vector3.UnitY * mScaleFactor * 3f;
+
+		//the arrow mesh is backwards?
+		mLightArrowMat	=Matrix4x4.CreateWorld(camPos, -lightDir, -lightUp);
+
 		mMatLib.SetLightDirection(lightDir);
 
 		mCPrims.Update(gcam, lightDir);
@@ -118,6 +139,8 @@ internal class FormStuff
 	internal void Render()
 	{
 		mAF.Render(mGD.ImmediateContext);
+
+		mCPrims.DrawLightArrow(mLightArrowMat, mLightArrowColour);
 
 		if(mAF.GetDrawAxis())
 		{
