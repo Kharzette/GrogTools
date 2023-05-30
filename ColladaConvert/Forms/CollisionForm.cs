@@ -97,6 +97,75 @@ namespace ColladaConvert.Forms
 
 		void OnAfterSelect(object sender, TreeViewEventArgs e)
 		{
+			TreeNode	sel	=CollisionTreeView.SelectedNode;
+			if(sel == null)
+			{
+				ShapeGroup.Enabled	=false;
+				EditNode.Enabled	=false;
+			}
+			else
+			{
+				ShapeGroup.Enabled	=true;
+				EditNode.Enabled	=true;
+
+				CollisionNode	cn	=sel.Tag as CollisionNode;
+				if(cn == null)
+				{
+					RadioBox.Checked	=true;
+					EditNode.Enabled	=false;
+				}
+
+				int	shape	=cn.GetShape();
+				if(shape == CollisionNode.Box)
+				{
+					RadioBox.Checked	=true;
+				}
+				else if(shape == CollisionNode.Sphere)
+				{
+					RadioSphere.Checked	=true;
+				}
+				else if(shape == CollisionNode.Capsule)
+				{
+					RadioCapsule.Checked	=true;
+				}
+				else
+				{
+					ShapeGroup.Enabled		=false;
+					RadioBox.Checked		=false;
+					RadioSphere.Checked		=false;
+					RadioCapsule.Checked	=false;
+				}
+			}
+		}
+
+
+		void OnNodeShapeChanged(object sender, EventArgs e)
+		{
+			TreeNode	sel	=CollisionTreeView.SelectedNode;
+			if(sel == null)
+			{
+				return;		//shouldn't happen
+			}
+
+			CollisionNode	cn	=sel.Tag as CollisionNode;
+			if(cn == null)
+			{
+				//also shouldn't happen
+				return;
+			}
+
+			if(RadioBox.Checked)
+			{
+				cn.ChangeShape(CollisionNode.Box);
+			}
+			else if(RadioSphere.Checked)
+			{
+				cn.ChangeShape(CollisionNode.Sphere);
+			}
+			else if(RadioCapsule.Checked)
+			{
+				cn.ChangeShape(CollisionNode.Capsule);
+			}
 		}
 	}
 }

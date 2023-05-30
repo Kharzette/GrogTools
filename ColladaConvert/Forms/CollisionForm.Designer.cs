@@ -30,10 +30,10 @@
 		{
 			this.CollisionTreeView = new System.Windows.Forms.TreeView();
 			this.AddChild = new System.Windows.Forms.Button();
-			this.radioButton1 = new System.Windows.Forms.RadioButton();
+			this.RadioBox = new System.Windows.Forms.RadioButton();
 			this.ShapeGroup = new System.Windows.Forms.GroupBox();
-			this.radioButton3 = new System.Windows.Forms.RadioButton();
-			this.radioButton2 = new System.Windows.Forms.RadioButton();
+			this.RadioCapsule = new System.Windows.Forms.RadioButton();
+			this.RadioSphere = new System.Windows.Forms.RadioButton();
 			this.EditNode = new System.Windows.Forms.Button();
 			this.ShapeGroup.SuspendLayout();
 			this.SuspendLayout();
@@ -43,6 +43,7 @@
 			this.CollisionTreeView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this.CollisionTreeView.HideSelection = false;
 			this.CollisionTreeView.Location = new System.Drawing.Point(12, 12);
 			this.CollisionTreeView.Name = "CollisionTreeView";
 			this.CollisionTreeView.Size = new System.Drawing.Size(388, 321);
@@ -60,23 +61,24 @@
 			this.AddChild.UseVisualStyleBackColor = true;
 			this.AddChild.Click += new System.EventHandler(this.OnAddChild);
 			// 
-			// radioButton1
+			// RadioBox
 			// 
-			this.radioButton1.AutoSize = true;
-			this.radioButton1.Location = new System.Drawing.Point(6, 22);
-			this.radioButton1.Name = "radioButton1";
-			this.radioButton1.Size = new System.Drawing.Size(45, 19);
-			this.radioButton1.TabIndex = 2;
-			this.radioButton1.TabStop = true;
-			this.radioButton1.Text = "Box";
-			this.radioButton1.UseVisualStyleBackColor = true;
+			this.RadioBox.AutoSize = true;
+			this.RadioBox.Location = new System.Drawing.Point(6, 22);
+			this.RadioBox.Name = "RadioBox";
+			this.RadioBox.Size = new System.Drawing.Size(45, 19);
+			this.RadioBox.TabIndex = 2;
+			this.RadioBox.TabStop = true;
+			this.RadioBox.Text = "Box";
+			this.RadioBox.UseVisualStyleBackColor = true;
+			this.RadioBox.CheckedChanged += new System.EventHandler(this.OnNodeShapeChanged);
 			// 
 			// ShapeGroup
 			// 
 			this.ShapeGroup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.ShapeGroup.Controls.Add(this.radioButton3);
-			this.ShapeGroup.Controls.Add(this.radioButton2);
-			this.ShapeGroup.Controls.Add(this.radioButton1);
+			this.ShapeGroup.Controls.Add(this.RadioCapsule);
+			this.ShapeGroup.Controls.Add(this.RadioSphere);
+			this.ShapeGroup.Controls.Add(this.RadioBox);
 			this.ShapeGroup.Location = new System.Drawing.Point(12, 339);
 			this.ShapeGroup.Name = "ShapeGroup";
 			this.ShapeGroup.Size = new System.Drawing.Size(86, 99);
@@ -84,27 +86,29 @@
 			this.ShapeGroup.TabStop = false;
 			this.ShapeGroup.Text = "Node Shape";
 			// 
-			// radioButton3
+			// RadioCapsule
 			// 
-			this.radioButton3.AutoSize = true;
-			this.radioButton3.Location = new System.Drawing.Point(6, 72);
-			this.radioButton3.Name = "radioButton3";
-			this.radioButton3.Size = new System.Drawing.Size(67, 19);
-			this.radioButton3.TabIndex = 4;
-			this.radioButton3.TabStop = true;
-			this.radioButton3.Text = "Capsule";
-			this.radioButton3.UseVisualStyleBackColor = true;
+			this.RadioCapsule.AutoSize = true;
+			this.RadioCapsule.Location = new System.Drawing.Point(6, 72);
+			this.RadioCapsule.Name = "RadioCapsule";
+			this.RadioCapsule.Size = new System.Drawing.Size(67, 19);
+			this.RadioCapsule.TabIndex = 4;
+			this.RadioCapsule.TabStop = true;
+			this.RadioCapsule.Text = "Capsule";
+			this.RadioCapsule.UseVisualStyleBackColor = true;
+			this.RadioCapsule.CheckedChanged += new System.EventHandler(this.OnNodeShapeChanged);
 			// 
-			// radioButton2
+			// RadioSphere
 			// 
-			this.radioButton2.AutoSize = true;
-			this.radioButton2.Location = new System.Drawing.Point(6, 47);
-			this.radioButton2.Name = "radioButton2";
-			this.radioButton2.Size = new System.Drawing.Size(61, 19);
-			this.radioButton2.TabIndex = 3;
-			this.radioButton2.TabStop = true;
-			this.radioButton2.Text = "Sphere";
-			this.radioButton2.UseVisualStyleBackColor = true;
+			this.RadioSphere.AutoSize = true;
+			this.RadioSphere.Location = new System.Drawing.Point(6, 47);
+			this.RadioSphere.Name = "RadioSphere";
+			this.RadioSphere.Size = new System.Drawing.Size(61, 19);
+			this.RadioSphere.TabIndex = 3;
+			this.RadioSphere.TabStop = true;
+			this.RadioSphere.Text = "Sphere";
+			this.RadioSphere.UseVisualStyleBackColor = true;
+			this.RadioSphere.CheckedChanged += new System.EventHandler(this.OnNodeShapeChanged);
 			// 
 			// EditNode
 			// 
@@ -137,10 +141,10 @@
 
 		private TreeView CollisionTreeView;
 		private Button AddChild;
-		private RadioButton radioButton1;
+		private RadioButton RadioBox;
 		private GroupBox ShapeGroup;
-		private RadioButton radioButton3;
-		private RadioButton radioButton2;
+		private RadioButton RadioCapsule;
+		private RadioButton RadioSphere;
 		private Button EditNode;
 	}
 }
