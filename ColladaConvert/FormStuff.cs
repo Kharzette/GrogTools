@@ -17,6 +17,7 @@ using SharpDX.Windows;
 
 using MatLib	=MaterialLib.MaterialLib;
 using Color		=Vortice.Mathematics.Color;
+using ColladaConvert.Forms;
 
 namespace ColladaConvert;
 
@@ -30,6 +31,7 @@ internal class FormStuff
 	CelTweakForm	mCT;
 	Output			mOut;
 	SeamEditor		mSME;
+	CollisionForm	mCF;
 
 	MatLib			mMatLib;
 	AnimLib			mAnimLib;
@@ -68,6 +70,7 @@ internal class FormStuff
 		mCT		=new CelTweakForm(gd, mMatLib);
 		mOut	=new Output();
 		mSME	=new SeamEditor();
+		mCF		=new CollisionForm();
 
 		mBBE	=new BoneBoundEdit(mCPrims, mSKE, mAF);
 
@@ -79,6 +82,7 @@ internal class FormStuff
 		mSKE.Visible	=true;
 		mCT.Visible		=true;
 		mOut.Visible	=true;
+		mCF.Visible		=true;
 
 		mLightArrowColour	=Misc.SystemColorToV4Color(System.Drawing.Color.Gold);
 
@@ -490,6 +494,14 @@ internal class FormStuff
 
 		mSME.DataBindings.Add(new System.Windows.Forms.Binding("Size",
 			Properties.Settings.Default, "SeamEditorFormSize", true,
+			DataSourceUpdateMode.OnPropertyChanged));
+
+		mCF.DataBindings.Add(new System.Windows.Forms.Binding("Location",
+			Properties.Settings.Default, "CollisionFormPos", true,
+			DataSourceUpdateMode.OnPropertyChanged));
+
+		mCF.DataBindings.Add(new System.Windows.Forms.Binding("Size",
+			Properties.Settings.Default, "CollisionFormSize", true,
 			DataSourceUpdateMode.OnPropertyChanged));
 	}
 }

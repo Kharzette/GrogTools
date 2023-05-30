@@ -2,7 +2,7 @@
   "profiles": {
     "ColladaConvert": {
       "commandName": "Project",
-      "workingDirectory": "E:\\Games\\CurrentGame",
+      "workingDirectory": "D:\\Games\\CurrentGame",
       "nativeDebugging": true
     }
   }
