@@ -1,6 +1,7 @@
 Character art notes:
 
-Make your character mesh in Blender with normal character sizes.  I use 1.7ish meters.
+Make your character mesh in Blender with normal character sizes.  I use 1.7ish meters.  
+1.7 meters in valve units is about 93.75.
 
 Use https://github.com/SAM-tak/BlenderGameRig for rigging.  Default collada exporter.
 
@@ -11,7 +12,8 @@ Delete extra finger bones, but don't delete the heel.
 
 Adjust the sizes of the bones to fit your mesh in edit mode.  This is best done by
 using the move tool with the spherical joints.  Pulling those adjusts the overall bone.
-Do one side, then select the adjusted bones and do Armature->Symmetrize to copy to the other side.
+Do one side, then select the adjusted bones and do Armature->Symmetrize to copy to the other
+side.
 
 Knees must be slightly bent!
 
@@ -19,16 +21,20 @@ For extra bones, Add->single bone, then move where you want it.
 Select the new bone, then the bone you want to be its parent, then:
 Armature->Parent->Make->Keep Offset
 
-You can Armature->Symmetrize with the new bone selected if you need another on the other side.
+You can Armature->Symmetrize with the new bone selected if you need another on the other
+side.
 
 When it looks about right, go back to object mode:
 
-Select the mesh, then the metarig, then Object->Parent->Armature Deform->With Auto Weights.
+Select the metarig, then the mesh, then Object->Parent->Armature Deform->With Auto Weights.
+This used to work really well but lately you get gigantic influence regions.  I recently had
+to use envelope mode and manually shrink every bone and region down greatly.  Even doing
+that the results were not good.  I'm hoping they fix this eventually.
 
 When the weights look right do: Object Data Properties panel->GameRig->Generate New Rig
 
-There used to be a problem with generated rigs having a 90 degree rotation in them, but I think
-I've gotten rid of that now.
+There used to be a problem with generated rigs having a 90 degree rotation in them, but I
+think I've gotten rid of that now.
 
 Select the generated rig and do Object->Apply->Rotation just in case.
 
@@ -85,5 +91,8 @@ Save as FBX.  This will have to go back into blender as 3DCoat's collada is
 a bit mangled.  When importing back into blender the scale is super small.
 Fix it in the little transform tab.
 
-Rotate Z 90 degrees positive to align it the usual way, then Object->Apply->
+Rotate Z 90 degrees positive to align it the usual way if needed, then Object->Apply->
 Rotation.
+
+Note that as of this writing, there is a bug in Blender that starts the "set" of UV coords
+at 2 instead of 0.  I have a hack in place but only 1 coordinate set works right now.
