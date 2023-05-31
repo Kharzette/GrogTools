@@ -70,7 +70,7 @@ internal class FormStuff
 		mCT		=new CelTweakForm(gd, mMatLib);
 		mOut	=new Output();
 		mSME	=new SeamEditor();
-		mCF		=new CollisionForm();
+		mCF		=new CollisionForm(gd, sk);
 
 		mBBE	=new BoneBoundEdit(mCPrims, mSKE, mAF);
 
@@ -137,6 +137,7 @@ internal class FormStuff
 		mCPrims.Update(gcam, lightDir);
 
 		mAF.RenderUpdate(updateTime);
+		mCF.RenderUpdate(gcam, lightDir, updateTime);
 	}
 
 
@@ -181,6 +182,7 @@ internal class FormStuff
 		}
 
 		mBBE.Render();
+		mCF.Render();
 	}
 
 
@@ -235,6 +237,7 @@ internal class FormStuff
 	{
 		mMF.SetMesh(sender);
 		mBBE.MeshChanged(sender);
+		mCF.SetMesh(sender);
 
 		StaticMesh	?sm		=sender as StaticMesh;
 		Character	?chr	=sender as Character;

@@ -35,6 +35,7 @@
 			this.RadioCapsule = new System.Windows.Forms.RadioButton();
 			this.RadioSphere = new System.Windows.Forms.RadioButton();
 			this.EditNode = new System.Windows.Forms.Button();
+			this.DrawAll = new System.Windows.Forms.CheckBox();
 			this.ShapeGroup.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -49,6 +50,7 @@
 			this.CollisionTreeView.Size = new System.Drawing.Size(388, 321);
 			this.CollisionTreeView.TabIndex = 0;
 			this.CollisionTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.OnAfterSelect);
+			this.CollisionTreeView.KeyUp += new System.Windows.Forms.KeyEventHandler(this.OnTreeKeyUp);
 			// 
 			// AddChild
 			// 
@@ -120,11 +122,23 @@
 			this.EditNode.Text = "Edit Node";
 			this.EditNode.UseVisualStyleBackColor = true;
 			// 
+			// DrawAll
+			// 
+			this.DrawAll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.DrawAll.AutoSize = true;
+			this.DrawAll.Location = new System.Drawing.Point(104, 397);
+			this.DrawAll.Name = "DrawAll";
+			this.DrawAll.Size = new System.Drawing.Size(70, 19);
+			this.DrawAll.TabIndex = 5;
+			this.DrawAll.Text = "Draw All";
+			this.DrawAll.UseVisualStyleBackColor = true;
+			// 
 			// CollisionForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(412, 450);
+			this.Controls.Add(this.DrawAll);
 			this.Controls.Add(this.EditNode);
 			this.Controls.Add(this.ShapeGroup);
 			this.Controls.Add(this.AddChild);
@@ -134,6 +148,7 @@
 			this.ShapeGroup.ResumeLayout(false);
 			this.ShapeGroup.PerformLayout();
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 
@@ -146,5 +161,6 @@
 		private RadioButton RadioCapsule;
 		private RadioButton RadioSphere;
 		private Button EditNode;
+		private CheckBox DrawAll;
 	}
 }
