@@ -487,10 +487,19 @@ public partial class AnimForm : Form
 
 		allChunks.Clear();
 
-		AddVertexWeightsToChunks(colladaFile, chunks);
+		if(!AddVertexWeightsToChunks(colladaFile, chunks))
+		{
+			PrintToOutput("No vertex weights... are you trying to load static geometry as a character?\n");
+			return;
+		}
 
 		//build or get skeleton
 		Skeleton	skel	=BuildSkeleton(colladaFile, ePrint);
+		if(skel ==  null)
+		{
+			PrintToOutput("No skeleton... are you trying to load static geometry as a character?\n");
+			return;
+		}
 
 		//see if animlib has a skeleton yet
 		if(alib.GetSkeleton() == null)
@@ -1558,11 +1567,11 @@ public partial class AnimForm : Form
 	}
 
 
-	static void AddVertexWeightsToChunks(COLLADA colladaFile, List<MeshConverter> chunks)
+	static bool AddVertexWeightsToChunks(COLLADA colladaFile, List<MeshConverter> chunks)
 	{
 		if(colladaFile.Items.OfType<library_controllers>().Count() <= 0)
 		{
-			return;
+			return	false;
 		}
 
 		var	skins	=from conts in colladaFile.Items.OfType<library_controllers>().First().controller
@@ -1580,6 +1589,7 @@ public partial class AnimForm : Form
 				}
 			}
 		}
+		return	true;
 	}
 
 

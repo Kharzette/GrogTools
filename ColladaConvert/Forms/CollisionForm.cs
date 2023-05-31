@@ -34,7 +34,9 @@ public partial class CollisionForm : Form
 		mCPrims		=new CommonPrims(gd, sk);
 		mColTree	=new CollisionTree();
 
-		this.Enabled	=false;
+		this.Enabled		=false;
+		ShapeGroup.Enabled	=false;
+		EditNode.Enabled	=false;
 	}
 
 
@@ -212,6 +214,10 @@ public partial class CollisionForm : Form
 		BuildRecursive(tn);
 
 		CollisionTreeView.ExpandAll();
+
+		ShapeGroup.Enabled	=false;
+		EditNode.Enabled	=false;
+		AddChild.Enabled	=false;
 	}
 
 
@@ -245,11 +251,13 @@ public partial class CollisionForm : Form
 		{
 			ShapeGroup.Enabled	=false;
 			EditNode.Enabled	=false;
+			AddChild.Enabled	=false;
 		}
 		else
 		{
 			ShapeGroup.Enabled	=true;
 			EditNode.Enabled	=true;
+			AddChild.Enabled	=true;
 
 			CollisionNode	cn	=sel.Tag as CollisionNode;
 			if(cn == null)
