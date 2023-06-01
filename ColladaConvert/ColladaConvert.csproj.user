@@ -5,6 +5,9 @@
     <Compile Update="Forms\AnimForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Forms\CollisionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="Forms\SeamEditor.cs">
       <SubType>Form</SubType>
     </Compile>

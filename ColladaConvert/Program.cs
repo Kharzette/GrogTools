@@ -33,6 +33,8 @@ internal static class Program
 		BoneRadiusUp, BoneLengthUp, BoneDepthUp, 
 		BoneRadiusDown, BoneLengthDown, BoneDepthDown,
 		BoneDone, BoneMirror, BoneSphereSnap,
+		ColMoveX, ColMoveY, ColMoveZ, 
+		ColMoveNX, ColMoveNY, ColMoveNZ, 
 		Exit
 	};
 
@@ -247,18 +249,19 @@ internal static class Program
 			Modifiers.ShiftHeld, System.Windows.Forms.Keys.D);
 
 		//arrow keys
-		inp.MapAction(MyActions.MoveForward, ActionTypes.ContinuousHold,
+		inp.MapAction(MyActions.ColMoveY, ActionTypes.ContinuousHold,
 			Modifiers.None, System.Windows.Forms.Keys.Up);
-		inp.MapAction(MyActions.MoveBack, ActionTypes.ContinuousHold,
+		inp.MapAction(MyActions.ColMoveNY, ActionTypes.ContinuousHold,
 			Modifiers.None, System.Windows.Forms.Keys.Down);
-		inp.MapAction(MyActions.MoveForwardFast, ActionTypes.ContinuousHold,
+		inp.MapAction(MyActions.ColMoveZ, ActionTypes.ContinuousHold,
 			Modifiers.ShiftHeld, System.Windows.Forms.Keys.Up);
-		inp.MapAction(MyActions.MoveBackFast, ActionTypes.ContinuousHold,
+		inp.MapAction(MyActions.ColMoveNZ, ActionTypes.ContinuousHold,
 			Modifiers.ShiftHeld, System.Windows.Forms.Keys.Down);
-		inp.MapAction(MyActions.TurnLeft, ActionTypes.ContinuousHold,
+		inp.MapAction(MyActions.ColMoveX, ActionTypes.ContinuousHold,
 			Modifiers.None, System.Windows.Forms.Keys.Left);
-		inp.MapAction(MyActions.TurnRight, ActionTypes.ContinuousHold,
+		inp.MapAction(MyActions.ColMoveNX, ActionTypes.ContinuousHold,
 			Modifiers.None, System.Windows.Forms.Keys.Right);
+
 		inp.MapAction(MyActions.PitchUp, ActionTypes.ContinuousHold,
 			Modifiers.None, System.Windows.Forms.Keys.Q);
 		inp.MapAction(MyActions.PitchDown, ActionTypes.ContinuousHold,

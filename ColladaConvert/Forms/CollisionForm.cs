@@ -11,7 +11,9 @@ using Vortice.Direct3D11;
 using Vortice.Mathematics;
 using System.Numerics;
 using MaterialLib;
+using SharedForms;
 using UtilityLib;
+using InputLib;
 using MeshLib;
 
 
@@ -21,22 +23,111 @@ public partial class CollisionForm : Form
 {
 	CollisionTree	mColTree;
 	CommonPrims		mCPrims;
+	Output			mOut;
 	StaticMesh		?mMesh;
 
 	bool			mbEditMode;
 	CollisionNode	mEditNode;
+	float			mScaleFactor;
+
+	//values in meters
+	const float	RadiusIncrement			=0.004f;
+	const float	LengthIncrement			=0.004f;
+	const float	MoveAmount				=0.01f;
 
 
-	public CollisionForm(ID3D11Device gd, StuffKeeper sk)
+	public CollisionForm(ID3D11Device gd, StuffKeeper sk, Output op)
 	{
 		InitializeComponent();
 
 		mCPrims		=new CommonPrims(gd, sk);
 		mColTree	=new CollisionTree();
+		mOut		=op;
 
 		this.Enabled		=false;
 		ShapeGroup.Enabled	=false;
 		EditNode.Enabled	=false;
+	}
+
+
+	internal void UpdateKeys(List<Input.InputAction> acts)
+	{
+		if(!mbEditMode || mEditNode == null)
+		{
+			return;
+		}
+
+		foreach(Input.InputAction act in acts)
+		{
+			if(act.mAction.Equals(Program.MyActions.BoneLengthUp))
+			{
+				mEditNode.AdjustLength(LengthIncrement * mScaleFactor);
+				AddShapeToCPrims(mEditNode);	//update shape
+			}
+			else if(act.mAction.Equals(Program.MyActions.BoneRadiusUp))
+			{
+				mEditNode.AdjustRadius(RadiusIncrement * mScaleFactor);
+				AddShapeToCPrims(mEditNode);	//update shape
+			}
+			else if(act.mAction.Equals(Program.MyActions.BoneDepthUp))
+			{
+				mEditNode.AdjustDepth(RadiusIncrement * mScaleFactor);
+				AddShapeToCPrims(mEditNode);	//update shape
+			}
+			else if(act.mAction.Equals(Program.MyActions.BoneLengthDown))
+			{
+				mEditNode.AdjustLength(-LengthIncrement * mScaleFactor);
+				AddShapeToCPrims(mEditNode);	//update shape
+			}
+			else if(act.mAction.Equals(Program.MyActions.BoneRadiusDown))
+			{
+				mEditNode.AdjustRadius(-RadiusIncrement * mScaleFactor);
+				AddShapeToCPrims(mEditNode);	//update shape
+			}
+			else if(act.mAction.Equals(Program.MyActions.BoneDepthDown))
+			{
+				mEditNode.AdjustDepth(-RadiusIncrement * mScaleFactor);
+				AddShapeToCPrims(mEditNode);	//update shape
+			}
+			else if(act.mAction.Equals(Program.MyActions.ColMoveX))
+			{
+				mEditNode.Move(Vector3.UnitX * MoveAmount * mScaleFactor);
+				AddShapeToCPrims(mEditNode);	//update shape
+			}
+			else if(act.mAction.Equals(Program.MyActions.ColMoveY))
+			{
+				mEditNode.Move(Vector3.UnitY * MoveAmount * mScaleFactor);
+				AddShapeToCPrims(mEditNode);	//update shape
+			}
+			else if(act.mAction.Equals(Program.MyActions.ColMoveZ))
+			{
+				mEditNode.Move(Vector3.UnitZ * MoveAmount * mScaleFactor);
+				AddShapeToCPrims(mEditNode);	//update shape
+			}
+			else if(act.mAction.Equals(Program.MyActions.ColMoveNX))
+			{
+				mEditNode.Move(-Vector3.UnitX * MoveAmount * mScaleFactor);
+				AddShapeToCPrims(mEditNode);	//update shape
+			}
+			else if(act.mAction.Equals(Program.MyActions.ColMoveNY))
+			{
+				mEditNode.Move(-Vector3.UnitY * MoveAmount * mScaleFactor);
+				AddShapeToCPrims(mEditNode);	//update shape
+			}
+			else if(act.mAction.Equals(Program.MyActions.ColMoveNZ))
+			{
+				mEditNode.Move(-Vector3.UnitZ * MoveAmount * mScaleFactor);
+				AddShapeToCPrims(mEditNode);	//update shape
+			}
+			else if(act.mAction.Equals(Program.MyActions.BoneDone))
+			{
+				mbEditMode			=false;
+				mEditNode			=null;
+				ShapeGroup.Enabled	=true;
+				EditNode.Enabled	=true;
+				AddChild.Enabled	=true;
+			}
+		}
 	}
 
 
@@ -118,17 +209,19 @@ public partial class CollisionForm : Form
 	}
 
 
-	public void SetMesh(object ?m)
+	public void SetMesh(object ?m, float scaleFactor)
 	{
 		mMesh	=m as StaticMesh;
 
 		if(mMesh == null)
 		{
 			this.Enabled	=false;
+			mScaleFactor	=1f;
 		}
 		else
 		{
 			this.Enabled	=true;
+			mScaleFactor	=scaleFactor;
 		}
 	}
 
@@ -372,5 +465,41 @@ public partial class CollisionForm : Form
 //		{
 //			sel.Text	="blort";
 //		}
+	}
+
+	void OnEditNode(object sender, EventArgs e)
+	{
+		TreeNode	sel	=CollisionTreeView.SelectedNode;
+		if(sel == null)
+		{
+			return;		//shouldn't happen
+		}
+
+		CollisionNode	cn	=sel.Tag as CollisionNode;
+		if(cn == null)
+		{
+			//also shouldn't happen
+			return;
+		}
+
+		mbEditMode			=true;
+		mEditNode			=cn;
+		ShapeGroup.Enabled	=false;
+		EditNode.Enabled	=false;
+		AddChild.Enabled	=false;
+
+		string	msg	="Adjusting bound...\n";
+		if(cn.GetShape() == CollisionNode.Box)
+		{
+			msg	+="Use R / Shift-R to adjust width, Y / Shift-Y to adjust depth,\n"
+				+ "T / Shift-T to adjust length along the bone axis,\n"
+				+ "Arrows to move XY, Shift Arrow to move Z, and X when finished.\n";
+		}
+		else
+		{
+			msg	+="Use R / Shift-R to adjust radius, X when finished.\n";
+		}
+
+		mOut.Print(msg);
 	}
 }

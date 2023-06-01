@@ -420,9 +420,6 @@ internal class MeshConverter
 
 		List<TrackedVert>	verts	=new List<TrackedVert>();
 
-		//adjust coordinate system for normals
-		Matrix4x4	shiftMat	=Matrix4x4.CreateRotationX(-MathHelper.PiOver2);
-
 		//find lowest texcoord index
 		int	lowestIndex	=-1;
 		if(texIdxs0 != null && texCoords0 != null)
@@ -510,14 +507,18 @@ internal class MeshConverter
 				Vector3	norm;
 
 				//copy out of float array
-				norm.X	=norms.Values[nidx * 3];
-				norm.Y	=norms.Values[1 + nidx * 3];
-				norm.Z	=norms.Values[2 + nidx * 3];
-
-				//rotate statics
 				if(bStatic)
 				{
-					norm	=Vector3.TransformNormal(norm, shiftMat);
+					//statics swap y and z
+					norm.X	=norms.Values[nidx * 3];
+					norm.Y	=norms.Values[2 + nidx * 3];
+					norm.Z	=norms.Values[1 + nidx * 3];
+				}
+				else
+				{
+					norm.X	=norms.Values[nidx * 3];
+					norm.Y	=norms.Values[1 + nidx * 3];
+					norm.Z	=norms.Values[2 + nidx * 3];
 				}
 
 				tv.Normal0	=new Half4(norm.X, norm.Y, norm.Z, 1f);

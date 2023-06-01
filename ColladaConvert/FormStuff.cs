@@ -70,7 +70,7 @@ internal class FormStuff
 		mCT		=new CelTweakForm(gd, mMatLib);
 		mOut	=new Output();
 		mSME	=new SeamEditor();
-		mCF		=new CollisionForm(gd, sk);
+		mCF		=new CollisionForm(gd, sk, mOut);
 
 		mBBE	=new BoneBoundEdit(mCPrims, mSKE, mAF);
 
@@ -92,6 +92,7 @@ internal class FormStuff
 
 	internal void AdjustBone(List<Input.InputAction> acts)
 	{
+		mCF.UpdateKeys(acts);
 		mBBE.AdjustBone(acts);
 
 		if(!mbRoughAdjust)
@@ -237,7 +238,7 @@ internal class FormStuff
 	{
 		mMF.SetMesh(sender);
 		mBBE.MeshChanged(sender);
-		mCF.SetMesh(sender);
+		mCF.SetMesh(sender, mScaleFactor);
 
 		StaticMesh	?sm		=sender as StaticMesh;
 		Character	?chr	=sender as Character;

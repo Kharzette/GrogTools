@@ -121,6 +121,7 @@
 			this.EditNode.TabIndex = 4;
 			this.EditNode.Text = "Edit Node";
 			this.EditNode.UseVisualStyleBackColor = true;
+			this.EditNode.Click += new System.EventHandler(this.OnEditNode);
 			// 
 			// DrawAll
 			// 
