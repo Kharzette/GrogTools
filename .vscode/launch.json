@@ -1,0 +1,160 @@
+{
+	// Use IntelliSense to learn about possible attributes.
+	// Hover to view descriptions of existing attributes.
+	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+
+		{
+			"name": "CC Debug",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "build CC",
+			"program": "${workspaceFolder}/ColladaConvert/bin/Debug/net6.0-windows/ColladaConvert.exe",
+			"args": [],
+			"cwd": "D:/Games/CurrentGame",
+			"console": "internalConsole",
+			"justMyCode": false,
+			"requireExactSource": false,	//I really shouldn't need this but debugger is VERY confused
+			"stopAtEntry": false
+		},
+		{
+			"name": "CC Release",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "build release",
+			"program": "${workspaceFolder}/ColladaConvert/bin/Release/net6.0-windows/ColladaConvert.exe",
+			"args": [],
+			"cwd": "D:/Games/CurrentGame",
+			"console": "internalConsole",
+			"stopAtEntry": false
+		},
+		{
+			"name": "BB Debug",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "build",
+			"program": "${workspaceFolder}/BSPBuilder/bin/Debug/net6.0-windows/BSPBuilder.exe",
+			"args": [],
+			"cwd": "D:/Games/CurrentGame",
+			"console": "internalConsole",
+			"stopAtEntry": false
+		},
+		{
+			"name": "BB Release",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "build release",
+			"program": "${workspaceFolder}/BSPBuilder/bin/Release/netcoreapp3.1/BSPBuilder.exe",
+			"args": [],
+			"cwd": "D:/Games/CurrentGame",
+			"console": "internalConsole",
+			"stopAtEntry": false
+		},
+		{
+			"name": "LE Debug",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "build",
+			"program": "${workspaceFolder}/LightExplore/bin/Debug/netcoreapp3.1/LightExplore.exe",
+			"args": [],
+			"cwd": "D:/Games/CurrentGame",
+			"console": "internalConsole",
+			"stopAtEntry": false
+		},
+		{
+			"name": "LE Release",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "build release",
+			"program": "${workspaceFolder}/LightExplore/bin/Release/netcoreapp3.1/LightExplore.exe",
+			"args": [],
+			"cwd": "D:/Games/CurrentGame",
+			"console": "internalConsole",
+			"stopAtEntry": false
+		},
+		{
+			"name": "PE Debug",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "build",
+			"program": "${workspaceFolder}/ParticleEdit/bin/Debug/netcoreapp3.1/ParticleEdit.exe",
+			"args": [],
+			"cwd": "D:/Games/CurrentGame",
+			"console": "internalConsole",
+			"stopAtEntry": false
+		},
+		{
+			"name": "PE Release",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "build release",
+			"program": "${workspaceFolder}/ParticleEdit/bin/Release/netcoreapp3.1/ParticleEdit.exe",
+			"args": [],
+			"cwd": "D:/Games/CurrentGame",
+			"console": "internalConsole",
+			"stopAtEntry": false
+		},
+		{
+			"name": "QE Debug",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "build",
+			"program": "${workspaceFolder}/QEntityMaker/bin/Debug/net6.0-windows/QEntityMaker.exe",
+			"args": [],
+			"cwd": "D:/Games/CurrentGame",
+			"console": "internalConsole",
+			"stopAtEntry": false
+		},
+		{
+			"name": "FXDC Debug",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "build",
+			"program": "${workspaceFolder}/FXDeCompile/bin/Debug/net5.0-windows/FXDeCompile.exe",
+			"args": [],
+			"cwd": "${workspaceFolder}/FXDeCompile",
+			"console": "internalConsole",
+			"stopAtEntry": false
+		},
+		{
+			"name": "EM Debug",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "build",
+			"program": "${workspaceFolder}/QEntityMaker/bin/Debug/netcoreapp3.1/QEntityMaker.exe",
+			"args": [],
+			"cwd": "D:/Games/CurrentGame",
+			"console": "internalConsole",
+			"stopAtEntry": false
+		},
+		{
+			"name": "EM Release",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "build release",
+			"program": "${workspaceFolder}/QEntityMaker/bin/Release/netcoreapp3.1/QEntityMaker.exe",
+			"args": [],
+			"cwd": "D:/Games/CurrentGame",
+			"console": "internalConsole",
+			"stopAtEntry": false
+		},
+		{
+			"name": "ET Debug",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "build ET",
+			"program": "${workspaceFolder}/EarlyTest/bin/Debug/net6.0-windows/EarlyTest.exe",
+			"args": [],
+			"cwd": "D:/Games/CurrentGame",
+			"console": "internalConsole",
+			"stopAtEntry": false
+		},
+		{
+			"name": ".NET Core Attach",
+			"type": "coreclr",
+			"request": "attach",
+			"processId": "${command:pickProcess}"
+		}
+	]
+}

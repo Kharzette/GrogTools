@@ -14,6 +14,7 @@ internal class BoneBoundEdit
 {
 	CommonPrims			mCPrims;
 	Character			?mChr;
+	StaticMesh			?mStat;
 	SkeletonEditor		mEditor;
 	AnimForm			mAForm;
 
@@ -43,7 +44,7 @@ internal class BoneBoundEdit
 	}
 
 
-	internal void Render()
+	void RenderCharStuff()
 	{
 		if(mChr == null)
 		{
@@ -108,6 +109,72 @@ internal class BoneBoundEdit
 		else if(selChoice == Skin.Capsule)
 		{
 			mCPrims.DrawCapsule(mBoneIndex, actMat, selectedColor);
+		}
+	}
+
+
+	void RenderStaticStuff()
+	{
+		if(mStat == null)
+		{
+			return;
+		}
+
+		if(mEditor.GetDrawBounds())
+		{
+			for(int i=0;i < mStat.GetNumSubBounds();i++)
+			{
+				if(mbActive && i == mBoneIndex)
+				{
+					continue;
+				}
+
+				bool		bChoice	=mStat.GetSubBoundChoice(i);
+				Matrix4x4	mat		=mStat.GetTransform();
+
+				if(bChoice == true)
+				{
+					mCPrims.DrawBox(i, mat, Vector4.One * 0.5f);
+				}
+				else
+				{
+					mCPrims.DrawSphere(i, mat, Vector4.One * 0.5f);
+				}
+			}
+		}
+
+		if(!mbActive)
+		{
+			return;
+		}
+
+		Matrix4x4	actMat	=mStat.GetTransform();
+
+		Vector4	selectedColor	=Vector4.One * 0.5f;
+		selectedColor.X	=1f;
+
+		bool	bSelChoice	=mStat.GetSubBoundChoice(mBoneIndex);
+
+		if(bSelChoice == true)
+		{
+			mCPrims.DrawBox(mBoneIndex, actMat, selectedColor);
+		}
+		else
+		{
+			mCPrims.DrawSphere(mBoneIndex, actMat, selectedColor);
+		}
+	}
+
+
+	internal void Render()
+	{
+		if(mChr != null)
+		{
+			RenderCharStuff();
+		}
+		else if(mStat != null)
+		{
+			RenderStaticStuff();
 		}
 	}
 
@@ -195,6 +262,10 @@ internal class BoneBoundEdit
 		if(mChr != null)
 		{
 			mChr.BuildDebugBoundDrawData(mCPrims);
+		}
+		else
+		{
+			mStat	=mesh as StaticMesh;
 		}
 	}
 
@@ -308,22 +379,29 @@ internal class BoneBoundEdit
 
 	void IncDecRoughRadius(float amount)
 	{
-		Skin			?sk		=mChr?.GetSkin();
-		BoundingBox		?box	=null;
-		BoundingSphere	?sph	=null;
-
-		float	scaleFactor	=sk.GetScaleFactor();
-
-		mChr?.AdjustBoundRadius(amount * scaleFactor, mAForm.GetBoundChoice());
-
-		mChr?.GetRoughBounds(out box, out sph);
-
-		if(box == null || sph == null)
+		if(mChr != null)
 		{
-			return;
+			Skin			?sk		=mChr?.GetSkin();
+			BoundingBox		?box	=null;
+			BoundingSphere	?sph	=null;
+
+			float	scaleFactor	=sk.GetScaleFactor();
+
+			mChr?.AdjustBoundRadius(amount * scaleFactor, mAForm.GetBoundChoice());
+
+			mChr?.GetRoughBounds(out box, out sph);
+
+			if(box == null || sph == null)
+			{
+				return;
+			}
+			mCPrims.AddBox(RoughIndex, box.Value);
+			mCPrims.AddSphere(RoughIndex, sph.Value);
 		}
-		mCPrims.AddBox(RoughIndex, box.Value);
-		mCPrims.AddSphere(RoughIndex, sph.Value);
+		else if(mStat != null)
+		{
+			
+		}
 	}
 
 

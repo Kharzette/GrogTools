@@ -2872,6 +2872,7 @@ public partial class AnimForm : Form
 		}
 
 		mStatMesh.SaveToFile(mSFD.FileName + "Instance");
+		mStatMesh.SaveParts(FileUtil.StripFileName(mSFD.FileName));
 	}
 
 
