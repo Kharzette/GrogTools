@@ -8,7 +8,8 @@ Use https://github.com/SAM-tak/BlenderGameRig for rigging.  Default collada expo
 In object mode:  add->armature->gamerig->unity mechanim->human meta rig
 Zero out the transform in the transform panel or whatever.
 
-Delete extra finger bones, but don't delete the heel.
+Delete extra finger bones, but don't delete the heel.  Any fingers you keep must have at
+least 2 bones!
 
 Adjust the sizes of the bones to fit your mesh in edit mode.  This is best done by
 using the move tool with the spherical joints.  Pulling those adjusts the overall bone.
@@ -26,10 +27,13 @@ side.
 
 When it looks about right, go back to object mode:
 
-Select the metarig, then the mesh, then Object->Parent->Armature Deform->With Auto Weights.
-This used to work really well but lately you get gigantic influence regions.  I recently had
-to use envelope mode and manually shrink every bone and region down greatly.  Even doing
-that the results were not good.  I'm hoping they fix this eventually.
+Select the mesh, then the metarig.  Do this with clicks in the viewport as the scene collection
+causes it to bug out.  Then Object->Parent->Armature Deform->With Auto Weights.  Auto weights
+work pretty well with 4.1, but it is good to check influences:
+
+To do this go into edit mode on the mesh, and go to data (the green triangle).  This will list
+vertex groups.  You can click one and hit select below and see which bones are tied to which
+verts.  This is handy for removing like left thigh bone influencing the right knee etc...
 
 When the weights look right do: Object Data Properties panel->GameRig->Generate New Rig
 
@@ -38,7 +42,8 @@ think I've gotten rid of that now.
 
 Select the generated rig and do Object->Apply->Rotation just in case.
 
-Unparent the mesh from the metarig and parent it to the generated rig.
+Unparent the mesh from the metarig and parent it to the generated rig.  This time, select
+the mesh first, then the generated rig.  Why?  Who knows!?
 
 Make sure a material is assigned, even if you don't use it.
 

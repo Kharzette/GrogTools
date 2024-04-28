@@ -12,7 +12,7 @@
 			"preLaunchTask": "build CC",
 			"program": "${workspaceFolder}/ColladaConvert/bin/Debug/net6.0-windows/ColladaConvert.exe",
 			"args": [],
-			"cwd": "D:/Games/CurrentGame",
+			"cwd": "${workspaceFolder}/../../../Games/CurrentGame",
 			"console": "internalConsole",
 			"justMyCode": false,
 			"requireExactSource": false,	//I really shouldn't need this but debugger is VERY confused
@@ -25,7 +25,7 @@
 			"preLaunchTask": "build release",
 			"program": "${workspaceFolder}/ColladaConvert/bin/Release/net6.0-windows/ColladaConvert.exe",
 			"args": [],
-			"cwd": "D:/Games/CurrentGame",
+			"cwd": "${workspaceFolder}/../../../Games/CurrentGame",
 			"console": "internalConsole",
 			"stopAtEntry": false
 		},
@@ -36,7 +36,7 @@
 			"preLaunchTask": "build",
 			"program": "${workspaceFolder}/BSPBuilder/bin/Debug/net6.0-windows/BSPBuilder.exe",
 			"args": [],
-			"cwd": "D:/Games/CurrentGame",
+			"cwd": "${workspaceFolder}/../../../Games/CurrentGame",
 			"console": "internalConsole",
 			"stopAtEntry": false
 		},
@@ -47,7 +47,7 @@
 			"preLaunchTask": "build release",
 			"program": "${workspaceFolder}/BSPBuilder/bin/Release/netcoreapp3.1/BSPBuilder.exe",
 			"args": [],
-			"cwd": "D:/Games/CurrentGame",
+			"cwd": "${workspaceFolder}/../../../Games/CurrentGame",
 			"console": "internalConsole",
 			"stopAtEntry": false
 		},
@@ -58,7 +58,7 @@
 			"preLaunchTask": "build",
 			"program": "${workspaceFolder}/LightExplore/bin/Debug/netcoreapp3.1/LightExplore.exe",
 			"args": [],
-			"cwd": "D:/Games/CurrentGame",
+			"cwd": "${workspaceFolder}/../../../Games/CurrentGame",
 			"console": "internalConsole",
 			"stopAtEntry": false
 		},
@@ -69,7 +69,7 @@
 			"preLaunchTask": "build release",
 			"program": "${workspaceFolder}/LightExplore/bin/Release/netcoreapp3.1/LightExplore.exe",
 			"args": [],
-			"cwd": "D:/Games/CurrentGame",
+			"cwd": "${workspaceFolder}/../../../Games/CurrentGame",
 			"console": "internalConsole",
 			"stopAtEntry": false
 		},
@@ -80,7 +80,7 @@
 			"preLaunchTask": "build",
 			"program": "${workspaceFolder}/ParticleEdit/bin/Debug/netcoreapp3.1/ParticleEdit.exe",
 			"args": [],
-			"cwd": "D:/Games/CurrentGame",
+			"cwd": "${workspaceFolder}/../../../Games/CurrentGame",
 			"console": "internalConsole",
 			"stopAtEntry": false
 		},
@@ -91,7 +91,7 @@
 			"preLaunchTask": "build release",
 			"program": "${workspaceFolder}/ParticleEdit/bin/Release/netcoreapp3.1/ParticleEdit.exe",
 			"args": [],
-			"cwd": "D:/Games/CurrentGame",
+			"cwd": "${workspaceFolder}/../../../Games/CurrentGame",
 			"console": "internalConsole",
 			"stopAtEntry": false
 		},
@@ -102,7 +102,7 @@
 			"preLaunchTask": "build",
 			"program": "${workspaceFolder}/QEntityMaker/bin/Debug/net6.0-windows/QEntityMaker.exe",
 			"args": [],
-			"cwd": "D:/Games/CurrentGame",
+			"cwd": "${workspaceFolder}/../../../Games/CurrentGame",
 			"console": "internalConsole",
 			"stopAtEntry": false
 		},
@@ -124,7 +124,7 @@
 			"preLaunchTask": "build",
 			"program": "${workspaceFolder}/QEntityMaker/bin/Debug/netcoreapp3.1/QEntityMaker.exe",
 			"args": [],
-			"cwd": "D:/Games/CurrentGame",
+			"cwd": "${workspaceFolder}/../../../Games/CurrentGame",
 			"console": "internalConsole",
 			"stopAtEntry": false
 		},
@@ -135,7 +135,7 @@
 			"preLaunchTask": "build release",
 			"program": "${workspaceFolder}/QEntityMaker/bin/Release/netcoreapp3.1/QEntityMaker.exe",
 			"args": [],
-			"cwd": "D:/Games/CurrentGame",
+			"cwd": "${workspaceFolder}/../../../Games/CurrentGame",
 			"console": "internalConsole",
 			"stopAtEntry": false
 		},
@@ -146,7 +146,7 @@
 			"preLaunchTask": "build ET",
 			"program": "${workspaceFolder}/EarlyTest/bin/Debug/net6.0-windows/EarlyTest.exe",
 			"args": [],
-			"cwd": "D:/Games/CurrentGame",
+			"cwd": "${workspaceFolder}/../../../Games/CurrentGame",
 			"console": "internalConsole",
 			"stopAtEntry": false
 		},

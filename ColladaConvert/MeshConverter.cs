@@ -750,10 +750,7 @@ internal class MeshConverter
 			}
 			if(bNormals)
 			{
-				//Ludum dare hack
-				Vector4	norm	=mBaseVerts[i].Normal0.ToVector4();				
-
-				VertexTypes.SetArrayField(verts, i, "Normal", norm.XYZ());
+				VertexTypes.SetArrayField(verts, i, "Normal", mBaseVerts[i].Normal0);
 			}
 			if(bBoneIndices)
 			{
@@ -764,13 +761,7 @@ internal class MeshConverter
 				VertexTypes.SetArrayField(verts, i, "BoneWeights", mBaseVerts[i].BoneWeights);
 			}
 
-			//temp hack for blender bug
-			if(numTex > 0)
-			{
-				VertexTypes.SetArrayField(verts, i, "TexCoord0", mBaseVerts[i].TexCoord0);
-			}
 
-/*
 			if(bTexCoord0)
 			{
 				VertexTypes.SetArrayField(verts, i, "TexCoord0",
@@ -790,7 +781,7 @@ internal class MeshConverter
 			{
 				VertexTypes.SetArrayField(verts, i, "TexCoord3",
 					new Half2(mBaseVerts[i].TexCoord3.X, mBaseVerts[i].TexCoord3.Y));
-			}*/
+			}
 			if(bColor0)
 			{
 				VertexTypes.SetArrayField(verts, i, "Color0", new Color(mBaseVerts[i].Color0));
