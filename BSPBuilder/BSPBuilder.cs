@@ -91,30 +91,30 @@ internal class BSPBuilder
 		mZoneForm.eZoneGBSP				+=OnZoneGBSP;
 		mZoneForm.eLoadDebug			+=OnLoadDebug;
 		mZoneForm.eDumpTextures			+=OnDumpTextures;
-		mBSPForm.eBuild					+=OnBuild;
+//		mBSPForm.eBuild					+=OnBuild;
 		mBSPForm.eLight					+=OnLight;
-		mBSPForm.eOpenMap				+=OnOpenMap;
-		mBSPForm.eStaticToMap			+=OnOpenStatic;
-		mBSPForm.eMapToStatic			+=OnMapToStatic;
-		mBSPForm.eSave					+=OnSaveGBSP;
-		mBSPForm.eFullBuild				+=OnFullBuild;
-		mBSPForm.eUpdateEntities		+=OnUpdateEntities;
+//		mBSPForm.eOpenMap				+=OnOpenMap;
+//		mBSPForm.eStaticToMap			+=OnOpenStatic;
+//		mBSPForm.eMapToStatic			+=OnMapToStatic;
+//		mBSPForm.eSave					+=OnSaveGBSP;
+//		mBSPForm.eFullBuild				+=OnFullBuild;
+//		mBSPForm.eUpdateEntities		+=OnUpdateEntities;
 		mVisForm.eResumeVis				+=OnResumeVis;
 		mVisForm.eStopVis				+=OnStopVis;
 		mVisForm.eVis					+=OnVis;
 
 		//core events
-		CoreEvents.eBuildDone		+=OnBuildDone;
+//		CoreEvents.eBuildDone		+=OnBuildDone;
 		CoreEvents.eLightDone		+=OnLightDone;
-		CoreEvents.eGBSPSaveDone	+=OnGBSPSaveDone;
+//		CoreEvents.eGBSPSaveDone	+=OnGBSPSaveDone;
 		CoreEvents.eVisDone			+=OnVisDone;
 		CoreEvents.ePrint			+=OnPrint;
 
 		//stats
-		CoreEvents.eNumPortalsChanged	+=OnNumPortalsChanged;
-		CoreEvents.eNumClustersChanged	+=OnNumClustersChanged;
-		CoreEvents.eNumPlanesChanged	+=OnNumPlanesChanged;
-		CoreEvents.eNumVertsChanged		+=OnNumVertsChanged;
+//		CoreEvents.eNumPortalsChanged	+=OnNumPortalsChanged;
+//		CoreEvents.eNumClustersChanged	+=OnNumClustersChanged;
+//		CoreEvents.eNumPlanesChanged	+=OnNumPlanesChanged;
+//		CoreEvents.eNumVertsChanged		+=OnNumVertsChanged;
 
 		ProgressWatcher.eProgressUpdated	+=OnProgress;
 	}
@@ -182,13 +182,14 @@ internal class BSPBuilder
 			return;
 		}
 
-		if(mZoneDraw == null || mVisMap == null)
+		if(mZoneDraw == null)// || mVisMap == null)
 		{
 			mDebugDraw.Draw(mGD);
 			return;
 		}
 
-		mZoneDraw.Draw(gd, mVisMap.IsMaterialVisibleFromPos, GetModelMatrix);
+//		mZoneDraw.Draw(gd, mVisMap.IsMaterialVisibleFromPos, GetModelMatrix);
+		mZoneDraw.Draw(gd, null, null);
 	}
 
 
@@ -321,15 +322,15 @@ internal class BSPBuilder
 		SharedForms.FormExtensions.Invoke(mZoneForm, setText);
 		mZoneForm.SetZoneSaveEnabled(false);
 		mZoneForm.EnableFileIO(false);
-		mBSPForm.EnableFileIO(false);
-		mVisForm.EnableFileIO(false);
+//		mBSPForm.EnableFileIO(false);
+//		mVisForm.EnableFileIO(false);
 
 		mVisMap	=new VisMap();
 		mVisMap.MaterialVisGBSPFile(fileName, mGD);
 
 		mZoneForm.EnableFileIO(true);
-		mBSPForm.EnableFileIO(true);
-		mVisForm.EnableFileIO(true);
+//		mBSPForm.EnableFileIO(true);
+//		mVisForm.EnableFileIO(true);
 
 		mVisMap	=null;
 	}
@@ -360,66 +361,69 @@ internal class BSPBuilder
 			Action<System.Windows.Forms.Form>	setText	=frm => frm.Text = fileName;
 			SharedForms.FormExtensions.Invoke(mZoneForm, setText);
 			mZoneForm.EnableFileIO(false);
-			mBSPForm.EnableFileIO(false);
-			mVisForm.EnableFileIO(false);
-			mMap	=new Map();
+//			mBSPForm.EnableFileIO(false);
+//			mVisForm.EnableFileIO(false);
 
-			GFXHeader	hdr	=mMap.LoadGBSPFile(fileName);
+			QBSPFile	qfile	=new QBSPFile(fileName);
 
-			if(hdr == null)
-			{
-				CoreEvents.Print("Load failed\n");
-			}
-			else
-			{
-				mVisMap	=new VisMap();
-				mVisMap.SetMap(mMap);
-				mVisMap.LoadVisData(fileName);
+			List<Vector3>	verts	=new List<Vector3>();
+			List<Vector3>	norms	=new List<Vector3>();
+			List<Color>		cols	=new List<Color>();
+			List<UInt16>	inds	=new List<ushort>();
 
-				mMatLib.NukeAllMaterials();
+			qfile.GetDrawData(verts, norms, cols, inds);
 
-				MapGrinder	mg	=mMap.MakeMaterials(mGD, mSKeeper,
-					mMatLib, mZoneForm.GetLightAtlasSize(), fileName);
+//			mDebugDraw.MakeDrawStuff(mGD.GD, verts, norms, cols, inds);
 
-				mMap.MakeLMData(mg);
-				mMap.MakeLMAData(mg);
-				mMap.MakeVLitData(mg);
-				mMap.MakeLMAnimData(mg);
-				mMap.MakeLMAAnimData(mg);
-				mMap.MakeAlphaData(mg);
-				mMap.MakeFullBrightData(mg);
-				mMap.MakeSkyData(mg);
+			mMatLib.NukeAllMaterials();
 
-				int		typeIndex;
-				Array	verts;
-				UInt16	[]inds;
+			MapGrinder	mg	=new MapGrinder(mGD, mSKeeper, mMatLib,
+				qfile.mTexInfos, qfile.mVerts, qfile.mEdges, qfile.mSurfEdges,
+				qfile.mFaces, qfile.mPlanes, qfile.mModels, qfile.mLightData,
+				mZoneForm.GetLightAtlasSize());
 
-				//feed data into meshlib
-				mg.GetLMGeometry(out typeIndex, out verts, out inds);
-				mZoneDraw.SetLMData(mGD.GD, typeIndex, verts, inds, mg.GetLMDrawCalls());
+			mg.BuildLMData();
 
-				mg.GetLMAGeometry(out typeIndex, out verts, out inds);
-				mZoneDraw.SetLMAData(mGD.GD, typeIndex, verts, inds, mg.GetLMADrawCalls());
+/*
+			mMap.MakeLMData(mg);
+			mMap.MakeLMAData(mg);
+			mMap.MakeVLitData(mg);
+			mMap.MakeLMAnimData(mg);
+			mMap.MakeLMAAnimData(mg);
+			mMap.MakeAlphaData(mg);
+			mMap.MakeFullBrightData(mg);
+			mMap.MakeSkyData(mg);
+*/
+			int		typeIndex;
+			Array	vertArray;
+			UInt16	[]indArray;
 
-				mg.GetVLitGeometry(out typeIndex, out verts, out inds);
-				mZoneDraw.SetVLitData(mGD.GD, typeIndex, verts, inds, mg.GetVLitDrawCalls());
+			//feed data into meshlib
+			mg.GetLMGeometry(out typeIndex, out vertArray, out indArray);
+			mZoneDraw.SetLMData(mGD.GD, typeIndex, vertArray, indArray, mg.GetLMDrawCalls());
+/*
+			mg.GetLMAGeometry(out typeIndex, out verts, out inds);
+			mZoneDraw.SetLMAData(mGD.GD, typeIndex, verts, inds, mg.GetLMADrawCalls());
 
-				mg.GetLMAnimGeometry(out typeIndex, out verts, out inds);
-				mZoneDraw.SetLMAnimData(mGD.GD, typeIndex, verts, inds, mg.GetLMAnimDrawCalls());
+			mg.GetVLitGeometry(out typeIndex, out verts, out inds);
+			mZoneDraw.SetVLitData(mGD.GD, typeIndex, verts, inds, mg.GetVLitDrawCalls());
 
-				mg.GetLMAAnimGeometry(out typeIndex, out verts, out inds);
-				mZoneDraw.SetLMAAnimData(mGD.GD, typeIndex, verts, inds, mg.GetLMAAnimDrawCalls());
+			mg.GetLMAnimGeometry(out typeIndex, out verts, out inds);
+			mZoneDraw.SetLMAnimData(mGD.GD, typeIndex, verts, inds, mg.GetLMAnimDrawCalls());
 
-				mg.GetAlphaGeometry(out typeIndex, out verts, out inds);
-				mZoneDraw.SetAlphaData(mGD.GD, typeIndex, verts, inds, mg.GetVLitAlphaDrawCalls());
+			mg.GetLMAAnimGeometry(out typeIndex, out verts, out inds);
+			mZoneDraw.SetLMAAnimData(mGD.GD, typeIndex, verts, inds, mg.GetLMAAnimDrawCalls());
 
-				mg.GetFullBrightGeometry(out typeIndex, out verts, out inds);
-				mZoneDraw.SetFullBrightData(mGD.GD, typeIndex, verts, inds, mg.GetFullBrightDrawCalls());
+			mg.GetAlphaGeometry(out typeIndex, out verts, out inds);
+			mZoneDraw.SetAlphaData(mGD.GD, typeIndex, verts, inds, mg.GetVLitAlphaDrawCalls());
 
-				mg.GetSkyGeometry(out typeIndex, out verts, out inds);
-				mZoneDraw.SetSkyData(mGD.GD, typeIndex, verts, inds, mg.GetSkyDrawCalls());
+			mg.GetFullBrightGeometry(out typeIndex, out verts, out inds);
+			mZoneDraw.SetFullBrightData(mGD.GD, typeIndex, verts, inds, mg.GetFullBrightDrawCalls());
 
-				mZoneDraw.SetLMAtlas(mg.GetLMAtlas());
+			mg.GetSkyGeometry(out typeIndex, out verts, out inds);
+			mZoneDraw.SetSkyData(mGD.GD, typeIndex, verts, inds, mg.GetSkyDrawCalls());
+*/
+			mZoneDraw.SetLMAtlas(mg.GetLMAtlas());
 
 
 //				mZoneDraw.BuildLM(mGD, mSKeeper, mZoneForm.GetLightAtlasSize(), mMap.BuildLMRenderData, mMap.GetPlanes(), bPerPlaneAlpha);
@@ -429,21 +433,21 @@ internal class BSPBuilder
 //				mZoneDraw.BuildMirror(mGD, mSKeeper, mMap.BuildMirrorRenderData, mMap.GetPlanes());
 //				mZoneDraw.BuildSky(mGD, mSKeeper, mMap.BuildSkyRenderData, mMap.GetPlanes());
 
-				mZoneDraw.FinishAtlas(mGD, mSKeeper);
+			mZoneDraw.FinishAtlas(mGD, mSKeeper);
 
-				mModelMats	=mMap.GetModelTransforms();
+//			mModelMats	=mMap.GetModelTransforms();
 
-				mMatForm.SetMesh(mZoneDraw);
+			mMatForm.SetMesh(mZoneDraw);
 
-				mMatForm.RefreshMaterials();
+			mMatForm.RefreshMaterials();
 
-				mVisMap.SetMaterialVisBytes(mMatLib.GetMaterialNames().Count);
+//			mVisMap.SetMaterialVisBytes(mMatLib.GetMaterialNames().Count);
 
 //					mMatLib.SetLightMapsToAtlas();
-			}
+
 			mZoneForm.EnableFileIO(true);
-			mBSPForm.EnableFileIO(true);
-			mVisForm.EnableFileIO(true);
+//			mBSPForm.EnableFileIO(true);
+//			mVisForm.EnableFileIO(true);
 			mZoneForm.SetZoneSaveEnabled(true);
 
 			mOutForm.Print("Zoning complete.\n");
@@ -503,7 +507,7 @@ internal class BSPBuilder
 		}
 	}
 
-	void OnBuild(object sender, EventArgs ea)
+/*	void OnBuild(object sender, EventArgs ea)
 	{
 		mbWorking	=true;
 		mZoneForm.EnableFileIO(false);
@@ -511,7 +515,7 @@ internal class BSPBuilder
 		mVisForm.EnableFileIO(false);
 		mMap.BuildTree(mBSPForm.BSPParameters);
 	}
-
+*/
 	void OnLight(object sender, EventArgs ea)
 	{
 		string	fileName	=sender as string;
@@ -534,7 +538,7 @@ internal class BSPBuilder
 		mMap.LightGBSPFile(fileName, mBSPForm.LightParameters,
 			mBSPForm.BSPParameters);
 	}
-
+/*
 	void OnOpenMap(object sender, EventArgs ea)
 	{
 		string	fileName	=sender as string;
@@ -779,7 +783,7 @@ internal class BSPBuilder
 		OnZoneGBSP(mFullBuildFileName + ".gbsp", null);
 		OnSaveZone(mFullBuildFileName + ".Zone", null);
 	}
-
+*/
 	void OnResumeVis(object sender, EventArgs ea)
 	{
 		string	fileName	=sender as string;
@@ -828,7 +832,7 @@ internal class BSPBuilder
 
 		mVisMap.VisGBSPFile(fileName, vp, mBSPForm.BSPParameters);
 	}
-
+/*
 	void OnBuildDone(object sender, EventArgs ea)
 	{
 		bool	bSuccess	=(bool)sender;
@@ -856,7 +860,7 @@ internal class BSPBuilder
 			mbFullBuilding	=false;
 		}
 	}
-
+*/
 	void OnLightDone(object sender, EventArgs ea)
 	{
 		bool	bSuccess	=(bool)sender;
@@ -884,7 +888,7 @@ internal class BSPBuilder
 			mbFullBuilding	=false;
 		}
 	}
-
+/*
 	void OnGBSPSaveDone(object sender, EventArgs ea)
 	{
 		bool	bSuccess	=(bool)sender;
@@ -914,7 +918,7 @@ internal class BSPBuilder
 			mbFullBuilding	=false;
 		}
 	}
-
+*/
 	void OnVisDone(object sender, EventArgs ea)
 	{
 		bool	bSuccess	=(bool)sender;
@@ -938,7 +942,7 @@ internal class BSPBuilder
 			mbFullBuilding	=false;
 		}
 	}
-
+/*
 	void OnNumClustersChanged(object sender, EventArgs ea)
 	{
 		int	num	=(int)sender;
@@ -965,5 +969,5 @@ internal class BSPBuilder
 		int	num	=(int)sender;
 
 //			mBSPForm.NumberOfPlanes	="" + num;
-	}
+	}*/
 }

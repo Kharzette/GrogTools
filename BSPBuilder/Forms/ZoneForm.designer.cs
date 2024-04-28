@@ -31,11 +31,9 @@
 			this.components = new System.ComponentModel.Container();
 			this.GroupFileIO = new System.Windows.Forms.GroupBox();
 			this.LoadDebug = new System.Windows.Forms.Button();
-			this.SaveEmissives = new System.Windows.Forms.Button();
 			this.VisGBSP = new System.Windows.Forms.Button();
 			this.SaveZone = new System.Windows.Forms.Button();
-			this.GenerateMaterials = new System.Windows.Forms.Button();
-			this.LoadGBSP = new System.Windows.Forms.Button();
+			this.LoadQBSP = new System.Windows.Forms.Button();
 			this.label10 = new System.Windows.Forms.Label();
 			this.AtlasSize = new System.Windows.Forms.NumericUpDown();
 			this.SaveDebug = new System.Windows.Forms.CheckBox();
@@ -48,45 +46,36 @@
 			// GroupFileIO
 			// 
 			this.GroupFileIO.Controls.Add(this.LoadDebug);
-			this.GroupFileIO.Controls.Add(this.SaveEmissives);
 			this.GroupFileIO.Controls.Add(this.VisGBSP);
 			this.GroupFileIO.Controls.Add(this.SaveZone);
-			this.GroupFileIO.Controls.Add(this.GenerateMaterials);
-			this.GroupFileIO.Controls.Add(this.LoadGBSP);
-			this.GroupFileIO.Location = new System.Drawing.Point(12, 12);
+			this.GroupFileIO.Controls.Add(this.LoadQBSP);
+			this.GroupFileIO.Location = new System.Drawing.Point(14, 14);
+			this.GroupFileIO.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.GroupFileIO.Name = "GroupFileIO";
-			this.GroupFileIO.Size = new System.Drawing.Size(189, 109);
+			this.GroupFileIO.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
+			this.GroupFileIO.Size = new System.Drawing.Size(220, 95);
 			this.GroupFileIO.TabIndex = 26;
 			this.GroupFileIO.TabStop = false;
 			this.GroupFileIO.Text = "File IO";
 			// 
 			// LoadDebug
 			// 
-			this.LoadDebug.Location = new System.Drawing.Point(87, 77);
+			this.LoadDebug.Location = new System.Drawing.Point(103, 56);
+			this.LoadDebug.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.LoadDebug.Name = "LoadDebug";
-			this.LoadDebug.Size = new System.Drawing.Size(75, 23);
+			this.LoadDebug.Size = new System.Drawing.Size(88, 27);
 			this.LoadDebug.TabIndex = 27;
 			this.LoadDebug.Text = "Load Debug";
 			this.mTips.SetToolTip(this.LoadDebug, "Load debug files for drawing portals or other misc data");
 			this.LoadDebug.UseVisualStyleBackColor = true;
 			this.LoadDebug.Click += new System.EventHandler(this.OnLoadDebug);
 			// 
-			// SaveEmissives
-			// 
-			this.SaveEmissives.Location = new System.Drawing.Point(87, 19);
-			this.SaveEmissives.Name = "SaveEmissives";
-			this.SaveEmissives.Size = new System.Drawing.Size(96, 23);
-			this.SaveEmissives.TabIndex = 26;
-			this.SaveEmissives.Text = "Save Emissives";
-			this.mTips.SetToolTip(this.SaveEmissives, "Saves the emissives set up on the material form");
-			this.SaveEmissives.UseVisualStyleBackColor = true;
-			this.SaveEmissives.Click += new System.EventHandler(this.OnSaveEmissives);
-			// 
 			// VisGBSP
 			// 
-			this.VisGBSP.Location = new System.Drawing.Point(6, 77);
+			this.VisGBSP.Location = new System.Drawing.Point(8, 56);
+			this.VisGBSP.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.VisGBSP.Name = "VisGBSP";
-			this.VisGBSP.Size = new System.Drawing.Size(75, 23);
+			this.VisGBSP.Size = new System.Drawing.Size(88, 27);
 			this.VisGBSP.TabIndex = 25;
 			this.VisGBSP.Text = "Material Vis";
 			this.mTips.SetToolTip(this.VisGBSP, "Compute which materials are visible from any given cluster");
@@ -96,43 +85,35 @@
 			// SaveZone
 			// 
 			this.SaveZone.Enabled = false;
-			this.SaveZone.Location = new System.Drawing.Point(87, 48);
+			this.SaveZone.Location = new System.Drawing.Point(103, 22);
+			this.SaveZone.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.SaveZone.Name = "SaveZone";
-			this.SaveZone.Size = new System.Drawing.Size(75, 23);
+			this.SaveZone.Size = new System.Drawing.Size(88, 27);
 			this.SaveZone.TabIndex = 21;
 			this.SaveZone.Text = "Save Zone";
 			this.mTips.SetToolTip(this.SaveZone, "Save the zone, also creates a ZoneDraw file");
 			this.SaveZone.UseVisualStyleBackColor = true;
 			this.SaveZone.Click += new System.EventHandler(this.OnSaveZone);
 			// 
-			// GenerateMaterials
+			// LoadQBSP
 			// 
-			this.GenerateMaterials.Location = new System.Drawing.Point(6, 19);
-			this.GenerateMaterials.Name = "GenerateMaterials";
-			this.GenerateMaterials.Size = new System.Drawing.Size(75, 23);
-			this.GenerateMaterials.TabIndex = 24;
-			this.GenerateMaterials.Text = "Gen Mats";
-			this.mTips.SetToolTip(this.GenerateMaterials, "Generate materials, useful for making emissives for lighting");
-			this.GenerateMaterials.UseVisualStyleBackColor = true;
-			this.GenerateMaterials.Click += new System.EventHandler(this.OnGenerateMaterials);
-			// 
-			// LoadGBSP
-			// 
-			this.LoadGBSP.Location = new System.Drawing.Point(6, 48);
-			this.LoadGBSP.Name = "LoadGBSP";
-			this.LoadGBSP.Size = new System.Drawing.Size(75, 23);
-			this.LoadGBSP.TabIndex = 19;
-			this.LoadGBSP.Text = "Zone GBSP";
-			this.mTips.SetToolTip(this.LoadGBSP, "Grind a gbsp file into Zone and ZoneDraw information");
-			this.LoadGBSP.UseVisualStyleBackColor = true;
-			this.LoadGBSP.Click += new System.EventHandler(this.OnZone);
+			this.LoadQBSP.Location = new System.Drawing.Point(8, 22);
+			this.LoadQBSP.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+			this.LoadQBSP.Name = "LoadQBSP";
+			this.LoadQBSP.Size = new System.Drawing.Size(88, 27);
+			this.LoadQBSP.TabIndex = 19;
+			this.LoadQBSP.Text = "Zone QBSP";
+			this.mTips.SetToolTip(this.LoadQBSP, "Grind a qbsp file into Zone and ZoneDraw information");
+			this.LoadQBSP.UseVisualStyleBackColor = true;
+			this.LoadQBSP.Click += new System.EventHandler(this.OnZone);
 			// 
 			// label10
 			// 
 			this.label10.AutoSize = true;
-			this.label10.Location = new System.Drawing.Point(266, 14);
+			this.label10.Location = new System.Drawing.Point(310, 16);
+			this.label10.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label10.Name = "label10";
-			this.label10.Size = new System.Drawing.Size(99, 13);
+			this.label10.Size = new System.Drawing.Size(110, 15);
 			this.label10.TabIndex = 41;
 			this.label10.Text = "Lightmap Atlas Size";
 			// 
@@ -143,7 +124,8 @@
             0,
             0,
             0});
-			this.AtlasSize.Location = new System.Drawing.Point(207, 12);
+			this.AtlasSize.Location = new System.Drawing.Point(241, 14);
+			this.AtlasSize.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.AtlasSize.Maximum = new decimal(new int[] {
             8192,
             0,
@@ -155,7 +137,7 @@
             0,
             0});
 			this.AtlasSize.Name = "AtlasSize";
-			this.AtlasSize.Size = new System.Drawing.Size(53, 20);
+			this.AtlasSize.Size = new System.Drawing.Size(62, 23);
 			this.AtlasSize.TabIndex = 42;
 			this.mTips.SetToolTip(this.AtlasSize, "Size of the atlas that contains the lightmaps.  Smaller the better, but you may r" +
         "un out of space.");
@@ -170,9 +152,10 @@
 			this.SaveDebug.AutoSize = true;
 			this.SaveDebug.Checked = true;
 			this.SaveDebug.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.SaveDebug.Location = new System.Drawing.Point(207, 38);
+			this.SaveDebug.Location = new System.Drawing.Point(241, 44);
+			this.SaveDebug.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.SaveDebug.Name = "SaveDebug";
-			this.SaveDebug.Size = new System.Drawing.Size(107, 17);
+			this.SaveDebug.Size = new System.Drawing.Size(112, 19);
 			this.SaveDebug.TabIndex = 43;
 			this.SaveDebug.Text = "Save Debug Info";
 			this.mTips.SetToolTip(this.SaveDebug, "Save the Zone with leaf face and other data a final game has no need of");
@@ -180,9 +163,10 @@
 			// 
 			// DumpTextures
 			// 
-			this.DumpTextures.Location = new System.Drawing.Point(207, 61);
+			this.DumpTextures.Location = new System.Drawing.Point(241, 70);
+			this.DumpTextures.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.DumpTextures.Name = "DumpTextures";
-			this.DumpTextures.Size = new System.Drawing.Size(87, 34);
+			this.DumpTextures.Size = new System.Drawing.Size(102, 39);
 			this.DumpTextures.TabIndex = 44;
 			this.DumpTextures.Text = "Dump Textures Used";
 			this.DumpTextures.UseVisualStyleBackColor = true;
@@ -190,15 +174,16 @@
 			// 
 			// ZoneForm
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(389, 129);
+			this.ClientSize = new System.Drawing.Size(454, 120);
 			this.ControlBox = false;
 			this.Controls.Add(this.DumpTextures);
 			this.Controls.Add(this.SaveDebug);
 			this.Controls.Add(this.AtlasSize);
 			this.Controls.Add(this.label10);
 			this.Controls.Add(this.GroupFileIO);
+			this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			this.Name = "ZoneForm";
 			this.Text = "ZoneForm";
 			this.GroupFileIO.ResumeLayout(false);
@@ -212,11 +197,9 @@
 
 		private System.Windows.Forms.GroupBox GroupFileIO;
 		private System.Windows.Forms.Button LoadDebug;
-		private System.Windows.Forms.Button SaveEmissives;
 		private System.Windows.Forms.Button VisGBSP;
 		private System.Windows.Forms.Button SaveZone;
-		private System.Windows.Forms.Button GenerateMaterials;
-		private System.Windows.Forms.Button LoadGBSP;
+		private System.Windows.Forms.Button LoadQBSP;
 		private System.Windows.Forms.Label label10;
 		private System.Windows.Forms.NumericUpDown AtlasSize;
 		private System.Windows.Forms.CheckBox SaveDebug;

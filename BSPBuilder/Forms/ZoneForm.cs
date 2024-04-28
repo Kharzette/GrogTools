@@ -45,8 +45,8 @@ public partial class ZoneForm : Form
 
 	void OnGenerateMaterials(object sender, EventArgs e)
 	{
-		mOFD.DefaultExt	="*.gbsp";
-		mOFD.Filter		="Genesis bsp files (*.gbsp)|*.gbsp|All files (*.*)|*.*";
+		mOFD.DefaultExt	="*.bsp";
+		mOFD.Filter		="Quake 2 bsp files (*.bsp)|*.bsp|All files (*.*)|*.*";
 		DialogResult	dr	=mOFD.ShowDialog();
 
 		if(dr == DialogResult.Cancel)
@@ -77,8 +77,8 @@ public partial class ZoneForm : Form
 
 	void OnZone(object sender, EventArgs e)
 	{
-		mOFD.DefaultExt	="*.gbsp";
-		mOFD.Filter		="Genesis bsp files (*.gbsp)|*.gbsp|All files (*.*)|*.*";
+		mOFD.DefaultExt	="*.bsp";
+		mOFD.Filter		="Quake 2 bsp files (*.bsp)|*.bsp|All files (*.*)|*.*";
 		DialogResult	dr	=mOFD.ShowDialog();
 
 		if(dr == DialogResult.Cancel)
