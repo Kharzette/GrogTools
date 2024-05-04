@@ -76,7 +76,7 @@ public class SubAnimation
 			//me gives the bones sids, but then the address element
 			//says Name (note the case), so I guess you need to try
 			//to match via sid first and if that fails, use name?
-			node	?n	=AnimForm.LookUpNode(lvs, sid);
+			node	?n	=ColladaData.LookUpNode(lvs, sid);
 
 			if(n == null)
 			{
@@ -180,7 +180,7 @@ public class SubAnimation
 			int		sidx	=chan.target.IndexOf('/');
 			string	sid		=chan.target.Substring(0, sidx);
 
-			node	?n	=AnimForm.LookUpNode(scenes, sid);
+			node	?n	=ColladaData.LookUpNode(scenes, sid);
 
 			if(n == null)
 			{
@@ -240,10 +240,10 @@ public class SubAnimation
 				nodeElement	=nodeElement.Substring(0, dotIdx);
 			}
 
-			node	?targeted	=AnimForm.LookUpNode(scenes, nodeID);
+			node	?targeted	=ColladaData.LookUpNode(scenes, nodeID);
 			Debug.Assert(targeted != null);
 
-			int	idx	=AnimForm.GetNodeItemIndex(targeted, nodeElement);
+			int	idx	=ColladaData.GetNodeItemIndex(targeted, nodeElement);
 			if(idx == -1)
 			{
 				continue;	//bad anim stuffs?
@@ -257,7 +257,7 @@ public class SubAnimation
 			{
 				//This is the usual path for characters now using the default
 				//blender exporter.  Seems to be working well.
-				List<Matrix4x4>	mats	=AnimForm.GetMatrixListFromFloatList(outValues);
+				List<Matrix4x4>	mats	=ColladaData.GetMatrixListFromFloatList(outValues);
 				for(int v=0;v < mats.Count;v++)
 				{
 					bool	bWorked	=Matrix4x4.Decompose(mats[v],

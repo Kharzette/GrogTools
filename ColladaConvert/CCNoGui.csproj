@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Forms/*"/>
+    <Compile Remove="Properties/*"/>
+    <Compile Remove="Program.cs"/>
+    <Compile Remove="FormStuff.cs"/>
+    <Compile Remove="BoneBoundEdit.cs"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GrogLibs\UtilityLib\UtilityLib6.csproj" />
+    <ProjectReference Include="..\GrogLibs\MaterialLib\MaterialLib6.csproj" />
+    <ProjectReference Include="..\GrogLibs\MeshLib\MeshLib6.csproj" />
+  </ItemGroup>
+
+</Project>
