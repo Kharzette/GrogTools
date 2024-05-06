@@ -1,3 +1,4 @@
 {
-	"dotnet.defaultSolution": "GrogTools.sln"
+	"dotnet.defaultSolution": "GrogTools.sln",
+	"C_Cpp.default.compilerPath": "/usr/bin/gcc"
 }

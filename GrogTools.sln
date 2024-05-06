@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QEntityMaker", "QEntityMake
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeshDumpTypes", "MeshDumpTypes\MeshDumpTypes.csproj", "{6FAC5D89-4DA8-4246-A9D9-CB2C0D85AE70}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CCNoGui", "CCNoGui\CCNoGui.csproj", "{A1B811AE-35D2-4B38-94E7-611189E9D0AF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -104,6 +106,10 @@ Global
 		{6FAC5D89-4DA8-4246-A9D9-CB2C0D85AE70}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6FAC5D89-4DA8-4246-A9D9-CB2C0D85AE70}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6FAC5D89-4DA8-4246-A9D9-CB2C0D85AE70}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1B811AE-35D2-4B38-94E7-611189E9D0AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1B811AE-35D2-4B38-94E7-611189E9D0AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1B811AE-35D2-4B38-94E7-611189E9D0AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1B811AE-35D2-4B38-94E7-611189E9D0AF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{BE4558B0-AE7A-41EB-941D-AB1FEF019335} = {FB7A4C23-D3CA-4A17-9DEB-FF8BD7812BDF}
