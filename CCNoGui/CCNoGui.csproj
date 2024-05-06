@@ -7,8 +7,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <!--my own library references-->
   <ItemGroup>
-    <ProjectReference Include="..\GrogLibs\MeshLib\MeshLib.csproj" />
+    <ProjectReference Include="..\GrogLibs\MeshBase\MeshBase.csproj" />
+    <ProjectReference Include="..\GrogLibs\UtilityBase\UtilityBase.csproj" />
   </ItemGroup>
 
 </Project>
