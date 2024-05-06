@@ -10,6 +10,273 @@ namespace ColladaConvert;
 
 internal class ColladaData
 {
+	static void BuildFinalVerts(COLLADA colladaFile, List<MeshConverter> chunks, bool bStatic)
+	{
+		IEnumerable<library_geometries>		geoms	=colladaFile.Items.OfType<library_geometries>();
+		IEnumerable<library_controllers>	conts	=colladaFile.Items.OfType<library_controllers>();
+
+		PrintToOutput("geoms.Count() is: " + geoms.Count() + " in BuildFinalVerts()\n");
+
+		foreach(object geomItem in geoms.First().geometry)
+		{
+			geometry	?geom	=geomItem as geometry;
+			if(geom == null)
+			{
+				PrintToOutput("Null geometry in BuildFinalVerts()!\n");
+				continue;
+			}
+
+			//blast any chunks with no verts (happens with max collada)
+			List<MeshConverter>	toNuke	=new List<MeshConverter>();
+
+			foreach(MeshConverter cnk in chunks)
+			{
+				string	name	=cnk.GetName();
+				if(cnk.mGeometryID == geom.id)
+				{
+					int	normStride, tex0Stride, tex1Stride, tex2Stride, tex3Stride;
+					int	col0Stride, col1Stride, col2Stride, col3Stride;
+
+					List<int>	?posIdxs	=GetGeometryIndexesBySemantic(geom, "VERTEX", 0, name);
+					float_array	?norms		=GetGeometryFloatArrayBySemantic(geom, "NORMAL", 0, name, out normStride);
+					List<int>	?normIdxs	=GetGeometryIndexesBySemantic(geom, "NORMAL", 0, name);
+					float_array	?texCoords0	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 0, name, out tex0Stride);
+					float_array	?texCoords1	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 1, name, out tex1Stride);
+					float_array	?texCoords2	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 2, name, out tex2Stride);
+					float_array	?texCoords3	=GetGeometryFloatArrayBySemantic(geom, "TEXCOORD", 3, name, out tex3Stride);
+					List<int>	?texIdxs0	=GetGeometryIndexesBySemantic(geom, "TEXCOORD", 0, name);
+					List<int>	?texIdxs1	=GetGeometryIndexesBySemantic(geom, "TEXCOORD", 1, name);
+					List<int>	?texIdxs2	=GetGeometryIndexesBySemantic(geom, "TEXCOORD", 2, name);
+					List<int>	?texIdxs3	=GetGeometryIndexesBySemantic(geom, "TEXCOORD", 3, name);
+					float_array	?colors0	=GetGeometryFloatArrayBySemantic(geom, "COLOR", 0, name, out col0Stride);
+					float_array	?colors1	=GetGeometryFloatArrayBySemantic(geom, "COLOR", 1, name, out col1Stride);
+					float_array	?colors2	=GetGeometryFloatArrayBySemantic(geom, "COLOR", 2, name, out col2Stride);
+					float_array	?colors3	=GetGeometryFloatArrayBySemantic(geom, "COLOR", 3, name, out col3Stride);
+					List<int>	?colIdxs0	=GetGeometryIndexesBySemantic(geom, "COLOR", 0, name);
+					List<int>	?colIdxs1	=GetGeometryIndexesBySemantic(geom, "COLOR", 1, name);
+					List<int>	?colIdxs2	=GetGeometryIndexesBySemantic(geom, "COLOR", 2, name);
+					List<int>	?colIdxs3	=GetGeometryIndexesBySemantic(geom, "COLOR", 3, name);
+					List<int>	?vertCounts	=GetGeometryVertCount(geom, name, ePrint);
+
+					if(vertCounts == null || vertCounts.Count == 0)
+					{
+						PrintToOutput("Empty geometry chunk in BuildFinalVerts()!\n");
+						toNuke.Add(cnk);
+						continue;
+					}
+
+					cnk.AddNormTexByPoly(posIdxs, norms, normIdxs,
+						texCoords0, texIdxs0, texCoords1, texIdxs1,
+						texCoords2, texIdxs2, texCoords3, texIdxs3,
+						colors0, colIdxs0, colors1, colIdxs1,
+						colors2, colIdxs2, colors3, colIdxs3,
+						vertCounts, col0Stride, col1Stride, col2Stride, col3Stride, bStatic);
+
+					bool	bPos	=(posIdxs != null && posIdxs.Count > 0);
+					bool	bNorm	=(norms != null && norms.count > 0);
+					bool	bTex0	=(texCoords0 != null && texCoords0.count > 0);
+					bool	bTex1	=(texCoords1 != null && texCoords1.count > 0);
+					bool	bTex2	=(texCoords2 != null && texCoords2.count > 0);
+					bool	bTex3	=(texCoords3 != null && texCoords3.count > 0);
+					bool	bCol0	=(colors0 != null && colors0.count > 0);
+					bool	bCol1	=(colors1 != null && colors1.count > 0);
+					bool	bCol2	=(colors2 != null && colors2.count > 0);
+					bool	bCol3	=(colors3 != null && colors3.count > 0);
+					bool	bBone	=false;
+
+					//see if any skins reference this geometry
+					if(conts.Count() > 0)
+					{
+						foreach(controller cont in conts.First().controller)
+						{
+							skin	?sk	=cont.Item as skin;
+							if(sk == null)
+							{
+								continue;
+							}
+							string	skinSource	=sk.source1.Substring(1);
+							if(skinSource == null || skinSource == "")
+							{
+								continue;
+							}
+							if(skinSource == geom.id)
+							{
+								bBone	=true;
+								break;
+							}
+						}
+					}
+
+					//todo obey stride on everything
+					cnk.BuildBuffers(gd, bPos, bNorm, bBone,
+						bBone, bTex0, bTex1, bTex2, bTex3,
+						bCol0, bCol1, bCol2, bCol3);
+				}
+			}
+
+			//blast empty chunks
+			foreach(MeshConverter nuke in toNuke)
+			{
+				chunks.Remove(nuke);
+			}
+			toNuke.Clear();
+		}
+	}
+
+	static COLLADA? DeSerializeCOLLADA(string path)
+	{
+		FileStream		fs	=new FileStream(path, FileMode.Open, FileAccess.Read);
+		XmlSerializer	xs	=new XmlSerializer(typeof(COLLADA));
+
+		COLLADA	?ret	=xs.Deserialize(fs) as COLLADA;
+
+		fs.Close();
+
+		return	ret;
+	}
+
+	static Matrix4x4 GetSceneNodeTransform(COLLADA colFile, MeshConverter chunk)
+	{
+		geometry	?g	=GetGeometryByID(colFile, chunk.mGeometryID);
+		if(g == null)
+		{
+			return	Matrix4x4.Identity;
+		}
+
+		var	geomNodes	=from lvs in colFile.Items.OfType<library_visual_scenes>().First().visual_scene
+							from n in lvs.node
+							where n.instance_geometry != null
+							select n;
+
+		foreach(node n in geomNodes)
+		{
+			foreach(instance_geometry ig in n.instance_geometry)
+			{
+				if(ig.url.Substring(1) == g.id)
+				{
+					if(!CNodeHasKeyData(n))
+					{
+						//no transform needed
+						return	Matrix4x4.Identity;
+					}
+
+					KeyFrame	kf	=GetKeyFromCNode(n);
+
+					Matrix4x4	mat	=Matrix4x4.CreateScale(kf.mScale) *
+						Matrix4x4.CreateFromQuaternion(kf.mRotation) *
+						Matrix4x4.CreateTranslation(kf.mPosition);
+
+					return	mat;
+				}
+			}
+		}
+
+		//might have a max pivot
+		geomNodes	=from lvs in colFile.Items.OfType<library_visual_scenes>().First().visual_scene
+							from n in lvs.node
+							where n.instance_geometry == null && n.node1 != null
+							select n;
+
+		foreach(node n in geomNodes)
+		{
+			var subNodes	=from nd in n.node1 where nd.instance_geometry != null select nd;
+
+			foreach(node sn in subNodes)
+			{
+				foreach(instance_geometry ig in sn.instance_geometry)
+				{
+					if(ig.url.Substring(1) == g.id)
+					{
+						if(!CNodeHasKeyData(sn) && !CNodeHasKeyData(n))
+						{
+							//no transform needed
+							return	Matrix4x4.Identity;
+						}
+
+						Matrix4x4	parentMat	=Matrix4x4.Identity;
+						Matrix4x4	mat			=Matrix4x4.Identity;
+
+						if(CNodeHasKeyData(n))
+						{
+							KeyFrame	kfParent	=GetKeyFromCNode(n);
+
+							parentMat	=Matrix4x4.CreateScale(kfParent.mScale) *
+								Matrix4x4.CreateFromQuaternion(kfParent.mRotation) *
+								Matrix4x4.CreateTranslation(kfParent.mPosition);
+						}
+
+						if(CNodeHasKeyData(sn))
+						{
+							KeyFrame	kf	=GetKeyFromCNode(sn);
+
+							mat	=Matrix4x4.CreateScale(kf.mScale) *
+								Matrix4x4.CreateFromQuaternion(kf.mRotation) *
+								Matrix4x4.CreateTranslation(kf.mPosition);
+						}
+						return	parentMat * mat;// * parentMat;
+					}
+				}
+			}
+		}
+
+		//none found, not necessarily bad
+		//skinned stuff doesn't have this
+		return	Matrix4x4.Identity;
+	}
+
+	static void LoadStatic(string path, out StaticMesh ?sm)
+	{
+		COLLADA	?colladaFile	=DeSerializeCOLLADA(path);
+
+		if(colladaFile == null)
+		{
+			Console.WriteLine("Null file in LoadStatic()\n");
+			sm	=null;
+			return;
+		}
+
+		//Blender's collada exporter always outputs Z up.
+		//If you select Z or X it simply rotates the model before export
+		if(colladaFile.asset.up_axis == UpAxisType.X_UP)
+		{
+			Console.WriteLine("Warning!  X up axis not supported.  Strange things may happen!\n");
+		}
+		else if(colladaFile.asset.up_axis == UpAxisType.Y_UP)
+		{
+			Console.WriteLine("Warning!  Y up axis not supported.  Strange things may happen!\n");
+		}
+		
+		//unit conversion
+		float	scaleFactor	=colladaFile.asset.unit.meter;
+
+		scaleFactor	*=MeshConverter.GetScaleFactor(GetScaleFactor());
+
+		Misc.SafeInvoke(eScaleFactorDecided, scaleFactor);
+
+		sm	=new StaticMesh();
+
+		List<MeshConverter>	chunks	=GetMeshChunks(colladaFile, false, GetScaleFactor());
+
+		BuildFinalVerts(mGD, colladaFile, chunks, true);
+		foreach(MeshConverter mc in chunks)
+		{
+			Mesh	?m	=mc.GetConvertedMesh();
+			if(m == null)
+			{
+				continue;
+			}
+			Matrix4x4	mat	=GetSceneNodeTransform(colladaFile, mc);
+
+			m.Name	=mc.GetGeomName();
+
+			sm.AddPart(m, mat, null);
+		}
+
+		//this needs to be identity so the game
+		//can mess with it without needing the axis info
+		sm.SetTransform(Matrix4x4.Identity);
+	}
+
 	static void	matrixToMatrix(ref matrix cMat, ref Matrix4x4 sdxMat)
 	{
 		sdxMat.M11	=cMat.Values[0];
