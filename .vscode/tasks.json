@@ -41,6 +41,18 @@
             "problemMatcher": "$msCompile"
 		},
 		{
+			"label": "build CCNoGui",
+			"command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/CCNoGui/CCNoGui.csproj",
+                "/property:GenerateFullPaths=true",
+				"/consoleloggerparameters:NoSummary",
+            ],
+            "problemMatcher": "$msCompile"
+		},
+		{
 			"label": "build ET",
 			"command": "dotnet",
             "type": "process",

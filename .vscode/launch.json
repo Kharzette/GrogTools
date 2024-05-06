@@ -30,6 +30,19 @@
 			"stopAtEntry": false
 		},
 		{
+			"name": "CCNoGui Debug",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "build CCNoGui",
+			"program": "${workspaceFolder}/CCNoGui/bin/Debug/net6.0/CCNoGui",
+			"args": [ "-meters", "-static Documents/Art/Obelisk.dae"],
+			"cwd": "${userHome}",
+			"console": "internalConsole",
+			"justMyCode": false,
+			"requireExactSource": false,	//I really shouldn't need this but debugger is VERY confused
+			"stopAtEntry": false
+		},
+		{
 			"name": "BB Debug",
 			"type": "coreclr",
 			"request": "launch",

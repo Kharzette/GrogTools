@@ -716,7 +716,7 @@ internal class MeshConverter
 
 	//take the munged data and stuff it into
 	//the vertex and index buffers
-	internal void BuildBuffers(ID3D11Device gd,
+	internal void BuildBuffers(
 		bool bPositions, bool bNormals, bool bBoneIndices,
 		bool bBoneWeights, bool bTexCoord0, bool bTexCoord1,
 		bool bTexCoord2, bool bTexCoord3, bool bColor0,
@@ -800,7 +800,7 @@ internal class MeshConverter
 			}
 		}
 
-		ID3D11Buffer	vb	=VertexTypes.BuildABuffer(gd, verts, vtype);
+//		ID3D11Buffer	vb	=VertexTypes.BuildABuffer(gd, verts, vtype);
 
 		int	vertSize	=VertexTypes.GetSizeForType(vtype);
 
@@ -808,7 +808,7 @@ internal class MeshConverter
 		mConverted.SetNumVerts(mNumBaseVerts);
 		mConverted.SetNumTriangles(mNumTriangles);
 		mConverted.SetTypeIndex(VertexTypes.GetIndex(vtype));
-		mConverted.SetVertexBuffer(vb);
+//		mConverted.SetVertexBuffer(vb);
 
 
 		ushort	[]idxs	=new ushort[mIndexList.Count];
@@ -818,9 +818,9 @@ internal class MeshConverter
 			idxs[i]	=mIndexList[i];
 		}
 
-		ID3D11Buffer	inds	=VertexTypes.BuildAnIndexBuffer(gd, idxs);
+//		ID3D11Buffer	inds	=VertexTypes.BuildAnIndexBuffer(gd, idxs);
 
-		mConverted.SetIndexBuffer(inds);
+//		mConverted.SetIndexBuffer(inds);
 
 		mConverted.SetEditorData(verts, idxs);
 	}
