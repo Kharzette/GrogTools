@@ -10,6 +10,142 @@ namespace ColladaConvert;
 
 internal class ColladaData
 {
+	internal static Character LoadCharacterDAE(string path, MeshConverter.ScaleFactor scaleDesired, AnimLib alib)
+	{
+		Character	ret	=null;
+
+		COLLADA	?colladaFile	=DeSerializeCOLLADA(path);
+
+		if(colladaFile == null)
+		{
+			Console.WriteLine("Null file in LoadCharacterDAE()\n");
+			return	ret;
+		}
+
+		//Blender's collada exporter always outputs Z up.
+		//If you select Y or X it simply rotates the model before export
+		if(colladaFile.asset.up_axis == UpAxisType.X_UP)
+		{
+			Console.WriteLine("Warning!  X up axis not supported.  Strange things may happen!\n");
+		}
+		else if(colladaFile.asset.up_axis == UpAxisType.Y_UP)
+		{
+			Console.WriteLine("Warning!  Y up axis not supported.  Strange things may happen!\n");
+		}
+
+		//unit conversion
+		float	scaleFactor	=colladaFile.asset.unit.meter;
+
+		scaleFactor	*=MeshConverter.GetScaleFactor(scaleDesired);
+
+		Matrix4x4	scaleMat	=Matrix4x4.CreateScale(Vector3.One * (1f / scaleFactor));
+		
+		//grab visual scenes
+		IEnumerable<library_visual_scenes>	lvss	=
+			colladaFile.Items.OfType<library_visual_scenes>();
+
+		library_visual_scenes	lvs	=lvss.First();
+
+		List<MeshConverter>	allChunks	=GetMeshChunks(colladaFile, true, scaleDesired);
+		List<MeshConverter>	chunks		=new List<MeshConverter>();
+
+		//skip dummies
+		foreach(MeshConverter mc in allChunks)
+		{
+			if(!mc.GetName().Contains("DummyGeometry"))
+			{
+				chunks.Add(mc);
+//				mc.ePrint	+=OnPrintString;
+			}
+		}
+
+		allChunks.Clear();
+
+		if(!AddVertexWeightsToChunks(colladaFile, chunks))
+		{
+			Console.WriteLine("No vertex weights... are you trying to load static geometry as a character?\n");
+			return	ret;
+		}
+
+		//build or get skeleton
+		Skeleton	skel	=BuildSkeleton(colladaFile);
+		if(skel ==  null)
+		{
+			Console.WriteLine("No skeleton... are you trying to load static geometry as a character?\n");
+			return	ret;
+		}
+
+		//see if animlib has a skeleton yet
+		if(alib.GetSkeleton() == null)
+		{
+			alib.SetSkeleton(skel);
+//			Misc.SafeInvoke(eSkeletonChanged, skel);
+		}
+		else
+		{
+			//make sure they match
+			if(!alib.CheckSkeleton(skel))
+			{
+				Console.WriteLine("Warning!  Skeleton check failed!  Might need to restart to clear the animation library skeleton.\n");
+				return	ret;
+			}
+
+			//use old one
+			skel	=alib.GetSkeleton();
+		}
+
+		Anim	anm	=BuildAnim(colladaFile, alib.GetSkeleton(), lvs, path);
+
+		alib.AddAnim(anm);
+
+		//need to do this again in case keyframes were added
+		//for the root bone.
+		anm.SetBoneRefs(skel);
+
+		FixBoneIndexes(colladaFile, chunks, skel);
+
+		BuildFinalVerts(colladaFile, chunks, false);
+
+		List<Mesh>		converted	=new List<Mesh>();
+
+		foreach(MeshConverter mc in chunks)
+		{
+			Mesh	?conv	=mc.GetConvertedMesh();
+			if(conv == null)
+			{
+				continue;
+			}
+
+			Matrix4x4	mat		=GetSceneNodeTransform(colladaFile, mc);
+
+			//this might not be totally necessary
+			//but it is nice to have
+			if(!mat.IsIdentity)
+			{
+				Console.WriteLine("Warning!  Mesh chunk " + conv.Name + "'s scene node is not identity!  This can make it tricksy to orient and move them in a game.\n");
+			}
+
+			conv.Name	=mc.GetGeomName();
+
+			converted.Add(conv);
+
+			if(!conv.Name.EndsWith("Mesh"))
+			{
+				conv.Name	+="Mesh";
+			}
+//			mc.ePrint	-=OnPrintString;
+		}
+
+		Skin	?sk	=null;
+		CreateSkin(colladaFile, ref sk, chunks, skel, scaleFactor);
+
+		ret	=new Character(converted, sk, alib);
+
+		SetSkinRootTransformBlender(ret);
+
+		return	ret;
+	}
+
 	internal static void LoadStaticDAE(string path, MeshConverter.ScaleFactor scaleDesired, out StaticMesh ?sm)
 	{
 		COLLADA	?colladaFile	=DeSerializeCOLLADA(path);
@@ -1558,7 +1694,7 @@ internal class ColladaData
 	}
 
 
-	static void BuildSkeleton(node n, List<string> namesInUse, out GSNode gsn, EventHandler ?ePrint)
+	static void BuildSkeleton(node n, List<string> namesInUse, out GSNode gsn)
 	{
 		gsn	=new GSNode();
 
@@ -1594,14 +1730,14 @@ internal class ColladaData
 		{
 			GSNode	kid	=new GSNode();
 
-			BuildSkeleton(child, namesInUse, out kid, ePrint);
+			BuildSkeleton(child, namesInUse, out kid);
 
 			gsn.AddChild(kid);
 		}
 	}
 
 
-	static Skeleton BuildSkeleton(COLLADA colMesh, EventHandler ?ePrint)
+	static Skeleton BuildSkeleton(COLLADA colMesh)
 	{
 		Skeleton	ret	=new Skeleton();
 
@@ -1613,7 +1749,7 @@ internal class ColladaData
 		{
 			GSNode	gsnRoot	=new GSNode();
 
-			BuildSkeleton(n, namesInUse, out gsnRoot, ePrint);
+			BuildSkeleton(n, namesInUse, out gsnRoot);
 
 			ret.AddRoot(gsnRoot);
 		}
@@ -1750,5 +1886,25 @@ internal class ColladaData
 			}
 		}
 		return	ret;
+	}
+	
+	//this is for the standard unchanged export of z up and y forward
+	static void SetSkinRootTransformBlender(Character c)
+	{
+		//need a couple rotations to go from blender which is:
+		//z up, y forward, x right
+		//to
+		//z forward, y up, x left
+		Matrix4x4	spinXToLeft		=Matrix4x4.CreateRotationZ(MathHelper.Pi);
+		Matrix4x4	tiltYToForward	=Matrix4x4.CreateRotationX(-MathHelper.PiOver2);
+		Matrix4x4	spinYToFront	=Matrix4x4.CreateRotationY(MathHelper.Pi);
+
+		Matrix4x4	accum	=Matrix4x4.Identity;
+
+		accum	*=spinXToLeft;
+		accum	*=tiltYToForward;
+		accum	*=spinYToFront;
+
+		c.GetSkin().SetRootTransform(accum);
 	}
 }

@@ -29,17 +29,18 @@ internal static class Program
 		{
 			if(arg.StartsWith("-static"))
 			{
-				bStatic	=true;
-
+				bStatic		=true;
 				fileName	=arg.Substring(8);
 			}
 			else if(arg.StartsWith("-character"))
 			{
-				bChar	=true;
+				bChar		=true;
+				fileName	=arg.Substring(11);
 			}
 			else if(arg.StartsWith("-anim"))
 			{
-				bAnim	=true;
+				bAnim		=true;
+				fileName	=arg.Substring(6);
 			}
 			else if(arg == "-centimeters")
 			{
@@ -72,6 +73,7 @@ internal static class Program
 			if(!File.Exists(fileName))
 			{
 				Console.WriteLine("File: " + fileName + " not found.");
+				return;
 			}
 
 			StaticMesh	sm;
@@ -103,6 +105,53 @@ internal static class Program
 			Console.WriteLine("Saving to " + smFile);
 
 			sm.SaveToFile(smFile);
+
+			//save base mesh too
+			string	path	=FileUtil.StripFileName(fileName);
+			sm.SaveParts(path);
+		}
+		else if(bChar)
+		{
+			if(!File.Exists(fileName))
+			{
+				Console.WriteLine("File: " + fileName + " not found.");
+				return;
+			}
+
+			AnimLib	alib	=new AnimLib();
+
+			Character	c	=ColladaData.LoadCharacterDAE(fileName, sf, alib);
+
+			c.GenerateRoughBounds();
+
+			//print some stats
+			int	numParts	=c.GetPartCount();
+
+			Console.WriteLine("Character mesh " + fileName + " loaded with "
+								+ numParts + " parts:");
+
+			for(int i=0;i < numParts;i++)
+			{
+				string		name		=c.GetPartName(i);
+				Matrix4x4	partMat		=c.GetPartTransform(i);
+				Type		partType	=c.GetPartVertexType(i);
+
+				Console.WriteLine("Part " + i + ": " + name +
+					" with identity " + partMat.IsIdentity +
+					", and vertex type: " + partType.ToString());
+			}
+
+			string	smFile	=FileUtil.StripExtension(fileName);
+
+			smFile	+=".Character";
+
+			Console.WriteLine("Saving to " + smFile);
+
+			c.SaveToFile(smFile);
+
+			//save base mesh too
+			string	path	=FileUtil.StripFileName(fileName);
+			c.SaveParts(path);
 		}
 
 		Console.WriteLine("Done!");
