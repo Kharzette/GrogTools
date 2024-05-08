@@ -21,26 +21,31 @@ internal static class Program
 
 		string	someArg		="";
 		string	fileName	="";
+		string	alib		="";
 		bool	bStatic		=false;
 		bool	bChar		=false;
 		bool	bAnim		=false;
 
 		foreach(string arg in args)
 		{
-			if(arg.StartsWith("-static"))
+			if(arg.StartsWith("-static "))
 			{
 				bStatic		=true;
 				fileName	=arg.Substring(8);
 			}
-			else if(arg.StartsWith("-character"))
+			else if(arg.StartsWith("-character "))
 			{
 				bChar		=true;
 				fileName	=arg.Substring(11);
 			}
-			else if(arg.StartsWith("-anim"))
+			else if(arg.StartsWith("-anim "))
 			{
 				bAnim		=true;
 				fileName	=arg.Substring(6);
+			}
+			else if(arg.StartsWith("-animlib"))
+			{
+				alib	=arg.Substring(9);
 			}
 			else if(arg == "-centimeters")
 			{
@@ -118,9 +123,9 @@ internal static class Program
 				return;
 			}
 
-			AnimLib	alib	=new AnimLib();
+			AnimLib	anlib	=new AnimLib();
 
-			Character	c	=ColladaData.LoadCharacterDAE(fileName, sf, alib);
+			Character	c	=ColladaData.LoadCharacterDAE(fileName, sf, anlib);
 
 			c.GenerateRoughBounds();
 
@@ -141,17 +146,63 @@ internal static class Program
 					", and vertex type: " + partType.ToString());
 			}
 
-			string	smFile	=FileUtil.StripExtension(fileName);
+			string	chFile	=FileUtil.StripExtension(fileName);
 
-			smFile	+=".Character";
+			chFile	+=".Character";
 
-			Console.WriteLine("Saving to " + smFile);
+			Console.WriteLine("Saving to " + chFile);
 
-			c.SaveToFile(smFile);
+			c.SaveToFile(chFile);
 
 			//save base mesh too
 			string	path	=FileUtil.StripFileName(fileName);
 			c.SaveParts(path);
+		}
+		else if(bAnim)
+		{
+			if(!File.Exists(fileName))
+			{
+				Console.WriteLine("File: " + fileName + " not found.");
+				return;
+			}
+
+			AnimLib	anlib	=new AnimLib();
+
+			if(alib != "")
+			{
+				if(File.Exists(alib))
+				{
+					Console.WriteLine("Loading animlib: " + alib);
+					anlib.ReadFromFile(alib);
+				}
+				else
+				{
+					Console.WriteLine("Animlib: " + alib + "doesn't exist, but that is ok, it will be created.");
+				}
+			}
+
+			bool	bGood	=ColladaData.LoadAnimDAE(fileName, sf, anlib, true);
+			if(!bGood)
+			{
+				Console.WriteLine("Animation load failed!");
+				return;
+			}
+
+			if(alib != "")
+			{
+				Console.WriteLine("Saving to " + alib);
+				anlib.SaveToFile(alib);
+			}
+			else
+			{
+				string	alFile	=FileUtil.StripExtension(fileName);
+
+				alFile	+=".AnimLib";
+
+				Console.WriteLine("Saving to " + alFile);
+
+				anlib.SaveToFile(alFile);
+			}
 		}
 
 		Console.WriteLine("Done!");

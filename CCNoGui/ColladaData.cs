@@ -10,6 +10,70 @@ namespace ColladaConvert;
 
 internal class ColladaData
 {
+	//loads an animation into an existing anim lib
+	internal static bool LoadAnimDAE(string path, MeshConverter.ScaleFactor scaleDesired, AnimLib alib, bool bCheckSkeleton)
+	{
+		COLLADA	?colladaFile	=DeSerializeCOLLADA(path);
+
+		if(colladaFile == null)
+		{
+			Console.WriteLine("Null file in LoadAnim()\n");
+			return	false;
+		}
+
+		//Blender's collada exporter always outputs Z up.
+		//If you select Y or X it simply rotates the model before export
+		if(colladaFile.asset.up_axis == UpAxisType.X_UP)
+		{
+			Console.WriteLine("Warning!  X up axis not supported.  Strange things may happen!\n");
+		}
+		else if(colladaFile.asset.up_axis == UpAxisType.Y_UP)
+		{
+			Console.WriteLine("Warning!  Y up axis not supported.  Strange things may happen!\n");
+		}
+
+		//unit conversion
+		float	scaleFactor	=colladaFile.asset.unit.meter;
+
+		scaleFactor	*=MeshConverter.GetScaleFactor(scaleDesired);
+
+		Matrix4x4	scaleMat	=Matrix4x4.CreateScale(Vector3.One * (1f / scaleFactor));
+
+		Skeleton	skel	=BuildSkeleton(colladaFile);
+
+		//grab visual scenes
+		IEnumerable<library_visual_scenes>	lvss	=
+			colladaFile.Items.OfType<library_visual_scenes>();
+
+		library_visual_scenes	lvs	=lvss.First();
+
+		//see if animlib has a skeleton yet
+		if(alib.GetSkeleton() == null)
+		{
+			alib.SetSkeleton(skel);
+//			Misc.SafeInvoke(eSkeletonChanged, skel);
+		}
+		else if(bCheckSkeleton)
+		{
+			//make sure they match
+			if(!alib.CheckSkeleton(skel))
+			{
+				Console.WriteLine("Warning!  Skeleton check failed, anim load aborted!\n");
+				return	false;
+			}
+		}
+
+		Anim	anm	=BuildAnim(colladaFile, alib.GetSkeleton(), lvs, path);
+
+		alib.AddAnim(anm);
+
+		//need to do this again in case keyframes were added
+		//for the root bone.
+		anm.SetBoneRefs(alib.GetSkeleton());
+
+		return	true;
+	}
+
 	internal static Character LoadCharacterDAE(string path, MeshConverter.ScaleFactor scaleDesired, AnimLib alib)
 	{
 		Character	ret	=null;
