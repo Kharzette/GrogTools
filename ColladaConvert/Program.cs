@@ -89,7 +89,17 @@ internal static class Program
 
 		//set up post processing module
 		PostProcess	post	=new PostProcess(gd, sk);
-		
+
+		//default cel
+		{
+			Vector4	min	=new Vector4(0.0f, 0.3f, 0.6f, 1.0f);
+			Vector4	max	=new Vector4(0.3f, 0.6f, 1.0f, 5.0f);
+			Vector4	stp	=new Vector4(0.3f, 0.5f, 0.9f, 1.4f);
+
+			cbk.SetCelSteps(min, max, stp, 4);
+			cbk.UpdateCelStuff(gd.DC);
+		}
+
 		EventHandler	actHandler	=new EventHandler(
 			delegate(object ?s, EventArgs ea)
 			{	inp.ClearInputs();	});
