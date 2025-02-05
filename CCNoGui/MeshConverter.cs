@@ -122,14 +122,25 @@ internal class MeshConverter
 
 	//this will build a base list of verts
 	//eventually these will need to expand
-	internal void CreateBaseVerts(float_array verts)
+	internal void CreateBaseVerts(float_array verts, bool bFlipX)
 	{
 		mNumBaseVerts	=(int)verts.count / 3;
 		mBaseVerts		=new TrackedVert[mNumBaseVerts];
 
 		for(int i=0;i < (int)verts.count;i+=3)
 		{
-			mBaseVerts[i / 3].Position0.X		=verts.Values[i];
+			//if exporting to left handed, static meshes
+			//need the x axis flipped.  I'm keeping skinned
+			//verts in right handed format and just do a
+			//right to left matrix in the skeleton roots
+			if(!bFlipX)
+			{
+				mBaseVerts[i / 3].Position0.X		=-verts.Values[i];
+			}
+			else
+			{
+				mBaseVerts[i / 3].Position0.X		=verts.Values[i];
+			}
 			mBaseVerts[i / 3].Position0.Y		=verts.Values[i + 1];
 			mBaseVerts[i / 3].Position0.Z		=verts.Values[i + 2];
 			mBaseVerts[i / 3].mOriginalIndex	=i / 3;
@@ -410,7 +421,7 @@ internal class MeshConverter
 									int				col1Stride,
 									int				col2Stride,
 									int				col3Stride,
-									bool			bStatic)
+									bool			bFlipTri)
 	{
 		//make sure there are at least positions and vertCounts
 		if(posIdxs == null || vertCounts == null || mBaseVerts == null)
@@ -494,32 +505,15 @@ internal class MeshConverter
 			//and vertex weights
 			tv	=mBaseVerts[pidx];
 
-			if(bStatic)
-			{
-				//swap y and z on statics
-				tv.Position0.Z	=mBaseVerts[pidx].Position0.Y;
-				tv.Position0.Y	=mBaseVerts[pidx].Position0.Z;
-			}
-
 			//copy normal if exists
 			if(normIdxs != null && norms != null)
 			{
 				Vector3	norm;
 
 				//copy out of float array
-				if(bStatic)
-				{
-					//statics swap y and z
-					norm.X	=norms.Values[nidx * 3];
-					norm.Y	=norms.Values[2 + nidx * 3];
-					norm.Z	=norms.Values[1 + nidx * 3];
-				}
-				else
-				{
-					norm.X	=norms.Values[nidx * 3];
-					norm.Y	=norms.Values[1 + nidx * 3];
-					norm.Z	=norms.Values[2 + nidx * 3];
-				}
+				norm.X	=norms.Values[nidx * 3];
+				norm.Y	=norms.Values[1 + nidx * 3];
+				norm.Z	=norms.Values[2 + nidx * 3];
 
 				tv.Normal0	=new Half4(norm.X, norm.Y, norm.Z, 1f);
 			}
@@ -639,7 +633,7 @@ internal class MeshConverter
 			mBaseVerts[i]	=verts[i];
 		}
 
-		Triangulate(vertCounts, bStatic);
+		Triangulate(vertCounts, bFlipTri);
 
 		mNumVerts		=verts.Count;
 		mNumTriangles	=mIndexList.Count / 3;
@@ -670,7 +664,7 @@ internal class MeshConverter
 	}
 
 
-	void Triangulate(List<int> vertCounts, bool bStatic)
+	void Triangulate(List<int> vertCounts, bool bFlipTri)
 	{
 		List<ushort>	newIdxs	=new List<ushort>();
 
@@ -689,7 +683,7 @@ internal class MeshConverter
 
 			for(int j=1;j < (vCount - 1);j++)
 			{
-				if(bStatic)
+				if(bFlipTri)
 				{
 					newIdxs.Add((ushort)(j + 1 + curIdx));
 					newIdxs.Add((ushort)(j + curIdx));

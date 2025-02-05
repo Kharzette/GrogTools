@@ -11,7 +11,8 @@ namespace ColladaConvert;
 internal class ColladaData
 {
 	//loads an animation into an existing anim lib
-	internal static bool LoadAnimDAE(string path, MeshConverter.ScaleFactor scaleDesired, AnimLib alib, bool bCheckSkeleton)
+	internal static bool LoadAnimDAE(string path, MeshConverter.ScaleFactor scaleDesired,
+									 AnimLib alib, bool bCheckSkeleton, bool bRightHand)
 	{
 		COLLADA	?colladaFile	=DeSerializeCOLLADA(path);
 
@@ -41,6 +42,11 @@ internal class ColladaData
 
 		Skeleton	skel	=BuildSkeleton(colladaFile);
 
+		if(!bRightHand)
+		{
+			skel.ConvertToLeftHanded();
+		}
+
 		//grab visual scenes
 		IEnumerable<library_visual_scenes>	lvss	=
 			colladaFile.Items.OfType<library_visual_scenes>();
@@ -65,6 +71,17 @@ internal class ColladaData
 
 		Anim	anm	=BuildAnim(colladaFile, alib.GetSkeleton(), lvs, path);
 
+		if(alib.HasAnim(anm.Name))
+		{
+			alib.NukeAnim(anm.Name);
+
+			//if only 1 anim in the lib it nukes the skeleton
+			if(alib.GetSkeleton() == null)
+			{
+				alib.SetSkeleton(skel);
+			}
+		}
+
 		alib.AddAnim(anm);
 
 		//need to do this again in case keyframes were added
@@ -74,7 +91,7 @@ internal class ColladaData
 		return	true;
 	}
 
-	internal static Character LoadCharacterDAE(string path, MeshConverter.ScaleFactor scaleDesired, AnimLib alib)
+	internal static Character LoadCharacterDAE(string path, MeshConverter.ScaleFactor scaleDesired, AnimLib alib, bool bRightHand)
 	{
 		Character	ret	=null;
 
@@ -110,7 +127,7 @@ internal class ColladaData
 
 		library_visual_scenes	lvs	=lvss.First();
 
-		List<MeshConverter>	allChunks	=GetMeshChunks(colladaFile, true, scaleDesired);
+		List<MeshConverter>	allChunks	=GetMeshChunks(colladaFile, !bRightHand, scaleDesired);
 		List<MeshConverter>	chunks		=new List<MeshConverter>();
 
 		//skip dummies
@@ -139,6 +156,11 @@ internal class ColladaData
 			return	ret;
 		}
 
+		if(!bRightHand)
+		{
+			skel.ConvertToLeftHanded();
+		}
+
 		//see if animlib has a skeleton yet
 		if(alib.GetSkeleton() == null)
 		{
@@ -160,6 +182,11 @@ internal class ColladaData
 
 		Anim	anm	=BuildAnim(colladaFile, alib.GetSkeleton(), lvs, path);
 
+		if(alib.HasAnim(anm.Name))
+		{
+			alib.NukeAnim(anm.Name);
+		}
+		
 		alib.AddAnim(anm);
 
 		//need to do this again in case keyframes were added
@@ -168,7 +195,7 @@ internal class ColladaData
 
 		FixBoneIndexes(colladaFile, chunks, skel);
 
-		BuildFinalVerts(colladaFile, chunks, false);
+		BuildFinalVerts(colladaFile, chunks, !bRightHand);
 
 		List<Mesh>		converted	=new List<Mesh>();
 
@@ -205,12 +232,19 @@ internal class ColladaData
 
 		ret	=new Character(converted, sk, alib);
 
-		SetSkinRootTransformBlender(ret);
+		if(bRightHand)
+		{
+			SetSkinRootTransformBlenderRightHand(ret);
+		}
+		else
+		{
+			SetSkinRootTransformBlenderLeftHand(ret);
+		}
 
 		return	ret;
 	}
 
-	internal static void LoadStaticDAE(string path, MeshConverter.ScaleFactor scaleDesired, out StaticMesh ?sm)
+	internal static void LoadStaticDAE(string path, MeshConverter.ScaleFactor scaleDesired, out StaticMesh ?sm, bool bRightHand)
 	{
 		COLLADA	?colladaFile	=DeSerializeCOLLADA(path);
 
@@ -239,9 +273,11 @@ internal class ColladaData
 
 		sm	=new StaticMesh();
 
-		List<MeshConverter>	chunks	=GetMeshChunks(colladaFile, false, scaleDesired);
+		//if not right handed flip X
+		List<MeshConverter>	chunks	=GetMeshChunks(colladaFile, !bRightHand, scaleDesired);
 
-		BuildFinalVerts(colladaFile, chunks, true);
+		//and this flips the winding order if left handed
+		BuildFinalVerts(colladaFile, chunks, !bRightHand);
 		foreach(MeshConverter mc in chunks)
 		{
 			Mesh	?m	=mc.GetConvertedMesh();
@@ -303,7 +339,7 @@ internal class ColladaData
 				where geoms.id == id select geoms).FirstOrDefault();
 	}
 
-	static List<MeshConverter> GetMeshChunks(COLLADA colladaFile, bool bSkinned, MeshConverter.ScaleFactor sf)
+	static List<MeshConverter> GetMeshChunks(COLLADA colladaFile, bool bXFlip, MeshConverter.ScaleFactor sf)
 	{
 		List<MeshConverter>	chunks	=new List<MeshConverter>();
 
@@ -398,7 +434,7 @@ internal class ColladaData
 					fileUnitSize	=colladaFile.asset.unit.meter;
 				}
 
-				cnk.CreateBaseVerts(verts);
+				cnk.CreateBaseVerts(verts, bXFlip);
 
 				cnk.mPartIndex	=-1;
 				cnk.SetGeometryID(geom.id);
@@ -654,7 +690,7 @@ internal class ColladaData
 		return	null;
 	}
 
-	static void BuildFinalVerts(COLLADA colladaFile, List<MeshConverter> chunks, bool bStatic)
+	static void BuildFinalVerts(COLLADA colladaFile, List<MeshConverter> chunks, bool bFlipTri)
 	{
 		IEnumerable<library_geometries>		geoms	=colladaFile.Items.OfType<library_geometries>();
 		IEnumerable<library_controllers>	conts	=colladaFile.Items.OfType<library_controllers>();
@@ -714,7 +750,8 @@ internal class ColladaData
 						texCoords2, texIdxs2, texCoords3, texIdxs3,
 						colors0, colIdxs0, colors1, colIdxs1,
 						colors2, colIdxs2, colors3, colIdxs3,
-						vertCounts, col0Stride, col1Stride, col2Stride, col3Stride, bStatic);
+						vertCounts, col0Stride, col1Stride, col2Stride, col3Stride,
+						bFlipTri);
 
 					bool	bPos	=(posIdxs != null && posIdxs.Count > 0);
 					bool	bNorm	=(norms != null && norms.count > 0);
@@ -1953,7 +1990,7 @@ internal class ColladaData
 	}
 	
 	//this is for the standard unchanged export of z up and y forward
-	static void SetSkinRootTransformBlender(Character c)
+	static void SetSkinRootTransformBlenderRightHand(Character c)
 	{
 		//need a couple rotations to go from blender which is:
 		//z up, y forward, x right
@@ -1968,6 +2005,22 @@ internal class ColladaData
 		accum	*=spinXToLeft;
 		accum	*=tiltYToForward;
 		accum	*=spinYToFront;
+
+		c.GetSkin().SetRootTransform(accum);
+	}
+
+	//this is for the standard unchanged export of z up and y forward
+	static void SetSkinRootTransformBlenderLeftHand(Character c)
+	{
+		//need a couple rotations to go from blender which is:
+		//z up, y forward, x right
+		//to
+		//z forward, y up, x right
+		Matrix4x4	tiltYToForward	=Matrix4x4.CreateRotationX(-MathHelper.PiOver2);
+
+		Matrix4x4	accum	=Matrix4x4.Identity;
+
+//		accum	*=tiltYToForward;
 
 		c.GetSkin().SetRootTransform(accum);
 	}

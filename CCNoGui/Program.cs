@@ -25,6 +25,7 @@ internal static class Program
 		bool	bStatic		=false;
 		bool	bChar		=false;
 		bool	bAnim		=false;
+		bool	bRightHand	=false;
 
 		foreach(string arg in args)
 		{
@@ -67,6 +68,10 @@ internal static class Program
 			{
 				sf	=MeshConverter.ScaleFactor.Valve;
 			}
+			else if(arg == "-righthanded")
+			{
+				bRightHand	=true;
+			}
 			else
 			{
 				someArg	=arg;
@@ -82,7 +87,7 @@ internal static class Program
 			}
 
 			StaticMesh	sm;
-			ColladaData.LoadStaticDAE(fileName, sf, out sm);
+			ColladaData.LoadStaticDAE(fileName, sf, out sm, bRightHand);
 
 			sm.GenerateRoughBounds();
 
@@ -125,7 +130,7 @@ internal static class Program
 
 			AnimLib	anlib	=new AnimLib();
 
-			Character	c	=ColladaData.LoadCharacterDAE(fileName, sf, anlib);
+			Character	c	=ColladaData.LoadCharacterDAE(fileName, sf, anlib, bRightHand);
 
 			c.GenerateRoughBounds();
 
@@ -181,7 +186,7 @@ internal static class Program
 				}
 			}
 
-			bool	bGood	=ColladaData.LoadAnimDAE(fileName, sf, anlib, true);
+			bool	bGood	=ColladaData.LoadAnimDAE(fileName, sf, anlib, true, bRightHand);
 			if(!bGood)
 			{
 				Console.WriteLine("Animation load failed!");
