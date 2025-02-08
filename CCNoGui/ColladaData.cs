@@ -2018,9 +2018,16 @@ internal class ColladaData
 		//z forward, y up, x right
 		Matrix4x4	tiltYToForward	=Matrix4x4.CreateRotationX(-MathHelper.PiOver2);
 
-		Matrix4x4	accum	=Matrix4x4.Identity;
+		Plane	xPlane;
 
-//		accum	*=tiltYToForward;
+		xPlane.Normal	=Vector3.UnitX;
+		xPlane.D		=0;
+
+		Matrix4x4	accum	=Matrix4x4.CreateReflection(xPlane);
+
+		accum	*=tiltYToForward;
+
+//		KeyFrame.RightHandToLeft(ref accum);
 
 		c.GetSkin().SetRootTransform(accum);
 	}
